@@ -1,0 +1,984 @@
+1. **前后端分离和传统开发的区别**
+
+   传统：前端和后端的代码都由一个人完成的。
+
+   **基于MVC的思路**将后端分为三层控制层，业务层和持久层。控制层接收参数，调用业务层，封装数据、路由，渲染jsp页面，页面上通过标签和Java表达式展现数据，缺点就是**前后端依赖性强耦合性高服务器压力大**，现在是大数据时代对**性能要求很高**，前后端耦合在一起的架构不能满足需求。
+
+   于是**出现了前后端分离**的架构，**主要方式**就是前后端约定接口、数据和参数，并行开发然后进行集成，后端注重业务，安全，三高，存储等，前端注重表现，流畅，用户体验等。
+
+# HTML
+
+1. **必考：你是如何理解 HTML 语义化的？**
+
+   本质是增加代码的可读性和可维护性
+
+   过去使用表格布局发展到div+css到现在的h5的section，header，footer，main等语义化标签都是语义化发展的体现
+
+2. **meta viewport 是做什么用的，怎么写？**
+
+   视口是**html的包含块**，浏览器厂商为了页面在手机端友好展示，**不会将视口与屏幕大小关联**，所以一般宽度会远大于屏幕，为了提高移动端的用户体验，一般都会对**视口手动进行设置**，让它按屏幕大小进行缩放
+
+   `<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">`
+
+3. **你用过哪些 HTML 5 标签？**
+   section，header，footer，main等**语义化标签**，video，audio**音视频**，input的新增的**type**等。语义化标签是最常用的。
+
+4. **H5 是什么？**
+   不是html5，移动端页面，具体就是可以达到各种动画互动效果的，用于广告营销的，具有炫酷效果的页面，目的就是提高曝光。
+
+# CSS
+
+1. CSS3都知道什么
+
+   常用
+
+   flex布局
+
+   过渡，动画
+
+2. 必考：两种盒模型分别说一下。**
+   IE的盒模型：width和height包括了content，padding和border三个部分，标准盒模型width和height就是content的宽高
+
+3. **必考：如何垂直居中？**
+
+   https://juejin.im/post/58f818bbb123db006233ab2a
+
+   - **水平6**：
+
+   **行内**元素水平居中：text-align：center
+
+   **块级**元素水平居中：margin：0 auto
+
+   **绝对定位**+transform；
+
+   绝对定位+left50%+负的margin（已知宽度）；
+
+   绝对定位+left、right：0；margin：0 auto（宽度固定）
+
+   **flex**：display：flex；justify-content：cneter
+
+   - **垂直6**：
+
+   单行文本：line-height
+
+   **高度不定**：父元素：table；子元素：table-cell+vertical-align，任意宽高，兼容性不好
+
+   ​		  flex：flex+items-align，任意宽高，兼容性不好
+
+   ​		  绝对定位+transform，任意宽高，兼容性不好
+
+   **高度固定**：绝对定位+top50%+负的margin，兼容性好
+
+   ​		  绝对定位+top、bottom：0；margin：0 auto
+
+4. **三栏布局5**
+
+   **兼容性好：**
+
+   浮动：左右定宽浮动，中间margin空出左右的空间，结构上中间部分要放在最后
+
+   定位：左右定宽，左中右绝对定位
+
+   grid：table和table-cel**l==========不受高度影响**
+
+   **兼容性不好：**
+
+   flex：左右定宽，中间flex：1自适应**==========不受高度影响**
+
+   网格：grid；grid-template-rows：300px；grid-template-columns：100px auto 100px；
+
+5. **必考：flex 怎么用，常用属性有哪些？**
+
+   弹性布局使用：display：flex
+
+   justify-content
+
+   items-align
+
+   flex-flow（direction和wrap）
+
+6. **必考：BFC 是什么？**
+
+   自己的理解有一定规则的独立渲染区域
+
+   特点和作用：
+
+   1. 与外界互不影响
+   2. 计算浮动元素
+   3. 会发生外边距合并
+   4. 不会与浮动元素重叠
+
+   生成BFC：
+
+   1. **float**不为none
+   2. **position**不为static
+   3. 行内块元素（**display**为inline-block，table-cell等）
+   4. **overflow** 值不为 visible 的块元素
+   5. **弹性元素**（display为 flex 或 inline-flex元素的直接子元素）
+
+7. **CSS 选择器优先级**
+
+   1. 越具体优先级越高
+   2. 同样优先级写在后面的覆盖写在前面的
+   3. !important 优先级最高，但是要少用
+
+8. **清除浮动说一下**
+
+   两种方式：
+
+   增加一个有**clear: both**的元素，一般用伪元素；
+
+   形成**BFC**，一般用overflow：hidden
+
+   背代码
+
+   ```css
+    .clearfix:after{
+        content: '';
+        display: block; /*或者 table*/
+        clear: both;
+    }
+    .clearfix{
+        zoom: 1; /* IE 兼容*/
+    }
+   ```
+
+# 原生 JS
+
+1. **必考：ES 6 语法知道哪些，分别怎么用？**
+   块级作用域：let const
+
+   promise
+
+   1. 构造函数，new立即执行
+   2. 一个异步操作的容器，有三种状态pedding，fullfilled，rejcted，只和异步操作的结果有关，不会被外界改变，改变一次后不会再改变
+   3. then方法指定成功或失败的回调，返回一个promise对象
+   4. Promise.all([]).then()，数组中的异步操作完成后才执行then中的操作
+   5. 优点：可以将异步的操作以同步的流程表达出来，避免了层层嵌套
+   6. 缺点：如果不指定失败的方法，错误不会反映到外部；一旦执行不可以取消；pedding状态时不能得知处于哪个阶段
+
+   class
+
+   ​	语法糖，可以更加方便地实现继承
+
+   模块化：import export
+
+   解构赋值
+
+   箭头函数
+
+   新增api
+
+   模板字符串
+
+2. **箭头函数和function有什么区别**
+
+   箭头函数简化了function
+
+   不绑定this，上下文的this作为this；不绑定arguments（可以用...代替）
+
+   匿名函数不能作为构造函数
+
+   显示绑定this不起作用
+
+   没有原型
+
+3. **必考 Promise、Promise.all、Promise.race 分别怎么用？**
+
+   1. 背代码 Promise 用法
+
+      ```js
+       function fn(){
+           return new Promise((resolve, reject)=>{
+               成功时调用 resolve(数据)
+               失败时调用 reject(错误)
+           })
+       }
+       fn().then(success, fail).then(success2, fail2)
+      ```
+
+   2. 背代码 Promise.all 用法
+
+      ```js
+       Promise.all([promise1, promise2]).then(success1, fail1)
+      ```
+
+      promise1和promise2都成功才会调用success1
+
+   3. 背代码 Promise.race 用法
+
+      ```js
+       Promise.race([promise1, promise2]).then(success1, fail1)
+      ```
+
+      promise1和promise2只要有一个成功就会调用success1
+
+4. **必考：手写函数防抖和函数节流**
+
+   1. 背代码
+
+      ```js
+       // 节流（一段时间执行一次之后，就不执行第二次）
+      function throttle (fn, delay) {
+          // 执行标志
+          let canUse = true
+          return function () {
+              if (canUse) {
+                  canUse = false
+                  fn.call(this, arguments)
+                  setTimeout(()=>canUse = true, delay)
+              }
+          }
+      }
+      ```
+
+      注意，有些地方认为节流函数不是立刻执行的，而是在冷却时间末尾执行的（相当于施法有吟唱时间），那样说也是对的。
+
+   2. 背代码
+
+      ```js
+      // 在事件触发后的n秒回调，在n秒中再触发会重新计算
+      function debounce (fn, delay) {
+      		let timerId = null
+      		return function() {
+      			// 将计时器停止
+      			if(timerId) window.clearTimeout(timerId)
+      			// n秒后执行回调
+      			timerId = setTimeout(()=>{
+      				fn.call(this, arguments)
+      				// 清除计时器
+      				timerId = null
+      			}, delay)
+      		}
+      	}
+      ```
+
+5. **必考：手写AJAX**
+
+   1. 背代码，完整版
+
+      ```js
+       var request = new XMLHttpRequest()
+       request.open('GET', '/a/b/c?name=ff', true);
+       request.onreadystatechange = function () {
+         if(request.readyState === 4 && request.status === 200) {
+           console.log(request.responseText);
+         }};
+       request.send();
+      ```
+
+   2. 背代码，简化版
+
+      ```js
+       var request = new XMLHttpRequest()
+       request.open('GET', '/a/b/c?name=ff', true)
+       request.onload = ()=> console.log(request.responseText)
+       request.send()
+      ```
+
+6. **必考：这段代码里的 this 是什么？**
+
+   四种绑定方式
+
+7. **必考：闭包/立即执行函数是什么？**
+
+   闭包：简单来说就是在一个函数内部创建另外一个函数，特点是这个函数在外部引用可以访问到之前函数内部的变量
+
+   原理：一般情况下函数执行完毕后，这个执行环境会从栈中弹出，变量对象会等待回收，但是在存在闭包的情况下，由于外部环境存在这个闭包函数的引用，闭包又引用了这些变量，所以这个变量对象不会被回收
+
+   应用：比如返回函数用于事件绑定，封装私有和方法也叫模块模式
+
+   立即执行函数：立即执行的函数，一般用于创建独立作用域防止污染
+
+8. **必考：什么是 JSONP，什么是 CORS，什么是跨域？**
+
+   由于浏览器有同源策略的限制，跨域是为了解决不同源页面的通信问题
+
+   
+
+   同源策略主要是用来**防止 CSRF 攻击**
+
+   同源策略的限制：同源是指同一个**协议域名和端口**，限制的是DOM的获取，Ajax的发送，LocalStorage、Cookie、indexDB的获取
+
+   
+
+   跨域
+
+   **jsonp**：利用script标签没用跨域限制的特点，向服务端发送一个带有回调函数名称和参数的请求，服务端根据参数获取数据后将数据作为参数，返回一个回调函数的调用脚本。
+
+   **CORS**（跨域资源共享）
+
+   需要前后端同时支持，主要是在服务端配置access-control-allow-origin
+
+   分为两种请求简单请求和复杂请求，复杂请求会先发一个预检请求，服务端允许后响应会多几条access-control-allow-origin相关字段，不允许会正常返回但不包含这些字段
+
+   hash（hash改变不会刷新页面）
+
+   在A页面包含跨域页面B时，获取B页面改变hash传递参数，在B页面监听hash的改变
+
+   **postMessage**
+
+   H5类似于hash，利用window.postMessage传递参数，在另一个页面监听message事件执行回调
+
+   **webSocket**：应对HTTP协议只能客户端发起请求效率低的缺陷一种网络通信协议，客户端服务端都能发送请求，不受同源限制
+
+9. **常考：async/await 怎么用，如何捕获异常？**
+
+10. **常考：如何实现深拷贝？**
+
+    ```js
+    // 浅拷贝
+    function simpleCopy(source) {
+    	let target = Array.isArray(source) ? [] : {}
+    	if(source && typeof source === 'object') {
+    		for(const key in source) {
+    		target[key] = source[key]
+    		}
+    	}
+    }
+    
+    // 深拷贝
+    function deepCopy(source) {
+    	let target = Array.isArray(source) ? [] : {}
+    	if (source && typeof source === 'object') {
+    		// 防止相互引用
+    		const prop = source[key]
+    		if (prop == source) {
+    			// 如果发生相互引用退出当前循环
+    			continue
+    		}
+    		for(key in source) {
+    			// 不拷贝原型
+    			if (source.hasOwnProperty(key)) {
+    				// 判断是否引用类型
+    				if (source[key] && typeof source[key] === 'object') {
+    					// 递归
+    					target[key] = deepCopy(source[key])
+    				}else {
+    					target[key] = source[key]
+    				}
+    
+    			}
+    		}
+    	}
+    	return target
+    }
+    ```
+    背代码，要点：
+
+    1. 递归
+    2. 判断类型
+    3. 检查环（也叫循环引用）
+    4. 需要忽略原型
+
+11. **常考：如何用正则实现 trim()？**
+
+    ```js
+    function trim(string){
+        return string.replace(/^\s+|\s+$/g, '')
+    }
+    ```
+
+12. **常考：不用 class 如何实现继承？用 class 又如何实现？**
+
+    1. 背代码，不用 class 这样实现
+
+       ```js
+       // 原型实现继承
+       function Animal(color) {
+           this.color = color
+       }
+       Animal.prototype.eat = function() {
+           console.log('eating...')
+       }
+       function Cat(name) {
+           this.name = name
+       }
+       Cat.prototype = new Animal('white')
+       const c1 = new Cat('c1')
+       console.log(c1.color)
+       c1.eat()
+       // 缺点：不能向父类的构造函数传递参数
+       // 引用类型的修改会被共享
+       
+       // 借用+原型继承
+       function Cat(color, name) {
+           Animal.call(this, color)
+           this.name = name
+       }
+       Cat.prototype = new Animal('white')
+       const c2 = new Cat('yellow', 'c2')
+       console.log(c2.color)
+       c2.eat()
+       // 缺点：构造函数执行了两次
+       
+       // 寄生继承
+       function Cat(color, name) {
+           Animal.call(this, color)
+           this.name = name
+       }
+       Cat.prototype = Object.create(Animal.prototype, {
+           constructor: {
+               value: Cat,
+               enumerable: false,
+               writable: true,
+               configurable: true
+           }
+       })
+       const c3 = new Cat('black', 'c3')
+       console.log(c3.color+'  '+c3.name)
+       c3.eat()
+       ```
+
+    2. 背代码，用 class 就简单了
+
+       ```js
+        class Animal{
+            constructor(color){
+                this.color = color
+            }
+            move(){}
+        }
+        class Dog extends Animal{
+            constructor(color, name){
+                super(color)
+                this.name = name
+            }
+            say(){}
+        }
+       ```
+
+13. **常考：如何实现数组去重？**
+
+    ```js
+    function cutArr(arr) {
+    	let newArr = []
+    	for (var i = 0; i < arr.length; i++) {
+    		// 方法一遍历数组判断复制数组各项发现已经存在时忽略，ie8以下不支持indexOf方法
+    		if (newArr.indexOf(arr[i]) === -1) {
+    			newArr.push(arr[i])
+    		}
+    		// 方法二下标判断法：判断第一次出现的下标等于当前下标时添加
+    		if (arr.indexOf(arr[i]) === i) {
+    			newArr.push(arr[i])
+    		}
+    		// 方法三判断从前后开始数下标相同添加
+    		if (arr.indexOf(arr[i]) === arr.lastIndexOf(arr[i])) {
+    			newArr.push(arr[i])
+    		}
+    		// 方法四优化遍历数组
+    		for (var i = 0; i < arr.length; i++) {
+    			for (var j = i+1; j < arr.length; j++) {
+    				// 当检测到相等时终止当前循环进入下一层循环
+    				if (arr[i] === arr[j]) {++i}
+    			}
+    			newArr.push(arr[i])
+    		}
+    	}
+    	return newArr
+    }
+    ```
+    1. `newArr = [...new Set(arr)]`
+    2. 使用 WeakMap
+
+14. **放弃：== 相关题目（反着答）**
+    不要背，记不住，太复杂且没有规律
+
+15. **送命题：手写一个 Promise**
+
+# DOM
+
+1. **必考：事件委托**
+
+   1. 错误版（但是可能能过）
+
+      ```js
+       ul.addEventListener('click', function(e){
+           if(e.target.tagName.toLowerCase() === 'li'){
+               fn() // 执行某个函数
+           }
+       })
+      ```
+
+      bug 在于，如果用户点击的是 li 里面的 span，就没法触发 fn，这显然不对。
+
+   2. 高级版
+
+      ```js
+       function delegate(element, eventType, selector, fn) {
+           element.addEventListener(eventType, e => {
+             let el = e.target
+             while (!el.matches(selector)) {
+               if (element === el) {
+                 el = null
+                 break
+               }
+               el = el.parentNode
+             }
+             el && fn.call(el, e, el)
+           })
+           return element
+         }
+      ```
+
+      思路是点击 span 后，递归遍历 span 的祖先元素看其中有没有 ul 里面的 li。
+
+2. **曾考：用 mouse 事件写一个可拖曳的 div**
+   参考代码
+
+   # HTTP
+
+3. **必考：HTTP 状态码知道哪些？分别什么意思？**
+
+   - 2xx 表示成功 200
+   - 3xx 表示需要进一步操作 301永久重定向 302临时重定向 304可使用缓存
+   - 4xx 表示浏览器方面出错 400语法错误 401请求未授权 403禁止访问 404 资源不存在 414请求过长
+   - 5xx 表示服务器方面出错 500服务器出错 503 请求过载，一段时间后恢复
+
+4. **必考：HTTP 缓存有哪几种？**
+
+   **强缓存**：表示缓存期间不需要请求
+
+   **EXpire**：绝对时间（可能会不一致） 和 `Cach-Control：max-age：xx//s`（相对时间）
+
+   **协商缓存**：缓存过期会发送请求验证是否更新
+
+   **Last-Modify**：打开未修改或修改时间过短会有问题
+
+   **Etag**：类似于文件指纹，优先级高
+
+   未设置时会有默认的缓存时间
+
+   方案：频繁改动的资源利用协商缓存；代码文件使用强缓存缓存很长时间，有更新时再请求
+
+5. **必考：GET 和 POST 的区别**
+
+   1. 错解，但是能过面试
+      - GET在浏览器回退时是无害的，而POST会再次提交请求。
+      - GET产生的URL地址可以被加入收藏栏，而POST不可以。
+      - GET请求会被浏览器主动cache，而POST不会，除非手动设置。
+      - GET请求只能进行url编码，而POST支持多种编码方式。
+      - GET请求参数会被完整保留在浏览器历史记录里，而POST中的参数不会被保留。
+      - GET请求在URL中传送的参数是有长度限制的，而POST么有。
+      - 对参数的数据类型，GET只接受ASCII字符，而POST没有限制。
+      - GET比POST更不安全，因为参数直接暴露在URL上，所以不能用来传递敏感信息。
+      - GET参数通过URL传递，POST放在Request body中。
+      - 语义
+
+6. **Cookie V.S. LocalStorage V.S. SessionStorage V.S. Session**
+
+   - Cookie 
+     1. 服务器发给浏览器，请求时会被发送到服务器
+     2. 存储在浏览器文件中
+     3. Cookie 一般最大 4k
+   - LocalStorage
+     1. LocalStorage 存储在硬盘
+     2. 一般5m
+   - Session
+     1. Session 存在服务器的文件里
+     2. Session 是基于 Cookie 实现的，具体做法就是把 SessionID 存在 Cookie 里
+   - SessionStorage
+     1. 存储在当前页面会话结束时过期
+
+# 框架 Vue
+
+1. **对MVVM的理解**
+
+   Model：数据模型
+
+   View：ui组件，展示数据
+
+   ViewModel：连接view和model的对象，监听数据的改变控制视图和交互
+
+   view和model之间没有直接的联系，viewModel通过双向的数据绑定将它们连接起来，它们之间的同步工作是自动的，因此开发人员无需关注Dom操作和数据状态的同步，只专注业务逻辑
+
+2. **必考：Vue 数据响应式怎么做到的？**
+
+   采用数据劫持结合发布订阅者模式：通过Object.defineProperty()劫持属性的getter和setter，在数据变动时将消息发布给订阅者
+
+3. **必考：watch 和 computed 区别是什么？**
+
+   1. computed 是计算属性，依赖其他属性进行计算，有缓存，有变化时才会重新计算，一般当做属性使用
+   2. watch 是监听到数值变化就会执行回调
+
+4. **必考：Vue 有哪些生命周期钩子函数？分别有什么用？**
+
+   作用：形成更好的逻辑
+
+   beforeCreate：创建实例之前，初始化了默认事件和钩子函数
+
+   created：完成实例创建，创建data，method等属性
+
+   beforeMount：挂载页面之前，完成了模板编译，创建虚拟DOM
+
+   mounted：渲染真实Dom和数据，可以在此时获取数据
+
+   beforeDestroy：实例还存在
+
+   destroyed
+
+   第一次渲染触发前四个
+
+5. **keep-alive 组件**
+
+   如果你需要**在组件切换的时候，保存一些组件的状态防止多次渲染**，就可以使用 `keep-alive` 组件包裹需要保存的组件。
+
+6. **必考：Vue 如何实现组件间通信？**
+
+   1. 父子组件：使用 v-bind 或 v-on 通过事件通信
+   2. 爷孙组件：使用两次 v-on 通过爷爷爸爸通信，爸爸儿子通信实现爷孙通信
+   3. 任意组件：使用 eventBus = new Vue() 来通信，eventBus.$on 和 eventBus.$emit 是主要API
+   4. 任意组件：使用 Vuex 通信
+
+7. **必考：Vue.set 是做什么用的？**
+
+8. **Vuex 你怎么用的？**
+
+   1. Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式
+
+   2. state：存储共通的状态
+
+      mutations：用来改变状态
+
+      getters：相当于计算属性和过滤器的结合
+
+      actions：异步操作
+
+      modules：分模块
+
+9. **VueRouter 你怎么用的？**
+
+   1. Vue Router 是 Vue.js 官方的路由管理器。
+
+   2. Hash 模式：通过onhashchange()事件实现，页面不会刷新但会被浏览器记录下来，简单兼容性好
+
+   3. History 模式：利用history.pushState()/replaceState()实现，页面不会刷新但会被浏览器记录下来，需要后端的配置页面用于匹配不到静态资源的情况
+
+      导航守卫：组件加载前要做的一些操作，验证用户信息等
+
+      路由懒加载：防止首次加载过多资源导致加载时间过长，懒加载将资源进行划分，需要时进行加载
+
+      `component:() => import('./xx') // 在路由规则中引入异步组件`
+
+   4. 说出常用 API：
+
+      router-link：路由跳转
+
+      router-view：展示匹配到的组件
+
+      this.$router.push：编程式导航一般结合事件使用
+
+      this.$router.replace：和push类似但是不会向history中加入新纪录
+
+      this.$route.params：获取动态路由参数
+
+      ```js
+       this.$router.push('/user-admin')
+       this.$route.params
+      ```
+
+10. **路由守卫是什么？**
+
+    规定组件加载之前的一些操作，比如验证个人信息等
+
+# 框架 React
+
+1. **必考：受控组件 V.S. 非受控组件**
+
+   ```jsx
+    <FInput value={x} onChange={fn}/> 受控组件
+    <FInput defaultValue={x} ref={input}/> 非受控组件
+   ```
+
+   区别受控组件的状态由开发者维护，非受控组件的状态由组件自身维护（不受开发者控制）
+
+2. **必考：React 有哪些生命周期函数？分别有什么用？（Ajax 请求放在哪个阶段？）**
+
+   答题思路跟 Vue 的一样
+
+   1. 钩子在[文档](https://react.docschina.org/docs/state-and-lifecycle.html)里，蓝色框框里面的都是生命周期钩子
+   2. 把名字翻译一遍就是满分
+   3. 要特别说明哪个钩子里请求数据，[答案是 componentDidMount](https://segmentfault.com/q/1010000008133309)
+
+3. **必考：React 如何实现组件间通信？**
+
+   1. 父子靠 props 传函数
+   2. 爷孙可以穿两次 props
+   3. 任意组件用 Redux（也可以自己写一个 eventBus）
+
+4. **必考：shouldComponentUpdate 有什么用？**
+
+   1. 要点：用于在没有必要更新 UI 的时候返回 false，以提高渲染性能
+   2. 参考：<http://taobaofed.org/blog/2016/08/12/optimized-react-components/>
+
+5. **必考：虚拟 DOM 是什么？**
+
+   1. 要点：虚拟 DOM 就是用来模拟 DOM 的一个对象，这个对象拥有一些重要属性，并且更新 UI 主要就是通过对比（DIFF）旧的虚拟 DOM 树 和新的虚拟 DOM 树的区别完成的。
+   2. 参考：<http://www.alloyteam.com/2015/10/react-virtual-analysis-of-the-dom/>
+
+6. **必考：什么是高阶组件？**
+
+   1. 要点：[文档原话](https://react.docschina.org/docs/higher-order-components.html)——高阶组件就是一个函数，且该函数接受一个组件作为参数，并返回一个新的组件。
+   2. 举例：React-Redux 里 [connect 就是一个高阶组件](https://react-redux.js.org/api/connect)，比如 `connect(mapState)(MyComponent)` 接受组件 MyComponent，返回一个具有状态的新 MyComponent 组件。
+
+7. **React diff 的原理是什么？**
+   看你记忆力了：<https://imweb.io/topic/579e33d693d9938132cc8d94>
+
+8. **必考 Redux 是什么？**
+
+   1. 背下文档第一句：Redux 是 JavaScript 状态容器，提供可预测化的状态管理。重点是『状态管理』。
+   2. 说出核心概念的名字和作用：Action/Reducer/Store/单向数据流
+   3. 说出常用 API：store.dispatch(action)/store.getState()
+
+9. **connect 的原理是什么？**
+   react-redux 库提供的一个 API，connect 的作用是让你把组件和store连接起来，产生一个新的组件（connect 是高阶组件）
+   参考：<https://segmentfault.com/a/1190000017064759>
+
+# 小程序
+
+
+
+# TypeScript
+
+1. never 类型是什么？
+   不应该出现的类型
+2. TypeScript 比起 JavaScript 有什么优点？
+   提供了类型约束，因此更可控、更容易重构、更适合大型项目、更容易维护
+
+# Webpack
+
+1. **必考：有哪些常见 loader 和 plugin，你用过哪些？**
+2. **英语题：loader 和 plugin 的区别是什么？**
+3. **必考：如何按需加载代码？**
+4. **必考：如何提高构建速度？**
+5. **转义出的文件过大怎么办？**
+
+上面五题请看这个不错的参考：<https://zhuanlan.zhihu.com/p/44438844>
+
+# 安全
+
+1. **必考：什么是 XSS？如何预防？**
+
+   跨站请求伪造：攻击者伪造一个地址，在登录状态下，引诱用户点击一个链接，后端以为是用户操作执行相应的逻辑
+
+   预防：Token验证，服务器下发token，引诱的发起的请求不携带就不会通过验证，referer验证来源，验证是否第三方；Cookie设置sameSite属性，cookie不随着跨域请求发送
+
+2. **必考：什么是 CSRF？如何预防？**
+
+   跨域脚本攻击：向页面注入可执行脚本，比如评论
+
+   预防：让脚本不能执行：转义字符；开启CSP用白名单的形式告诉浏览器允许加载的资源，用HTTP Header或meta设置Content-Security-Policy
+
+# 开放题目
+
+1. **必考：你遇到最难的问题是怎样的？**
+2. **你在团队的突出贡献是什么？**
+3. **最近在关注什么新技术**
+   书、博客、推特、知乎，不要说 CSDN、百度。
+4. **有没有看什么源码，看了后有什么记忆深刻的地方，有什么收获**
+   看过源码说源码，推荐看 underscore.js 的源码
+   没看过源码就说同事的代码，代码烂就说哪里烂，代码好就说哪里好
+   收获：命名规范、设计模式
+
+# 刁钻题目
+
+1. 代码
+
+   ```js
+    [1,2,3].map(parseInt)
+   ```
+
+   答案
+
+   ```
+    1
+    NaN
+    NaN
+   ```
+
+2. 代码
+
+   ```js
+    var a = {name: 'a'}
+    a.x = a = {}
+    问 a.x 是多少？
+   ```
+
+   答案
+
+   ```
+    undefined
+   ```
+
+3. ```
+   (a ==1 && a== 2 && a==3)
+   ```
+
+    
+
+   可能为 true 吗？
+
+   1. 利用 == 会调用 valueOf() 的特性
+
+      ```js
+       var a = {
+        value: 1,
+        valueOf(){
+         return this.value++
+        }
+       }
+       a ==1 && a== 2 && a==3 // true
+      ```
+
+   2. 利用 a 会读取 window.a 的特性
+
+      ```js
+       var value = 1; 
+       Object.defineProperty(window, 'a', {
+           get(){
+               return value++;
+           }
+       })
+       a ==1 && a== 2 && a==3 // true
+       // 或者 
+       a ===1 && a=== 2 && a===3 // true
+      ```
+
+# 浏览器
+
+1. **JS 垃圾回收机制**
+
+   被浏览器认为不会再被使用的变量就会被当作垃圾回收，浏览器的判断方式就是看它有没有被引用，但是相互引用或者不能从头遍历到的环引用也会被当做垃圾等待回收。浏览器的判断方法就是标记清除法。包含标记和清除两个阶段，标记阶段会从顶级变量开始遍历，标记被引用的变量，清除阶段会将没有被标记的变量进行回收。
+
+   缺点：会中断js的进程，数量过多时会影响性能。V8引擎将垃圾回收分为了新生代和老生代实行不同的回收算法，新生代是存活时间较短的对象，回收频繁，老生代是存活时间较长的对象。刚开始所有的变量都在新生代，当满足一定条件时移动到老生代。老生代采取标记清除算法，利用标记整理清除内存碎片，增量标志用来将大型内存分为更小的模块进行回收，解决性能问题，还有一种并发标记的技术可以在标记对象的同时运行js
+
+2. **Eventloop 说一下**
+
+   js是单线程运行的，执行函数就是将函数放入到**执行栈**中，当它遇到异步代码时会被挂起并在需要执行的时候**加入到task队列**中，一旦执行栈为空，eventloop就会拿出task中需要执行的代码**放入执行栈**中，直到队列清空，然后继续循环。每一轮称为一个tick。
+
+   不同的任务会被分配到不同的队列中，包括微任务和宏任务，微任务包括process.nexttick，promise（then）等，宏任务包括setInterval，setTimeout，script，setImmediate，i/o等
+
+   node中eventloop分为六个阶段反复运行，主要的三个阶段是：timer：执行settimeout和interval的回调，poll：等待定时器或其他异步操作，时间到达后经过check到达timer，check：立即执行一些函数，比如：setimmediate
+
+   
+
+   ```js
+    setTimeout(function () {
+        console.log(4);--一会
+    }, 0);
+    new Promise(function (resolve) {
+        console.log(1);
+        resolve();
+        console.log(2);
+    }).then(function () {
+        console.log(5);--马上
+    });
+   
+    console.log(3);
+   ```
+
+   ```js
+    1
+    2
+    3
+    5
+    4
+   
+   ```
+
+   1. setTimeout 宏任务
+   2. setImmediate（浏览器没有） check
+   3. process.nextTick（浏览器没有）当前阶段后马上
+   4. MutationObserver（Node 没有）微任务
+   5. promise.then 微任务
+   6. await 微任务
+
+   1. 这种题目尽量说思路，因为你不可能通过眼睛看出结果（必须画图）
+
+      ```js
+      async function async1() {
+          console.log(1);
+          await async2();
+          console.log(2);
+      }
+      async function async2() {
+      	console.log(3)
+      }
+      
+      async1();
+      
+      new Promise(function (resolve) {
+          console.log(4);
+          resolve();
+      }).then(function () {
+      	console.log(5);
+      });
+      ```
+
+      ```
+      1
+      3
+      4
+      2
+      5
+      ```
+
+3. 浏览器缓存
+
+   主要有HTTP缓存策略（强缓存和协商缓存）和浏览器内置存储功能（cookie，session，localstorage等）
+
+   浏览器请求资源的步骤：
+
+   1. 判断请求**是否命中缓存**
+   2. 判断**缓存是否过期**，没有直接返回，有就请求资源并携带缓存信息
+   3. **请求资源**
+   4. 服务器**判断缓存信息**，如果资源未更新返回304，已更新或没有缓存信息返回200并返回资源
+   5. 浏览器根据响应头（cache-control）**决定要不要缓存**（只有no-store不缓存）
+
+   ServiceWorker：本质上是一个js线程，可以用于精细化管理缓存的关键在于监听fetch和管理Cache资源
+
+# 其他
+
+- PWA
+
+  PWA全称Progressive Web App，即渐进式WEB应用。
+
+  一个 PWA 应用首先是一个网页, 可以通过 Web 技术编写出一个网页应用. 随后添加上 App Manifest 和 Service Worker 来实现 PWA 的安装和离线等功能
+
+  解决的问题：
+
+  - 可添加至主屏幕
+  - 实现离线缓存
+  - 消息推送
+
+- echarts.js / d3.js
+
+- three.js
+
+- flutter
+
+- SSR
+
+做个 hello world 基本就能应付面试了，如果怕应付不了，就再做个复杂点的。
+
+# 项目
+
+mall：
+
+组件化布局；
+
+vue-router控制页面跳转；
+
+利用cookie-parser设置cookie实现登录登出；
+
+利用node的中间件拦截登录信息，校验登录状态；
+
+vuex实现状态管理主要是用户名和购物车数量的管理；
+
+全局过滤器实现价格的格式化；
+
+结合slot实现全局模态框组件（确认删除或未登录加入购物车提示）；
+
+vue-lazyload实现图片懒加载；
+
+vue-infinite-scroll实现滚动加载
