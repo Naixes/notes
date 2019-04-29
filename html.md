@@ -5,7 +5,7 @@
 浏览器是网页运行的平台，五大浏览器：IE、火狐（Firefox）、谷歌（Chrome）、Safari和Opera。
 ```
 
-## 浏览器内核（理解）             
+## 浏览器内核 
 
 ```
 浏览器内核又可以分成两部分：渲染引擎(layout engineer 或者 Rendering Engine)和 JS 引擎。
@@ -26,7 +26,7 @@ JS 引擎 则是解析 Javascript 语言，执行 javascript语言来实现网�
 + Safari浏览器内核：Webkit内核；
 + Opera浏览器内核：最初是自己的Presto内核，后来是Webkit，现在是Blink内核；
 
-##移动端的浏览器内核
+## 移动端的浏览器内核
 
 主要说的是系统内置浏览器的内核。
 
@@ -36,7 +36,7 @@ Android 4.4 之前的 Android 系统浏览器内核是 WebKit，Android4.4 系�
 
 Windows Phone 8 系统浏览器内核是 Trident。
 
-# Web标准（重点）
+# Web标准
 
 ##  Web 标准构成
 
@@ -57,44 +57,6 @@ HTML（英文Hyper Text Markup Language的缩写）中文译为“超文本标�
 ## HTML骨架格式
 
 ```html
-<HTML>   
-    <head>     
-        <title></title>
-    </head>
-    <body>
-    </body>
-</HTML>
-```
-
-1.  HTML标签：所有HTML中标签的一个根节点。
-
-2. head标签：用于存放：title,meta,base,style,script,link
-
-注意：在head标签中我们必须要设置的标签是title
-
-3. title标签：让页面拥有一个属于自己的标题。
-
-4. body标签：页面在的主体部分，用于存放所有的HTML标签：
-
-## HTML标签分类
-
-1. 双标签
-2. 单标签 单标签也称空标签，是指用一个标签符号即可完整地描述某个功能的标签。
-
-
-## HTML标签关系
-
-1. 嵌套关系
-2. 并列关系
-
-# 工具
-
-HTML骨架快捷键：
-
-1.  html: 5   
-2.  !
-
-~~~
 <!doctype html>
 <html lang="en">
 <head>
@@ -108,19 +70,31 @@ HTML骨架快捷键：
 
 </body>
 </html>
-~~~
+```
+
+1.  HTML标签：所有HTML中标签的一个根节点。
+
+2. head标签：用于存放：title,meta,base,style,script,link
+
+注意：在head标签中我们必须要设置的标签是title
+
+3. title标签：让页面拥有一个属于自己的标题。
+
+4. body标签：页面在的主体部分，用于存放所有的HTML标签
 
 # 文档类型声明<!DOCTYPE>
 
 ~~~html
 <!DOCTYPE html>
-~~~
 
 <!DOCTYPE> 标签位于文档的最前面，用于向浏览器说明当前文档使用哪种 HTML 或 XHTML 标准规范，必需在开头处使用<!DOCTYPE>标签为所有的XHTML文档指定XHTML版本和类型，只有这样浏览器才能按指定的文档类型进行解析，这里使用的是 html 5 的版本。
+~~~
 
 DTD文档类型定义：浏览器会使用它来判断文档类型，从而决定使用何种协议来解析 
 
-# 字符集
+# meta 标签
+
+## 字符集
 
 <meta charset="UTF-8">
 
@@ -134,20 +108,27 @@ GBK包含全部中文字符    是GB2312的扩展，加入对繁体字的支持�
 
 UTF-8则包含全世界所有国家需要用到的字符
 
+## 视口
+
+https://www.cnblogs.com/chunyangji/p/5795487.html
+
+视口是html的包含块，移动端浏览器厂商为了让窄屏幕下友好展示，会将视口的宽度不与屏幕关联，就会远大于屏幕宽度。可以用meta viewport手动设置视口宽度
+
+`<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">`
+
+将浏览器中虚拟的页面容器缩放到屏幕大小然后展示出来
+
+HEAD仓库有一些视口的常见写法
+
 # HTML标签的语义化
 
 ## 为什么要有语义化标签
 
-1. 方便代码的阅读和维护
-
-2. 同时让浏览器或是网络爬虫可以很好地解析，从而更好分析其中的内容 
-
-3. 使用语义化标签会具有更好地搜索引擎优化 
-
-
-核心：合适的地方给一个最为合理的标签。
-
-语义是否良好： 当我们去掉CSS之后，网页结构依然组织有序，并且有良好的可读性。
+1. 方便代码的**阅读**，样式丢失时候能让页面呈现清晰的结构。
+2. 有利于**开发和维护**，语义化更具可读性，代码更好维护，与CSS3关系更和谐。
+3. 同时让可以很好地**解析**，从而更好分析其中的内容 
+4. 使用语义化标签会具有更好地搜索引擎优化（**SEO**）
+5. 方便**浏览器或网络爬虫及其他设备解析**，如盲人阅读器根据语义渲染网页
 
 遵循的原则：先确定语义的HTML ，再选合适的CSS。
 
@@ -155,11 +136,9 @@ UTF-8则包含全世界所有国家需要用到的字符
 
 ## 排版标签
 
-排版标签主要和css搭配使用，显示网页结构的标签，是网页布局最常用的标签。
+### 标题标签-h
 
-### 标题标签 (熟记)
-
- 单词缩写：  head   标题
+**块级元素**
 
 HTML提供了6个等级的标题，即 <h1>、<h2>、<h3>、<h4>、<h5>和<h6>
 
@@ -169,9 +148,9 @@ HTML提供了6个等级的标题，即 <h1>、<h2>、<h3>、<h4>、<h5>和<h6>
 >
 > 默认情况下，HTML 会自动地在块级元素前后添加一个额外的空行，比如段落、标题元素前后。
 
-### 段落标签( 熟记)
+### 段落标签-p
 
-块级元素，单词缩写：  paragraph  段落 
+**块级元素**
 
 ~~~html
 <p>  文本内容  </p>
@@ -179,9 +158,9 @@ HTML提供了6个等级的标题，即 <h1>、<h2>、<h3>、<h4>、<h5>和<h6>
 
 默认情况下，文本在一个段落中会根据浏览器窗口的大小自动换行。
 
-### 水平线标签(认识)
+### 水平线标签-hr
 
-单词缩写：  horizontal  横线
+**块级元素**
 
 ```html
 <hr />是单标签
@@ -189,33 +168,29 @@ HTML提供了6个等级的标题，即 <h1>、<h2>、<h3>、<h4>、<h5>和<h6>
 
  在网页中显示默认样式的水平线。
 
-### 换行标签(熟记)
+### 换行标签-br
 
-单词缩写：  break   打断 ,换行
+**行内元素**
 
 ```html
 <br />
 ```
 
-### div span标签(重点)
+### div span标签
 
-div  span    是没有语义的     是我们网页布局主要的2个容器，如果与 CSS 一同使用，可用于对大的内容块设置样式属性。 
+div（分类**块级元素**）  span（分类**行内元素**）    
 
-div（分类块级元素），division  的缩写   分割， 分区的意思  其实有很多div 来组合网页。
-
-span（分类行内元素），跨度，跨距；范围  
-
-语法格式：
+是没有语义的，是我们网页布局主要的2个容器，可用于对大的内容块设置样式属性。 
 
 ~~~html
 <div> 这是头部 </div>    <span>今日价格</span>
 ~~~
 
-## 文本格式化标签(熟记)
+## 文本格式化标签
 
-在网页中，有时需要为文字设置粗体、斜体或下划线效果，这时就需要用到HTML中的文本格式化标签，使文字以特殊的方式显示。
+使文字以特殊的方式显示：
 
-b（粗体）  i（斜体）  s（删除线）  u （下划线）  没有 强调的意思建议使用：
+b（粗体）  i（斜体）  s（删除线）  u （下划线）  没有强调的意思
 
 strong   em  del   ins  语义更强烈
 
@@ -227,13 +202,11 @@ strong   em  del   ins  语义更强烈
 <标签名 属性1="属性值1" 属性2="属性值2" …> 内容 </标签名>
 ```
 
-## 图像标签img (重点)
+## 图像标签-img
 
-单词缩写：   image  图像
+**行内元素**
 
-其基本语法格式如下：
-
-该语法中src属性用于指定图像文件的路径和文件名，他是img标签的必需属性。
+src属性用于指定图像文件的路径和文件名，他是img标签的必需属性。
 
 ```html
 <img src="图像URL" />
@@ -246,7 +219,7 @@ strong   em  del   ins  语义更强烈
 | title | 文本                      | 悬停内容       |
 | align | bottom（默认）;middle;top | 文本对齐方式   |
 
-结合map实现图像映射
+### 结合map实现**图像映射**
 
 ``````html
 <img src="1.jpg" usemap="#Map" />
@@ -257,9 +230,9 @@ strong   em  del   ins  语义更强烈
 </map>
 ``````
 
-## 链接标签
+## 链接标签-a
 
-单词缩写：  anchor 的缩写 
+**行内元素**
 
 基本语法格式如下：
 
@@ -267,13 +240,13 @@ strong   em  del   ins  语义更强烈
 <a href="跳转目标" target="目标窗口的弹出方式">文本或图像</a>
 ```
 
-**href**：用于指定链接目标的**url**地址，当为标签应用href属性时，它就具有了超链接的功能。  Hypertext Reference的缩写。意思是超文本引用
+**href**：用于指定链接目标的**url**地址，当为标签应用href属性时，它就具有了超链接的功能。 Hypertext Reference的缩写。意思是超文本引用
 
 **target**：用于指定链接页面的打开方式，其取值有**\_self**和**\_blank**两种，其中\_self为默认值，\_blank为在新窗口中打开方式。
 
 注意：
 
-1. 外部链接 需要添加 http:// www.baidu.com
+1. 外部链接 需要添加 http://
 2. 内部链接 直接链接内部页面名称即可 比如 < a href="index.html"> 首页 </a >
 3. 如果当时没有确定链接目标时，通常将链接标签的href属性值定义为“#”(即href="#")，表示该链接暂时为一个空链接。
 4. 不仅可以创建文本超链接，在网页中各种网页元素，如图像、表格、音频、视频等都可以添加超链接。
@@ -292,11 +265,11 @@ strong   em  del   ins  语义更强烈
 
 base 可以设置整体链接的打开状态   
 
-base 写到  <head>  </head>  之间
+base 写到  <head></head>  之间
 
 `<base target='_blank' />`
 
-##  特殊字符标签 （理解）
+##  特殊字符标签
 
 | 特殊字符 | 描述     | 代码    |
 | -------- | -------- | ------- |
@@ -335,7 +308,9 @@ base 写到  <head>  </head>  之间
 
 # 列表标签
 
-## 无序列表 ul （重点）
+## 无序列表-ul
+
+**块级元素**
 
 无序列表的各个列表项之间没有顺序级别之分，是并列的。其基本语法格式如下：
 
@@ -348,14 +323,12 @@ base 写到  <head>  </head>  之间
 </ul>
 ```
 
-脚下留心：
-
 ```
  1. <ul></ul>中只能嵌套<li></li>，直接在<ul></ul>标签中输入其他标签或者文字的做法是不被允许的。
  2. <li>与</li>之间相当于一个容器，可以容纳所有元素。
 ```
 
-## 有序列表 ol
+## 有序列表-ol
 
 有序列表即为有排列顺序的列表，其各个列表项按照一定的顺序排列定义，有序列表的基本语法格式如下：
 
@@ -370,7 +343,7 @@ base 写到  <head>  </head>  之间
 
 type：A，a，I，i
 
-## 自定义列表
+## 自定义列表-dl
 
 定义列表常用于对术语或名词进行解释和描述，定义列表的列表项前没有任何项目符号。其基本语法如下：
 
@@ -387,7 +360,7 @@ type：A，a，I，i
 </dl>
 ```
 
-# 表格 table(会使用)
+# 表格-table
 
 ## 创建表格
 
@@ -403,12 +376,10 @@ type：A，a，I，i
 </table>
 ```
 
-在上面的语法中包含三对HTML标签，分别为 &lt;table&gt;&lt;/table&gt;、&lt;tr&gt;&lt;/tr&gt;、&lt;td&gt;&lt;/td&gt;，他们是创建表格的基本标签，缺一不可，下面对他们进行具体地解释。
-
 ~~~
 1.table用于定义一个表格。
 2.tr 用于定义表格中的一行，必须嵌套在 table /table标签中，在 table /table中包含几对 tr /tr，就有几行表格。
-3.td /td：用于定义表格中的单元格，必须嵌套在<tr></tr>标签中，一对 <tr> </tr>中包含几对<td></td>，就表示该行中有多少列（或多少个单元格）。
+3.td ：用于定义表格中的单元格，必须嵌套在<tr></tr>标签中，一对 <tr> </tr>中包含几对<td></td>，就表示该行中有多少列（或多少个单元格）。
 ~~~
 
 注意：
@@ -441,7 +412,7 @@ type：A，a，I，i
 
 ```<caption></caption>```:表格标题,必须紧跟<table></table>标签后
 
-在使用表格进行布局时，可以将表格划分为头部、主体和页脚（页脚因为有兼容性问题，我们不在赘述），具体 如下所示：
+在使用表格进行布局时，可以将表格划分为头部、主体和页脚（页脚因为有兼容性问题），具体 如下所示：
 
 ```<thead></thead>```：用于定义表格的头部。
 必须位于<table></table> 标签中，一般包含网页的logo和导航等头部信息。
@@ -449,7 +420,7 @@ type：A，a，I，i
 ```<tbody></tbody>```：用于定义表格的主体。
 位于<table></table>标签中，一般包含网页中除头部和底部之外的其他内容。
 
-```
+```html
 <table border="1">
   <thead>
     <tr>
@@ -482,12 +453,6 @@ type：A，a，I，i
 
 跨行合并：rowspan（合并列）    跨列合并：colspan（合并行）
 
-合并单元格的思想：
-
-​     将多个内容合并的时候，就会有多余的东西，把它删除。
-
-​     合并顺序：从上到下，从左到右
-
 # 表单标签
 
 在HTML中，一个完整的表单通常由表单控件（也称为表单元素）、提示信息和表单域3个部分构成。
@@ -498,7 +463,9 @@ type：A，a，I，i
 
 3. 表单域：  他相当于一个容器，用来容纳所有的表单控件和提示信息，可以通过他定义处理表单数据所用程序的url地址，以及数据提交到服务器的方法。如果不定义表单域，表单中的数据就无法传送到后台服务器。
 
-## input 控件
+## input 标签
+
+**块级元素**
 
 在上面的语法中，&lt;input /&gt;标签为单标签，type属性为其最基本的属性，其取值有多种，用于指定不同的控件类型。除了type属性之外，&lt;input /&gt;标签还可以定义很多其他的属性，其常用属性如下表所示。
 
@@ -511,20 +478,20 @@ type：A，a，I，i
 | checked   | checked（radio或checkbox结合使用）                           |
 | maxlength |                                                              |
 
-##  label标签
+##  label 标签
 
 label 标签为 input 元素定义标注（标签）。
 
 作用：  用于绑定一个表单元素, 当点击label标签的时候, 被绑定的表单元素就会获得输入焦点
 
-**for** 属性规定 label 与哪个表单元素绑定（id）。
+**for** 属性规定 label 与哪个表单元素绑定（**id**）。
 
 ```html
 <label for="male">Male</label>
 <input type="radio" name="sex" id="male" value="male">
 ```
 
-## textarea控件(文本域)
+## textarea 标签(文本域)
 
 如果需要输入大量的信息，就需要用到&lt;textarea&gt;&lt;/textarea&gt;标签。通过textarea控件可以轻松地创建多行文本输入框，其基本语法格式如下：
 
@@ -565,18 +532,381 @@ label 标签为 input 元素定义标注（标签）。
 常用属性：
 
 1. Action在表单收集到信息后，需要将信息传递给服务器进行处理，action属性用于指定接收并处理表单数据的服务器程序的url地址。
-2. method用于设置表单数据的提交方式，其取值为get或post。
+2. method用于设置表单数据的提交方式。
 3. name用于指定表单的名称，以区分同一个页面中的多个表单。
 
 注意：  每个表单都应该有自己表单域。
 
-#浏览器缓存机制
+# HTML5新标签与特性
+
+## H5
+
+- H5 是一个产品名词
+- HTML5 是一个技术名词
+
+不是HTML5，泛指移动端页面，具体的就是在iPhone这类无法播放Flash的移动端上呈现的，可以达到Flash效果（如各种动画，互动）的，用于广告、营销的，具有酷炫效果的网页。可以简略称为「移动端PPT」，H5可能用到HTML5的标准，也可能完全没有用到。
+
+## 文档类型设定
+
+`<!DOCTYPE html>`
+
+## 字符设定
+
+`<meta http-equiv="charset" content="utf-8">：HTML与XHTML中建议这样去写`
+
+`<meta charset="utf-8">：HTML5的标签中建议这样去写`
+
+## 常用新标签
+
+| 标签         | 描述                                                         |
+| ------------ | ------------------------------------------------------------ |
+| <article>    | 定义文章。                                                   |
+| <aside>      | 定义页面内容以外的内容，内容应该与周围内容相关。             |
+| <details>    | 定义用户能够查看或隐藏的额外细节。 目前只有 Chrome 和 Safari 6 支持 <details> 标签。 |
+| <figcaption> | 定义 <figure> 元素的标题。                                   |
+| <figure>     | 规定自包含内容，比如图示、图表、照片、代码清单等。           |
+| <footer>     | 定义文档或节的页脚。                                         |
+| <header>     | 规定文档或节的页眉。                                         |
+| <main>       | 规定文档的主内容。                                           |
+| <mark>       | 定义重要的或强调的文本。                                     |
+| <nav>        | 定义导航链接。                                               |
+| <section>    | 定义文档中的节。                                             |
+| <summary>    | 定义 <details> 元素的可见标题。                              |
+| <time>       | 定义日期/时间。                                              |
+| <datalist>   | 定义选项列表。请与 input 元素配合使用该元素，来定义 input 可能的值。   input 元素的 list 属性来绑定 datalist。 |
+| <fieldset>   | 可将表单内的相关元素分组，浏览器会以特殊方式来显示它们，它们可能有特殊的边界、3D 效果，或者甚至可创建一个子表单来处理这些元素。 <legend>为 fieldset 元素定义标题。 |
+
+移除没有语义化注重样式的标签
+
+### 兼容处理
+
+```
+<script src="../js/html5shiv.min.js"></script>
+```
+
+### figure 和 figcaption 元素
+
+在书籍和报纸中，与图片搭配的标题很常见。
+
+标题（caption）的作用是为图片添加可见的解释。
+
+```
+<figure>
+   <img src="pic_mountain.jpg" alt="The Pulpit Rock" width="304" height="228">
+   <figcaption>Fig1. - The Pulpit Pock, Norway.</figcaption>
+</figure> 
+```
+
+## 常用新属性
+
+| **属性**         | **用法**                                       | **含义**                                                   |
+| ---------------- | ---------------------------------------------- | ---------------------------------------------------------- |
+| **placeholder**  | <input type="text" placeholder="请输入用户名"> | 占位符提供可描述输入字段预期值的提示信息                   |
+| **autofocus**    | <input type="text" autofocus>                  | 规定当页面加载时 input 元素应该自动获得焦点                |
+| **multiple**     | <input type="file" multiple>                   | 多文件上传                                                 |
+| **autocomplete** | <input type="text" autocomplete="off">         | 规定表单是否应该启用自动完成功能，只有提交过的内容才会记录 |
+| **required**     | <input type="text" required>                   | 必填项                                                     |
+| **accesskey**    | <input type="text" accesskey="s">              | 规定激活（使元素获得焦点）元素的快捷键为alt+‘s’            |
+
+## 新增的type属性值：
+
+| **类型**     | **使用示例**            | **含义**                               |
+| ------------ | ----------------------- | -------------------------------------- |
+| **email**    | <input type="email">    | 输入邮箱格式，包含校验                 |
+| **tel**      | <input type="tel">      | 输入手机号码格式，手机上会弹出数字键盘 |
+| **url**      | <input type="url">      | 输入url格式，包含校验                  |
+| **number**   | <input type="number">   | 只能输入数字格式                       |
+| **search**   | <input type="search">   | 搜索框（体现语义化）                   |
+| **range**    | <input type="range">    | 自由拖动滑块，value取值                |
+| **time**     | <input type="time">     |                                        |
+| **date**     | <input type="date">     |                                        |
+| **datetime** | <input type="datetime"> |                                        |
+| **month**    | <input type="month">    |                                        |
+| **week**     | <input type="week">     |                                        |
+
+## 综合案例
+
+```html
+<form action="">
+  <fieldset>
+    <legend>学生档案</legend>
+    <label for="userName">姓名:</label>
+    <input type="text" name="userName" id="userName" placeholder="请输入用户名"> <br>
+    <label for="userPhone">手机号码:</label>
+    <input type="tel" name="userPhone" id="userPhone" pattern="^1\d{10}$"><br>
+    <label for="email">邮箱地址:</label>
+    <input type="email" required name="email" id="email"><br>
+    <label for="collage">所属学院:</label>
+    <input type="text" name="collage" id="collage" list="cList" placeholder="请选择"><br>
+    <datalist id="cList">
+      <option value="前端与移动开发学院"></option>
+      <option value="java学院"></option>
+      <option value="c++学院"></option>
+    </datalist><br>
+    <label for="score">入学成绩:</label>
+    <input type="number" max="100" min="0" value="0" id="score"><br>
+    <label for="level">基础水平:</label>
+    <meter id="level" max="100" min="0" low="59" high="90"></meter><br>
+    <label for="inTime">入学日期:</label>
+    <input type="date" id="inTime" name="inTime"><br>
+    <label for="leaveTime">毕业日期:</label>
+    <input type="date" id="leaveTime" name="leaveTime"><br>
+    <input type="submit">
+  </fieldset>
+</form>
+```
+
+## Web存储
+
+### cookie，localStorage，sessionStorage，indexDB
+
+我们先来通过表格学习下这几种存储方式的区别
+
+| 特性         | cookie                                     | localStorage             | sessionStorage | indexDB                  |
+| ------------ | ------------------------------------------ | ------------------------ | -------------- | ------------------------ |
+| 数据生命周期 | 一般由服务器生成，可以设置过期时间         | 除非被清理，否则一直存在 | 页面关闭就清理 | 除非被清理，否则一直存在 |
+| 数据存储大小 | 4K                                         | 5M                       | 5M             | 无限                     |
+| 与服务端通信 | 每次都会携带在 header 中，对于请求性能影响 | 不参与                   | 不参与         | 不参与                   |
+
+从上表可以看到，`cookie` 已经不建议用于存储。如果没有大量数据存储需求的话，可以使用 `localStorage` 和 `sessionStorage` 。对于不怎么改变的数据尽量使用 `localStorage` 存储，否则可以用 `sessionStorage` 存储。
+
+sessionStorage/localStorage：将数据存储到本地
+
+API：
+
+```js
+window.sessionStorage.setItem('name',name)
+window.sessionStorage.getItem('name')
+window.sessionStorage.removeItem('name')
+window.sessionStorage.clear()
+```
+
+sessionStorage
+
+1. 存储在当前页面内存中
+2. 5M左右
+
+localStorage
+
+1. 同一个浏览器可以共享
+2. 永久存储，存储在硬盘
+3. 20M左右
+
+对于 `cookie` 来说，我们还需要注意安全性。
+
+| 属性      | 作用                                                         |
+| --------- | ------------------------------------------------------------ |
+| value     | 如果用于保存用户登录态，应该将该值加密，不能使用明文的用户标识 |
+| http-only | 不能通过 JS 访问 Cookie，减少 XSS 攻击                       |
+| secure    | 只能在协议为 HTTPS 的请求中携带                              |
+| same-site | 规定浏览器不能在跨域请求中携带 Cookie，减少 CSRF 攻击        |
+
+### Service Worker
+
+Service Worker 是运行在浏览器背后的**独立线程**，一般可以用来实现缓存功能。使用 Service Worker的话，传输协议必须为 **HTTPS**。因为 Service Worker 中涉及到请求拦截，所以必须使用 HTTPS 协议来保障安全。
+
+Service Worker 实现缓存功能一般分为三个步骤：首先需要先注册 Service Worker，然后监听到 `install` 事件以后就可以缓存需要的文件，那么在下次用户访问的时候就可以通过拦截请求的方式查询是否存在缓存，存在缓存的话就可以直接读取缓存文件，否则就去请求数据。以下是这个步骤的实现：
+
+```js
+// index.js
+if (navigator.serviceWorker) {
+  navigator.serviceWorker
+    .register('sw.js')
+    .then(function(registration) {
+      console.log('service worker 注册成功')
+    })
+    .catch(function(err) {
+      console.log('servcie worker 注册失败')
+    })
+}
+// sw.js
+// 监听 `install` 事件，回调中缓存所需文件
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open('my-cache').then(function(cache) {
+      return cache.addAll(['./index.html', './index.js'])
+    })
+  )
+})
+
+// 拦截所有请求事件
+// 如果缓存中已经有请求的数据就直接用缓存，否则去请求数据
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(function(response) {
+      if (response) {
+        return response
+      }
+      console.log('fetch source')
+    })
+  )
+})
+```
+
+打开页面，可以在开发者工具中的 `Application` 看到 Service Worker 已经启动了
+
+![img](https://user-gold-cdn.xitu.io/2018/3/28/1626b1e8eba68e1c?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+在 Cache 中也可以发现我们所需的文件已被缓存
+
+![img](https://user-gold-cdn.xitu.io/2018/3/28/1626b20dfc4fcd26?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+当我们重新刷新页面可以发现我们缓存的数据是从 Service Worker 中读取的
+
+![img](https://user-gold-cdn.xitu.io/2018/3/28/1626b20e4f8f3257?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+## 应用缓存ApplicationCache
+
+指定缓存文件，5M左右
+
+```html
+<html lang='en' manifest='demo.appcache'>
+...
+</html>
+```
+
+manifest=应用程序缓存清单路径，文件扩展名建议为appcache
+
+appcache文件内容：
+
+```config
+#第一句
+CACHE MANIFEST
+#需要缓存的清单列表
+CACHE:
+../01.jpg
+#*代表所有文件
+#每次请求都需要重新获取的清单列表
+NETWORK：
+../02.jpg
+#没找到时的替代文件
+FALLBACK:
+#被替代文件 替代文件
+../03.jpg ../04.jpg
+#/代表所有文件
+```
+
+不起作用时要配置IIS管理器（服务器）里的的MIME类型：text/cache-manifest
+
+根据官方文档，AppCache 已经不推荐使用了，标准也不会再支持。 
+
+## 多媒体标签
+
+- embed：标签定义嵌入的内容
+- audio：播放音频
+- video：播放视频
+
+### 多媒体 embed
+
+embed可以用来插入各种多媒体，格式可以是 Midi、Wav、AIFF、AU、MP3等等。url为音频或视频文件及其路径，可以是相对路径或绝对路径。
+
+```html
+<embed src="http://player.youku.com/player.php/sid/XMTI4MzM2MDIwOA==/v.swf" allowFullScreen="true" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
+```
+
+### 多媒体 audio
+
+```
+<audio controls>
+  <source src="horse.ogg" type="audio/ogg">
+  <source src="horse.mp3" type="audio/mpeg">
+您的浏览器不支持 audio 元素。
+</audio>
+```
+
+**autoplay**：autoplay自动播放
+
+**controls**：controls是否显示默认播放控件
+
+**loop**：loop循环播放，loop='2'，-1为循环播放
+
+目前<audio>元素支持三种音频格式文件: MP3, Wav, 和 Ogg由于版权等原因，不同的浏览器可支持播放的格式是不一样的
+
+| 浏览器               | MP3  | Wav  | Ogg  |
+| -------------------- | ---- | ---- | ---- |
+| Internet Explorer 9+ | YES  | NO   | NO   |
+| Chrome 6+            | YES  | YES  | YES  |
+| Firefox 3.6+         | YES  | YES  | YES  |
+| Safari 5+            | YES  | YES  | NO   |
+| Opera 10+            | YES  | YES  | YES  |
+
+多浏览器支持的方案，如下图
+
+```
+<audio src="" controls autoplay>
+  <source src="bgs.mp3" />
+  <source src="bgs.wav" />
+  <source src="bgs.ogg" />
+  你的浏览器不支持该audio音频播放
+</audio>
+```
+
+### 多媒体 video
+
+```
+<video width="320" height="240" controls>
+  <source src="movie.mp4" type="video/mp4">
+  <source src="movie.ogg" type="video/ogg">
+  您的浏览器不支持Video标签。
+</video>
+```
+
+**autoplay** 自动播放
+
+**controls** 是否显示默认播放控件
+
+**loop** 循环播放
+
+**width** 设置播放窗口宽度
+
+**height**设置播放窗口的高度
+
+当前， <video> 元素支持三种视频格式： MP4, WebM, 和 Ogg ，由于版权等原因，不同的浏览器可支持播放的格式是不一样的，如下图供参考
+
+| 浏览器            | MP4                  | WebM | Ogg  |
+| ----------------- | -------------------- | ---- | ---- |
+| Internet Explorer | YES                  | NO   | NO   |
+| Chrome            | YES                  | YES  | YES  |
+| Firefox           | YES                  | YES  | YES  |
+| Safari            | YES                  | NO   | NO   |
+| Opera             | YES (从 Opera 25 起) | YES  | YES  |
+
+**多浏览器支持的方案同音频**
+
+## DOM操作
+
+### 获取元素
+
+document.getElementByClassName('class')类数组
+
+document.getElementByTagName('tag')类数组
+
+document.querySelector('')返回第一个匹配的元素
+
+document.querySelectorAll('')类数组
+
+### 类名操作
+
+Node.classLisht.add('')
+
+Node.classLisht.remove('')
+
+Node.classLisht.toggle('')
+
+Node.classLisht.contains('')
+
+### 自定义属性
+
+1. 在HTML5中我们可以自定义属性，其格式如下`data-*=""`，例如：`data-info="我是自定义属性"`，通过`Node.dataset['info']` 我们便可以获取到自定义的属性值。
+2. 当我们如下格式设置时，则需要以驼峰格式才能正确获取：`data-my-name="itcast"`，获取`Node.dataset['myName']
+
+# 浏览器缓存机制
 
 缓存可以说是性能优化中**简单高效**的一种优化方式了，它可以**显著减少网络传输所带来的损耗**。
 
 对于一个数据请求来说，可以分为发起网络请求、后端处理、浏览器响应三个步骤。浏览器缓存可以帮助我们在第一和第三步骤中优化性能。比如说直接使用缓存而不发起请求，或者发起了请求但后端存储的数据和前端一致，那么就没有必要再将数据回传回来，这样就减少了响应数据。
 
-##缓存位置
+## 缓存位置
 
 从缓存位置上来说分为四种，并且各自有**优先级**，当依次查找缓存且都没有命中的时候，才会去请求网络
 
@@ -586,13 +916,13 @@ label 标签为 input 元素定义标注（标签）。
 4. Push Cache
 5. 网络请求
 
-###Service Worker
+### Service Worker
 
 Service Worker 的缓存与浏览器其他内建的缓存机制不同，它可以让我们**自由控制**缓存哪些文件、如何匹配缓存、如何读取缓存，并且**缓存是持续性的**。
 
 当 Service Worker 没有命中缓存的时候，我们需要去调用 `fetch` 函数获取数据。也就是说，如果我们没有在 Service Worker 命中缓存的话，会根据缓存查找优先级去查找数据。**但是不管我们是从 Memory Cache 中还是从网络请求中获取的数据，浏览器都会显示我们是从 Service Worker 中获取的内容。**
 
-###Memory Cache
+### Memory Cache
 
 Memory Cache 也就是内存中的缓存，读取内存中的数据肯定比磁盘快。**但是内存缓存虽然读取高效，可是缓存持续性很短，会随着进程的释放而释放。** 一旦我们关闭 Tab 页面，内存中的缓存也就被释放了。
 
@@ -615,7 +945,7 @@ Disk Cache 也就是存储在硬盘中的缓存，读取速度慢点，但是什
 
 在所有浏览器缓存中，Disk Cache 覆盖面基本是最大的。它会**根据 HTTP Herder 中的字段判断**哪些资源需要缓存，哪些资源可以不请求直接使用，哪些资源已经过期需要重新请求。**并且即使在跨站点的情况下，相同地址的资源一旦被硬盘缓存下来，就不会再次去请求数据。**
 
-###Push Cache
+### Push Cache
 
 Push Cache 是 HTTP/2 中的内容，当以上三种缓存都没有命中时，它才会被使用。**并且缓存时间也很短暂，只在会话（Session）中存在，一旦会话结束就被释放。**
 
@@ -629,21 +959,21 @@ Push Cache 在国内能够查到的资料很少，也是因为 HTTP/2 在国内�
 - 浏览器可以拒绝接受已经存在的资源推送
 - 你可以给其他域名推送资源
 
-###网络请求
+### 网络请求
 
 如果所有缓存都没有命中的话，那么只能发起请求来获取资源了。
 
 那么为了性能上的考虑，大部分的接口都应该选择好缓存策略，接下来我们就来学习缓存策略这部分的内容。
 
-##缓存策略
+## 缓存策略
 
 通常浏览器缓存策略分为两种：**强缓存**和**协商缓存**，并且缓存策略都是通过设置 HTTP Header 来实现的。
 
-###强缓存
+### 强缓存
 
 强缓存可以通过设置两种 HTTP Header 实现：`Expires` 和 `Cache-Control` 。**强缓存表示在缓存期间不需要请求**，`state code` 为 200。
 
-####Expires
+#### Expires
 
 ```
 Expires: Wed, 22 Oct 2018 08:41:00 GMT
@@ -651,7 +981,7 @@ Expires: Wed, 22 Oct 2018 08:41:00 GMT
 
 `Expires` 是 HTTP/1 的产物，表示资源会在 `Wed, 22 Oct 2018 08:41:00 GMT` 后过期，需要再次请求。并且 `Expires` **受限于本地时间**，如果修改了本地时间，可能会造成缓存失效。
 
-####Cache-control
+#### Cache-control
 
 ```
 Cache-control: max-age=30
@@ -1423,385 +1753,4 @@ performance.measure('test', 'start', 'end')
 - 可以通过 **Performance** 工具了解网站的性能瓶颈
 - 可以通过 **Performance** API 具体测量时间
 - 为了减少编译时间，我们可以采用**减少代码文件的大小**或者**减少书写嵌套函数**的方式
-- 为了让 V8 优化代码，我们应该尽可能保证传入参数的**类型一致**。这也给我们带来了一个思考，这是不是也是使用 TypeScript 能够带来的好处之一
-
-# HTML5新标签与特性
-
-## 文档类型设定
-
-- document
-  - HTML:
-  - XHTML:
-  - HTML5
-
-## 字符设定
-
-- <meta http-equiv="charset" content="utf-8">：HTML与XHTML中建议这样去写
-- <meta charset="utf-8">：HTML5的标签中建议这样去写
-
-## 常用新标签
-
-| 标签         | 描述                                                         |
-| ------------ | ------------------------------------------------------------ |
-| <article>    | 定义文章。                                                   |
-| <aside>      | 定义页面内容以外的内容，内容应该与周围内容相关。             |
-| <details>    | 定义用户能够查看或隐藏的额外细节。 目前只有 Chrome 和 Safari 6 支持 <details> 标签。 |
-| <figcaption> | 定义 <figure> 元素的标题。                                   |
-| <figure>     | 规定自包含内容，比如图示、图表、照片、代码清单等。           |
-| <footer>     | 定义文档或节的页脚。                                         |
-| <header>     | 规定文档或节的页眉。                                         |
-| <main>       | 规定文档的主内容。                                           |
-| <mark>       | 定义重要的或强调的文本。                                     |
-| <nav>        | 定义导航链接。                                               |
-| <section>    | 定义文档中的节。                                             |
-| <summary>    | 定义 <details> 元素的可见标题。                              |
-| <time>       | 定义日期/时间。                                              |
-| <datalist>   | 定义选项列表。请与 input 元素配合使用该元素，来定义 input 可能的值。   input 元素的 list 属性来绑定 datalist。 |
-| <fieldset>   | 可将表单内的相关元素分组，浏览器会以特殊方式来显示它们，它们可能有特殊的边界、3D 效果，或者甚至可创建一个子表单来处理这些元素。 <legend>为 fieldset 元素定义标题。 |
-
-### 移除的标签
-
-没有语义化注重样式的标签
-
-### 兼容处理
-
-```
-<script src="../js/html5shiv.min.js"></script>
-```
-
-### figure 和 figcaption 元素
-
-在书籍和报纸中，与图片搭配的标题很常见。
-
-标题（caption）的作用是为图片添加可见的解释。
-
-```
-<figure>
-   <img src="pic_mountain.jpg" alt="The Pulpit Rock" width="304" height="228">
-   <figcaption>Fig1. - The Pulpit Pock, Norway.</figcaption>
-</figure> 
-```
-
-## 常用新属性
-
-| **属性**         | **用法**                                       | **含义**                                                   |
-| ---------------- | ---------------------------------------------- | ---------------------------------------------------------- |
-| **placeholder**  | <input type="text" placeholder="请输入用户名"> | 占位符提供可描述输入字段预期值的提示信息                   |
-| **autofocus**    | <input type="text" autofocus>                  | 规定当页面加载时 input 元素应该自动获得焦点                |
-| **multiple**     | <input type="file" multiple>                   | 多文件上传                                                 |
-| **autocomplete** | <input type="text" autocomplete="off">         | 规定表单是否应该启用自动完成功能，只有提交过的内容才会记录 |
-| **required**     | <input type="text" required>                   | 必填项                                                     |
-| **accesskey**    | <input type="text" accesskey="s">              | 规定激活（使元素获得焦点）元素的快捷键为alt+‘s’            |
-
-## 新增的type属性值：
-
-| **类型**     | **使用示例**            | **含义**                               |
-| ------------ | ----------------------- | -------------------------------------- |
-| **email**    | <input type="email">    | 输入邮箱格式，包含校验                 |
-| **tel**      | <input type="tel">      | 输入手机号码格式，手机上会弹出数字键盘 |
-| **url**      | <input type="url">      | 输入url格式，包含校验                  |
-| **number**   | <input type="number">   | 只能输入数字格式                       |
-| **search**   | <input type="search">   | 搜索框（体现语义化）                   |
-| **range**    | <input type="range">    | 自由拖动滑块，value取值                |
-| **time**     | <input type="time">     |                                        |
-| **date**     | <input type="date">     |                                        |
-| **datetime** | <input type="datetime"> |                                        |
-| **month**    | <input type="month">    |                                        |
-| **week**     | <input type="week">     |                                        |
-
-## 综合案例
-
-~~~html
-<form action="">
-  <fieldset>
-    <legend>学生档案</legend>
-    <label for="userName">姓名:</label>
-    <input type="text" name="userName" id="userName" placeholder="请输入用户名"> <br>
-    <label for="userPhone">手机号码:</label>
-    <input type="tel" name="userPhone" id="userPhone" pattern="^1\d{10}$"><br>
-    <label for="email">邮箱地址:</label>
-    <input type="email" required name="email" id="email"><br>
-    <label for="collage">所属学院:</label>
-    <input type="text" name="collage" id="collage" list="cList" placeholder="请选择"><br>
-    <datalist id="cList">
-      <option value="前端与移动开发学院"></option>
-      <option value="java学院"></option>
-      <option value="c++学院"></option>
-    </datalist><br>
-    <label for="score">入学成绩:</label>
-    <input type="number" max="100" min="0" value="0" id="score"><br>
-    <label for="level">基础水平:</label>
-    <meter id="level" max="100" min="0" low="59" high="90"></meter><br>
-    <label for="inTime">入学日期:</label>
-    <input type="date" id="inTime" name="inTime"><br>
-    <label for="leaveTime">毕业日期:</label>
-    <input type="date" id="leaveTime" name="leaveTime"><br>
-    <input type="submit">
-  </fieldset>
-</form>
-~~~
-
-## 操作类名
-
-```js
-div.classList.remove('')
-div.classLIst.add('')
-div.classList.toggle('')
-div.classList.contains('')
-```
-
-## Web存储
-
-### cookie，localStorage，sessionStorage，indexDB
-
-我们先来通过表格学习下这几种存储方式的区别
-
-| 特性         | cookie                                     | localStorage             | sessionStorage | indexDB                  |
-| ------------ | ------------------------------------------ | ------------------------ | -------------- | ------------------------ |
-| 数据生命周期 | 一般由服务器生成，可以设置过期时间         | 除非被清理，否则一直存在 | 页面关闭就清理 | 除非被清理，否则一直存在 |
-| 数据存储大小 | 4K                                         | 5M                       | 5M             | 无限                     |
-| 与服务端通信 | 每次都会携带在 header 中，对于请求性能影响 | 不参与                   | 不参与         | 不参与                   |
-
-从上表可以看到，`cookie` 已经不建议用于存储。如果没有大量数据存储需求的话，可以使用 `localStorage` 和 `sessionStorage` 。对于不怎么改变的数据尽量使用 `localStorage` 存储，否则可以用 `sessionStorage` 存储。
-
-sessionStorage/localStorage：将数据存储到本地
-
-API：
-
-```js
-window.sessionStorage.setItem('name',name)
-window.sessionStorage.getItem('name')
-window.sessionStorage.removeItem('name')
-window.sessionStorage.clear()
-```
-
-sessionStorage
-
-1. 存储在当前页面内存中
-2. 5M左右
-
-localStorage
-
-1. 同一个浏览器可以共享
-2. 永久存储，存储在硬盘
-3. 20M左右
-
-对于 `cookie` 来说，我们还需要注意安全性。
-
-| 属性      | 作用                                                         |
-| --------- | ------------------------------------------------------------ |
-| value     | 如果用于保存用户登录态，应该将该值加密，不能使用明文的用户标识 |
-| http-only | 不能通过 JS 访问 Cookie，减少 XSS 攻击                       |
-| secure    | 只能在协议为 HTTPS 的请求中携带                              |
-| same-site | 规定浏览器不能在跨域请求中携带 Cookie，减少 CSRF 攻击        |
-
-### Service Worker
-
-Service Worker 是运行在浏览器背后的**独立线程**，一般可以用来实现缓存功能。使用 Service Worker的话，传输协议必须为 **HTTPS**。因为 Service Worker 中涉及到请求拦截，所以必须使用 HTTPS 协议来保障安全。
-
-Service Worker 实现缓存功能一般分为三个步骤：首先需要先注册 Service Worker，然后监听到 `install` 事件以后就可以缓存需要的文件，那么在下次用户访问的时候就可以通过拦截请求的方式查询是否存在缓存，存在缓存的话就可以直接读取缓存文件，否则就去请求数据。以下是这个步骤的实现：
-
-```js
-// index.js
-if (navigator.serviceWorker) {
-  navigator.serviceWorker
-    .register('sw.js')
-    .then(function(registration) {
-      console.log('service worker 注册成功')
-    })
-    .catch(function(err) {
-      console.log('servcie worker 注册失败')
-    })
-}
-// sw.js
-// 监听 `install` 事件，回调中缓存所需文件
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open('my-cache').then(function(cache) {
-      return cache.addAll(['./index.html', './index.js'])
-    })
-  )
-})
-
-// 拦截所有请求事件
-// 如果缓存中已经有请求的数据就直接用缓存，否则去请求数据
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(function(response) {
-      if (response) {
-        return response
-      }
-      console.log('fetch source')
-    })
-  )
-})
-```
-
-打开页面，可以在开发者工具中的 `Application` 看到 Service Worker 已经启动了
-
-![img](https://user-gold-cdn.xitu.io/2018/3/28/1626b1e8eba68e1c?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
-
-在 Cache 中也可以发现我们所需的文件已被缓存
-
-![img](https://user-gold-cdn.xitu.io/2018/3/28/1626b20dfc4fcd26?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
-
-当我们重新刷新页面可以发现我们缓存的数据是从 Service Worker 中读取的
-
-![img](https://user-gold-cdn.xitu.io/2018/3/28/1626b20e4f8f3257?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
-
-## 应用缓存ApplicationCache
-
-指定缓存文件，5M左右
-
-```html
-<html lang='en' manifest='demo.appcache'>
-...
-</html>
-```
-
-manifest=应用程序缓存清单路径，文件扩展名建议为appcache
-
-appcache文件内容：
-
-```config
-#第一句
-CACHE MANIFEST
-#需要缓存的清单列表
-CACHE:
-../01.jpg
-#*代表所有文件
-#每次请求都需要重新获取的清单列表
-NETWORK：
-../02.jpg
-#没找到时的替代文件
-FALLBACK:
-#被替代文件 替代文件
-../03.jpg ../04.jpg
-#/代表所有文件
-```
-
-不起作用时要配置IIS管理器（服务器）里的的MIME类型：text/cache-manifest
-
-根据官方文档，AppCache 已经不推荐使用了，标准也不会再支持。 
-
-## 多媒体标签
-
-- embed：标签定义嵌入的内容
-
-- audio：播放音频
-
-- video：播放视频
-
-
-### 多媒体 embed（会使用）
-
-embed可以用来插入各种多媒体，格式可以是 Midi、Wav、AIFF、AU、MP3等等。url为音频或视频文件及其路径，可以是相对路径或绝对路径。
-
-因为兼容性问题，这里只讲解插入网络视频， 后面H5会讲解 audio 和video 视频多媒体。 
-
-```html
-<embed src="http://player.youku.com/player.php/sid/XMTI4MzM2MDIwOA==/v.swf" allowFullScreen="true" quality="high" width="480" height="400" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
-```
-
- 优酷，土豆，爱奇艺，腾讯、乐视等等
-
-1. 先上传
-2. 在分享
-
-### 多媒体 audio
-
-```
-<audio controls>
-  <source src="horse.ogg" type="audio/ogg">
-  <source src="horse.mp3" type="audio/mpeg">
-您的浏览器不支持 audio 元素。
-</audio>
-```
-
-**autoplay**：autoplay自动播放
-
-**controls**：controls是否显示默认播放控件
-
-**loop**：loop循环播放，loop='2'，-1为循环播放
-
-目前<audio>元素支持三种音频格式文件: MP3, Wav, 和 Ogg由于版权等原因，不同的浏览器可支持播放的格式是不一样的
-
-| 浏览器               | MP3  | Wav  | Ogg  |
-| -------------------- | ---- | ---- | ---- |
-| Internet Explorer 9+ | YES  | NO   | NO   |
-| Chrome 6+            | YES  | YES  | YES  |
-| Firefox 3.6+         | YES  | YES  | YES  |
-| Safari 5+            | YES  | YES  | NO   |
-| Opera 10+            | YES  | YES  | YES  |
-
-多浏览器支持的方案，如下图
-
- ``````
-<audio src="" controls autoplay>
-  <source src="bgs.mp3" />
-  <source src="bgs.wav" />
-  <source src="bgs.ogg" />
-  你的浏览器不支持该audio音频播放
-</audio>
- ``````
-
-
-
-### 多媒体 video
-
-``````
-<video width="320" height="240" controls>
-  <source src="movie.mp4" type="video/mp4">
-  <source src="movie.ogg" type="video/ogg">
-  您的浏览器不支持Video标签。
-</video>
-``````
-
-**autoplay** 自动播放
-
-**controls** 是否显示默认播放控件
-
-**loop** 循环播放
-
-**width** 设置播放窗口宽度
-
-**height**设置播放窗口的高度
-
-当前， <video> 元素支持三种视频格式： MP4, WebM, 和 Ogg ，由于版权等原因，不同的浏览器可支持播放的格式是不一样的，如下图供参考
-
-| 浏览器            | MP4                  | WebM | Ogg  |
-| ----------------- | -------------------- | ---- | ---- |
-| Internet Explorer | YES                  | NO   | NO   |
-| Chrome            | YES                  | YES  | YES  |
-| Firefox           | YES                  | YES  | YES  |
-| Safari            | YES                  | NO   | NO   |
-| Opera             | YES (从 Opera 25 起) | YES  | YES  |
-
-**多浏览器支持的方案同音频**
-
-## DOM操作
-
-### 获取元素
-
-document.getElementByClassName('class')类数组
-
-document.getElementByTagName('tag')类数组
-
-document.querySelector('')返回第一个匹配的元素
-
-document.querySelectorAll('')类数组
-
-### 类名操作
-
-Node.classLisht.add('')
-
-Node.classLisht.remove('')
-
-Node.classLisht.toggle('')
-
-Node.classLisht.contains('')
-
-### 自定义属性
-
-1. 在HTML5中我们可以自定义属性，其格式如下`data-*=""`，例如：`data-info="我是自定义属性"`，通过`Node.dataset['info']` 我们便可以获取到自定义的属性值。
-2. 当我们如下格式设置时，则需要以驼峰格式才能正确获取：`data-my-name="itcast"`，获取`Node.dataset['myName']`
+- 为了让 V8 优化代码，我们应该尽可能保证传入参数的**类型一致**。这也给我们带来了一个思考，这是不是也是使用 TypeScript 能够带来的好处之一`
