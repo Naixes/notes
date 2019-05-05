@@ -4,26 +4,6 @@
 
 CSS(Cascading Style Sheets)通常称为CSS样式表或层叠样式表（级联样式表），主要用于设置HTML页面中的文本内容（字体、大小、对齐方式等）、图片的外形（宽高、边框样式、边距等）以及版面的布局等外观显示样式。
 
-## CSS样式表
-
-内部样式：写在head标签下的style标签里面
-
-内联样式（行内样式）：写在标签内部
-
-外部样式（外链式）：在head中引入css文件
-
-``````
-<head>
-  <link rel="stylesheet" type="text/css" href="CSS文件路径" />
-</head>
-``````
-
-| 属性                                                      | 值           | 描述                                 |
-| --------------------------------------------------------- | ------------ | ------------------------------------ |
-| [type](http://www.w3school.com.cn/tags/att_link_type.asp) | *MIME_type*  | 规定被链接文档的 MIME 类型。         |
-| [href](http://www.w3school.com.cn/tags/att_link_href.asp) | *URL*        | 规定被链接文档的位置。               |
-| [rel](http://www.w3school.com.cn/tags/att_link_rel.asp)   | stylesheet等 | 规定当前文档与被链接文档之间的关系。 |
-
 # 引入CSS样式表
 
 ## 内部样式表
@@ -38,7 +18,7 @@ CSS(Cascading Style Sheets)通常称为CSS样式表或层叠样式表（级联�
 </head>
 ```
 
-语法中，style标签一般位于head标签中title标签之后，也可以把他放在HTML文档的任何地方。
+语法中，style标签一般位于head标签中**title标签之后**，也可以把他放在HTML文档的任何地方。
 
 type="text/CSS"  在html5中可以省略， 写上也比较符合规范， 所以这个地方可以写也可以省略。
 
@@ -702,7 +682,7 @@ Formatting context是W3C CSS2.1规范中的一个概念。它是页面中的一�
 ##W3C定义
 
 ​	浮动元素和绝对定位元素，非块级盒子的块级容器（例如 inline-blocks, table-cells, 和 table-captions），以及overflow值不为“visiable”的块级盒子，都会为他们的内容创建新的块级格式化上下文。 
-	在一个块级格式化上下文里，盒子从包含块的顶端开始垂直地一个接一个地排列，两个盒子之间的垂直的间隙是由他们的margin 值所决定的。两个相邻的块级盒子的垂直外边距会发生叠加。 
+​	在一个块级格式化上下文里，盒子从包含块的顶端开始垂直地一个接一个地排列，两个盒子之间的垂直的间隙是由他们的margin 值所决定的。两个相邻的块级盒子的垂直外边距会发生叠加。 
 
 ​	在块级格式化上下文中，每一个盒子的左外边缘（margin-left）会触碰到容器的左边缘(border-left)（对于从右到左的格式来说，则触碰到右边缘），即使存在浮动也是如此，除非这个盒子创建一个新的块级格式化上下文。 
 
