@@ -1,4 +1,3 @@
-
 # 常见浏览器介绍
 
 ```
@@ -20,11 +19,11 @@ JS 引擎 则是解析 Javascript 语言，执行 javascript语言来实现网�
 四大内核分别是：Trident（也称IE内核）、webkit、Blink、Gecko
 ```
 
-+ IE浏览器内核：Trident内核，也是俗称的IE内核；
-+ Chrome浏览器内核：统称为Chromium内核或Chrome内核，以前是Webkit内核，现在是Blink内核；
-+ Firefox浏览器内核：Gecko内核，俗称Firefox内核；
-+ Safari浏览器内核：Webkit内核；
-+ Opera浏览器内核：最初是自己的Presto内核，后来是Webkit，现在是Blink内核；
+- IE浏览器内核：Trident内核，也是俗称的IE内核；
+- Chrome浏览器内核：统称为Chromium内核或Chrome内核，以前是Webkit内核，现在是Blink内核；
+- Firefox浏览器内核：Gecko内核，俗称Firefox内核；
+- Safari浏览器内核：Webkit内核；
+- Opera浏览器内核：最初是自己的Presto内核，后来是Webkit，现在是Blink内核；
 
 ## 移动端的浏览器内核
 
@@ -38,627 +37,17 @@ Windows Phone 8 系统浏览器内核是 Trident。
 
 # Web标准
 
-##  Web 标准构成
+## Web 标准构成
 
  Web标准不是某一个标准，而是由W3C和其他标准化组织制定的一系列标准的集合。主要包括结构（Structure）、表现（Presentation）和行为（Behavior）三个方面。
 
-~~~
+```
 结构标准：结构用于对网页元素进行整理和分类，主要包括XML和XHTML两个部分。
 样式标准：表现用于设置网页元素的版式、颜色、大小等外观样式，主要指的是CSS。
 行为标准：行为是指网页模型的定义及交互的编写，主要包括DOM和ECMAScript两个部分
-~~~
+```
 
 理想状态我们的源码： .HTML    .css   .js 
-
-# HTML
-
-HTML（英文Hyper Text Markup Language的缩写）中文译为“超文本标签语言”，主要是通过HTML标签对网页中的文本、图片、声音等内容进行描述。
-
-## HTML骨架格式
-
-```html
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-</head>
-<body>
-
-</body>
-</html>
-```
-
-1.  HTML标签：所有HTML中标签的一个根节点。
-
-2. head标签：用于存放：title,meta,base,style,script,link
-
-注意：在head标签中我们必须要设置的标签是title
-
-3. title标签：让页面拥有一个属于自己的标题。
-
-4. body标签：页面在的主体部分，用于存放所有的HTML标签
-
-# 文档类型声明<!DOCTYPE>
-
-~~~html
-<!DOCTYPE html>
-
-<!DOCTYPE> 标签位于文档的最前面，用于向浏览器说明当前文档使用哪种 HTML 或 XHTML 标准规范，必需在开头处使用<!DOCTYPE>标签为所有的XHTML文档指定XHTML版本和类型，只有这样浏览器才能按指定的文档类型进行解析，这里使用的是 html 5 的版本。
-~~~
-
-DTD文档类型定义：浏览器会使用它来判断文档类型，从而决定使用何种协议来解析 
-
-# 路径
-
-## 相对路径
-
-## 绝对路径
-
-# 元素
-
-## 元素属性
-
-使用HTML制作网页时，如果想让HTML标签提供更多的信息，可以使用HTML标签的属性加以设置。其基本语法格式如下：
-
-```html
-<标签名 属性1="属性值1" 属性2="属性值2" …> 内容 </标签名>
-```
-
-## 文档元信息
-
-### meta 标签
-
-### 字符集
-
-<meta charset="UTF-8">
-
-utf-8是目前最常用的字符集编码方式，常用的字符集编码方式还有gbk和gb2312。
-
-gb2312 简单中文  包括6763个汉字
-
-BIG5   繁体中文 港澳台等用
-
-GBK包含全部中文字符    是GB2312的扩展，加入对繁体字的支持，兼容GB2312
-
-UTF-8则包含全世界所有国家需要用到的字符
-
-### 视口
-
-https://www.cnblogs.com/chunyangji/p/5795487.html
-
-视口是html的包含块，移动端浏览器厂商为了让窄屏幕下友好展示，会将视口的宽度不与屏幕关联，就会远大于屏幕宽度。可以用meta viewport手动设置视口宽度
-
-`<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">`
-
-将浏览器中虚拟的页面容器缩放到屏幕大小然后展示出来
-
-HEAD仓库有一些视口的常见写法
-
-## 注释标签
-
-```html
-    <!-- 注释语句 -->
-```
-
-## 语义化标签
-
-### 为什么要有语义化标签
-
-1. 样式丢失时候能让页面呈现**清晰的结构**，语义化更具**可读性**，有利于**开发和维护**，与CSS3关系更和谐。
-2. 适宜机器阅读，具有更好地搜索引擎优化（**SEO**），方便**浏览器或网络爬虫及其他设备解析**，如盲人阅读器根据语义渲染网页，读屏软件自动生成目录等
-
-不恰当的使用语义会造成负面作用
-
-遵循的原则：先确定语义的HTML ，再选合适的CSS。
-
-- 使用场景：
-- **作为自然语言的延伸**：用来**表达一定的结构**或**消除歧义**
-
-比如：ruby（html5：ruby，rt，rp）、em（和strong的区别）
-
-- **作为标题摘要**
-
-hgroup中的h1-h6被视为同一标题的不同部分
-
-html5中section可以使h下降一级
-
-- **作为整体结构**
-
-适合机器阅读的特性，提出明确的主次关系，让浏览器很好地支持阅读视图功能；提高搜索引擎命中；对视障用户的读屏软件更友好
-
-body，header，nav，aside，artical，section，footer，address  
-
-### 标题标签-h
-
-**块级元素**
-
-HTML提供了6个等级的标题，即 <h1>、<h2>、<h3>、<h4>、<h5>和<h6>
-
-> 注意： 
->
->  h1 标签因为重要，尽量少用， 一般h1 都是给logo使用。
->
-> 默认情况下，HTML 会自动地在块级元素前后添加一个额外的空行，比如段落、标题元素前后。
-
-### 段落标签-p
-
-**块级元素**
-
-~~~html
-<p>  文本内容  </p>
-~~~
-
-默认情况下，文本在一个段落中会根据浏览器窗口的大小自动换行。
-
-### 水平线标签-hr
-
-**块级元素**
-
-```html
-<hr />是单标签
-```
-
- 在网页中显示默认样式的水平线。
-
-### 换行标签-br
-
-**行内元素**
-
-```html
-<br />
-```
-
-### div span标签
-
-div（分类**块级元素**）  span（分类**行内元素**）    
-
-是没有语义的，是我们网页布局主要的2个容器，可用于对大的内容块设置样式属性。 
-
-~~~html
-<div> 这是头部 </div>    <span>今日价格</span>
-~~~
-
-### 文本格式化标签
-
-使文字以特殊的方式显示：
-
-b（粗体）  i（斜体）  s（删除线）  u （下划线）  没有强调的意思
-
-strong   em  del   ins  语义更强烈
-
-### 图像标签-img
-
-**行内元素**
-
-src属性用于指定图像文件的路径和文件名，他是img标签的必需属性。
-
-```html
-<img src="图像URL" />
-```
-
-| 属性  | 值                        | 说明           |
-| ----- | ------------------------- | -------------- |
-| src   | url                       | 路径           |
-| alt   | 文本                      | 不显示时的替换 |
-| title | 文本                      | 悬停内容       |
-| align | bottom（默认）;middle;top | 文本对齐方式   |
-
-#### 结合map实现**图像映射**
-
-``````html
-<img src="1.jpg" usemap="#Map" />
-<map name="Map">
-	<area shape="热点形状" coords="坐标" href="链接" alt="替代文字" />
-	<area shape="circle" coords="180,139,14" href ="/example/html/venus.html" target ="_blank" alt="Venus" />
-	<area shape="rect" coords="0,0,110,260" href ="/example/html/sun.html"  target ="_blank" alt="Sun" />
-</map>
-``````
-
-### 列表标签
-
-#### 无序列表-ul
-
-**块级元素**
-
-无序列表的各个列表项之间没有顺序级别之分，是并列的。其基本语法格式如下：
-
-```html
-<ul>
-  <li>列表项1</li>
-  <li>列表项2</li>
-  <li>列表项3</li>
-  ......
-</ul>
-```
-
-```
- 1. <ul></ul>中只能嵌套<li></li>，直接在<ul></ul>标签中输入其他标签或者文字的做法是不被允许的。
- 2. <li>与</li>之间相当于一个容器，可以容纳所有元素。
-```
-
-#### 有序列表-ol
-
-有序列表即为有排列顺序的列表，其各个列表项按照一定的顺序排列定义，有序列表的基本语法格式如下：
-
-```html
-<ol type="A">
-  <li>列表项1</li>
-  <li>列表项2</li>
-  <li>列表项3</li>
-  ......
-</ol>
-```
-
-type：A，a，I，i
-
-#### 自定义列表-dl
-
-定义列表常用于对术语或名词进行解释和描述，定义列表的列表项前没有任何项目符号。其基本语法如下：
-
-```html
-<dl>
-  <dt>名词1</dt>
-  <dd>名词1解释1</dd>
-  <dd>名词1解释2</dd>
-  ...
-  <dt>名词2</dt>
-  <dd>名词2解释1</dd>
-  <dd>名词2解释2</dd>
-  ...
-</dl>
-```
-
-### HTML5语义化标签
-
-| 标签         | 描述                                                         |
-| ------------ | ------------------------------------------------------------ |
-| <article>    | 定义文章。                                                   |
-| <aside>      | 定义页面内容以外的内容，内容应该与周围内容相关。             |
-| <details>    | 定义用户能够查看或隐藏的额外细节。 目前只有 Chrome 和 Safari 6 支持 <details> 标签。 |
-| <figcaption> | 定义 <figure> 元素的标题。                                   |
-| <figure>     | 规定自包含内容，比如图示、图表、照片、代码清单等。           |
-| <footer>     | 定义文档或节的页脚。                                         |
-| <header>     | 规定文档或节的页眉。                                         |
-| <main>       | 规定文档的主内容。                                           |
-| <mark>       | 定义重要的或强调的文本。                                     |
-| <nav>        | 定义导航链接。                                               |
-| <section>    | 定义文档中的节。                                             |
-| <summary>    | 定义 <details> 元素的可见标题。                              |
-| <time>       | 定义日期/时间。                                              |
-| <datalist>   | 定义选项列表。请与 input 元素配合使用该元素，来定义 input 可能的值。   input 元素的 list 属性来绑定 datalist。 |
-| <fieldset>   | 可将表单内的相关元素分组，浏览器会以特殊方式来显示它们，它们可能有特殊的边界、3D 效果，或者甚至可创建一个子表单来处理这些元素。 <legend>为 fieldset 元素定义标题。 |
-
-移除没有语义化注重样式的标签
-
-#### 兼容处理
-
-```
-<script src="../js/html5shiv.min.js"></script>
-```
-
-#### figure 和 figcaption 元素
-
-在书籍和报纸中，与图片搭配的标题很常见。
-
-标题（caption）的作用是为图片添加可见的解释。
-
-```
-<figure>
-   <img src="pic_mountain.jpg" alt="The Pulpit Rock" width="304" height="228">
-   <figcaption>Fig1. - The Pulpit Pock, Norway.</figcaption>
-</figure> 
-```
-
-## 链接标签-a
-
-**行内元素**
-
-基本语法格式如下：
-
-```html
-<a href="跳转目标" target="目标窗口的弹出方式">文本或图像</a>
-```
-
-**href**：用于指定链接目标的**url**地址，当为标签应用href属性时，它就具有了超链接的功能。 Hypertext Reference的缩写。意思是超文本引用
-
-**target**：用于指定链接页面的打开方式，其取值有**\_self**和**\_blank**两种，其中\_self为默认值，\_blank为在新窗口中打开方式。
-
-注意：
-
-1. 外部链接 需要添加 http://
-2. 内部链接 直接链接内部页面名称即可 比如 < a href="index.html"> 首页 </a >
-3. 如果当时没有确定链接目标时，通常将链接标签的href属性值定义为“#”(即href="#")，表示该链接暂时为一个空链接。
-4. 不仅可以创建文本超链接，在网页中各种网页元素，如图像、表格、音频、视频等都可以添加超链接。
-
-### 锚点定位 
-
-通过创建锚点链接，用户能够快速定位到目标内容。
-创建锚点链接分为两步：
-
-```html
-1.使用<a href="#id名">"链接文本"</a>创建链接文本。
-2.使用相应的id名标注跳转目标的位置。
-```
-
-### base 标签
-
-base 可以设置整体链接的打开状态   
-
-base 写到  <head></head>  之间
-
-`<base target='_blank' />`
-
-## 特殊字符标签
-
-| 特殊字符 | 描述     | 代码    |
-| -------- | -------- | ------- |
-| <        |          | &lt     |
-| >        |          | &gt     |
-| &        |          | &amp    |
-| ￥       |          | &yen    |
-| &copy;   | 版权     | &copy   |
-| &reg;    | 注册商标 | &reg    |
-| &deg;    |          | &deg    |
-| &plusmn; |          | &plusmn |
-| &times;  |          | &times  |
-| &divide; |          | &divide |
-| ²        | 平方     | &sup2   |
-| &nbsp;   | 空格     | &nbsp   |
-
-## 表格-table
-
-### 创建表格
-
-在HTML网页中，要想创建表格，就需要使用表格相关的标签。创建表格的基本语法格式如下：
-
-```html
-<table>
-  <tr>
-    <td>单元格内的文字</td>
-    ...
-  </tr>
-  ...
-</table>
-```
-
-~~~
-1.table用于定义一个表格。
-2.tr 用于定义表格中的一行，必须嵌套在 table /table标签中，在 table /table中包含几对 tr /tr，就有几行表格。
-3.td ：用于定义表格中的单元格，必须嵌套在<tr></tr>标签中，一对 <tr> </tr>中包含几对<td></td>，就表示该行中有多少列（或多少个单元格）。
-~~~
-
-注意：
-
-```
-1. <tr></tr>中只能嵌套<td></td>
-```
-
-```
-2. <td></td>标签，他就像一个容器，可以容纳所有的元素
-```
-
-### 表格属性
-
-|    属性     |               描述               | 常用值                       |
-| :---------: | :------------------------------: | ---------------------------- |
-|   border    |               边框               |                              |
-| cellspacing |   单元格与单元格边框之间的空隙   | 2（默认）                    |
-| cellpadding | 单元格内容与单元格边框之间的空隙 | 1（默认）                    |
-|    width    |                                  |                              |
-|   height    |                                  |                              |
-|    align    |           水平对齐方式           | left,center,right            |
-|    frame    |     边框显示的样式，ie不兼容     | box,above,below,hsides,vside |
-
-### 表头标签
-
-表头一般位于表格的**第一行或第一列**，其文本加粗居中，如下图所示，即为设置了表头的表格。设置表头非常简单，只需用表头标签**&lt;th&gt;&lt;/th&gt;**替代相应的单元格标签&lt;td&gt;&lt;/td&gt;即可。
-
-### 表格结构
-
-```<caption></caption>```:表格标题,必须紧跟<table></table>标签后
-
-在使用表格进行布局时，可以将表格划分为头部、主体和页脚（页脚因为有兼容性问题），具体 如下所示：
-
-```<thead></thead>```：用于定义表格的头部。
-必须位于<table></table> 标签中，一般包含网页的logo和导航等头部信息。
-
-```<tbody></tbody>```：用于定义表格的主体。
-位于<table></table>标签中，一般包含网页中除头部和底部之外的其他内容。
-
-```html
-<table border="1">
-  <thead>
-    <tr>
-      <th>Month</th>
-      <th>Savings</th>
-    </tr>
-  </thead>
-
-  <tfoot>
-    <tr>
-      <td>Sum</td>
-      <td>$180</td>
-    </tr>
-  </tfoot>
-
-  <tbody>
-    <tr>
-      <td>January</td>
-      <td>$100</td>
-    </tr>
-    <tr>
-      <td>February</td>
-      <td>$80</td>
-    </tr>
-  </tbody>
-</table>
-```
-
-### 合并单元格
-
-跨行合并：rowspan（合并列）    跨列合并：colspan（合并行）
-
-## 表单标签
-
-在HTML中，一个完整的表单通常由表单控件（也称为表单元素）、提示信息和表单域3个部分构成。
-
-1. 表单控件：包含了具体的表单功能项，如单行文本输入框、密码输入框、复选框、提交按钮、重置按钮等。
-
-2. 提示信息：一个表单中通常还需要包含一些说明性的文字，提示用户进行填写和操作。
-
-3. 表单域：  他相当于一个容器，用来容纳所有的表单控件和提示信息，可以通过他定义处理表单数据所用程序的url地址，以及数据提交到服务器的方法。如果不定义表单域，表单中的数据就无法传送到后台服务器。
-
-### input 标签
-
-**块级元素**
-
-在上面的语法中，&lt;input /&gt;标签为单标签，type属性为其最基本的属性，其取值有多种，用于指定不同的控件类型。除了type属性之外，&lt;input /&gt;标签还可以定义很多其他的属性，其常用属性如下表所示。
-
-| 属性      | 值/描述                                                      |
-| --------- | ------------------------------------------------------------ |
-| type      | text,password,radio,checkbox,button,submit,reset,image(图像形式的提交按钮，结合src属性使用),file |
-| name      | 同一组radio或checkbox的name相同                              |
-| value     | 默认文本值                                                   |
-| size      | 显示宽度                                                     |
-| checked   | checked（radio或checkbox结合使用）                           |
-| maxlength |                                                              |
-
-### label 标签
-
-label 标签为 input 元素定义标注（标签）。
-
-作用：  用于绑定一个表单元素, 当点击label标签的时候, 被绑定的表单元素就会获得输入焦点
-
-**for** 属性规定 label 与哪个表单元素绑定（**id**）。
-
-```html
-<label for="male">Male</label>
-<input type="radio" name="sex" id="male" value="male">
-```
-
-### textarea 标签(文本域)
-
-如果需要输入大量的信息，就需要用到&lt;textarea&gt;&lt;/textarea&gt;标签。通过textarea控件可以轻松地创建多行文本输入框，其基本语法格式如下：
-
-```html
-<textarea cols="每行中的字符数" rows="显示的行数">
-  文本内容
-</textarea>
-```
-
-### 下拉菜单
-
-使用select控件定义下拉菜单的基本语法格式如下
-
-```html
-<select>
-  <option>选项1</option>
-  <option>选项2</option>
-  <option>选项3</option>
-  ...
-</select>
-```
-
-注意：
-
-1. &lt;select&gt;</select&gt;中至少应包含一对&lt;option></option&gt;。
-2. 在option 中定义selected =" selected "时，当前项即为默认选中项。
-
-### 表单域
-
-在HTML中，form标签被用于定义表单域，即创建一个表单，以实现用户信息的收集和传递，form中的所有有**name**属性的内容都会被提交给服务器。创建表单的基本语法格式如下：
-
-```html
-<form action="url地址" method="提交方式" name="表单名称">
-  各种表单控件
-</form>
-```
-
-常用属性：
-
-1. Action在表单收集到信息后，需要将信息传递给服务器进行处理，action属性用于指定接收并处理表单数据的服务器程序的url地址。
-2. method用于设置表单数据的提交方式。
-3. name用于指定表单的名称，以区分同一个页面中的多个表单。
-
-注意：  每个表单都应该有自己表单域。
-
-### HTML5新增属性
-
-| **属性**         | **用法**                                       | **含义**                                                   |
-| ---------------- | ---------------------------------------------- | ---------------------------------------------------------- |
-| **placeholder**  | <input type="text" placeholder="请输入用户名"> | 占位符提供可描述输入字段预期值的提示信息                   |
-| **autofocus**    | <input type="text" autofocus>                  | 规定当页面加载时 input 元素应该自动获得焦点                |
-| **multiple**     | <input type="file" multiple>                   | 多文件上传                                                 |
-| **autocomplete** | <input type="text" autocomplete="off">         | 规定表单是否应该启用自动完成功能，只有提交过的内容才会记录 |
-| **required**     | <input type="text" required>                   | 必填项                                                     |
-| **accesskey**    | <input type="text" accesskey="s">              | 规定激活（使元素获得焦点）元素的快捷键为alt+‘s’            |
-
-### HTML5新增type属性值：
-
-| **类型**     | **使用示例**            | **含义**                               |
-| ------------ | ----------------------- | -------------------------------------- |
-| **email**    | <input type="email">    | 输入邮箱格式，包含校验                 |
-| **tel**      | <input type="tel">      | 输入手机号码格式，手机上会弹出数字键盘 |
-| **url**      | <input type="url">      | 输入url格式，包含校验                  |
-| **number**   | <input type="number">   | 只能输入数字格式                       |
-| **search**   | <input type="search">   | 搜索框（体现语义化）                   |
-| **range**    | <input type="range">    | 自由拖动滑块，value取值                |
-| **time**     | <input type="time">     |                                        |
-| **date**     | <input type="date">     |                                        |
-| **datetime** | <input type="datetime"> |                                        |
-| **month**    | <input type="month">    |                                        |
-| **week**     | <input type="week">     |                                        |
-
-### 综合案例
-
-```html
-<form action="">
-  <fieldset>
-    <legend>学生档案</legend>
-    <label for="userName">姓名:</label>
-    <input type="text" name="userName" id="userName" placeholder="请输入用户名"> <br>
-    <label for="userPhone">手机号码:</label>
-    <input type="tel" name="userPhone" id="userPhone" pattern="^1\d{10}$"><br>
-    <label for="email">邮箱地址:</label>
-    <input type="email" required name="email" id="email"><br>
-    <label for="collage">所属学院:</label>
-    <input type="text" name="collage" id="collage" list="cList" placeholder="请选择"><br>
-    <datalist id="cList">
-      <option value="前端与移动开发学院"></option>
-      <option value="java学院"></option>
-      <option value="c++学院"></option>
-    </datalist><br>
-    <label for="score">入学成绩:</label>
-    <input type="number" max="100" min="0" value="0" id="score"><br>
-    <label for="level">基础水平:</label>
-    <meter id="level" max="100" min="0" low="59" high="90"></meter><br>
-    <label for="inTime">入学日期:</label>
-    <input type="date" id="inTime" name="inTime"><br>
-    <label for="leaveTime">毕业日期:</label>
-    <input type="date" id="leaveTime" name="leaveTime"><br>
-    <input type="submit">
-  </fieldset>
-</form>
-```
-
-# 语言
-
-## 实体
-
-## 命名空间
-
-
-
-# H5
-
-- H5 是一个产品名词
-- HTML5 是一个技术名词
-
-不是HTML5，泛指移动端页面，具体的就是在iPhone这类无法播放Flash的移动端上呈现的，可以达到Flash效果（如各种动画，互动）的，用于广告、营销的，具有酷炫效果的网页。可以简略称为「移动端PPT」，H5可能用到HTML5的标准，也可能完全没有用到。
 
 # Web存储
 
@@ -1758,3 +1147,922 @@ performance.measure('test', 'start', 'end')
 - 可以通过 **Performance** API 具体测量时间
 - 为了减少编译时间，我们可以采用**减少代码文件的大小**或者**减少书写嵌套函数**的方式
 - 为了让 V8 优化代码，我们应该尽可能保证传入参数的**类型一致**。这也给我们带来了一个思考，这是不是也是使用 TypeScript 能够带来的好处之一`
+
+# Web API
+
+## Web API介绍
+
+### API的概念
+
+API（Application Programming Interface,应用程序编程接口）是一些预先定义的函数，目的是提供应用程序与开发人员基于某软件或硬件得以访问一组例程的能力，而又无需访问源码，或理解内部工作机制的细节。
+
+- 任何开发语言都有自己的API
+- API的特征输入和输出(I/O)
+- API的使用方法(console.log())
+
+### Web API的概念
+
+浏览器提供的一套操作浏览器功能和页面元素的API(BOM和DOM)
+
+此处的Web API特指浏览器提供的API(一组方法)，Web API在后面的课程中有其它含义
+
+
+### 掌握常见的浏览器提供的API的调用方式
+[MDN-Web API](https://developer.mozilla.org/zh-CN/docs/Web/API)
+
+
+### JavaScript的组成
+
+![1496912475691](media/1496912475691.png)
+
+#### ECMAScript - JavaScript的核心 
+
+定义了javascript的语法规范
+
+JavaScript的核心，描述了语言的基本语法和数据类型，ECMAScript是一套标准，定义了一种语言的标准与具体实现无关
+
+#### BOM - 浏览器对象模型
+
+一套操作浏览器功能的API
+
+通过BOM可以操作浏览器窗口，比如：弹出框、控制浏览器跳转、获取分辨率等
+
+#### DOM - 文档对象模型
+
+一套操作页面元素的API
+
+DOM可以把HTML看做是文档树，通过DOM提供的API可以对树上的节点进行操作
+
+文档：一个页面就是一个文档
+
+节点：页面上所有的内容，包括：属性，标签，文本
+
+元素：页面上所有的标签
+
+## BOM
+
+### BOM的概念
+
+BOM(Browser Object Model) 是指浏览器对象模型，浏览器对象模型提供了独立于内容的、可以与浏览器窗口进行互动的对象结构。BOM由多个对象组成，其中代表浏览器窗口的Window对象是BOM的顶层对象，其他对象都是该对象的子对象。
+
+我们在浏览器中的一些操作都可以使用BOM的方式进行编程处理，
+
+比如：刷新浏览器、后退、前进、在浏览器中输入URL等
+
+### BOM的顶级对象window
+
+window是浏览器的顶级对象，当调用window下的属性和方法时，可以省略window
+注意：window下一个特殊的属性 window.name
+
+### 对话框
+
+- alert()
+- prompt()
+- confirm()
+
+
+### 页面加载事件
+
+- onload
+
+```javascript
+window.onload = function () {
+  // 当页面加载完成执行
+  // 当页面完全加载所有内容（包括图像、脚本文件、CSS 文件等）执行
+}
+```
+
+- onunload
+
+```javascript
+window.onunload = function () {
+  // 当用户退出页面时执行 ie8 还有onbeforeunload事件
+}
+```
+
+### 定时器
+
+#### setTimeout()和clearTimeout()
+
+在指定的毫秒数到达之后执行指定的函数，只执行一次
+
+```javascript
+// 创建一个定时器，1000毫秒后执行，返回定时器的标示
+var timerId = setTimeout(function () {
+  console.log('Hello World');
+}, 1000);
+
+// 取消定时器的执行
+clearTimeout(timerId);
+```
+
+#### setInterval()和clearInterval()
+
+定时调用的函数，可以按照给定的时间(单位毫秒)周期调用函数
+
+```javascript
+// 创建一个定时器，每隔1秒调用一次
+var timerId = setInterval(function () {
+  var date = new Date();
+  console.log(date.toLocaleTimeString());
+}, 1000);
+
+// 取消定时器的执行
+clearInterval(timerId);
+```
+
+### console对象
+
+console.log()：在控制台输出信息。
+
+console.dir()：可以显示一个对象所有的属性和方法。 
+
+console.trace()：用来追踪函数的调用轨迹。 
+
+console.dirxml()：用来显示网页的某个节点(node)所包含的html/xml代码) 。
+
+console.assert()：用来判断一个表达式或变量是否为真，只有表达式为false时，才输出一条相应作息，并且抛出一个异常 。
+
+console.time()和console.timeEnd()：用来显示代码的运行时间，传入计时器标志
+
+性能分析：就是分析程序各个部分的运行时间，找出瓶颈所在，使用的方法是console.profile()和console.proileEnd(); 
+
+console.count()：统计代码被执行的次数 ，计数器
+
+### location对象
+
+location对象是window对象下的一个属性，时候的时候可以省略window对象
+
+location可以获取或者设置浏览器地址栏的URL
+
+#### URL
+
+统一资源定位符 (Uniform Resource Locator, URL)
+
+- URL的组成
+
+```
+scheme://host:port/path?query#fragment
+scheme:通信协议
+	常用的http,ftp,maito等
+host:主机
+	服务器(计算机)域名系统 (DNS) 主机名或 IP 地址。
+port:端口号
+	整数，可选，省略时使用方案的默认端口，如http的默认端口为80。
+path:路径
+	由零或多个'/'符号隔开的字符串，一般用来表示主机上的一个目录或文件地址。
+query:查询
+	可选，用于给动态网页传递参数，可有多个参数，用'&'符号隔开，每个参数的名和值用'='符号隔开。例如：name=zs
+fragment:信息片断
+	字符串，锚点.
+```
+
+#### location成员
+
+- 使用chrome的控制台查看
+
+- 查MDN
+
+  [MDN](https://developer.mozilla.org/zh-CN/)
+
+- 成员
+
+  assign(‘url’)：页面跳转，存入历史
+
+  reload()：重新加载
+
+  replace()：替换成指定页面，不存入历史
+
+  hash：#以及后面的内容
+
+  host：主机名及端口号
+
+  hostname：主机名
+
+  path：文件的相对路径
+
+  port：端口号
+
+  protocol：协议
+
+  search：搜索内容 
+
+  href：页面地址，可以页面跳转，存入历史
+
+#### 案例
+
+解析URL中的query，并返回对象的形式
+
+```javascript
+function getQuery(queryStr) {
+  var query = {};
+  if (queryStr.indexOf('?') > -1) {
+    var index = queryStr.indexOf('?');
+    queryStr = queryStr.substr(index + 1);
+    var array = queryStr.split('&');
+    for (var i = 0; i < array.length; i++) {
+      var tmpArr = array[i].split('=');
+      if (tmpArr.length === 2) {
+        query[tmpArr[0]] = tmpArr[1];
+      }
+    }
+  }
+  return query;
+}
+console.log(getQuery(location.search));
+console.log(getQuery(location.href));
+```
+
+### history对象
+
+- back()
+- forward()
+- go()
+
+### navigator对象
+
+- userAgent
+
+通过userAgent可以判断用户浏览器的类型
+
+- platform
+
+通过platform可以判断浏览器所在的系统平台类型.
+
+## DOM
+
+### DOM的概念
+
+文档对象模型（Document Object Model，简称DOM），是[W3C](http://baike.baidu.com/item/W3C)组织推荐的处理可扩展标志语言的标准编程接口。在网页上，组织页面（或文档）的对象被组织在一个树形结构中，用来表示文档中对象的标准模型就称为DOM。
+
+DOM又称为文档树模型
+
+![1497154623955](media/1497154623955.png)
+
+- 文档：一个网页可以称为文档
+- 节点：网页中的所有内容都是节点（标签、属性、文本、注释等）
+- 元素：网页中的标签
+- 属性：标签的属性
+
+### 模拟文档树结构
+
+![1497165666684](media/1497165666684.png)
+
+```javascript
+function Element(option) {
+  this.id = option.id || '';
+  this.nodeName = option.nodeName || '';
+  this.nodeValue = option.nodeValue || '';
+  this.nodeType = 1;
+  this.children = option.children || [];
+}
+
+var doc = new Element({
+  nodeName: 'html'
+});
+var head = new Element({
+  nodeName: 'head'
+});
+var body = new Element({
+  nodeName: 'body'
+})
+doc.children.push(head);
+doc.children.push(body);
+
+var div = new Element({
+  nodeName: 'div',
+  nodeValue: 'haha',
+});
+
+var p = new Element({
+  nodeName: 'p',
+  nodeValue: '段落'
+})
+body.children.push(div);
+body.children.push(p);
+
+function getChildren(ele) {
+  for(var i = 0; i < ele.children.length; i++) {
+    var child = ele.children[i];
+    console.log(child.nodeName);
+    getChildren(child);
+  }
+}
+getChildren(doc);
+```
+
+### DOM经常进行的操作
+
+- 获取元素
+- 动态创建元素
+- 对元素进行操作(设置其属性或调用其方法)
+- 事件(什么时机做相应的操作)
+
+## 获取页面元素
+
+获取body：document.body // 元素
+
+获取title：document.title // 内容
+
+获取html：document.documentElement // 元素
+
+### 根据id获取元素
+
+```javascript
+var div = document.getElementById('main');
+console.log(div);
+
+// 获取到的数据类型 HTMLDivElement，对象都是有类型的
+// HTMLDivElement <-- HTMLElement <-- Element  <-- Node  <-- EventTarget
+```
+
+注意：由于id名具有唯一性，部分浏览器支持直接使用id名访问元素，但不是标准方式，不推荐使用。
+
+### 根据标签名获取元素
+
+```javascript
+var divs = document.getElementsByTagName('div');// 返回伪数组
+for (var i = 0; i < divs.length; i++) {
+  var div = divs[i];
+  console.log(div);
+}
+```
+
+### 根据name获取元素*
+
+```javascript
+var inputs = document.getElementsByName('hobby');
+for (var i = 0; i < inputs.length; i++) {
+  var input = inputs[i];
+  console.log(input);
+}
+```
+
+### 根据类名获取元素
+
+```javascript
+var mains = document.getElementsByClassName('main');
+for (var i = 0; i < mains.length; i++) {
+  var main = mains[i];
+  console.log(main);
+}
+```
+
+### 根据选择器获取元素
+
+```javascript
+var text = document.querySelector('#text');
+console.log(text);
+
+var boxes = document.querySelectorAll('.box');
+for (var i = 0; i < boxes.length; i++) {
+    var box = boxes[i];
+    console.log(box);
+}
+```
+
+getXXXByXXX 获取的是动态集合，querySelector获取的是静态集合。
+
+## 事件
+
+事件：触发-响应机制
+
+Event接口表示在DOM中发生的任何事件，一些是用户生成的（例如鼠标或键盘事件），而其他由API生成。
+
+### 事件三要素
+
+- 事件源:触发(被)事件的元素
+- 事件类型:事件的触发方式(例如鼠标点击或键盘点击)
+- 事件处理程序:事件**触发后**要执行的代码(函数形式)
+
+### 注册/移除事件的三种方式
+
+```javascript
+var box = document.getElementById('box');
+// onclick方式只能绑定1个事件
+box.onclick = function () {
+  console.log('点击后执行');
+};
+box.onclick = null;
+// ie8不支持
+// 参数1：事件类型；2：事件处理函数；3：事件触发方式
+// this指当前对象
+box.addEventListener('click', eventCode, false);
+box.removeEventListener('click', eventCode, false);
+// ie8
+// 参数1：on+事件类型；2：事件处理函数；
+// this指window
+box.attachEvent('onclick', eventCode);
+box.detachEvent('onclick', eventCode);
+
+function eventCode() {
+  console.log('点击后执行');
+}
+```
+
+通常我们使用 `addEventListener` 注册事件，该函数的第三个参数可以是布尔值，也可以是对象。对于布尔值 `useCapture` 参数来说，该参数默认值为 `false` 。对于对象参数来说，可以使用以下几个属性
+
+- `capture`：布尔值，和 `useCapture` 作用一样
+- `once`：布尔值，值为 `true` 表示该回调只会调用一次，调用后会移除监听
+- `passive`：布尔值，表示永远不会调用 `preventDefault`
+
+一般来说，如果我们只希望事件只触发在目标上，这时候可以使用 `stopPropagation` 来阻止事件的进一步传播。通常我们认为 `stopPropagation` 是用来阻止事件冒泡的，其实该函数也可以阻止捕获事件。`stopImmediatePropagation` 同样也能实现阻止事件，但是还能阻止该事件目标执行别的注册事件。
+
+```js
+node.addEventListener(
+  'click',
+  event => {
+    event.stopImmediatePropagation()
+    console.log('冒泡')
+  },
+  false
+)
+// 点击 node 只会执行上面的函数，该函数不会执行
+node.addEventListener(
+  'click',
+  event => {
+    console.log('捕获 ')
+  },
+  true
+)
+```
+
+### 兼容代码
+
+```javascript
+function addEventListener(element, type, fn) {
+  if (element.addEventListener) {
+    element.addEventListener(type, fn, false);
+  } else if (element.attachEvent){
+    element.attachEvent('on' + type,fn);
+  } else {
+    element['on'+type] = fn;
+  }
+}
+
+function removeEventListener(element, type, fn) {
+  if (element.removeEventListener) {
+    element.removeEventListener(type, fn, false);
+  } else if (element.detachEvent) {
+    element.detachEvent('on' + type, fn);
+  } else {
+    element['on'+type] = null;
+  }
+}
+```
+
+### 事件的三个阶段
+
+1. 捕获阶段，`window` 往事件触发处传播，遇到注册的捕获事件会触发（从外向内）true
+2. 当前目标阶段，传播到事件触发处时触发注册的事件
+3. 冒泡阶段，从事件触发处往 `window` 传播，遇到注册的冒泡事件会触发（从里向外）false
+
+事件对象.eventPhase属性可以查看事件触发时所处的阶段：1，2，3
+
+冒泡和捕获不会同时发生
+
+### 事件委托
+
+原理：事件冒泡
+
+使用：同时给拥有共同父元素的多个子元素绑定事件
+
+优点：减少与dom的交互次数，节省内存，提高性能，不需要给子节点注销事件
+
+给父元素绑定事件，由于冒泡原理，子元素会触发父元素的事件。但是父元素也会触发事件，如果不需要，可以使用事件对象中的事件源属性进行过滤
+
+```js
+window.onload = function(){
+　var oUl = document.getElementById("ul1");
+　oUl.onclick = function(e){
+　　var e = e || window.event;
+　　var target = e.target || e.srcElement;// 兼容问题：e.target，IE浏览器用event.srcElement
+　　if(target.nodeName.toLowerCase() == 'li'){
+　 　　// TODO
+　　}
+　}
+}
+```
+
+子元素进行不同的操作也可以利用事件委托进行优化，结合switch
+
+```js
+window.onload = function(){
+ var oBox = document.getElementById("box");
+ oBox.onclick = function (ev) {
+     var ev = ev || window.event;
+     var target = ev.target || ev.srcElement;
+     if(target.nodeName.toLocaleLowerCase() == 'input'){
+         switch(target.id){
+         case 'add' :
+         alert('添加');
+         break;
+         case 'remove' :
+         alert('删除');
+         break;
+         case 'move' :
+         alert('移动');
+         break;
+         case 'select' :
+         alert('选择');
+         break;
+         }
+     }
+  }   
+}
+```
+
+新添加的子元素也是有效果的，不需要多余的dom操作
+
+参照：https://www.cnblogs.com/liugang-vip/p/5616484.html
+
+适合用事件委托的事件：click，mousedown，mouseup，keydown，keyup，keypress，mouseover和mouseout虽然也有事件冒泡，但是处理它们的时候需要特别的注意，因为需要经常计算它们的位置，处理起来不太容易。
+
+不适合的：mousemove，每次都要计算它的位置，非常不好把控；focus，blur等，没用冒泡的特性，自然就不能用事件委托了。
+
+### 事件对象的属性和方法
+
+- type：获取事件类型
+
+- clientX/clientY：所有浏览器都支持，窗口位置
+
+- pageX/pageY：IE8不支持，页面位置
+
+- target || event.srcElement：用于获取触发事件的真实元素
+
+- currentTarget：正在触发事件处理函数的元素
+
+- preventDefault()：取消默认行为
+
+  ie8不存在事件对象用window.event(谷歌也支持)代替：e=window.event||e
+
+### 阻止事件传播的方式
+
+- 标准方式 e（事件对象）.stopPropagation();
+- IE低版本 window.event.cancelBubble = true; 标准中已废弃
+
+### 阻止默认事件
+
+- 阻止超链接跳转，在事件中return false
+- event.preventDefault() 取消默认行为
+- window.event.returnValue = false // IE
+
+### 兼容代码
+
+```js
+function preventDefa(e){ 
+	if(window.event){ 
+		//IE中阻止函数器默认动作的方式  
+		window.event.returnValue = false;  
+	}else{ 
+		//阻止默认浏览器动作(W3C)  
+		e.preventDefault(); 
+	}  
+} 
+
+function stopBubble(e) { 
+	if(e && e.stopPropagation) { //非IE 
+		e.stopPropagation(); 
+	} else { //IE 
+		window.event.cancelBubble = true; 
+	} 
+} 
+```
+
+### 常用的事件
+
+鼠标键盘事件
+
+- onmouseup 鼠标按键放开时触发
+- onmousedown 鼠标按键按下触发
+- onmousemove 鼠标移动触发
+- onkeyup 键盘按键抬起触发
+- onkeydown 键盘按键按下触发
+- onfocus 获取焦点
+- onblur 失去焦点
+
+
+
+- scroll 滚动事件
+
+#### enter、leave、over、out 的区别
+
+![1542079902802](C:\Users\ADMINI~1\AppData\Local\Temp\1542079902802.png)
+
+## 属性操作
+
+### 非表单元素的属性
+
+href、title、id、src、className
+
+```javascript
+var link = document.getElementById('link');
+console.log(link.href);
+console.log(link.title);
+
+var pic = document.getElementById('pic');
+console.log(pic.src);
+```
+
+- innerHTML和innerText
+
+  获取：innerText会拿到子元素的内文本不包括标签；
+
+  ​	    innerHTML也会拿到子元素中的内容包括标签
+
+```javascript
+var box = document.getElementById('box');
+box.innerHTML = '我是文本<p>我会生成为标签</p>';
+console.log(box.innerHTML);
+box.innerText = '我是文本<p>我不会生成为标签</p>';
+console.log(box.innerText);
+```
+- innerText（低版本火狐不支持）和textContent（ie8不支持）
+
+  获取：innerText会拿到子元素的内容不包括标签
+
+  总结：设置文本也推荐使用innerHTML，因为没有兼容问题
+
+- HTML转义符
+
+```
+"		&quot;
+‘		&apos;
+&		&amp;
+<		&lt;    //less than  小于
+>		&gt;   // greater than  大于
+空格	   &nbsp;
+©		&copy;
+```
+
+属性名中有-的属性js中改为驼峰表示
+
+width和height属性不用加px
+
+css中的样式是获取不到的只能获取style属性里的样式
+
+### 表单元素属性
+
+- value 用于大部分表单元素的内容获取(option除外)
+- type 可以获取input标签的类型(输入框或复选框等)
+- disabled 禁用属性
+- checked 复选框选中属性
+- selected 下拉菜单选中属性
+
+属性值只有一个且和属性名相同的属性在js中的值可以写true或false
+
+### 自定义属性操作
+
+- getAttribute(“属性名”) 获取标签行内属性，可获取自定义属性
+- setAttribute(“属性名”，“属性值”) 设置标签行内属性，可设置自定义属性
+- removeAttribute(“属性名”) 移除标签行内属性，可移除自定义属性
+- 与element.属性的区别: 上述三个方法用于获取任意的行内属性。
+
+### 样式操作
+
+- 使用style方式设置的样式显示在标签行内
+```javascript
+var box = document.getElementById('box');
+box.style.width = '100px';
+box.style.height = '100px';
+box.style.backgroundColor = 'red';
+```
+
+- 注意
+
+  通过样式属性设置宽高、位置的属性类型是字符串，需要加上px
+
+  如果一次样式操作过多应该改用类名操作
+
+### 类名操作
+
+- 修改标签的className属性相当于直接修改标签的类名
+```javascript
+var box = document.getElementById('box');
+box.className = 'clearfix';
+```
+
+- **classList属性**
+
+  classList 属性返回元素的类名，作为 DOMTokenList 对象。
+
+  该属性用于在元素中添加，移除及切换 CSS 类。
+
+  classList 属性是只读的，但你可以使用 add() 和 remove() 方法修改它。
+
+``````
+document.getElementById("myDIV").classList.add("mystyle");
+document.getElementById("myDIV").classList.remove("mystyle");
+``````
+
+
+
+## 创建元素的三种方式
+
+### document.write()
+
+```javascript
+document.write('新设置的内容<p>标签也可以生成</p>');
+```
+
+页面加载完之后创建会清空页面上的所有内容
+
+### innerHTML
+
+```javascript
+var box = document.getElementById('box');
+box.innerHTML = '新内容<p>新标签</p>';
+```
+
+### document.createElement()
+
+```javascript
+var div = document.createElement('div');
+document.body.appendChild(div);// 插入到最后面
+```
+
+### 性能问题
+
+- innerHTML方法由于会对字符串进行解析，需要避免在循环内多次使用。
+- 可以借助字符串或数组的方式进行替换，再设置给innerHTML
+- 优化后与document.createElement性能相近
+
+## 节点操作
+
+在 HTML DOM （文档对象模型）中，每个部分都是节点：
+
+- 文档本身是文档节点
+- 所有 HTML 元素是元素节点
+- 所有 HTML 属性是属性节点
+- HTML 元素内的文本是文本节点 （包括回车符也是属于文本节点）
+- 注释是注释节点
+
+ Element 对象可以拥有类型为元素节点、文本节点、注释节点的子节点。
+
+ NodeList 对象表示节点列表，比如 HTML 元素的子节点集合。
+
+ 元素也可以拥有属性。属性是属性节点。
+
+ 总结：元素是元素节点，是节点中的一种，但元素节点中可以包含很多的节点。
+
+```javascript
+var body = document.body;
+var div = document.createElement('div');
+body.appendChild(div);
+
+var firstEle = body.children[0];
+body.insertBefore(div,firstEle);// 插入子元素
+
+body.removeChild(firstEle);// 移除子元素
+
+var text = document.createElement('p');
+body.replaceChild(text, div);// 替换子元素
+
+div.cloneNode(true); //克隆节点，false表示只克隆标签，true表示克隆标签属性以及内容
+```
+
+### 节点属性
+
+nodeType：1---标签，2---属性，3---文本
+
+nodeName：标签，大写的标签名；属性，小写的属性名；文本，#text
+
+nodeValue：标签，null；属性，属性值；文本，文本内容
+
+### 节点获取
+
+```javascript
+var box = document.getElementById('box');
+console.log(box.parentNode);// 获取父节点，最顶级为document
+console.log(box.parentElement);// 获取父元素
+console.log(box.childNodes);// 获取子节点，包括标签 文本
+console.log(box.children);// 获取子元素
+console.log(box.getAttributeNode("属性名"));// 获取属性节点
+// 以下代码ie8节点表示元素，元素不支持undefined
+console.log(box.nextSibling);
+console.log(box.nextElementSibling);
+console.log(box.previousSibling);
+console.log(box.previousElementSibling);
+console.log(box.firstChild);// 第一个子节点
+console.log(box.firstElementChild);// 第一个子元素
+console.log(box.lastChild);
+console.log(box.lastElementChild);// 最后一个子元素
+```
+
+- 注意
+
+  nextElementSibling，previousElementSibling，firstElementChild，lastElementChild有兼容性问题，IE9以后才支持
+
+- 总结
+
+```
+节点操作，方法
+	appendChild()
+	insertBefore()
+	removeChild()
+	replaceChild()
+节点层次，属性
+	parentNode
+	childNodes
+	children
+	nextSibling/previousSibling
+	firstChild/lastChild
+```
+
+## 特效
+
+### 偏移量offset
+
+- offsetParent用于获取定位的父级元素
+
+```javascript
+var box = document.getElementById('box');
+console.log(box.offsetParent);
+console.log(box.offsetLeft); //脱标：自身的left和margin；未脱标：父margin至子margin
+console.log(box.offsetTop);
+console.log(box.offsetWidth);
+console.log(box.offsetHeight);
+```
+
+![1498743216279](media/1498743216279.png)
+
+### 客户区大小client
+
+```javascript
+var box = document.getElementById('box');
+console.log(box.clientLeft); // 包含左边框宽度
+console.log(box.clientTop); // 包含上边框宽度	
+console.log(box.clientWidth);
+console.log(box.clientHeight);
+```
+
+![1498743269100](media/1498743269100.png)
+
+### 滚动偏移scroll
+
+```javascript
+var box = document.getElementById('box');
+console.log(box.scrollLeft)
+console.log(box.scrollTop)
+console.log(box.scrollWidth)// 内容实际宽度，内容没有超出时是元素的宽，没有边框
+console.log(box.scrollHeight)// 内容实际高度，内容没有超出时是元素的高，没有边框
+
+// 浏览器
+window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop||0// 浏览器向上滚动的距离兼容
+window.pageXOffset||document.documentElement.scrollLeft||document.body.scrollLeft||0// 浏览器向左滚动的距离兼容
+```
+
+![1498743288621](media/1498743288621.png)
+
+### 获取元素计算后的样式属性值
+
+``````
+window.getComputedStyle(ele, 伪类) // ie8不支持
+ele.currentStyle // ie8
+
+function getStylr(ele, attr) {
+	return window.getComputedStyle ? window.getComputedStyle(ele, null)[attr] : ele.currentStyle[attr] // 兼容
+}
+``````
+
+### 获取元素相对于视窗位置的集合getBoundingClientRect
+
+**getBoundingClientRect()**
+
+这个方法返回一个矩形对象，包含四个属性：left、top、right和bottom。分别表示元素各边与页面上边和左边的距离。
+
+![1544078450154](C:\Users\ADMINI~1\AppData\Local\Temp\1544078450154.png)
+
+ ```javascript
+var box=document.getElementById('box');         // 获取元素
+alert(box.getBoundingClientRect().top);         // 元素上边距离页面上边的距离
+alert(box.getBoundingClientRect().right);       // 元素右边距离页面左边的距离
+alert(box.getBoundingClientRect().bottom);      // 元素下边距离页面上边的距离
+alert(box.getBoundingClientRect().left);        // 元素左边距离页面左边的距离
+ ```
+
+注意：IE、Firefox3+、Opera9.5、Chrome、Safari支持，在IE中，默认坐标从(2,2)开始计算
+
+```javascript
+document.documentElement.clientTop;  // 非IE为0，IE为2
+document.documentElement.clientLeft; // 非IE为0，IE为2
+functiongGetRect (element) {
+    var rect = element.getBoundingClientRect();
+    var top = document.documentElement.clientTop;
+    var left= document.documentElement.clientLeft;
+    return{
+        top    :   rect.top - top,
+        bottom :   rect.bottom - top,
+        left   :   rect.left - left,
+        right  :   rect.right - left
+    }
+}
+```
+
+
+
+## 附录
+
+### 元素的类型 
+
+![1497169919418](media/1497169919418.png)
