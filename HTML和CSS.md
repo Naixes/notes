@@ -784,7 +784,7 @@ rel：定义当前文档与被链接文档之间的关系，在这里需要指�
 CSS规则是使用     /*  需要注释的内容  */  进行注释的。
 ```
 
-# CSSRule
+# CSS qulified Rule
 
 ## 字体样式-font
 
@@ -1259,6 +1259,34 @@ vertical-align 不影响块级元素中的内容对齐，它只针对于 行内�
 2. 给img 添加 display：block; 转换为块级元素就不会存在问题了；
 3. 给父元素添加font-size： 0；
 4. 给父元素添加line-height： 0；
+
+## 函数
+
+
+
+# CSS @-rule
+
+## @charset
+
+## @import
+
+## @media
+
+## @page
+
+## @counter-style
+
+## @keyframes
+
+## @fontface
+
+## @supports
+
+## @namespace
+
+
+
+
 
 # 选择器
 
