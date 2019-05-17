@@ -1,5 +1,7 @@
 # Vue.js 
 
+## 基本概念
+
 ### 什么是Vue.js
 
 - Vue.js 是一套构建用户界面的框架，**只关注视图层**，它不仅易于上手，还便于与第三方库或既有项目整合。（Vue有配套的第三方类库，可以整合起来做大型项目的开发）
@@ -176,7 +178,7 @@ v-bind可以绑定标签的属性
     })
 ```
 
-### 事件修饰符：
+修饰符：
 
 - .stop       阻止冒泡
 - .prevent    阻止默认事件
@@ -337,9 +339,10 @@ search(name) {
 
 如果指令需要多个值，可以传入一个 JavaScript 对象字面量。指令函数能够接受所有合法的 JavaScript 表达式。
 
-```
+```html
 <div v-demo="{ color: 'white', text: 'hello!' }"></div>
-
+```
+```js
 Vue.directive('demo', function (el, binding) {
   console.log(binding.value.color) // => "white"
   console.log(binding.value.text)  // => "hello!"
@@ -365,7 +368,7 @@ Vue.directive('demo', function (el, binding) {
 
 在很多时候，你可能想在 `bind` 和 `update` 时触发相同行为，而不关心其它的钩子。比如这样写:
 
-```
+```js
 Vue.directive('color-swatch', function (el, binding) {
   el.style.backgroundColor = binding.value
 })
@@ -373,7 +376,7 @@ Vue.directive('color-swatch', function (el, binding) {
 
 ### Vue 1.x 自定义元素指令
 
-```
+```js
 Vue.elementDirective('red-color', {
   bind: function () {
     this.el.style.color = 'red';
@@ -383,7 +386,7 @@ Vue.elementDirective('red-color', {
 
 使用方式：
 
-```
+```html
 <red-color>1232</red-color>
 ```
 
@@ -393,7 +396,7 @@ Vue.elementDirective('red-color', {
 
 - 数组
 
-```
+```html
 <h1 :class="['red', 'thin']">这是一个邪恶的H1</h1>
 ```
 
@@ -401,19 +404,19 @@ Vue.elementDirective('red-color', {
 
 - 数组中使用三元表达式
 
-```
+```html
 <h1 :class="['red', 'thin', isactive?'active':'']">这是一个邪恶的H1</h1>
 ```
 
 - 数组中嵌套对象
 
-```
+```html
 <h1 :class="['red', 'thin', {'active': isactive}]">这是一个邪恶的H1</h1>
 ```
 
 - 直接使用对象
 
-```
+```html
 <h1 :class="{red:true, italic:true, active:true, thin:true}">这是一个邪恶的H1</h1>
 ```
 
@@ -423,7 +426,7 @@ Vue.elementDirective('red-color', {
 
 1. 直接在元素上通过 `:style` 的形式，书写样式对象
 
-```
+```html
 <h1 :style="{color: 'red', 'font-size': '40px'}">这是一个善良的H1</h1>
 ```
 
@@ -431,7 +434,7 @@ Vue.elementDirective('red-color', {
 
 - 在data上定义样式：
 
-```
+```js
 data: {
   h1StyleObj: { color: 'red', 'font-size': '40px', 'font-weight': '200' }
 }
@@ -439,7 +442,7 @@ data: {
 
 - 在元素中，通过属性绑定的形式，将样式对象应用到元素中：
 
-```
+```html
 <h1 :style="h1StyleObj">这是一个善良的H1</h1>
 ```
 
@@ -447,7 +450,7 @@ data: {
 
 - 在data上定义样式：
 
-```
+```js
 data: {
   h1StyleObj: { color: 'red', 'font-size': '40px', 'font-weight': '200' },
   h1StyleObj2: { fontStyle: 'italic' }
@@ -456,7 +459,7 @@ data: {
 
 - 在元素中，通过属性绑定的形式，将样式对象应用到元素中：
 
-```
+```html
 <h1 :style="[h1StyleObj, h1StyleObj2]">这是一个善良的H1</h1>
 ```
 
@@ -469,6 +472,8 @@ data: {
 概念：Vue.js 允许你自定义过滤器，**可被用作一些常见的文本格式化**。过滤器可以用在两个地方：**mustache 插值和 v-bind 表达式**。过滤器应该被添加在 JavaScript 表达式的尾部，由“管道”符指示；
 
 可以同时调用多个
+
+**注意：过滤器中没有this上下文**
 
 ### 私有过滤器
 
@@ -541,23 +546,17 @@ Vue.filter('dataFormat', function (input, pattern = '') {
 
 也可以直接使用键盘码值
 
-### 1.x中自定义键盘修饰符
-
-```
-Vue.directive('on').keyCodes.f2 = 113;
-```
-
 ### [2.x中自定义键盘修饰符](https://cn.vuejs.org/v2/guide/events.html#键值修饰符)
 
 1. 通过`Vue.config.keyCodes.名称 = 按键值`来自定义案件修饰符的别名：
 
-```
+```js
 Vue.config.keyCodes.f2 = 113;
 ```
 
 1. 使用自定义的按键修饰符：
 
-```
+```html
 <input type="text" v-model="name" @keyup.f2="add">
 ```
 
@@ -582,7 +581,9 @@ Vue.config.keyCodes.f2 = 113;
 - 运行期间的生命周期函数：
   - beforeUpdate：状态更新之前执行此函数， 此时 data 中的状态值是最新的，但是界面上显示的 数据还是旧的，因为此时还没有开始重新渲染DOM节点
   - updated：实例更新完毕之后调用此函数，此时 data 中的状态值 和 界面上显示的数据，都已经完成了更新，界面已经被重新渲染好了！
-- 另外还有 `keep-alive` 独有的生命周期，分别为 `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `actived` 钩子函数。 
+- 另外还有 `keep-alive` 独有的生命周期
+
+   `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `actived` 钩子函数。 
 - 销毁期间的生命周期函数：
   - beforeDestroy：实例销毁之前调用。在这一步，实例仍然完全可用。适合移除事件、定时器等等，否则可能会引起内存泄露的问题。 
   - destroyed：Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
