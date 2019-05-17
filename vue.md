@@ -60,9 +60,10 @@ var vm = new Vue({
 
 ### v-cloak
 
+这个指令保持在元素上直到关联实例结束编译,编译后会删除该属性。和 CSS 规则如 [v-cloak] { display: none } 一起用时，这个指令可以隐藏未编译的 Mustache 标签直到实例准备完毕。
+
 网速慢的时候，编译前差值表达式会直接显示出来，有闪烁问题，v-cloak可以解决
 
-v-cloak：编译后会删除该属性，可以用来隐藏编译前的插值表达式
 
 ```html
 <style>
@@ -103,33 +104,60 @@ var vm = new Vue({
 </script>
 ```
 
-### v-bind的三种用法
+### v-bind
 
 v-bind可以绑定标签的属性
 
-1. 直接使用指令`v-bind`
-2. 使用简化指令`:`
-3. 在绑定的时候，拼接绑定内容：`:title="btnTitle + ', 这是追加的内容'"`
-4. v-bind中可以写合法的js表达式
+1. 简化指令`:`
+2. v-bind中可以写合法的js表达式
+
+修饰符：
+-  `.sync (2.3.0+)` 语法糖，会扩展成一个更新父组件绑定值的 v-on 侦听器。
 
 ```html
-<input type="button" value="按钮" :title="mytitle">
-<input type="button" value="按钮" v-bind:title="mytitle">
-<input type="button" value="按钮" v-bind:title="mytitle + 'bind中可以写合法的js表达式'">
-<script>
-    var vm = new Vue({
-        el: '#app',
-        data: {
-            msg: 'msg',
-            mytitle: '自定义title'
-        }
-    })
-</script>
+<!-- 绑定一个属性 -->
+<img v-bind:src="imageSrc">
+
+<!-- 动态特性名 (2.6.0+) -->
+<button v-bind:[key]="value"></button>
+
+<!-- 缩写 -->
+<img :src="imageSrc">
+
+<!-- 动态特性名缩写 (2.6.0+) -->
+<button :[key]="value"></button>
+
+<!-- 内联字符串拼接 -->
+<img :src="'/path/to/images/' + fileName">
+
+<!-- class 绑定 -->
+<div :class="{ red: isRed }"></div>
+<div :class="[classA, classB]"></div>
+<div :class="[classA, { classB: isB, classC: isC }]">
+
+<!-- style 绑定 -->
+<div :style="{ fontSize: size + 'px' }"></div>
+<div :style="[styleObjectA, styleObjectB]"></div>
+
+<!-- 绑定一个有属性的对象 -->
+<div v-bind="{ id: someProp, 'other-attr': otherProp }"></div>
+
+<!-- 通过 prop 修饰符绑定 DOM 属性 -->
+<div v-bind:text-content.prop="text"></div>
+
+<!-- prop 绑定。“prop”必须在 my-component 中声明。-->
+<my-component :prop="someThing"></my-component>
+
+<!-- 通过 $props 将父组件的 props 一起传给子组件 -->
+<child-component v-bind="$props"></child-component>
+
+<!-- XLink -->
+<svg><a :xlink:special="foo"></a></svg>
 ```
 
 ### v-on
 
-指定事件
+绑定事件
 
 ```html
 <input type="button" value="按钮" v-on:click="alertmsg">
@@ -148,46 +176,6 @@ v-bind可以绑定标签的属性
     })
 ```
 
-### 跑马灯效果
-
-1. HTML结构：
-
-```html
-<div id="app">
-    <p>{{info}}</p>
-    <input type="button" value="开启" v-on:click="go">
-    <input type="button" value="停止" v-on:click="stop">
-</div>
-```
-
-1. Vue实例：
-
-```javascript
-	// 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: {
-        info: '猥琐发育，别浪~！',
-        intervalId: null
-      },
-      methods: {
-        go() {
-          // 如果当前有定时器在运行，则直接return
-          if (this.intervalId != null) {
-            return;
-          }
-          // 开始定时器
-          this.intervalId = setInterval(() => {
-            this.info = this.info.substring(1) + this.info.substring(0, 1);
-          }, 500);
-        },
-        stop() {
-          clearInterval(this.intervalId);
-        }
-      }
-    });
-```
-
 ### 事件修饰符：
 
 - .stop       阻止冒泡
@@ -199,21 +187,10 @@ v-bind可以绑定标签的属性
 
 ```html
 <a href="http://www.baidu.com" @click.prevent.once="alertmsg">百度</a>
-  <script>
-  var vm = new Vue({
-    el: '#app',
-    data: {
-      msg: 'msg'
-    },
-    methods: {
-      alertmsg: function () {
-        alert('msg')
-      }
-    }
-  })
+...
 ```
 
-### Vue指令之v-model和双向数据绑定
+### v-model和双向数据绑定
 
 只能用于表单
 
@@ -228,59 +205,10 @@ v-bind可以绑定标签的属性
     })
 </script>
 ```
-
-### 简易计算器案例
-
-1. HTML 代码结构
-
-```html
-  <div id="app">
-    <input type="text" v-model="n1">
-    <select v-model="opt">
-      <option value="0">+</option>
-      <option value="1">-</option>
-      <option value="2">*</option>
-      <option value="3">÷</option>
-    </select>
-    <input type="text" v-model="n2">
-    <input type="button" value="=" v-on:click="getResult">
-    <input type="text" v-model="result">
-  </div>
-```
-
-1. Vue实例代码：
-
-```javascript
-	// 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: {
-        n1: 0,
-        n2: 0,
-        result: 0,
-        opt: '0'
-      },
-      methods: {
-        getResult() {
-          switch (this.opt) {
-            case '0':
-              this.result = parseInt(this.n1) + parseInt(this.n2);
-              break;
-            case '1':
-              this.result = parseInt(this.n1) - parseInt(this.n2);
-              break;
-            case '2':
-              this.result = parseInt(this.n1) * parseInt(this.n2);
-              break;
-            case '3':
-              this.result = parseInt(this.n1) / parseInt(this.n2);
-              break;
-          }
-        }
-      }
-    });
-
-```
+修饰符：
+- .lazy - 取代 input 监听 change 事件
+- .number - 输入字符串转为有效的数字
+- .trim - 输入首尾空格过滤
 
 ### `v-for`和`key`属性
 
@@ -309,26 +237,15 @@ v-bind可以绑定标签的属性
 
 当 Vue.js 用 v-for 正在更新已渲染过的元素列表时，它默认用 “**就地复用**” 策略。如果数据项的顺序被改变，Vue将**不是移动 DOM 元素来匹配数据项的顺序**， 而是**简单复用此处每个元素**，并且确保它在特定索引下显示已被渲染过的每个元素。
 
-为了给 Vue 一个提示，**以便它能跟踪每个节点的身份，从而重用和重新排序现有元素**，你需要为每项提供一个唯一 key 属性。
-
 -  key 属性必须是字符串或数字，并且必须绑定
+
+为了给 Vue 一个提示，**以便它能跟踪每个节点的身份，从而重用和重新排序现有元素**，你需要为每项提供一个唯一 key 属性。
 
 `<li v-for="(item, i) in list" :key="item.name">索引：{{i}}姓名：{{item.name}}</li>`
 
 ### 筛选
 
 [filterBy - 指令](https://v1-cn.vuejs.org/api/#filterBy)2.x已经废除
-
-```html
-<tr v-for="item in list | filterBy searchName in 'name'">
-  <td>{{item.id}}</td>
-  <td>{{item.name}}</td>
-  <td>{{item.ctime}}</td>
-  <td>
-    <a href="#" @click.prevent="del(item.id)">删除</a>
-  </td>
-</tr>
-```
 
 在2.x版本中[手动实现筛选的方式](https://cn.vuejs.org/v2/guide/list.html#显示过滤-排序结果)：
 
@@ -368,9 +285,9 @@ search(name) {
 
 ### `v-if`和`v-show`
 
-`v-show` 只是在 `display: none` 和 `display: block` 之间切换。无论初始条件是什么都会被渲染出来，后面只需要切换 CSS，DOM 还是一直保留着的。所以总的来说 `v-show` 在初始渲染时有更高的开销，但是切换开销很小，更适合于频繁切换的场景。
+`v-show` 只是在 `display: none` 和 `display: block` 之间切换。无论初始条件是什么都会被渲染出来，后面只需要切换 CSS。所以总的来说 `v-show` 在初始渲染时有更高的开销，但是切换开销很小，更适合于频繁切换的场景。
 
-`v-if` 的话就得说到 Vue 底层的编译了。当属性初始为 `false` 时，组件就不会被渲染，直到条件为 `true`，并且切换条件时会触发销毁/挂载组件，所以总的来说在切换时开销更高，更适合不经常切换的场景。
+`v-if` 当属性初始为 `false` 时，组件就不会被渲染，直到条件为 `true`，并且切换条件时会触发销毁/挂载组件，所以总的来说在切换时开销更高，更适合不经常切换的场景。
 
 并且基于 `v-if` 的这种惰性渲染机制，可以在必要的时候才去渲染组件，减少整个页面的初始渲染开销。
 
