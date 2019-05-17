@@ -58,6 +58,54 @@ var vm = new Vue({
 }).$mount("#app")
 ```
 
+## Vue实例
+```js
+var vm = new Vue({
+  // 选项
+})
+```
+
+### 数据与方法
+
+
+### [vue实例的生命周期](https://cn.vuejs.org/v2/guide/instance.html#实例生命周期)
+
+- 什么是生命周期：从Vue实例创建、运行、到销毁期间，总是伴随着各种各样的事件，这些事件，统称为生命周期！![lifecycle](G:\note\前端\html\lifecycle.png)
+- [生命周期钩子](https://cn.vuejs.org/v2/api/#选项-生命周期钩子)：就是生命周期事件的别名而已；
+- 主要的生命周期函数分类：
+- 创建期间的生命周期函数：
+  - beforeCreate：实例刚在内存中被创建出来，只初始化了默认事件和生命周期函数。此时，还没有初始化好 data 和 methods 属性
+  - created：实例已经在内存中创建OK，此时 data 和 methods 已经创建OK，此时还没有开始 编译模板
+  - beforeMount：此时已经完成了模板的编译，开始创建 VDOM，但是还没有挂载到页面中
+  - mounted：此时，将 VDOM 渲染为真实 DOM 并且渲染数据。组件中如果有子组件的话，会递归挂载子组件，只有当所有子组件全部挂载完毕，才会执行根组件的挂载钩子。 
+- 运行期间的生命周期函数：
+  - beforeUpdate：状态更新之前执行此函数， 此时 data 中的状态值是最新的，但是界面上显示的 数据还是旧的，因为此时还没有开始重新渲染DOM节点
+  - updated：实例更新完毕之后调用此函数，此时 data 中的状态值 和 界面上显示的数据，都已经完成了更新，界面已经被重新渲染好了！
+- 另外还有 `keep-alive` 独有的生命周期
+
+   `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `actived` 钩子函数。 
+- 销毁期间的生命周期函数：
+  - beforeDestroy：实例销毁之前调用。在这一步，实例仍然完全可用。适合移除事件、定时器等等，否则可能会引起内存泄露的问题。 
+  - destroyed：Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
+
+## keep-alive 组件
+
+`<keep-alive>` 包裹动态组件时，会缓存不活动的组件实例，而不是销毁它们。和 `<transition>` 相似，`<keep-alive>` 是一个抽象组件：它自身不会渲染一个 DOM 元素，也不会出现在父组件链中。 
+
+如果你需要**在组件切换的时候，保存一些组件的状态防止多次渲染**，就可以使用 `keep-alive` 组件包裹需要保存的组件。
+
+对于 `keep-alive` 组件来说，它拥有两个独有的生命周期钩子函数，分别为 `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `actived` 钩子函数。
+
+## 模板语法
+数据绑定最常见的形式就是使用“Mustache”语法 (双大括号) 的文本插值：
+
+`<span>Message: {{ msg }}</span>`
+
+Mustache 标签将会被替代为对应数据对象上 msg 属性的值。无论何时，绑定的数据对象上 msg 属性发生了改变，插值处的内容都会更新。
+
+通过使用 `v-once` 指令，你也能执行一次性地插值。但请留心这会影响到该节点上的其它数据绑定
+
+
 ## Vue指令
 
 ### v-cloak
@@ -95,6 +143,7 @@ var vm = new Vue({
     <!-- 会覆盖标签内的内容，没有闪烁问题 -->
     <p v-text="msg">内容</p>
     <!-- 会将数据以html格式渲染 -->
+    <!-- v-html:容易导致 XSS 攻击。请只对可信内容使用 HTML 插值，绝不要对用户提供的内容使用插值。 -->
     <div v-html="msg"></div>
 </div>
 
@@ -568,33 +617,6 @@ Vue.config.keyCodes.f2 = 113;
 4. [js 里面的键盘事件对应的键码](http://www.cnblogs.com/wuhua1/p/6686237.html)
 5. [Vue.js双向绑定的实现原理](http://www.cnblogs.com/kidney/p/6052935.html)
 
-## [vue实例的生命周期](https://cn.vuejs.org/v2/guide/instance.html#实例生命周期)
-
-- 什么是生命周期：从Vue实例创建、运行、到销毁期间，总是伴随着各种各样的事件，这些事件，统称为生命周期！![lifecycle](G:\note\前端\html\lifecycle.png)
-- [生命周期钩子](https://cn.vuejs.org/v2/api/#选项-生命周期钩子)：就是生命周期事件的别名而已；
-- 主要的生命周期函数分类：
-- 创建期间的生命周期函数：
-  - beforeCreate：实例刚在内存中被创建出来，只初始化了默认事件和生命周期函数。此时，还没有初始化好 data 和 methods 属性
-  - created：实例已经在内存中创建OK，此时 data 和 methods 已经创建OK，此时还没有开始 编译模板
-  - beforeMount：此时已经完成了模板的编译，开始创建 VDOM，但是还没有挂载到页面中
-  - mounted：此时，将 VDOM 渲染为真实 DOM 并且渲染数据。组件中如果有子组件的话，会递归挂载子组件，只有当所有子组件全部挂载完毕，才会执行根组件的挂载钩子。 
-- 运行期间的生命周期函数：
-  - beforeUpdate：状态更新之前执行此函数， 此时 data 中的状态值是最新的，但是界面上显示的 数据还是旧的，因为此时还没有开始重新渲染DOM节点
-  - updated：实例更新完毕之后调用此函数，此时 data 中的状态值 和 界面上显示的数据，都已经完成了更新，界面已经被重新渲染好了！
-- 另外还有 `keep-alive` 独有的生命周期
-
-   `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `actived` 钩子函数。 
-- 销毁期间的生命周期函数：
-  - beforeDestroy：实例销毁之前调用。在这一步，实例仍然完全可用。适合移除事件、定时器等等，否则可能会引起内存泄露的问题。 
-  - destroyed：Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
-
-## keep-alive 组件
-
-`<keep-alive>` 包裹动态组件时，会缓存不活动的组件实例，而不是销毁它们。和 `<transition>` 相似，`<keep-alive>` 是一个抽象组件：它自身不会渲染一个 DOM 元素，也不会出现在父组件链中。 
-
-如果你需要**在组件切换的时候，保存一些组件的状态防止多次渲染**，就可以使用 `keep-alive` 组件包裹需要保存的组件。
-
-对于 `keep-alive` 组件来说，它拥有两个独有的生命周期钩子函数，分别为 `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `actived` 钩子函数。
 
 ##axios
 
