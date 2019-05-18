@@ -106,7 +106,9 @@ Mustache 标签将会被替代为对应数据对象上 msg 属性的值。无论
 通过使用 `v-once` 指令，你也能执行一次性地插值。但请留心这会影响到该节点上的其它数据绑定
 
 
-## Vue指令
+## Vue指令（directive）
+
+补充了html的属性
 
 ### v-cloak
 
@@ -157,7 +159,7 @@ var vm = new Vue({
 
 ### v-bind
 
-v-bind可以绑定标签的属性
+v-bind可以绑定标签的属性，可以用于任何属性class和style的写法比较特殊，class支持数组和对象，style支持对象，参考：在`Vue`中使用样式
 
 1. 简化指令`:`
 2. v-bind中可以写合法的js表达式
@@ -229,21 +231,29 @@ v-bind可以绑定标签的属性
 
 修饰符：
 
-- .stop       阻止冒泡
+- .stop          阻止冒泡
+
 - .prevent    阻止默认事件
-- .capture    添加事件侦听器时使用事件捕获模式
-- .self       只当事件在该元素本身（比如不是子元素）触发时触发回调，只阻止自身冒泡行为的触发
-- .once       事件只触发一次
+
+  注意：submit事件的传递的this和原生的不同，不是form而是window
+
+- .native       使用原生的事件，和组件结合使用
+
+- .once          事件只触发一次
+- .keycode|name      筛选键盘按键，可以组合键
 - 事件修饰符可以写多个
+
+- .capture    添加事件侦听器时使用事件捕获模式
+- .self            只当事件在该元素本身（比如不是子元素）触发时触发回调，只阻止自身冒泡行为的触发
 
 ```html
 <a href="http://www.baidu.com" @click.prevent.once="alertmsg">百度</a>
 ...
 ```
 
-### v-model和双向数据绑定
+### v-model
 
-只能用于表单
+数据双向绑定，只能用于表单，经过v-model绑定的数据都是字符串
 
 ```html
 <input type="text" v-model="msg">
@@ -278,7 +288,8 @@ v-bind可以绑定标签的属性
 <div v-for="(val, key, i) in userInfo">{{val}} --- {{key}} --- {{i}}</div>
 ```
 
-3. 迭代数字，从1开始
+3. 迭代字符串
+4. 迭代数字，从1开始
 
 ```html
 <p v-for="i in 10">这是第 {{i}} 个P标签</p>
@@ -286,9 +297,9 @@ v-bind可以绑定标签的属性
 
 > 2.2.0+ 的版本里，**当在组件中使用** v-for 时，key 现在是必须的。
 
-当 Vue.js 用 v-for 正在更新已渲染过的元素列表时，它默认用 “**就地复用**” 策略。如果数据项的顺序被改变，Vue将**不是移动 DOM 元素来匹配数据项的顺序**， 而是**简单复用此处每个元素**，并且确保它在特定索引下显示已被渲染过的每个元素。
+当 Vue.js 用 v-for 正在更新已渲染过的元素列表时，它默认用 “**就地复用**” 策略。如果数据项的顺序被改变，Vue将**不是移动 DOM 元素来匹配数据项的顺序**， 而是**简单复用此处每个元素**，并且确保它在特定索引（vue会提供默认的key但是与数据的特性无关）下显示已被渲染过的每个元素。
 
--  key 属性必须是字符串或数字，并且必须绑定
+-  key 属性必须是不会重复的字符串或数字，并且必须绑定
 
 为了给 Vue 一个提示，**以便它能跟踪每个节点的身份，从而重用和重新排序现有元素**，你需要为每项提供一个唯一 key 属性。
 
@@ -341,6 +352,16 @@ search(name) {
 `v-if` 当属性初始为 `false` 时，组件就不会被渲染，直到条件为 `true`，并且切换条件时会触发销毁/挂载组件，所以总的来说在切换时开销更高，更适合不经常切换的场景。
 
 并且基于 `v-if` 的这种惰性渲染机制，可以在必要的时候才去渲染组件，减少整个页面的初始渲染开销。
+
+### v-pre
+
+跳过这个元素和它的子元素的编译过程。可以用来显示原始 Mustache 标签。跳过大量没有指令的节点会**加快编译**。
+
+`<span v-pre>{{ this will not be compiled }}</span>`
+
+### v-once
+
+只渲染元素和组件**一次**。随后的重新渲染，元素/组件及其所有的子节点将被视为静态内容并跳过。这可以用于**优化更新性能**。
 
 ## [自定义指令](https://cn.vuejs.org/v2/guide/custom-directive.html)
 
@@ -421,22 +442,6 @@ Vue.directive('demo', function (el, binding) {
 Vue.directive('color-swatch', function (el, binding) {
   el.style.backgroundColor = binding.value
 })
-```
-
-### Vue 1.x 自定义元素指令
-
-```js
-Vue.elementDirective('red-color', {
-  bind: function () {
-    this.el.style.color = 'red';
-  }
-});
-```
-
-使用方式：
-
-```html
-<red-color>1232</red-color>
 ```
 
 ## 在Vue中使用样式
@@ -1628,6 +1633,12 @@ Vue.mixin({
 
 [路由模式](https://www.cnblogs.com/goloving/p/9147551.html)
 
+- 防止页面真的跳转，降低用户体验
+
+- 不会清空js数据
+
+- history不会失效，可以前进、后退、收藏、刷新
+
 `www.test.com/#/` 就是 Hash URL，当 `#` 后面的哈希值发生变化时，可以**通过 `hashchange` 事件来监听到 URL 的变化**，从而进行跳转页面，并且无论哈希值如何变化，服务端接收到的 URL 请求永远是 `www.test.com`。
 
 ```js
@@ -1699,55 +1710,59 @@ window.addEventListener('popstate', e => {
   <script src="./lib/vue-router-2.7.0.js"></script>
 ```
 
-1. 使用 router-link 组件来导航
+2. 使用 router-link 组件来导航
 
 ```html
 <!-- 2. 使用 router-link 组件来导航，也可以在地址前加# -->
-<router-link to="/login">登录</router-link>
+<router-link :to="{name:'login'}">登录</router-link>
+<router-link :to="{name:'news', params: {id: 1}}">登录</router-link>
 <router-link to="/register">注册</router-link>
 ```
 
-1. 使用 router-link 组件来传参
+3. 使用 router-link 组件来传参
 
 `<router-link :to={path: '', query: {'': ''}}>登录</router-link>`
 
-1. 使用 router-view 组件来显示匹配到的组件
+4. 使用 router-view 组件来显示匹配到的组件
 
 ```
 <!-- 3. 使用 router-view 组件来显示匹配到的组件 -->
 <router-view></router-view>
 ```
 
-1. 创建使用`Vue.extend`创建组件
+5. 使用`Vue.extend`创建组件
 
 ```javascript
-    // 4.1 使用 Vue.extend 来创建登录组件
+    // 5.1 使用 Vue.extend 来创建登录组件
     var login = Vue.extend({
       template: '<h1>登录组件</h1>'
     });
 
-    // 4.2 使用 Vue.extend 来创建注册组件
+    // 5.2 使用 Vue.extend 来创建注册组件
     var register = Vue.extend({
       template: '<h1>注册组件</h1>'
     });
 ```
 
-1. 创建一个路由 router 实例，通过 routers 属性来定义路由匹配规则
+6. 创建一个路由 router 实例，通过 routers 属性来定义路由匹配规则
 
 ```javascript
-// 5. 创建一个路由 router 实例，通过 routers 属性来定义路由匹配规则
+// 6. 创建一个路由 router 实例，通过 routers 属性来定义路由匹配规则
     var router = new VueRouter({
       routes: [
-        { path: '/login', component: login },
-        { path: '/register', component: register }
+        // name:""指定命名路由
+        { path: '/login', component: login, name: 'login' },
+        { path: '/register', component: register },
+        // 带参数路由，使用$route.params.xxx获取
+        { path: '/news/:id/', component: register },  
       ]
     });
 ```
 
-1. 使用 router 属性来监听url地址变化使用路由规则展示响应的组件
+7. 使用 router 属性来监听url地址变化使用路由规则展示响应的组件
 
 ```javascript
-// 6. 创建 Vue 实例，得到 ViewModel
+// 7. 创建 Vue 实例，得到 ViewModel
     var vm = new Vue({
       el: '#app',
       router: router // 使用 router 属性来使用路由规则
@@ -1756,15 +1771,17 @@ window.addEventListener('popstate', e => {
 
 过程：修改url==》监听到路由改变==》进行路由匹配==》在画面指定位置显示指定组件
 
+注意：路径可以重复，显示最先匹配到
+
 ### 路由重定向
 
 和后台的重定向完全不同
 
 `{path: '/', redirect: '/login'}`
 
-### 设置路由高亮
+### 设置路由样式 
 
-在切换路由时选中的路由class会改变，可以利用这一点给当前路由添加样式
+可以在router-link上添加样式，在切换路由时选中的路由class也会改变，router-link-active表示当前路由
 
 ```css
 .router-link-active {
@@ -1778,7 +1795,7 @@ window.addEventListener('popstate', e => {
 
 router-view外添加transition，设置动画类和过渡模式
 
-### 动态路由：在路由规则中定义参数
+### 动态路由-在路由规则中定义参数
 
 1. 在规则中使用占位符定义参数：
 
@@ -1786,7 +1803,7 @@ router-view外添加transition，设置动画类和过渡模式
 { path: '/register/:id', component: register }
 ```
 
-1. 通过 `this.$route.params`来获取路由中的参数：
+2. 通过 `this.$route.params`来获取路由中的参数：
 
 ```
 var register = Vue.extend({
@@ -1949,7 +1966,7 @@ this.$router.push({path: '', query: {id: id}})
 // $router的原型对象上有go(),forword(),back()
 ```
 
-## `watch`属性的使用-侦听器
+## `watch`属性-侦听器
 
 考虑一个问题：想要实现 `名` 和 `姓` 两个文本框的内容改变，则全名的文本框中的值也跟着改变；（用以前的知识使用keyup事件，只需要定义一个函数）
 
@@ -1975,10 +1992,10 @@ this.$router.push({path: '', query: {id: id}})
       },
       methods: {},
       watch: {
-        'firstName': function (newVal, oldVal) { // 第一个参数是新数据，第二个参数是旧数据
+        firstName (newVal, oldVal) { // 第一个参数是新数据，第二个参数是旧数据
           this.fullName = newVal + ' - ' + this.lastName;
         },
-        'lastName': function (newVal, oldVal) {
+        lastName (newVal, oldVal) {
           this.fullName = this.firstName + ' - ' + newVal;
         }
       }
@@ -2019,6 +2036,7 @@ this.$router.push({path: '', query: {id: id}})
       methods: {},
       router: router,
       watch: {
+        // 注意写法
         '$route': function (newVal, oldVal) {
           if (newVal.path === '/login') {
             console.log('这是登录组件');
@@ -2043,11 +2061,15 @@ vm.$watch('obj', {
 })
 ```
 
-## `computed`计算属性的使用
+## `computed`计算属性
 
 `computer` 是计算属性，依赖其他属性计算值，本质是一个方法，使用时当作把名称属性来使用
 
-计算属性的求值结果会被缓存起来，方便下次直接调用，没有变化时不会重复计算
+特征（区分methods）：
+
+- 计算属性的求值结果会被缓存起来，方便下次直接调用，没有变化时不会重复计算
+
+- 可读可写
 
 默认只有`getter`的计算属性：
 
@@ -2520,6 +2542,10 @@ methodsToPatch.forEach(function (method) {
   })
 })
 ```
+
+## 虚拟DOM
+
+作用：合并请求，快速查询，局部刷新
 
 ## 编译过程
 
