@@ -1,4 +1,4 @@
-# Vue.js 
+# `Vue.js`
 
 ## 基本概念
 
@@ -35,7 +35,7 @@
 
 ![01.MVC和MVVM的关系图解](G:\note\前端\html\01.MVC和MVVM的关系图解.png)
 
-### Vue.js 基本代码 和 MVVM 之间的对应关系
+### Vue.js 基本代码和MVVM
 
 以 Vue 框架来举例，ViewModel 就是组件的实例。View 就是模板，Model 的话在引入 Vuex 的情况下是完全可以和组件分离的。
 
@@ -70,23 +70,25 @@ var vm = new Vue({
 
 ### [vue实例的生命周期](https://cn.vuejs.org/v2/guide/instance.html#实例生命周期)
 
-- 什么是生命周期：从Vue实例创建、运行、到销毁期间，总是伴随着各种各样的事件，这些事件，统称为生命周期！![lifecycle](G:\note\前端\html\lifecycle.png)
+- 什么是生命周期：从Vue实例创建、运行、到销毁期间，总是伴随着各种各样的事件，这些事件，统称为生命周期！![lifecycle](.\media\lifecycle.png)
 - [生命周期钩子](https://cn.vuejs.org/v2/api/#选项-生命周期钩子)：就是生命周期事件的别名而已；
-- 主要的生命周期函数分类：
-- 创建期间的生命周期函数：
-  - beforeCreate：实例刚在内存中被创建出来，只初始化了默认事件和生命周期函数。此时，还没有初始化好 data 和 methods 属性
-  - created：实例已经在内存中创建OK，此时 data 和 methods 已经创建OK，此时还没有开始 编译模板
-  - beforeMount：此时已经完成了模板的编译，开始创建 VDOM，但是还没有挂载到页面中
-  - mounted：此时，将 VDOM 渲染为真实 DOM 并且渲染数据。组件中如果有子组件的话，会递归挂载子组件，只有当所有子组件全部挂载完毕，才会执行根组件的挂载钩子。 
-- 运行期间的生命周期函数：
-  - beforeUpdate：状态更新之前执行此函数， 此时 data 中的状态值是最新的，但是界面上显示的 数据还是旧的，因为此时还没有开始重新渲染DOM节点
-  - updated：实例更新完毕之后调用此函数，此时 data 中的状态值 和 界面上显示的数据，都已经完成了更新，界面已经被重新渲染好了！
+- **创建期间**的生命周期函数：
+
+  - `beforeCreate`：实例刚在内存中被创建出来，只初始化了**默认事件和生命周期函数**。此时，还没有初始化好 data 和 methods 属性
+  - `created`：实例已经在内存中创建OK，此时 **data 和 methods** 已经创建OK，此时还没有开始 编译模板。可以在这里**请求数据**
+  - `beforeMount`：此时已经完成了模板的编译，开始创建` VDOM`，但是还没有挂载到页面中
+  - `mounted`：此时，将 `VDOM` 渲染为真实 DOM 并且渲染数据。组件中如果有子组件的话，会递归挂载子组件，只有当所有子组件全部挂载完毕，才会执行根组件的挂载钩子。 **可以操作组件元素**。
+- **运行期间**的生命周期函数：
+
+  - `beforeUpdate`：状态更新之前执行此函数， 此时 data 中的状态值是最新的，但是界面上显示的 数据还是旧的，因为此时还没有开始重新渲染DOM节点
+  - `updated`：实例更新完毕之后调用此函数，此时 data 中的状态值 和 界面上显示的数据，都已经完成了更新，界面已经被重新渲染好了！
 - 另外还有 `keep-alive` 独有的生命周期
 
-   `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `actived` 钩子函数。 
-- 销毁期间的生命周期函数：
-  - beforeDestroy：实例销毁之前调用。在这一步，实例仍然完全可用。适合移除事件、定时器等等，否则可能会引起内存泄露的问题。 
-  - destroyed：Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
+   `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `actived` 钩子函数。 
+- **销毁期间**的生命周期函数：不能保证会执行到，比如关闭浏览器
+
+  - `beforeDestroy`：实例销毁之前调用。在这一步，实例仍然完全可用。适合**移除事件、定时器**等等，否则可能会引起内存泄露的问题。 
+  - `destroyed`：`Vue` 实例销毁后调用。调用后，`Vue` 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
 
 ## keep-alive 组件
 
@@ -363,9 +365,9 @@ search(name) {
 
 只渲染元素和组件**一次**。随后的重新渲染，元素/组件及其所有的子节点将被视为静态内容并跳过。这可以用于**优化更新性能**。
 
-## [自定义指令](https://cn.vuejs.org/v2/guide/custom-directive.html)
+### [自定义指令](https://cn.vuejs.org/v2/guide/custom-directive.html)
 
-### Vue 2x 自定义元素指令
+Vue 2x中：
 
 1. 自定义全局和局部的自定义指令：
 
@@ -590,7 +592,7 @@ Vue.filter('dataFormat', function (input, pattern = '') {
 
 > 注意：当有局部和全局两个名称相同的过滤器时候，会以就近原则进行调用，即：局部过滤器优先于全局过滤器被调用！
 
-## 键盘修饰符以及自定义键盘修饰符
+## 键盘修饰符及自其定义
 
 ### 键盘修饰符
 
@@ -600,7 +602,9 @@ Vue.filter('dataFormat', function (input, pattern = '') {
 
 也可以直接使用键盘码值
 
-### [2.x中自定义键盘修饰符](https://cn.vuejs.org/v2/guide/events.html#键值修饰符)
+### [自定义键盘修饰符](https://cn.vuejs.org/v2/guide/events.html#键值修饰符)
+
+2.x中:
 
 1. 通过`Vue.config.keyCodes.名称 = 按键值`来自定义案件修饰符的别名：
 
@@ -608,7 +612,7 @@ Vue.filter('dataFormat', function (input, pattern = '') {
 Vue.config.keyCodes.f2 = 113;
 ```
 
-1. 使用自定义的按键修饰符：
+2. 使用自定义的按键修饰符：
 
 ```html
 <input type="text" v-model="name" @keyup.f2="add">
@@ -616,20 +620,68 @@ Vue.config.keyCodes.f2 = 113;
 
 ## 相关文章
 
-1. [vue.js 1.x 文档](https://v1-cn.vuejs.org/)
-2. [vue.js 2.x 文档](https://cn.vuejs.org/)
-3. [String.prototype.padStart(maxLength, fillString)](http://www.css88.com/archives/7715)
-4. [js 里面的键盘事件对应的键码](http://www.cnblogs.com/wuhua1/p/6686237.html)
-5. [Vue.js双向绑定的实现原理](http://www.cnblogs.com/kidney/p/6052935.html)
+1. [vue.js 2.x 文档](https://cn.vuejs.org/)
+2. [String.prototype.padStart(maxLength, fillString)](http://www.css88.com/archives/7715)
+3. [js 里面的键盘事件对应的键码](http://www.cnblogs.com/wuhua1/p/6686237.html)
+4. [Vue.js双向绑定的实现原理](http://www.cnblogs.com/kidney/p/6052935.html)
+
+## 数据通信
+
+- 库：axios、vue-resource
+- 原生：fetch
+
+### `axios`
+
+需要安装`axios`，`vue-axios`
+
+和`vue-resource`用法相似，没有`jsonp`，没有挂载到实例中，可以直接使用
+
+以对象形式发送post请求：
+
+```javascript
+postInfo() {
+  var url = 'http://127.0.0.1:8899/api/post';
+  // 默认以json的形式提交数据，transformRequest可以对data进行操作
+  // 方法2：webpack支持引入node系统模块，引入querystring的stringify方法
+  // import {stringify} from 'querystring'
+  // 方法3：修改contentType
+  axios({url: '', method: 'POST', data: {}
+         transformRequest: [
+             function(data) {
+      			// 方法1：手动操作字符串
+             	let arr = []
+                for(let name in data) {
+                    arr.push(`${mame}=${data[name]}`)
+                }
+      			return arr.join('&')
+      			// 方法2：使用querystring的stringify方法
+      			return stringify(data)
+             }
+         ]
+        }).then(res => {
+    console.log(res.body);
+  });
+}
+```
+
+#### `Axios.create()`
+
+返回一个`axios`实例，后面可以直接使用
+
+```js
+axios.Axios.create({
+    transformRequest: [
+        function(data) {
+            // 方法2：使用querystring的stringify方法
+            return stringify(data)
+        }
+    ]
+})
+```
 
 
-##axios
 
-和vue-resource用法相似，没有jsonp，没有挂载到实例中，可以直接使用
-
-## axios
-
-### all()方法
+#### all()方法
 
 ```js
 function getUserName() {
@@ -644,7 +696,7 @@ axios.all(getUserName(), getUserAge())
 }))
 ```
 
-### 拦截器
+#### 拦截器
 
 ```js
 axios.interceptor.request.use(function(config) {
@@ -657,13 +709,11 @@ axios.interceptor.response.use(function(response) {
 })
 ```
 
-### 配置
+#### 配置
 
+### [vue-resource](https://github.com/pagekit/vue-resource)
 
-
-## [vue-resource](https://github.com/pagekit/vue-resource)
-
-### http请求
+#### http请求
 
 除了 vue-resource 之外，还可以使用 `axios` 的第三方包实现实现数据的请求
 
@@ -775,9 +825,9 @@ jsonpInfo() { // JSONP形式从服务器获取数据
 
 对象参数的形式发送请求
 
-`this.$http({url: '', params:{}, headers:{}, timeout:5, before: fn})`
+`this.$http({url: '', params:{}, headers:{}, timeout:5, before: fn, method: 'POST'})`
 
-### 全局拦截器interceptors
+#### 全局拦截器-interceptors
 
 应用loading处理
 
@@ -793,7 +843,7 @@ Vue.http.interceptors.push((req, next)=>{
 })
 ```
 
-### 配置
+#### 配置
 
 - 全局配置数据接口根域名，配置过后，用到的地方不能加/
 
@@ -803,9 +853,28 @@ Vue.http.interceptors.push((req, next)=>{
 
 `http: {root: ''}`
 
-- 全局配置emulateJSON
+- 全局配置`emulateJSON`
 
 `Vue.http.options.emulateJSON= true`
+
+### fetch
+
+```js
+let formdata = new FormData() // 不兼容IE9
+formdata.append("a", 9)
+formdata.append("b", 9)
+// let formdata = new FormData(this.$refs[from1])
+
+fetch('', {method: '', body: formdata...})
+    // 第一个then中获取不到数据，得到response对象，可以通过res.json()返回一个promise对象
+    .then(res => {
+    return res.json()
+	})
+ 	// 第二个then返回的data就是获得的数据
+    .then(data => {
+    console.log(data)
+})
+```
 
 ## [Vue动画](https://cn.vuejs.org/v2/guide/transitions.html)
 
@@ -1012,7 +1081,7 @@ methods: {
 - 模块化： 是从代码逻辑的角度进行划分的；方便代码分层开发，保证每个功能模块的职能单一；
 - 组件化： 是从UI界面的角度进行划分的；前端的组件化，方便UI组件的重用；
 
-### 全局组件定义的三种方式
+### 定义全局组件
 
 extend这个 API 很少用到，作用是扩展组件生成一个构造器，通常会与 `$mount` 一起使用。
 
@@ -1021,7 +1090,7 @@ extend这个 API 很少用到，作用是扩展组件生成一个构造器，通
 let Component = Vue.extend({
   template: '<div>test</div>'
 })
-// 挂载到 #app 上
+// 挂载到 #app 上 
 new Component().$mount('#app')
 // 除了上面的方式，还可以用来扩展已有的组件
 let SuperComponent = Vue.extend(Component)
@@ -1046,7 +1115,7 @@ Vue.component('login', login);
 
 2. 直接使用 Vue.component 方法：
 
-```
+```js
 Vue.component('register', {
 	template: '<h1>注册</h1>'
 });
@@ -1054,7 +1123,7 @@ Vue.component('register', {
 
 3. 将模板字符串，定义到template标签中：
 
-```
+```js
 <template id="tmpl">
 	 <div><a href="#">登录</a> | <a href="#">注册</a></div>
 </template>
@@ -1062,7 +1131,7 @@ Vue.component('register', {
 
 同时，需要使用 Vue.component 来定义组件：
 
-```
+```js
 Vue.component('account', {
 	template: '#tmpl'
 });
@@ -1070,7 +1139,7 @@ Vue.component('account', {
 
 > 注意： 组件中的DOM结构，有且只能有唯一的根元素（Root Element）来进行包裹！
 
-### 使用render函数渲染组件
+### render函数渲染组件
 
 ```javascript
 var login = {
@@ -1094,7 +1163,7 @@ var vm = new Vue({
 
 如果不通过方法返回，所有的组件会公用同一个data，如果 `data` 是对象的话，就会造成一个组件修改 `data` 以后会影响到其他所有组件，所以需要将 `data` 写成函数，每次用到就调用一次函数获得新的数据。 
 
-当我们使用 `new Vue()` 的方式的时候，无论我们将 `data` 设置为对象还是函数都是可以的，因为 `new Vue()` 的方式是生成一个根组件，该组件不会复用，也就不存在共享 `data` 的情况了。 
+当我们使用 `new Vue()` 的方式的时候，该组件不会复用，也就不存在共享 `data` 的情况了。 
 
 ```javascript
 Vue.component('account', {
@@ -1114,7 +1183,7 @@ Vue.component('account', {
 
 2. 在子组件中，如果将模板字符串，定义到了script标签中，那么，要访问子组件身上的`data`属性中的值，需要使用`this`来访问；
 
-### 使用`components`属性定义局部子组件
+### `components`属性定义局部组件
 
 1. 组件实例定义方式：
 
@@ -1182,7 +1251,7 @@ Vue.component('account', {
 </script>
 ```
 
-### 切换组件：`:is`属性,并添加切换动画
+### 动态组件：`:is`属性
 
 1. 组件实例定义方式：
 
@@ -1225,7 +1294,7 @@ Vue.component('account', {
   </div>
 ```
 
-1. 添加切换样式：
+2. 添加切换样式：
 
 ```html
   <style>
@@ -1248,11 +1317,33 @@ Vue.component('account', {
   </style>
 ```
 
+### 组件实例化
+
+```js
+// 1
+exports default Vue.component({})
+
+// 2
+import comp from './1'
+let compI = new comp({propsData: {...}})
+let vm = cmpI.$mount()
+// 应用：测试
+if(vm.$el.querySelector('li').innerHTML == '') {
+    ...
+}
+```
+
+应用：测试
+
 ### 组件通信
 
 #### 父子通信
 
-#####通过 `props` 
+##### 通过`ref` 
+
+父组件向子组件传值：**耦合性高**
+
+##### 通过 `props` 
 
 父组件通过 `props` 传递数据给子组件，子组件通过 `emit` 发送事件传递数据给父组件，这两种方式是最常用的父子通信实现办法。
 
@@ -1260,7 +1351,7 @@ Vue.component('account', {
 
 - 父组件向子组件传值
 
-组件实例定义方式，注意：一定要使用`props`属性来定义父组件传递过来的数据
+组件实例定义方式，注意：一定要使用`props`属性（可以校验）来定义父组件传递过来的数据
 
 ```html
 <script>
@@ -1305,7 +1396,7 @@ Vue.component('account', {
 
 ```html
 <div id="app">
-    <!-- 引用父组件 -->
+    <!-- 引用子组件 -->
     <son @func="getMsg"></son>
 
     <!-- 组件模板定义 -->
@@ -1340,9 +1431,59 @@ Vue.component('account', {
   </script>
 ```
 
-#####使用语法糖 `v-model` 
+##### 使用语法糖 `v-model` 
 
 使用语法糖 `v-model` 来直接实现，因为 `v-model` 默认会解析成名为 `value` 的 `prop` 和名为 `input` 的事件。这种语法糖的方式是典型的双向绑定，常用于 UI 控件上，但是究其根本，还是通过事件的方法让父组件修改数据。
+
+##### 使用$emit和$on
+
+```html
+<div id="app">
+    <!-- 触发子组件事件，子组件可以接受可以不接受 -->
+    <button type="text" value="+1" @click="$refs.son.$emit('add_num', 7)"/>
+    <!-- 引用子组件 -->
+    <son ref="son"></son>
+
+    <!-- 组件模板定义 -->
+    <script type="x-template" id="son">
+      <div>
+        {{num}}
+       </div>
+    </script>
+</div>
+
+  <script>
+    // 子组件的定义方式
+    Vue.component('son', {
+      template: '#son', // 组件模板Id
+      methods: {
+      },
+      data() {
+        return {
+          num: 0
+        }
+      },
+      created() {
+        this.$on('add_num', function(n) {
+          this.num += n
+        })
+      }
+    });
+
+    // 创建 Vue 实例，得到 ViewModel
+    var vm = new Vue({
+      el: '#app',
+      data: {},
+      methods: {
+        getMsg(val){ // 子组件中，通过 this.$emit() 实际调用的方法，在此进行定义
+          alert(val);
+        }
+      }
+    });
+  </script>
+```
+
+
 
 **children组件**
 
@@ -1392,7 +1533,7 @@ export default {
 
 这个我们直接用v-model像表单那样绑定就直接可以进行父子组件双向绑定了。在v-model的语法糖里封装了v-on:input 去进行监听事件
 
-#####通过访问 `$parent` 或者 `$children` 对象
+##### 通过 `$parent` 或者 `$children` 
 
 当然我们还可以通过访问 `$parent` 或者 `$children` 对象来访问组件实例中的方法和数据。
 
@@ -1444,7 +1585,7 @@ export default {
 </script>复制代码
 ```
 
-#####使用 `$listeners` 和 `.sync`
+##### 使用 `$listeners` 和 `.sync`
 
 另外如果你使用 Vue 2.3 及以上版本的话还可以使用 `$listeners` 和 `.sync` 这两个属性。
 
@@ -1517,7 +1658,7 @@ export default {
 
 对于这种情况可以通过查找父组件中的子组件实现，也就是 `this.$parent.$children`，在 `$children`中可以通过组件 `name` 查询到需要的组件实例，然后进行通信。
 
-####跨多层次组件通信
+#### 跨多层次组件通信
 
 对于这种情况可以使用 Vue 2.2 新增的 API `provide / inject`，虽然文档中不推荐直接使用在业务中，但是如果用得好的话还是很有用的。
 
@@ -1540,11 +1681,78 @@ export default {
 }
 ```
 
-#### 终极办法解决一切通信问题
+#### Vuex
 
 只要你不怕麻烦，可以使用 Vuex 或者 Event Bus 解决上述所有的通信情况。
 
 组件的嵌到超过3层的话，我还是建议用vuex来进行数据的共享，不然一层一层传，再一层一层的向上导，到最后你页面会把控不住，业务代码也就不直观了
+
+vue应用程序的状态管理模式，集中管理所有组件的状态
+
+```javascript
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+const store = new vuex.Store({
+    // 存储状态
+    // 通过this.$store.state.xx来访问
+    state: {
+        count: 0
+    },
+    // 更改状态
+    // 通过this.$store.commit('increment', 用来传递的参数2)来调用
+    mutations: {
+        increment(state, data) {
+            state.count++
+        }
+    },
+    // 通过getters向外提供数据，类似于过滤器和computed属性的集合
+    // this.$getters.optCount获取
+    getters: {
+        optCount: function(state) {
+            
+    }
+})
+
+Vue.use(vuex)
+
+const vm = new Vue({
+    el: '#app',
+    render: c=>c(App),
+    // 挂载到vm上
+    store
+})
+```
+
+### Vue2.0组件
+
+分为三部分
+
+```html
+<template lang="html"></template>
+<script>
+    export default {
+        name: "", // 有助于插件识别组件
+        data(){return {}},
+        ...
+    }
+</script>
+<style lang="scss" scoped></style>
+```
+
+`vue`文件的`loader：vue-loader`(包含了`vue-loader-plugin`)，`vue-style-loader`，`vue-html-loader`，`vue-template-compiler`
+
+### slot插槽
+
+在定义组件时声明为插槽的部分可以在使用时进行定义，即可以**动态加载组件中的一部分**，在组件使用的位置定义插槽的内容，如果没有定义插槽，内容会被抛弃
+
+声明插槽：`<slot name="sname"></slot>`
+
+使用插槽：在使用组件时所有内容会被渲染到组件的slot区域
+
+使用具名插槽：`<span slot="sname"><a>...</a>...</span>`会替换组件对应的slot区域，可以结合`<template>`使用
+
+#### 作用域插槽
 
 ## mixin 和 mixins 区别
 
@@ -1567,7 +1775,7 @@ Vue.mixin({
 
 ## 特性
 
-### 使用 `this.$refs` 来获取元素和组件
+###  `this.$refs` 获取元素和组件
 
 ```html
   <div id="app">
@@ -1608,15 +1816,7 @@ Vue.mixin({
   </script>
 ```
 
-### slot插槽
-
-在定义组件时声明为插槽的部分可以在使用时进行定义，即可以动态加载组件中的一部分，在组件使用的位置定义插槽的内容，如果没有定义插槽，内容会被抛弃
-
-声明插槽：`<slot name="sname"></slot>`
-
-使用插槽：在使用组件时所有内容会被渲染到组件的slot区域
-
-使用具名插槽：`<span slot="sname"><a>...</a>...</span>`会替换组件对应的slot区域
+#### 
 
 ## 路由
 
@@ -1795,17 +1995,17 @@ window.addEventListener('popstate', e => {
 
 router-view外添加transition，设置动画类和过渡模式
 
-### 动态路由-在路由规则中定义参数
+### 动态路由-参数传递
 
 1. 在规则中使用占位符定义参数：
 
-```
+```js
 { path: '/register/:id', component: register }
 ```
 
 2. 通过 `this.$route.params`来获取路由中的参数：
 
-```
+```js
 var register = Vue.extend({
       template: '<h1>注册组件 --- {{this.$route.params.id}}</h1>'
 });
@@ -1813,7 +2013,7 @@ var register = Vue.extend({
 
 通过 `this.$route.query`来获取路由查询字符串中的参数，path不用修改
 
-###  `children` 属性实现路由嵌套
+###  路由嵌套-children属性
 
 ```html
   <div id="app">
@@ -1849,9 +2049,11 @@ var register = Vue.extend({
         {
           path: '/account',
           component: account,
-          children: [ // 通过 children 数组属性，来实现路由的嵌套
-            { path: 'login', component: login }, // 注意，子路由的开头位置，不要加 / 路径符
-            { path: 'register', component: register }
+          children: [ 
+            // 通过 children 数组属性，来实现路由的嵌套
+            { path: 'login', component: login }, 
+            // 注意，子路由的开头位置，不要加 / 路径符，加 / 时要将路径写全
+            { path: '/account/register', component: register }
           ]
         }
       ]
@@ -1870,7 +2072,36 @@ var register = Vue.extend({
   </script>
 ```
 
-#### 命名视图实现经典布局
+### 编程式导航
+
+网页中的两种跳转方式：a标签，编程式导航（window.location.href）
+
+vue中的编程式导航：绑定事件，在事件中跳转
+
+```javascript
+// 区分：this.$route是路由参数对象，this.$router是路由导航对象
+// history是一个栈
+// push：     是在最后添加路由记录
+// replace：  替换最后一个历史记录（当前）
+// go(int)：
+this.$router.push('' + id)
+this.$router.push({path:'' + id})
+// name是路由规则的名字
+// {path: '', component: comp, name: 'info'}
+this.$router.push({name: 'info', params: {id: id}})
+// 提供path，params会被忽略，不能同时使用
+this.$router.push({path: '', query: {id: id}})
+
+// $router的原型对象上有go(),forword(),back()
+```
+
+### 路由守卫
+
+`beforeRouteUpdate(val,oldval,next )`
+
+### 多视图-命名视图
+
+实现经典布局
 
 1. 标签代码结构：
 
@@ -1884,7 +2115,7 @@ var register = Vue.extend({
   </div>
 ```
 
-1. JS代码：
+2. JS代码：
 
 ```javascript
 <script>
@@ -1905,6 +2136,7 @@ var register = Vue.extend({
       routes: [
         {
           path: '/', components: {
+            // 将组件放入不同的view里
             default: header,
             a: sidebar,
             b: mainbox
@@ -1923,14 +2155,12 @@ var register = Vue.extend({
   </script>
 ```
 
-1. CSS 样式：
+3. CSS 样式：
 
 ```
-  <style>
-    .header {
+	.header {
       border: 1px solid red;
     }
-
     .content{
       display: flex;
     }
@@ -1944,26 +2174,6 @@ var register = Vue.extend({
       border: 1px solid blue;
       height: 500px;
     }
-  </style>
-```
-
-### 编程式导航
-
-网页中的两种跳转方式：a标签，编程式导航（window.location.href）
-
-vue中的编程式导航：绑定事件，在事件中跳转
-
-```javascript
-// 区分：this.$route是路由参数对象，this.$router是路由导航对象
-this.$router.push('' + id)
-this.$router.push({path:'' + id})
-// name是路由规则的名字
-// {path: '', component: comp, name: 'info'}
-this.$router.push({name: 'info', params: {id: id}})
-// 提供path，params会被忽略，不能同时使用
-this.$router.push({path: '', query: {id: id}})
-
-// $router的原型对象上有go(),forword(),back()
 ```
 
 ## `watch`属性-侦听器
@@ -2003,7 +2213,7 @@ this.$router.push({path: '', query: {id: id}})
   </script>
 ```
 
-监听路由对象的改变：
+### 监听路由
 
 ```html
 <div id="app">
@@ -2036,8 +2246,8 @@ this.$router.push({path: '', query: {id: id}})
       methods: {},
       router: router,
       watch: {
-        // 注意写法
-        '$route': function (newVal, oldVal) {
+        // 表达式包含.时要使用引号
+        $route(newVal, oldVal) {
           if (newVal.path === '/login') {
             console.log('这是登录组件');
           }
@@ -2060,6 +2270,8 @@ vm.$watch('obj', {
     handler: function(val, oldVal) {}
 })
 ```
+
+注意：不推荐使用watch监视路由（只能观察不能控制），可以使用路由守卫（可以控制）
 
 ## `computed`计算属性
 
@@ -2140,12 +2352,14 @@ vm.$watch('obj', {
   </script>
 ```
 
-## `watch`、`computed`和`methods`之间的对比
+### `watch`、`computed`和`methods`之间的对比
 
 1. `computed`属性的结果会被缓存，除非依赖的响应式属性变化才会重新计算。主要当作属性来使用，必须有return；
 2. `methods`方法表示一个具体的操作，主要书写业务逻辑；
 3. `watch`一个对象，键是需要观察的表达式，值是对应回调函数。主要用来监听某些特定数据的变化，从而进行某些具体的业务逻辑操作；可以看作是`computed`和`methods`的结合体；
-4. 一般来说需要依赖别的属性来动态获得值的时候可以使用 `computer`，对于监听到值的变化需要做一些复杂业务逻辑的情况可以使用 `watch`。 
+4. 一般来说需要依赖别的属性来动态获得值的时候可以使用 `computer`，对于监听到值的变化需要做一些复杂业务逻辑的情况可以使用 `watch`。
+
+
 
 ## `nrm`的安装使用
 
@@ -2169,45 +2383,6 @@ vm.$watch('obj', {
    也可以`import * as util from ''`
 
 3. 使用箭头函数：`(a, b)=> { return a-b; }`
-
-## Vuex
-
-vue应用程序的状态管理模式，集中管理所有组件的状态
-
-```javascript
-import Vue from 'vue'
-import Vuex from 'vuex'
-
-const store = new vuex.Store({
-    // 存储状态
-    // 通过this.$store.state.xx来访问
-    state: {
-        count: 0
-    },
-    // 更改状态
-    // 通过this.$store.commit('increment', 用来传递的参数2)来调用
-    mutations: {
-        increment(state, data) {
-            state.count++
-        }
-    },
-    // 通过getters向外提供数据，类似于过滤器和computed属性的集合
-    // this.$getters.optCount获取
-    getters: {
-        optCount: function(state) {
-            
-    }
-})
-
-Vue.use(vuex)
-
-const vm = new Vue({
-    el: '#app',
-    render: c=>c(App),
-    // 挂载到vm上
-    store
-})
-```
 
 # Vue进阶
 

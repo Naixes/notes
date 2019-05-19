@@ -88,6 +88,20 @@ webpack src/js/main.js dist/bundle.js
     }
 ```
 
+两种形式：导出对象（上例），导出函数
+
+```js
+modile.exports = function(env, argv) {
+    // env:环境对象,scripts中可以设置
+    env = env || {} 
+    return {
+        // 通用的设置    
+    }
+}
+```
+
+
+
 ### `webpack-dev-server`实时打包构建
 
 1. 由于每次重新修改代码之后，都需要手动运行webpack打包的命令，比较麻烦，所以使用`webpack-dev-server`来实现代码实时打包编译，当修改代码之后，会自动进行打包构建。
