@@ -1685,32 +1685,61 @@ export default {
 
 只要你不怕麻烦，可以使用 Vuex 或者 Event Bus 解决上述所有的通信情况。
 
-组件的嵌到超过3层的话，我还是建议用vuex来进行数据的共享，不然一层一层传，再一层一层的向上导，到最后你页面会把控不住，业务代码也就不直观了
+组件的嵌到超过3层的话，我还是建议用vuex来进行数据的共享
 
-vue应用程序的状态管理模式，集中管理所有组件的状态
+vuex：vue应用程序的状态管理模式，集中管理所有组件的状态
+
+1. 数据跨组件共享
+2. 防止数据意外修改
+3. 追踪数据的修改，方便调试
+
+![](https://vuex.vuejs.org/vuex.png)
 
 ```javascript
+// main.js
+...
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-const store = new vuex.Store({
+const store = new Vuex.Store({
+    // 严格模式：防止直接修改，注意只在开发阶段为true，否则会很慢
+    // strict: true
+    strict: process.env.NODE_ENV != 'production'
     // 存储状态
     // 通过this.$store.state.xx来访问
     state: {
         count: 0
     },
     // 更改状态
-    // 通过this.$store.commit('increment', 用来传递的参数2)来调用
+    // 同步操作
+    // 通过this.$store.commit('increment', 用来传递的参数payload)来调用
     mutations: {
+        // 参数：state，传递过来的参数
         increment(state, data) {
             state.count++
         }
     },
-    // 通过getters向外提供数据，类似于过滤器和computed属性的集合
+    // 对mutation进行封装组合，执行异步操作
+    // 通过this.$store.dispatch('increment', 用来传递的参数payload)来调用
+    actions： {
+        // 参数：context当前的store对象，传递过来的参数
+        // increment(context, data) {
+            // content.commit('increment', data)
+        // }
+        increment({ commit }, data) {
+            commit('increment', data)
+        }
+    },
+    // 通过getters向外提供数据，类似于过滤器和computed属性的集合们
+    // 可以和computed结合使用：可以添加get，set封装store的操作
     // this.$getters.optCount获取
     getters: {
-        optCount: function(state) {
+        optCount(state) {
             
+    },
+    // 模块划分
+    modules: {
+
     }
 })
 
@@ -1723,6 +1752,25 @@ const vm = new Vue({
     store
 })
 ```
+
+vuex辅助方法
+
+```js
+// mapState： 将state映射成computed
+// mapActions： sctions -》 methods
+// mapGetters： getters -》 computed
+import {mapState, mapActions} from 'vuex'
+...
+methods{
+    ...mapActions(['seta', 'setb'])
+}
+computed: {
+    // 相当于a(){return this.$store.state.a}
+    ...mapState(['a', 'b'])
+}
+```
+
+
 
 ### Vue2.0组件
 
