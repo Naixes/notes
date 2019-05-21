@@ -982,7 +982,7 @@ A：Alpha（0-1）
 text-shadow:水平位置 垂直位置 模糊距离 阴影颜色;
 ```
 
-![1498467502625](G:/note/%E5%89%8D%E7%AB%AF/html/media/1498467502625.png) 
+![1498467502625](./media/1498467502625.png) 
 
 **前两项是必须写的**, 后两项可以选写。
 
@@ -1015,7 +1015,7 @@ text-shadow:水平位置 垂直位置 模糊距离 阴影颜色;
     </body>
 ```
 
-![1498467533412](G:/note/%E5%89%8D%E7%AB%AF/html/media/1498467533412.png)
+![1498467533412](./media/1498467533412.png)
 
 ## 背景-background
 
@@ -1626,11 +1626,11 @@ block-level box: display属性为block, list-item, table的元素，会生成blo
 
 inline-level box: display属性为inline, inline-block, inline-table的元素，会生成inline-level box。并且参与inline formatting context。
 
-##Formatting context
+## Formatting context
 
 Formatting context是W3C CSS2.1规范中的一个概念。它是页面中的一块渲染区域，并且有一套渲染规则，它决定了其子元素将如何定位，以及和其他元素的关系和相互作用。  
 
-##W3C定义
+## W3C定义
 
 ​	浮动元素和绝对定位元素，非块级盒子的块级容器（例如 inline-blocks, table-cells, 和 table-captions），以及overflow值不为“visiable”的块级盒子，都会为他们的内容创建新的块级格式化上下文。 
 ​	在一个块级格式化上下文里，盒子从包含块的顶端开始垂直地一个接一个地排列，两个盒子之间的垂直的间隙是由他们的margin 值所决定的。两个相邻的块级盒子的垂直外边距会发生叠加。 
@@ -1641,7 +1641,7 @@ Formatting context是W3C CSS2.1规范中的一个概念。它是页面中的一�
 
 素的显示模式 display，分为 块级元素行内元素行内块元素，其实，它还有很多其他显示模式。
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/dis.png"  style="border: 1px dashed #ccc; padding: 5px;" />
+<img src="./media/dis.png"  style="border: 1px dashed #ccc; padding: 5px;" />
 
 ## 那些元素会具有参与BFC的条件
 
@@ -1679,10 +1679,9 @@ BFC布局规则特性：
 
 ```
 计算BFC的高度时，自然也会检测浮动或者定位的盒子高度。
-
 ```
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/fu.jpg" />
+<img src="./media/fu.jpg" />
 (2) 解决外边距合并问题
 
 外边距合并的问题。
@@ -1696,7 +1695,7 @@ BFC布局规则特性：
 
 属于同一个BFC的两个相邻盒子的margin会发生重叠，那么我们创建不属于同一个BFC，就不会发生margin重叠了。
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/ma.png" />
+<img src="./media/ma.png" />
 
 (3) 制作右侧自适应的盒子问题
 
@@ -1707,7 +1706,7 @@ BFC布局规则特性：
 
 ```
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/you.png" />
+<img src="./media/you.png" />
 
 (4) 多列布局中防止最后一列因为浏览器四舍五入了列宽使总宽度会超出容器而掉下来，我们在多列布局中的最后一列里创建一个新的BFC，它将总是占据其他列先占位完毕后剩下的空间。 
 
@@ -1787,11 +1786,9 @@ BFC布局规则特性：
 行内样式优先，可以理解为远大于100。总之，他拥有比上面提高的选择器都大的优先级。
 权重相同时，CSS遵循就近原则。
 CSS定义了一个!important命令，该命令被赋予最大的优先级。
-
-
 ```
 
-##CSS特殊性（Specificity）
+## CSS特殊性（Specificity）
 
 关于CSS权重，我们需要一套计算公式来去计算，这个就是 CSS Specificity，我们称为CSS 特性或称非凡性，它是一个衡量CSS值优先级的一个标准 具体规范入如下：
 
@@ -1849,7 +1846,7 @@ CSS就三个大模块：  盒子模型 、 浮动 、 定位，其余的都是�
 
 ![这里写图片描述](https://img-blog.csdn.net/20180324150509906?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p3a2trazE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70) 
 
-###IE盒模型
+### IE盒模型
 
 **width表示content+padding+border这三个部分的宽度** 
 
@@ -2400,7 +2397,7 @@ ie6等低版本浏览器不支持固定定位。
 | 绝对定位absolute | 完全脱标，不占有位置 | 可以               | 相对于定位父级移动位置（拼爹型） |
 | 固定定位fixed    | 完全脱标，不占有位置 | 可以               | 相对于浏览器移动位置（认死理型） |
 
-##定位模式转换
+## 定位模式转换
 
 跟浮动一样， 元素添加了 绝对定位和固定定位之后， 元素模式也会发生转换， 都转换为行内块模式。
 
@@ -2887,8 +2884,6 @@ z 里面是负的， 外面是正的
 
  就是沿着 x 立体旋转.
 
-![1498445756802](E:/Jennifer/other/notes/media/1498445756802.png)
-
 ```css
 img {
   transition:all 0.5s ease 0s;
@@ -2903,8 +2898,6 @@ img:hove {
 ## rotateY()
 
 沿着y轴进行旋转
-
-![1498446043198](E:/Jennifer/other/notes/media/1498446043198.png)
 
 ```css
 img {
@@ -3109,7 +3102,6 @@ http://m.ctrip.com/html5/   携程网手机端地址
 
 ```css
 flex-flow: flex-direction  flex-wrap;  
-
 ```
 
 例如：
@@ -3119,7 +3111,6 @@ display: flex;
 /* flex-direction: row;
 flex-wrap: wrap;   这两句话等价于下面的这句话*/
 flex-flow: column wrap;  /* 两者的综合 */
-
 ```
 
 7、flex：flex属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto。后两个属性可选
@@ -3151,34 +3142,17 @@ align-content是针对flex容器里面多轴(多行)的情况,align-items是针�
 
 ```css
 order: 1;
-
 ```
 
 此知识点重在理解，要明确找出主轴、侧轴、方向，各属性对应的属性值
 
 父元素flex布局时
 
-# 京东项目(一)
-
-## 京东项目介绍
-
-项目名称：京东网
-项目描述：京东首页公共部分的头部和尾部制作，京东首页中间部分。
-
-
-
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/jd.png" />
-
-## 设计目标
-
-- 保证浏览器 ie7及以上, 火狐, 360, safari，chrome等。谁让我再测ie6，就跟谁急。。
-- 熟悉CSS+DIV布局，页面的搭建工作
-- 了解常用电商类网站的布局模式
-- 为后期京东移动端做铺垫
+# 京东项目
 
 ## 几点思考
 
-(1). 开发工具  sublime  、fireworks（ps）、各种浏览器(ie6.7 要测看心情)
+(1). 开发工具  sublime  、fireworks（ps）、各种浏览器
 
 (2). CSS Reset 类库,为跨浏览器兼容做准备(也可以直接运用jd网站的初始化)
 
@@ -3195,23 +3169,13 @@ normalize.css   只是一个很小的CSS文件，但它在默认的HTML元素样
 
 - 解释代码：用注释和详细的文档来
 
-
 ```
 
-(3). 技术栈
-
-```
-HTML 结构 + CSS  布局 
-
-```
-
-
-
-(4). 低版本浏览器 单独制作一个跳转页面 (都是孩子，也舍不得打，舍不得扔)
+(3). 低版本浏览器 单独制作一个跳转页面 
 
 https://h5.m.jd.com/dev/3dm8aE4LDBNMkDfcCaRxLnVQ7rqo/index.html
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/di.png" width="600" />
+<img src="./media/di.png" width="600" />
 
 ## 目录说明
 
@@ -3230,7 +3194,6 @@ https://h5.m.jd.com/dev/3dm8aE4LDBNMkDfcCaRxLnVQ7rqo/index.html
 
 ```
 代码：  <link rel="shortcut icon" href="favicon.ico"  type="image/x-icon"/>     
-
 ```
 
 注意： 
@@ -3246,7 +3209,7 @@ https://h5.m.jd.com/dev/3dm8aE4LDBNMkDfcCaRxLnVQ7rqo/index.html
 
 ### logo写法
 
-```
+```html
 <style>
   .logo a {
       text-indent: -2em;
@@ -3259,7 +3222,6 @@ https://h5.m.jd.com/dev/3dm8aE4LDBNMkDfcCaRxLnVQ7rqo/index.html
   	<a href='#' title='京东'>京东</a>
   </h1>
 </div>
-
 ```
 
 
@@ -3270,13 +3232,13 @@ SEO是由英文Search Engine Optimization缩写而来， 中文意译为“搜�
 
  我们现在阶段主要进行站内优化。网站优化，我们应该要懂。。。
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/san.png" />
+<img src="./media/san.png" />
 
 #### 网页title 标题
 
 title具有不可替代性，是我们的内页第一个重要标签，是搜索引擎了解网页的入口，和对网页主题归属的最佳判断点。
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/title.png" width="500" />
+<img src="./media/title.png" width="500" />
 
 建议：
 
@@ -3295,9 +3257,8 @@ title具有不可替代性，是我们的内页第一个重要标签，是搜索
 
 京东网：
 
-```
+```html
 <meta name="description" content="京东JD.COM-专业的综合网上购物商城,销售家电、数码通讯、电脑、家居百货、服装服饰、母婴、图书、食品等数万个品牌优质商品.便捷、诚信的服务，为您提供愉悦的网上购物体验!" />
-
 
 ```
 
@@ -3308,9 +3269,8 @@ title具有不可替代性，是我们的内页第一个重要标签，是搜索
 3. 补充在 title  和 keywords  中未能充分表述的说明.
 4. 用英文逗号 关键词1,关键词2
 
-```
+```html
 <meta name="description" content="小米商城直营小米公司旗下所有产品，囊括小米手机系列小米MIX、小米Note 2，红米手机系列红米Note 4、红米4，智能硬件，配件及小米生活周边，同时提供小米客户服务及售后支持。" />
-
 
 ```
 
@@ -3320,17 +3280,15 @@ Keywords是页面关键词，是搜索引擎关注点之一。Keywords应该限�
 
 京东网：
 
-```
+```html
 <meta name="Keywords" content="网上购物,网上商城,手机,笔记本,电脑,MP3,CD,VCD,DV,相机,数码,配件,手表,存储卡,京东" />
-
 
 ```
 
 小米网：
 
-```
+```html
 <meta name="keywords" content="小米,小米6,红米Note4,小米MIX,小米商城" />
-
 
 ```
 
@@ -3351,7 +3309,7 @@ Keywords是页面关键词，是搜索引擎关注点之一。Keywords应该限�
 
 ### 宽度剩余法：
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/w.png" />
+<img src="./media/w.png" />
 
 | 知识点       | 说明                                                         |
 | ------------ | ------------------------------------------------------------ |
@@ -3384,23 +3342,9 @@ Keywords是页面关键词，是搜索引擎关注点之一。Keywords应该限�
 
 left 50%   然后 margin-left  版心宽度一半。
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/guding.png" width="500" />
+<img src="./media/guding.png" width="500" />
 
-学习目标:
-
-- 掌握京东中间部分制作
-
-- 理解BFC使用
-
-- 了解优雅降级和渐进增强
-
-- 了解CSS压缩和验证工具
-
-  typora-copy-images-to: media
-
-------
-
-# 京东项目(二)
+typora-copy-images-to: media
 
 ## nav导航栏所用知识点
 
@@ -3417,7 +3361,7 @@ left 50%   然后 margin-left  版心宽度一半。
 
 left 50%   然后 margin-left  版心宽度一半。
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/guding.png" width="500" />
+<img src="./media/guding.png" width="500" />
 
 ## 焦点图部分所用知识点
 
@@ -3435,41 +3379,33 @@ left 50%   然后 margin-left  版心宽度一半。
 
 2.了解ie低版本浏览器 半透明
 
-filter:Alpha(opacity=50) ；   // opacity值为0 到 100
+`filter:Alpha(opacity=50) ；   // opacity值为0 到 100`
 
 但是 此属性是盒子半透明，不是背景半透明哦，因为里面的内容也一起半透明了
 
 因此，低版本的 ie6.7浏览器，我们不需要透明了，直接采用优雅降级的做法。
 
-background: gary;
+`background: gary;`
 
-background: rgba(0,0,0,.2);
+`background: rgba(0,0,0,.2);`
 
 写上两句 背景， 低版本ie只执行gray， 其他浏览器执行 半透明下面这一句。
 
 ## 优雅降级和渐进增强
 
-什么是渐进增强（progressive enhancement）、优雅降级（graceful degradation）呢？
-
-渐进增强 progressive enhancement：
+**渐进增强 progressive enhancement：**
 
 针对低版本浏览器进行构建页面，保证最基本的功能，然后再针对高级浏览器进行效果、交互等改进和追加功能达到更好的用户体验。
 
  类似 爬山，由低出往高处爬
 
-  <img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/pa.png" width="400" />
-
-  <b>优雅降级 graceful degradation：</b>
+ <b>优雅降级 graceful degradation：</b>
 
 一开始就构建完整的功能，然后再针对低版本浏览器进行兼容。
 
 类似蹦极，由高处往低处下落
 
-<img src="H:/01%20study/09%20%E7%BC%96%E7%A8%8B/01.html%E5%92%8Ccss(%E5%85%B1160%E5%A4%9A%E9%9B%86)/%E8%B5%84%E6%96%99/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80%E7%AC%AC%E5%85%AB%E5%A4%A9/%E7%AC%94%E8%AE%B0/media/xia.jpg" />
-
-　　区别：渐进增强是向上兼容，优雅降级是向下兼容。
-
-个人建议： 现在互联网发展很快， 连微软公司都抛弃了ie浏览器，转而支持 edge这样的高版本浏览器，我们很多情况下没有必要再时刻想着低版本浏览器了，而是一开始就构建完整的效果，根据实际情况，修补低版本浏览器问题。
+区别：渐进增强是向上兼容，优雅降级是向下兼容。
 
 ## 浏览器前缀
 
@@ -3481,7 +3417,7 @@ background: rgba(0,0,0,.2);
 | -ms-       | Internet Explorer, Edge                |
 | -khtml-    | Konqueror                              |
 
-后面我们会有 常用的解决H5和C3 的兼容解决文件， 我们这里暂且不涉及。
+常用的解决H5和C3 的兼容解决文件
 
 ## 背景渐变
 
@@ -3493,12 +3429,10 @@ background: rgba(0,0,0,.2);
 
 ```css
 background:-webkit-linear-gradient(渐变的起始位置， 起始颜色， 结束颜色)；
-
 ```
 
 ```css
 background:-webkit-linear-gradient(渐变的起始位置， 颜色 位置， 颜色位置....)；
-
 ```
 
 
@@ -3509,8 +3443,6 @@ CssStats 是一个在线的 CSS 代码分析工具
 
 ```
 网址是：  http://www.cssstats.com/
-
-
 ```
 
 如果你想要更全面的，这个神奇，你值得拥有：
