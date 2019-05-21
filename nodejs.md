@@ -1085,56 +1085,7 @@ todo() {
 
 - 回调地狱：使用回调嵌套的方式保证异步操作的执行顺序
 
-Promise是一个构造函数
-
-`Promise` 翻译过来就是承诺的意思，这个承诺会在未来有一个确切的答复，并且该承诺有三种状态，分别是：
-
-1. 等待中（pending）
-2. 完成了 （resolved）
-3. 拒绝了（rejected）
-
-这个承诺一旦从等待状态变成为其他状态就永远不能更改状态了，也就是说一旦状态变为 resolved 后，就不能再次改变
-
-```javascript
-// 创建promise容器:一旦创建就开始执行里面的代码
-// 在容器中创建异步任务，状态为pending
-var prm = new Promise(function(resolve, reject) {
-    fs.readFile('', function(err, data) {
-        if(err) {
-            // 状态由pending变为rejected
-            reject(err)
-        }
-        // 状态由pending变为resolved
-        resolve(data)
-    })
-})
-
-// then方法中的参数1即为resolve方法，参数2即为reject方法,或者.catch(fn)fn为reject方法
-prm
-  .then(function(data) {
-    // 这里返回的是下一个then的Promise容器
-    // 如果你在 then 中 使用了 return，那么 return 的值会被 Promise.resolve() 包装
-    return new Promise()
-  }, function(err) {})
-  .then(function(data) {
-    return new Promise()
-  }, function(err) {})
-```
-
-两个任务并行Promise.all()
-
-```javascript
-var p1 = new Promise(function (resolve, reject) {
-    setTimeout(resolve, 500, 'P1');
-});
-var p2 = new Promise(function (resolve, reject) {
-    setTimeout(resolve, 600, 'P2');
-});
-// 同时执行p1和p2，并在它们都完成后执行then:
-Promise.all([p1, p2]).then(function (results) {
-    console.log(results); // 获得一个Array: ['P1', 'P2']
-});
-```
+Promise是一个构造函数，用来封装异步函数
 
 ### promise封装异步函数
 
@@ -1194,30 +1145,7 @@ User.findOne({name: 'a'})
   .then(function(ret) {})
 ```
 
-### promise捕获异常
-
-promise也是存在一些缺点的，比如无法取消 `Promise`，错误需要通过回调函数捕获。 
-
-如果其中一个执行出错不想影响其他的执行，可以给每个promise指定失败的回调
-
-如果他们相互影响依赖，在最后用`.catch(fn)`捕获异常
-
-```javascript
-pReadFile.('aa.js')
-  .then(function(data) {
-    // todo
-    return pReadFile.('bb.js')
-  })
-  .then(function(data) {
-    // todo
-    return pReadFile.('cc.js')
-  })
-  .catch(function(err) {
-    console.log(err.message)
-})
-```
-
-Promise 的最大问题是代码冗余 ，原来的任务被 Promise 包装了一下，不管什么操作，一眼看去都是一堆then，原来的语义变得很不清楚。 
+promise也是存在一些缺点的，比如无法取消 `Promise`，错误需要通过回调函数捕获， 代码冗余 ，原来的任务被 Promise 包装了一下，不管什么操作，一眼看去都是一堆then，原来的语义变得很不清楚。 
 
 ### Generator
 
