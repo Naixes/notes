@@ -33,7 +33,7 @@
 
   ![img](https://user-gold-cdn.xitu.io/2018/12/21/167ced454926a458?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)  
 
-![01.MVC和MVVM的关系图解](G:\note\前端\html\01.MVC和MVVM的关系图解.png)
+![01.MVC和MVVM的关系图解](.\media\01.MVC和MVVM的关系图解.png)
 
 ### Vue.js 基本代码和MVVM
 
@@ -66,6 +66,14 @@ var vm = new Vue({
 ```
 
 ### 数据与方法
+
+当一个 Vue 实例被创建时，它将 `data` 对象中的所有的属性加入到 Vue 的**响应式系统**中。当这些属性的值发生改变时，视图将会产生“响应”，即匹配更新为新的值。
+
+当这些数据改变时，视图会进行重渲染。值得注意的是只有当实例被创建时 `data` 中存在的属性才是**响应式**的。
+
+这里唯一的例外是使用 `Object.freeze()`，这会阻止修改现有的属性，也意味着响应系统无法再*追踪*变化。
+
+除了数据属性，Vue 实例还暴露了一些有用的实例属性与方法。它们都有前缀 `$`，以便与用户定义的属性区分开来。例如：`$data, $el, $watch`
 
 
 ### [vue实例的生命周期](https://cn.vuejs.org/v2/guide/instance.html#实例生命周期)
@@ -1732,7 +1740,7 @@ const store = new Vuex.Store({
     },
     // 通过getters向外提供数据，类似于过滤器和computed属性的集合们
     // 可以和computed结合使用：可以添加get，set封装store的操作
-    // this.$getters.optCount获取
+    // this.$store.getters.optCount获取
     getters: {
         optCount(state) {
             
@@ -2823,7 +2831,7 @@ methodsToPatch.forEach(function (method) {
 
 对于实现 macrotasks ，会先判断是否能使用 `setImmediate` ，不能的话降级为 `MessageChannel` ，以上都不行的话就使用 `setTimeout`
 
-```
+```js
 if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   macroTimerFunc = () => {
     setImmediate(flushCallbacks)
@@ -3363,7 +3371,7 @@ Vue.use(VueResource);
 
 然后将其前面的“#”注释删掉，表示开启gzip压缩功能。开启以后还需要进行相关配置。在httpd.conf文件的最后添加以下内容即可：
 
-```
+```html
 <IfModule deflate_module>
     #必须的，就像一个开关一样，告诉apache对传输到浏览器的内容进行压缩
     SetOutputFilter DEFLATE
