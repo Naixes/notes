@@ -171,14 +171,19 @@ Number、String、Boolean、Undefined、Null
     - NaN 与任何值都不相等，包括他本身
     - 涉及到的 任何关于NaN的操作，都会返回NaN  
   - isNaN(): 函数用于检查其参数是否是非数字值。 
+  
 - 数值转换
   - Number()
   - parseInt()忽略空格找到第一个非空字符，如果不是数字或负号返回NaN，可以解析八进制和十六进制，ECMAScript5之后不能解析八进制，可以传入**第二个参数**表示`var num = parseInt("070", 8)`建议明确指定基数
   - parseFloat()只能解析十进制，如果是可解析为整数的值则返回整数
+  
+-  +0 和 -0
+
+  JavaScript 中有 +0 和 -0，在加法类运算中它们没有区别，但是除法的场合则需要特别留意区分，“忘记检测除以 -0，而得到负无穷大”的情况经常会导致错误，而区分 +0 和 -0 的方式，正是检测 1/x 是 Infinity 还是 -Infinity。
 
 ##### 0.1 + 0.2 != 0.3
 
-先说原因，因为 JS 采用 IEEE 754 双精度版本（64位），并且只要采用 IEEE 754 的语言都有该问题。
+先说原因，因为 JS 采用 IEEE 754 双精度版本（64位），并且只要采用 IEEE 754 的语言都有该问题。根据浮点数的定义，非整数的 Number 类型无法用 ==（=== 也不行） 来比较。
 
 我们都知道计算机是通过二进制来存储东西的，那么 `0.1` 在二进制中会表示为
 
@@ -227,7 +232,9 @@ console.log(0.10000000000000001)
 console.log(0.100000000000000002) // 0.1
 ```
 
-其实解决的办法有很多，原生提供的方式来解决问题
+所以实际上，这里错误的不是结论，而是比较的方法，正确的比较方法是使用 JavaScript提供的最小精度值：`console.log( Math.abs(0.1 + 0.2 - 0.3) <= Number.EPSILON);`
+
+其实解决的办法还有很多，原生提供的方式来解决问题
 
 ```js
 // toFixed() 方法可把 Number 四舍五入为指定小数位数的数字。
@@ -267,6 +274,12 @@ parseFloat((0.1 + 0.2).toFixed(10)) === 0.3 // true
 
   1. String()：适用于任何数据类型（null,undefined 转换后为null和undefined）；
   2. xx.toString()：null,defined没有toString()方法，参数是基数默认为10。 
+  
+- 字符串的最大长度
+
+  String 有最大长度是 `2^53 - 1`，这在一般开发中都是够用的，但是这个所谓最大长度，并不完全是你理解中的字符数。因为 String 的意义并非“字符串”，而是字符串的 UTF16 编码，我们字符串的操作charAt、charCodeAt、length 等方法针对的都是 UTF16 编码。所以，字符串的最大长度，实际上是受字符串的编码长度影响的。
+
+  JavaScript 字符串把每个 UTF16 单元当作一个字符来处理，所以处理非 BMP（超出U+0000 - U+FFFF 范围）的字符时，应该格外小心。
 
 #### Boolean类型
 
@@ -294,6 +307,14 @@ Null类型只有一个值即null，如果变量将用于保存对象，最好初
 2. undefined的值派生自null因此相等性测试返回true（==会转换操作数）
 
    `undefined == null // true`
+
+**用void 0 代替undefined：**
+
+任何变量在赋值前是 Undefined 类型、值为 undefined，一般我们可以用全局变量 undefined（就是名为undefined 的这个变量）来表达这个值，或者 void 运算来把任一一个表达式变成undefined 值。
+
+但是呢，因为 JavaScript 的代码 **undefined 是一个变量**，而并非是一个关键字，这是JavaScript 语言公认的设计失误之一，所以，我们为了避免无意中被篡改，我建议使用void 0 来获取 undefined 值。
+
+Naixes：在ant-design-vue的select组件中将选择内容重置为空时用到过
 
 #### Symbol
 
@@ -2279,14 +2300,12 @@ console.log(obj.age);
 
 ## ES6
 
-### class 关键字
+### 面向对象
 
-可以看做构造函数的另一种写法
+class实现面向对象，可以看做构造函数的另一种写法，将类和构造函数区分开
 
 1. class 中 `constructor` 就是构造函数
 2. 内部定义的方法都不可枚举，与ES5不一致
-3. 实例属性和实例方法
-4. 静态属性和静态方法
 
 ```javascript
 // 在类中只能写构造器实例静态方法和属性
@@ -2307,26 +2326,6 @@ class Animal {
 	static foo() {}
 }
 ```
-
-1. 使用 `extends` 关键字实现继承
-
-```javascript
-class Person {}
-class Chinese extends Person{
-    constructor(参数1, 参数2) {
-        // extends关键字继承的父类，要在构造器最开始调用super()
-        // super()是父类构造器的引用
-        super(参数1, 参数2)
-        this.state={}
-    }
-    render() {}
-}
-// 子类可以访问父类的实例方法
-```
-
-1. 为子类挂载独有的实例方法和属性
-
-   放到super()后面
 
 ### 解构赋值
 
@@ -2412,6 +2411,73 @@ test()
 ### 系统对象
 
 #### Array
+
+`map` 作用是生成一个新数组，遍历原数组，将每个元素拿出来做一些变换然后放入到新的数组中。
+
+`map` 的回调函数接受三个参数，分别是当前索引元素，索引，原数组
+
+```js
+['1','2','3'].map(parseInt)
+```
+
+- 第一轮遍历 `parseInt('1', 0) -> 1`
+- 第二轮遍历 `parseInt('2', 1) -> NaN // parseInt把传过来的索引值当成进制数来使用.从而返回了NaN `
+- 第三轮遍历 `parseInt('3', 2) -> NaN`
+
+`filter` 的作用也是生成一个新数组，在遍历数组的时候将返回值为 `true` 的元素放入新数组，我们可以利用这个函数删除一些不需要的元素
+
+```js
+let array = [1, 2, 4, 6]
+let newArray = array.filter(item => item !== 6)
+console.log(newArray) // [1, 2, 4]
+```
+
+和 `map` 一样，`filter` 的回调函数也接受三个参数，用处也相同。
+
+最后我们来讲解 `reduce` 这块的内容，同时也是最难理解的一块内容。`reduce` 可以将数组中的元素通过回调函数最终转换为一个值。
+
+如果我们想实现一个功能将函数里的元素全部相加得到一个值，可能会这样写代码
+
+```
+const arr = [1, 2, 3]
+let total = 0
+for (let i = 0; i < arr.length; i++) {
+  total += arr[i]
+}
+console.log(total) //6 
+
+```
+
+但是如果我们使用 `reduce` 的话就可以将遍历部分的代码优化为一行代码
+
+```
+const arr = [1, 2, 3]
+const sum = arr.reduce((acc, current) => acc + current, 0)
+console.log(sum)
+
+```
+
+对于 `reduce` 来说，它接受两个参数，分别是回调函数和初始值，接下来我们来分解上述代码中 `reduce` 的过程
+
+- 首先初始值为 `0`，该值会在执行第一次回调函数时作为第一个参数传入
+- 回调函数接受四个参数，分别为累计值、当前元素、当前索引、原数组，后三者想必大家都可以明白作用，这里着重分析第一个参数
+- 在一次执行回调函数时，当前值和初始值相加得出结果 `1`，该结果会在第二次执行回调函数时当做第一个参数传入
+- 所以在第二次执行回调函数时，相加的值就分别是 `1` 和 `2`，以此类推，循环结束后得到结果 `6`
+
+想必通过以上的解析大家应该明白 `reduce` 是如何通过回调函数将所有元素最终转换为一个值的，当然 `reduce` 还可以实现很多功能，接下来我们就通过 `reduce` 来实现 `map` 函数
+
+```js
+const arr = [1, 2, 3]
+const mapArray = arr.map(value => value * 2)
+const reduceArray = arr.reduce((acc, current) => {
+  acc.push(current * 2)
+  return acc
+}, [])
+console.log(mapArray, reduceArray) // [2, 4, 6]
+
+```
+
+**总结**
 
 ```js
 map(i => i>3)                   映射   1对1   返回对应的true和false的新数组
@@ -2559,14 +2625,11 @@ promise.fanally()
 正则增强
 ```
 
-
-
 ## MDN
 
 Mozilla 开发者网络（MDN）提供有关开放网络技术（Open Web）的信息，包括 HTML、CSS 和万维网及 HTML5 应用的 API。
 
 - [MDN](https://developer.mozilla.org/zh-CN/)
-- 通过查询MDN学习Math对象的random()方法的使用
 
 ## JavaScript 面向对象编程
 
@@ -2645,7 +2708,7 @@ var person = {
 }
 ```
 
-对于上面的写法固然没有问题，但是假如我们要生成两个 `person` 实例对象，这样写的代码太过冗余，重复性太高。
+假如我们要生成两个 `person` 实例对象，这样写的代码太过冗余，重复性太高。
 
 #### 简单方式的改进：工厂函数
 
@@ -2675,10 +2738,6 @@ var p2 = createPerson('Mike', 18)
 
 ### 构造函数
 
-#### 更优雅的工厂函数：构造函数
-
-一种更优雅的工厂函数就是下面这样，构造函数：
-
 ```javascript
 function Person (name, age) {
   this.name = name
@@ -2696,9 +2755,6 @@ p2.sayName() // => Mike
 ```
 
 #### 构造函数与工厂函数
-
-在上面的示例中，`Person()` 函数取代了 `createPerson()` 函数，但是实现效果是一样的。
-这是为什么呢？
 
 我们注意到，`Person()` 中的代码与 `createPerson()` 有以下几点不同之处：
 
@@ -2735,7 +2791,7 @@ console.log(p2 instanceof Person) // => true
 - 每一个实例对象都具有一个 `constructor` 属性，指向创建该实例的构造函数
   - 注意： `constructor` 是实例的属性的说法不严谨，具体后面的原型会讲到
 - 可以通过实例的 `constructor` 属性判断实例和构造函数之间的关系
-  - 注意：这种方式不严谨，推荐使用 `instanceof` 操作符，后面学原型会解释为什么
+  - 注意：这种方式不严谨，推荐使用 `instanceof` 操作符
 
 #### 构造函数的问题
 
@@ -2762,7 +2818,6 @@ var p2 = new Person('Jack', 16)
 
 ```javascript
 console.log(p1.sayHello === p2.sayHello) // => false
-
 ```
 
 对于这种问题我们可以把需要共享的函数定义到构造函数外部：
@@ -2843,7 +2898,6 @@ function Person (name, age) {
 console.log(Person.prototype)
 
 Person.prototype.type = 'human'
-
 Person.prototype.sayName = function () {
   console.log(this.name)
 }
@@ -2852,7 +2906,6 @@ var p1 = new Person(...)
 var p2 = new Person(...)
 
 console.log(p1.sayName === p2.sayName) // => true
-
 ```
 
 这时所有实例的 `type` 属性和 `sayName()` 方法，
@@ -2871,14 +2924,12 @@ console.log(F.prototype) // => object
 F.prototype.sayHi = function () {
   console.log('hi!')
 }
-
 ```
 
 构造函数的 `prototype` 对象默认都有一个 `constructor` 属性，指向prototype属性所在函数。 
 
 ```javascript
 console.log(F.prototype.constructor === F) // => true
-
 ```
 
 通过构造函数得到的实例对象内部会包含一个指向构造函数的 `prototype` 对象的指针 `__proto__`。
@@ -2886,43 +2937,39 @@ console.log(F.prototype.constructor === F) // => true
 ```javascript
 var instance = new F()
 console.log(instance.__proto__ === F.prototype) // => true
-
 ```
 
   `__proto__` 是非标准属性。其实每个 JS 对象都有 `__proto__` 属性，这个属性指向了原型。这个属性在现在来说已经不推荐直接去使用它了，这只是浏览器在早期为了让我们访问到内部属性 `[[prototype]]` 来实现的一个东西。 
-
-对于 `Person`实例 来说，可以通过 `__proto__` 找到一个原型对象，其中有一个 `constructor` 属性，指向指向构造函数，构造函数又通过 `prototype` 属性指回原型 。但是并不是所有函数都具有这个属性，`Function.prototype.bind()` 就没有这个属性。 
 
 实例对象可以直接访问原型对象成员。
 
 ```javascript
 instance.sayHi() // => hi!
-
 ```
 
-判断实例的原型对象：`Person.prototype.isProtptypeOf(person1)`
+**判断实例的原型对象：**`Person.prototype.isProtptypeOf(person1)`
 
-获取原型对象
+**获取原型对象**
 
 `Object.getPrototypeOf(person1)===Person.prototype`ES5
 
 `Object.getPrototypeOf(person1).name`
 
-返回所有实例属性的字符串数组
+**返回所有实例属性的字符串数组**
 
 `Object.getOwnPrototypeNames()`
 
-返回所有可枚举实例属性的字符串数组
+**返回所有可枚举实例属性的字符串数组**
 
 `Object.keys()`
 
-实例属性或方法可以屏蔽原型属性或方法但不能修改，delete操作符可以删除
+**实例属性或方法可以屏蔽原型属性或方法但不能修改，delete操作符可以删除**
 
-`hasOwnProperty()`可以判断是否实例属性
+`hasOwnProperty()`可以**判断是否实例属性**
 
-`in`操作符可以判断能否访问属性
+`in`操作符可以**判断能否访问属性**
 
-`for-in`循环实例所有可访问的可枚举属性
+`for-in`循环实例所有**可访问的可枚举属性**
 
 总结：
 
@@ -2934,8 +2981,6 @@ instance.sayHi() // => hi!
 #### 属性成员的搜索原则：原型链
 
 **原型链**：实例对象和原型对象通过原型（\__proto）联系，这个关系就是原型链。其实就是多个对象通过 `__proto__` 的方式连接了起来。 
-
-了解了 **构造函数-实例-原型对象** 三者之间的关系后，接下来我们来解释一下为什么实例对象可以访问原型对象中的成员。
 
 每当代码读取某个对象的某个属性时，都会执行一次搜索，目标是具有给定名字的属性
 
@@ -2960,8 +3005,8 @@ instance.sayHi() // => hi!
 
 值类型成员写入（`实例对象.值类型成员 = xx`）：
 
-- 当实例期望重写原型对象中的某个普通数据成员时实际上会把该成员添加到自己身上
-- 也就是说该行为实际上会屏蔽掉对原型对象成员的访问
+- 当实例期望重写原型对象中的某个普通数据成员时实际上**会把该成员添加到自己身上**
+- 也就是说该行为实际上**会屏蔽掉对原型对象成员的访问**
 
 引用类型成员写入（`实例对象.引用类型成员 = xx`）：
 
@@ -2993,8 +3038,7 @@ Person.prototype = {
 
 ```
 
-在该示例中，我们将 `Person.prototype` 重置到了一个新的对象。
-这样做的好处就是为 `Person.prototype` 添加成员简单了，但是也会带来一个问题，那就是原型对象丢失了 `constructor` 成员。即使`instanceof`还是可以返回正确的结果
+在该示例中，我们将 `Person.prototype` 重置到了一个新的对象。但是也会带来一个问题，那就是原型对象丢失了 `constructor` 成员。即使`instanceof`还是可以返回正确的结果
 
 所以，我们为了保持 `constructor` 的指向正确，建议的写法是：
 
@@ -3026,8 +3070,6 @@ Object.defineProperty(Person.prototype, 'constructor', {
 ```
 
 #### instanceof 的原理
-
-> 涉及面试题：instanceof 的原理是什么？
 
 `instanceof` 可以正确的判断对象的类型，因为内部机制是通过判断对象的原型链中是不是能找到类型的 `prototype`。
 
@@ -3605,7 +3647,7 @@ child instanceof Parent // true
 
 ![img](https://user-gold-cdn.xitu.io/2018/11/19/1672afb8dfa21361?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 
-### ES6Class 继承
+### Class 继承-ES6
 
 #### class 关键字的使用
 
@@ -3707,7 +3749,6 @@ s1.sayName() // => hello 张三
 ```javascript
 function foo () {
 }
-
 ```
 
 #### 函数表达式
@@ -3715,7 +3756,6 @@ function foo () {
 ```javascript
 var foo = function () {
 }
-
 ```
 
 #### 函数声明与函数表达式的区别
@@ -5342,82 +5382,6 @@ p.a // 'a' = 2
 
 当然这是简单版的响应式实现，如果需要实现一个 Vue 中的响应式，需要我们在 `get` 中收集依赖，在 `set` 派发更新，之所以 Vue3.0 要使用 `Proxy` 替换原本的 API 原因在于 `Proxy` 无需一层层递归为每个属性添加代理，一次即可完成以上操作，性能上更好，并且原本的实现有一些数据更新（数组）不能监听到，但是 `Proxy` 可以完美监听到任何方式的数据改变，唯一缺陷可能就是浏览器的兼容性不好了。
 
-## map, filter, reduce
-
-> 涉及面试题：map, filter, reduce 各自有什么作用？
-
-`map` 作用是生成一个新数组，遍历原数组，将每个元素拿出来做一些变换然后放入到新的数组中。
-
-```js
-[1, 2, 3].map(v => v + 1) // -> [2, 3, 4]
-
-```
-
-另外 `map` 的回调函数接受三个参数，分别是当前索引元素，索引，原数组
-
-```js
-['1','2','3'].map(parseInt)
-
-```
-
-- 第一轮遍历 `parseInt('1', 0) -> 1`
-- 第二轮遍历 `parseInt('2', 1) -> NaN // parseInt把传过来的索引值当成进制数来使用.从而返回了NaN `
-- 第三轮遍历 `parseInt('3', 2) -> NaN`
-
-`filter` 的作用也是生成一个新数组，在遍历数组的时候将返回值为 `true` 的元素放入新数组，我们可以利用这个函数删除一些不需要的元素
-
-```js
-let array = [1, 2, 4, 6]
-let newArray = array.filter(item => item !== 6)
-console.log(newArray) // [1, 2, 4]
-
-```
-
-和 `map` 一样，`filter` 的回调函数也接受三个参数，用处也相同。
-
-最后我们来讲解 `reduce` 这块的内容，同时也是最难理解的一块内容。`reduce` 可以将数组中的元素通过回调函数最终转换为一个值。
-
-如果我们想实现一个功能将函数里的元素全部相加得到一个值，可能会这样写代码
-
-```
-const arr = [1, 2, 3]
-let total = 0
-for (let i = 0; i < arr.length; i++) {
-  total += arr[i]
-}
-console.log(total) //6 
-
-```
-
-但是如果我们使用 `reduce` 的话就可以将遍历部分的代码优化为一行代码
-
-```
-const arr = [1, 2, 3]
-const sum = arr.reduce((acc, current) => acc + current, 0)
-console.log(sum)
-
-```
-
-对于 `reduce` 来说，它接受两个参数，分别是回调函数和初始值，接下来我们来分解上述代码中 `reduce` 的过程
-
-- 首先初始值为 `0`，该值会在执行第一次回调函数时作为第一个参数传入
-- 回调函数接受四个参数，分别为累计值、当前元素、当前索引、原数组，后三者想必大家都可以明白作用，这里着重分析第一个参数
-- 在一次执行回调函数时，当前值和初始值相加得出结果 `1`，该结果会在第二次执行回调函数时当做第一个参数传入
-- 所以在第二次执行回调函数时，相加的值就分别是 `1` 和 `2`，以此类推，循环结束后得到结果 `6`
-
-想必通过以上的解析大家应该明白 `reduce` 是如何通过回调函数将所有元素最终转换为一个值的，当然 `reduce` 还可以实现很多功能，接下来我们就通过 `reduce` 来实现 `map` 函数
-
-```js
-const arr = [1, 2, 3]
-const mapArray = arr.map(value => value * 2)
-const reduceArray = arr.reduce((acc, current) => {
-  acc.push(current * 2)
-  return acc
-}, [])
-console.log(mapArray, reduceArray) // [2, 4, 6]
-
-```
-
 ## 常用定时器
 
 异步编程当然少不了定时器了，常见的定时器函数有 `setTimeout`、`setInterval`、`requestAnimationFrame`。我们先来讲讲最常用的`setTimeout`，很多人认为 `setTimeout` 是延时多久，那就应该是多久后执行。
@@ -5498,7 +5462,6 @@ if (!window.requestAnimationFrame) {
         setTimeout(fn, 17);
     };    
 }
-
 ```
 
 严格兼容
@@ -5516,7 +5479,6 @@ if(!window.requestAnimationFrame){
         return id;
     }
 }
-
 ```
 
 ```js
@@ -5525,7 +5487,6 @@ if (!window.cancelAnimationFrame) {
         clearTimeout(id);
     };
 }
-
 ```
 
 首先 `requestAnimationFrame` 自带函数节流功能，基本可以保证在 16.6 毫秒内只执行一次（不掉帧的情况下），并且该函数的延时效果是精确的，没有其他定时器时间不准的问题，当然你也可以通过该函数来实现 `setTimeout`。
