@@ -4848,7 +4848,7 @@ if (reg.test(str)) {
   console.log(RegExp.$2);
   console.log(RegExp.$3);
 }
-// 判断文件名
+// 判断图片文件名
 /\.gif|jpg$/i //错误，因为|的优先级太低相当于 /（\.gif）|（jpg$）/i
 /\.（gif|jpg）$/i
 // 0-9999
@@ -4858,6 +4858,16 @@ if (reg.test(str)) {
 ### 正则替换
 
 - `Str.replace(RegExp|str,str|fn)`
+
+  当参数2是函数时函数的参数是：
+
+  match       --  匹配的子串
+
+  p1，p2...  --  括号内匹配的字符串相当于之前的$1 $2
+
+  offset        --  匹配到的子字符串在原字符串中的偏移量
+
+  string        --  被匹配的原字符串
 
 ```javascript
 // 1. 替换所有空白
@@ -4869,10 +4879,7 @@ console.log(str);
 var str = "abc,efg,123，abc,123，a";
 str = str.replace(/,|，/g, ".");
 console.log(str);
-
 ```
-
-
 
 ### 案例：表单验证
 

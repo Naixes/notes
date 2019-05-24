@@ -1224,7 +1224,9 @@ Vue.component('account', {
 </div>
 ```
 
-### 切换组件：`flag`标识符结合`v-if`和`v-else`
+### 切换组件
+
+`flag`标识符结合`v-if`和`v-else`
 
 1. 页面结构：
 
@@ -1347,11 +1349,11 @@ if(vm.$el.querySelector('li').innerHTML == '') {
 
 #### 父子通信
 
-##### 通过`ref` 
+##### `ref` 
 
 父组件向子组件传值：**耦合性高**
 
-##### 通过 `props` 
+#####  `props` 
 
 父组件通过 `props` 传递数据给子组件，子组件通过 `emit` 发送事件传递数据给父组件，这两种方式是最常用的父子通信实现办法。
 
@@ -1439,11 +1441,11 @@ if(vm.$el.querySelector('li').innerHTML == '') {
   </script>
 ```
 
-##### 使用语法糖 `v-model` 
+##### 语法糖 `v-model` 
 
 使用语法糖 `v-model` 来直接实现，因为 `v-model` 默认会解析成名为 `value` 的 `prop` 和名为 `input` 的事件。这种语法糖的方式是典型的双向绑定，常用于 UI 控件上，但是究其根本，还是通过事件的方法让父组件修改数据。
 
-##### 使用$emit和$on
+##### $emit 和 $on
 
 ```html
 <div id="app">
@@ -1541,7 +1543,7 @@ export default {
 
 这个我们直接用v-model像表单那样绑定就直接可以进行父子组件双向绑定了。在v-model的语法糖里封装了v-on:input 去进行监听事件
 
-##### 通过 `$parent` 或者 `$children` 
+##### $parent 或者 $children
 
 当然我们还可以通过访问 `$parent` 或者 `$children` 对象来访问组件实例中的方法和数据。
 
@@ -1593,7 +1595,7 @@ export default {
 </script>复制代码
 ```
 
-##### 使用 `$listeners` 和 `.sync`
+##### $listeners 和 .sync
 
 另外如果你使用 Vue 2.3 及以上版本的话还可以使用 `$listeners` 和 `.sync` 这两个属性。
 
@@ -2153,7 +2155,99 @@ this.$router.push({path: '', query: {id: id}})
 
 ### 路由守卫
 
-`beforeRouteUpdate(val,oldval,next )`
+#### 全局路由守卫
+
+```js
+const router = new VueRouter({...})
+// 前置守卫                           
+// to: Route: 即将要进入的目标 路由对象
+// from: Route: 当前导航正要离开的路由
+// next: Function: 一定要调用该方法来 resolve 这个钩子。执行效果依赖 next 方法的调用参数。
+router.beforeEach((to, from, next)=>{
+    ...
+    next() // 进行管道中的下一个钩子。如果全部钩子执行完了，则导航的状态就是 confirmed (确认的)。
+	next(false) // 中断当前的导航。如果浏览器的 URL 改变了 (可能是用户手动或者浏览器后退按钮)，那么 URL 地址会重置到 from 路由对应的地址。
+	next('/') 或者 next({ path: '/' }) // 当前的导航被中断，然后进行一个新的导航。可以向 next 传递任意位置对象，且允许设置诸如 replace: true、name: 'home' 之类的选项以及任何用在 router-link 的 to prop 或 router.push 中的选项。
+	next(error) // (2.4.0+) 如果传入 next 的参数是一个 Error 实例，则导航会被终止且该错误会被传递给 router.onError() 注册过的回调。
+})
+
+// 解析守卫
+router.beforResolve((to, from, next)=>{
+    // 这和 router.beforeEach 类似，区别是在导航被确认之前，同时在所有组件内守卫和异步路由组件被解析之后，解析守卫就被调用。
+})
+
+// 后置钩子，和守卫不同的是，这些钩子不会接受 next 函数也不会改变导航本身
+router.afterEach((to, from)=>{})
+```
+
+#### 路由独享守卫
+
+```js
+const router = newVueRouter({
+    routes: [
+        {
+            path: "/foo",
+            component: Foo,
+            beforeEnter: (to, from, next)=>{}
+        }
+    ]
+})
+```
+
+#### 组件内守卫
+
+```js
+const Foo = {
+    template: ``,
+    beforeRouteEnter(to, from, next) {
+        // 不能直接访问 this，因为守卫在导航确认前被调用,因此即将登场的新组件还没被创建。
+        // 可以通过传一个回调给 next 来访问组件实例。在导航被确认的时候执行回调，并且把组件实例作为回调方法的参数。
+        // 是支持给 next 传递回调的唯一守卫。因为其他的已经可以使用 this 了
+        next(vm=>{
+            // 这里可以访问组件实例
+        })
+    },
+    beforeRouteUpdate(to, from, next) {
+        // 可以使用 this
+        this.name = to.params.name
+    },
+    beforeRouteLeave(to, from, next) {
+        // 这个离开守卫通常用来禁止用户在还未保存修改前突然离开。该导航可以通过 next(false) 来取消。
+        const anser = window.confirm('Do you really want to leave? you have unsaved changes!!')
+        if(anser) {
+            next()
+        }else {
+            next(flase)
+        }
+    }
+}
+```
+
+#### 完整的导航解析流程
+
+导航被触发
+
+调用失活组件的离开守卫
+
+全局的`beforeEach`守卫
+
+调用激活组件的`beforeRouteUpdate`
+
+调用路由里的`beforeEnter`
+
+解析异步路由组件
+
+调用组件内`beforeRoteEnter`
+
+调用全局的`beforeResolve`
+
+导航被确认
+
+调用全局的`afterEach`
+
+触发DOM更新
+
+用创建好的实例调用 `beforeRouteEnter` 守卫中传给 `next` 的回调函数。
 
 ### 多视图-命名视图
 
@@ -3057,6 +3151,20 @@ Vue.use(VueResource)
 ```
 
 ## 插件
+
+### 自定义插件
+
+#### 应用
+
+1. 添加全局方法或者属性。如: [vue-custom-element](https://github.com/karol-f/vue-custom-element)
+2. 添加全局资源：指令/过滤器/过渡等。如 [vue-touch](https://github.com/vuejs/vue-touch)
+3. 通过全局混入来添加一些组件选项。如 [vue-router](https://github.com/vuejs/vue-router)
+4. 添加 Vue 实例方法，通过把它们添加到 `Vue.prototype` 上实现。
+5. 一个库，提供自己的 API，同时提供上面提到的一个或多个功能。如 [vue-router](https://github.com/vuejs/vue-router)
+
+#### 使用
+
+在`new Vue()`启动之前通过`Vue.use(xxx)`使用插件，也可以传入可选的选项对象`Vue.use(xxx, {})`
 
 ### 图片懒加载
 
