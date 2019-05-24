@@ -37,6 +37,12 @@
     - npm
     - glup
 
+### 优势
+
+1. 便于入手
+2. 性能高
+3. 利于和前台整合
+
 ### Node中的JavaScript
 
 - EcmaScript
@@ -106,6 +112,14 @@ Node中
 
 ## npm
 
+注意卸载时清理掉安装目录下的node_modules和用户文件夹下的node_modules，删除nodejs目录
+
+### 包管理
+
+yarn：`npm iyarn -g`
+
+bower：前端包管理，`npm i bower -g`
+
 ### 包说明文件
 
 快速生成：`npm init -y`
@@ -117,7 +131,7 @@ Node中
 新版本npm5以后的还会生成package-lock文件
 
 - package-lock文件会保存所有的包信息（版本，下载地址等）
-  - 重新install时速度会提升
+  - 重新install时速 度会提升
   - 可以锁定版本，不会重新下载最新版
 
 ### 命令行
@@ -188,6 +202,33 @@ node.js中所有的异步代码会在同步代码都执行完之后才执行，�
 
 ## 核心模块
 
+### querystring
+
+```js
+const querystr = quire("querystring")
+querystr.parse("a=1&b=2&c=3") // 解析为json
+querystr.stringify(json) // 解析为json
+```
+
+### assert
+
+```js
+const assert = require("assert")
+assert(5>3, 提示消息)
+assert.deepEqual(变量， 预期值， 消息) // 比较成员
+assert.deepStrictEqual(变量， 预期值， 消息) // 比较成员和类型
+```
+
+### net
+
+网络通信，不是http协议时用到
+
+OSI七层参考模型：物理---数据链路层---网络层（IP）---传输层（保证传输质量，TCP）---会话层（计算机之间保留通信的基本信息）---表现层（屏蔽各个网络之间的不同）---应用层（HTTP）
+
+五层参考模型：物理---数据链路层---网络层（IP）---传输层（保证传输质量，TCP，UDP）---应用层（HTTP）
+
+net属于传输层，对TCP的实现
+
 ### 文件模块
 
 #### 同步与异步文件系统调用
@@ -198,7 +239,7 @@ node.js中所有的异步代码会在同步代码都执行完之后才执行，�
 
 区别：
 
-- 异步函数需要回调函数作为额外的参数，通常包含一个错误作为回调函数的第一个参数
+- 异步函数需要回调函数作为额 外的参数，通常包含一个错误作为回调函数的第一个参数
 - 同步函数会阻塞当前线程
 - 异步函数会进入事件队列不会阻塞当前线程，直到事件循环线程将他提取出来时才会执行
 - 异步通过判断第一个参数处理异常，同步必须使用try/catch处理异常
@@ -329,6 +370,7 @@ server.on('request', function(req, res){
     // 请求路径，端口号之后的部分，以/开头
 	req.url
 })
+// 监听，等待客户端的连接
 server.listen('3000', fn)
 
 // 更简单的写法
@@ -384,7 +426,7 @@ post请求判断是否有请求参数
 
 - 发送响应
 
-`res.write()` 可以使用多次，但是一定要用`res.end()`来结束，否则客户端会一直等待，也可以用`res.end()`直接发送响应
+`res.write()` 可以使用多次，也可以用append追加内容，但是一定要用`res.end()`来结束，否则客户端会一直等待，也可以用`res.end()`直接发送响应
 
 **响应内容必须是字符串或者二进制数据**
 
