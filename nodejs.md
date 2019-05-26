@@ -231,6 +231,65 @@ net属于传输层，对TCP的实现
 
 ### 文件模块
 
+#### POST文件处理原理理解
+
+```js
+const http = require('http')
+
+http.createServer((req, res)=>{
+	console.log(req.headers)
+
+	let arr = [] // 实际情况下不应该所有的都放在这里
+	req.on('data', buffer=>{
+		arr.push(buffer)
+	})
+	req.on('end', ()=>{
+		let buffer = Buffer.concat(arr)
+		console.log(buffer.toString())
+		// ------WebKitFormBoundaryWZBe3Az77qpZZ48e
+		// Content-Disposition: form-data; name="username"
+
+		// naixes
+		// ------WebKitFormBoundaryWZBe3Az77qpZZ48e
+		// Content-Disposition: form-data; name="file"; filename="test.txt" // 原始文件名
+		// Content-Type: text/plain
+
+		// test
+		// 000000
+		// ------WebKitFormBoundaryWZBe3Az77qpZZ48e--
+	})
+}).listen(8080)
+```
+
+包：multiparty
+
+```js
+const http = require('http')
+// 文件上传
+const multiparty = require('multiparty')
+
+http.createServer((req, res) => {
+	let form = new multiparty.Form({
+		// 上传路径
+		uploadDir: './upload'
+	})
+	form.parse(req)
+	// 普通字段
+	form.on('field', (name, value) => {
+		console.log(name, value)
+	})
+	// 文件
+	form.on('file', (name, file) => {
+		console.log(name, file)
+	})
+	form.on('close', () => {
+		console.log("解析完成")
+	})
+}).listen(8080)
+```
+
+实际项目使用框架
+
 #### 同步与异步文件系统调用
 
 文件模块的所用操作几乎都分为异步与同步
@@ -490,6 +549,114 @@ path.resolve('/foo/bar', './baz') // '/foo/bar/baz'把一个路径或路径片�
 node中文件操作中的相对路径是相对执行node命令的路径，不可靠。应该使用`__dirname`和`join`方法
 
 `path.join(__dirname, '')`
+
+## 数据通信
+
+### ajax
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<script>
+		window.onload = function() {
+			let btn = document.getElementById('btn')
+			btn.onclick = function() {
+				let ajax = new XMLHttpRequest()
+				// true指异步
+				ajax.open('GET', 'http://localhost:8080/a', true)
+				ajax.send()
+				ajax.onreadystatechange = function() {
+					if(ajax.readyState === 4) {
+						if(ajax.status >= 200 && ajax.status < 300 || ajax.status === 304) {
+							alert("请求成功")
+							let json = JSON.parse(ajax.responseText)
+							console.log(json)
+						}else {
+							alert("请求失败")
+						}
+					}
+				}
+			}
+		}
+	</script>
+</head>
+<body>
+	<input type="button" value="请求" id="btn">
+</body>
+</html>
+```
+
+```js
+const http = require('http')
+
+http.createServer((req, res) => {
+	let allowOrigin = {
+		"http://localhost": true
+	}
+	// SOP:同源策略
+	// 设置CROS
+	const {origin} = req.headers
+	if(allowOrigin[origin]) {
+		res.setHeader('access-control-allow-origin', '*')
+	}
+
+	res.write('{"a": "12", "name": "j"}')
+	res.end()
+}).listen(8080)
+```
+
+### fetch
+
+#### 获取解析二进制数据
+
+```js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<script>
+		window.onload = function() {
+			let btn = document.getElementById('btn')
+			let img = document.getElementById('img')
+			btn.onclick = async function() {
+				// 请求
+				let res = await fetch('data/f0.png')
+				// 解析数据
+				// 二进制数据
+				let data = await res.blob()
+				// 将二进制数据转换为url
+				let url = URL.createObjectURL(data)
+				img.src = url
+			}
+		}
+	</script>
+</head>
+<body>
+	<input type="button" value="获取数据" id="btn">
+	<img src="" alt="" id="img">
+</body>
+</html>
+```
+
+
+
+### jsonp
+
+不安全，使用 变少
+
+### FormData
+
+### webSocket
+
+
 
 ## 模板引擎
 
@@ -2394,3 +2561,77 @@ ngnix反向代理服务器：用户没有直接和node进行交互，而是通�
 使用
 
 conf目录==》nginx.conf
+
+## 版本控制
+
+- svn：集中式，中心服务器，只有一个最新版
+- git：分布式，每个客户端都是服务器，多个最新版，需要先本地提交
+
+`git config --global user.name "" `
+
+更新：`git pull`
+
+合并：出现冲突后，`git pull`会自动合并成一个文件，需要手动合并，自动合并工具`git mergtool`默认使用svn的合并工具，合并后重新commit，push
+
+### 搭建svn服务器
+
+Linux：
+
+包管理器：yum，yum install
+
+文本编辑器：vi（vim）
+
+1. 安装svn服务端`yum install subversion -y `
+
+2. 新建目录
+
+   mkdir /svn
+
+3. 初始化目录
+
+   svnadmin create /test
+
+4. 创建用户
+
+   - vi conf/passwd // 用户
+
+   :wq
+
+   - vi conf/svnserve.conf // 服务器配置
+
+   anon-access = none // 不允许授权访问
+
+   auth-access = write // 读写
+
+   password-db = passwd
+
+   authz-db = authz // 授权策略文件，会出错
+
+5. 启动
+
+   ps -ef !grep svn // 确认svn是否启动
+
+   svnserve -d -r /svn/test/ // -d（daemon） 守护模式-自动重启 -r（root） 指定根目录 
+
+   kill -9 xxx // 关闭
+
+6. 关闭防火墙（实际上需要配置不能直接关闭）
+
+   iptables -F // -F 清除 -L 查看规则
+
+### 搭建git服务器
+
+1. yum install git -y
+
+   mkdir /git
+
+   cd /git/
+
+2. git init --bare test.git
+
+3. useradd xxx // 添加系统用户，需要禁止登录ssh否则不安全
+
+   passwd xxx
+
+4. chown -R xx:xx test.git // 修改所有者
+5. git clone 用户名@服务器:/目录/仓库.git
