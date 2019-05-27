@@ -728,9 +728,9 @@ label 标签为 input 元素定义标注（标签）。
 
 ```html
 <head>
-<style type="text/CSS">
-    选择器 {属性1:属性值1; 属性2:属性值2; 属性3:属性值3;}
-</style>
+    <style type="text/CSS">
+        选择器 {属性1:属性值1; 属性2:属性值2; 属性3:属性值3;}
+    </style>
 </head>
 ```
 
@@ -937,7 +937,31 @@ normal : 默认处理方式
 nowrap : 强制在同一行内显示所有文本，直到文本结束或者遭遇br标签对象才换行。可以处理中文
 ```
 
-## text-overflow:文字溢出
+## 文本方向-writing-mode
+
+定义了文本水平或垂直排布以及在块级元素中文本的行进方向。
+
+`writing-mode:horizontal-tb` 定义了内容从左到右水平流动，从上到下垂直流动。下一条水平线位于上一条线下方。
+
+`writing-mode:vertical-rl` 定义了内容从上到下垂直流动，从右到左水平流动。下一条垂直线位于上一行的左侧。
+
+`writing-mode:vertical-lr`定义了内容从上到下垂直流动，从左到右水平流动。下一条垂直线位于上一行的右侧。
+
+`writing-mode:sideways-rl`(仅Firefox41+实现)定义了内容从上到下垂直流动，所有字形，甚至是垂直脚本中的字形，都设置在右侧。
+
+`writing-mode:sideways-lr`(仅Firefox41+实现)内容从上到下垂直流动，所有字形，甚至是垂直脚本中的字形，都设置在左侧。
+
+## 文本对齐-direction
+
+`direction: ltr;`
+
+默认值，让文本和其他元素从左到右显示。
+
+`direction: rtl;`
+
+让文本和其他元素从右到左显示。
+
+## 文字溢出-text-overflow
 
 ```
 clip : 　不显示省略标记（...），而是简单的裁切 
@@ -1268,25 +1292,165 @@ vertical-align 不影响块级元素中的内容对齐，它只针对于 行内�
 
 ## @charset
 
+`@charset`用于定义样式表中使用的字符编码。它必须写在样式表的**最开头**且前面**不可**有别的字符。
+
+`@charset "UTF-8";`
+
 ## @import
+
+`@import`用于导入外部 `CSS样式表`文件。
+
+与link的区别：@import先加载html后加载css
+
+1. link属于XHTML标签，而@import完全是css提供的一种方式。link标签除了可以加载css外，还可以做很多其他的事情，比如定义RSS，定义rel连接属性等，@import只能加载CSS。
+
+2. 加载顺序的差别：当一个页面被加载的时候（就是被浏览者浏览的时候），link引用的CSS会同时被加载，而@import引用的CSS会等到页面全部被下载完再加载。所以有时候浏览@import加载CSS的页面时会没有样式（就是闪烁），网速慢的时候还挺明显。
+
+3. 兼容性的差别。由于@import是CSS2.1提出的只有在IE5以上的才能识别，而link标签无此问题，完全兼容。
+
+4. 使用dom控制样式时的差别。当时用JavaScript控制dom去改变样式的时候，只能使用link标签，因为@import不是dom可以控制的（不支持）。
+
+```css
+/* @import url; */
+/* @import url list-of-media-queries; */
+@importm'custom.css';
+@import url("fineprint.css") print ;
+```
 
 ## @media
 
+`@media`用于定义在一个或多个**设备类型**、**具体特点**和**环境**的媒体查询来应用样式。
+
+```css
+@media screen and (min-width: 900px) {
+    h1 { color: red; }
+}
+```
+
 ## @page
 
-## @counter-style
+`@page`用于在打印文档时修改某些CSS属性。 `@page`规则只能修改 `margin`、 `orphans`、 `widow` 和 `page breaks of the document`，对其他属性的修改是无效的。
+
+```css
+@page {
+    size: 10in 20in;
+    margin: 10% 20%;
+}
+```
 
 ## @keyframes
 
+`@keyframs`通过定义动画序列中的**关键帧**来控制 `CSS动画`不同步骤的状态。
+
+```css
+@keyframes slidein {
+    from { width: 300%; }
+    to { width: 100%; }
+}
+```
+
 ## @fontface
+
+`@font-face`用于给网页指定文本字体。
+
+```css
+@font-face {
+    font-family: "xxx";
+    src: url("xxx");
+}
+body {
+    font-family: "xx";
+}
+```
 
 ## @supports
 
+`@supports`用来检测规则组的**规则**是否生效。规则与 `@media`类似
+
+```css
+@supports (display: flex) {
+    div { display: flex; }
+}
+```
+
 ## @namespace
 
+`@namespace`是用来定义使用在 `CSS样式表`中的 `XML`命名空间的@规则。
 
+```css
+/* 默认命名空间 */
+@namespace "XML-namespace-URL";
+@namespace url(XML-namespace-URL);
 
+/* 命名空间前缀 */
+@namespace prefix url(XML-namespace-URL);
+@namespace prefix "XML-namespace-URL";
 
+@namespace svg url(http://www.w3.org/2000/svg);
+
+/* 匹配所有的XHTML <a> 元素, 因为 XHTML 是默认无前缀命名空间 */
+a {}
+
+/* 匹配所有的 SVG <a> 元素 */
+svg|a {}
+
+/* 匹配 XHTML 和 SVG <a> 元素 */
+*|a {}
+```
+
+## @viewport
+
+```css
+@viewport {
+    min-width: 640px;
+ 	/* 初始缩放系数 */   
+    zoom: 0.75;
+    /* 文档方向 */
+ 	/* landscape文件应锁定在横向。portrait文档应该锁定在纵向方向上 */ 
+    orientation: landscape;
+}
+```
+
+## @counter-style
+
+`@counter-style`用于自定义 `counter`的样式
+
+```css
+/*
+ * @counter-style <counter-style-name> {
+ *   <group-rule-body>
+ * }
+ */
+@count-style circled-alpha {
+    system: fixed;
+    symbols: Ⓐ;
+	suffix: " ";
+}
+.items {
+    list-style: circled-alpha
+}
+```
+
+## @doucment
+
+`@document`如果满足条件组的**条件**，则规则生效（推延至 CSS Level 4 规范）
+
+```css
+@document url(http://www.w3.org/),
+               url-prefix(http://www.w3.org/Style/),
+               domain(mozilla.org),
+               regexp("https:.*")
+{
+  /* 该条CSS规则会应用在下面的网页:
+     + URL为"http://www.w3.org/"的页面.
+     + 任何URL以"http://www.w3.org/Style/"开头的网页
+     + 任何主机名为"mozilla.org"或者主机名以".mozilla.org"结尾的网页     
+     + 任何URL以"https:"开头的网页 */
+
+  /* make the above-mentioned pages really ugly */
+  body { color: purple; background: yellow; }
+}
+```
 
 # 选择器
 
@@ -1830,13 +1994,15 @@ specificity用一个四位的数 字串(CSS2是三位)来表示，更像四个�
 
 ```
 
-# 盒子模型（CSS重点）
+# 盒子模型
 
 CSS就三个大模块：  盒子模型 、 浮动 、 定位，其余的都是细节。
 
 所谓盒子模型就是把HTML页面中的元素看作是一个矩形的盒子，也就是一个盛装内容的容器。每个矩形都由元素的内容、内边距（padding）、边框（border）和外边距（margin）组成。 
 
-## 盒子模型（Box Model）
+## 基础盒模型（Box Model）
+
+当浏览器对一个**render tree**进行渲染时，浏览器的渲染引擎就会根据**基础盒模型(CSS basic box model)**，将所有元素划分为一个个矩形的盒子，这些盒子的外观，属性由 `CSS`来决定。
 
 规定了元素框处理元素内容、内边距、边框 和 外边距 的方式。
 
@@ -1844,11 +2010,15 @@ CSS就三个大模块：  盒子模型 、 浮动 、 定位，其余的都是�
 
 **width，height指content的宽高**
 
+**box-sizing: content-box**对应的盒模型
+
 ![这里写图片描述](https://img-blog.csdn.net/20180324150509906?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p3a2trazE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70) 
 
 ### IE盒模型
 
 **width表示content+padding+border这三个部分的宽度** 
+
+**box-sizing: border-box**对应的盒模型
 
 ![这里写图片描述](https://img-blog.csdn.net/20180324150533356?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p3a2trazE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70) 
 
@@ -1858,7 +2028,6 @@ CSS就三个大模块：  盒子模型 、 浮动 、 定位，其余的都是�
 
 ```css
 border : border-width || border-style || border-color 
-
 ```
 
 边框属性—设置边框样式（border-style）
@@ -1871,8 +2040,6 @@ solid：边框为单实线(最为常用的)
 dashed：边框为虚线  
 dotted：边框为点线
 double：边框为双实线
-
-
 ```
 
 ### 表格的细线边框
@@ -2040,23 +2207,12 @@ width和height的属性值可以为不同单位的数值或相对于父元素的
 
 
 
-## CSS3盒模型
-
-可以分成两种情况：
-
-1、box-sizing: content-box  盒子大小为 width + padding + border   content-box:此值为其默认值，其让元素维持W3C的标准Box Mode
-
-2、box-sizing: border-box  盒子大小为 width    就是说  padding 和 border 是包含到width里面的
-
-注：上面的标注的width指的是CSS属性里设置的width: length，content的值是会自动调整的。
-
 ## 盒子阴影
 
 语法格式：
 
 ```css
 box-shadow:水平阴影 垂直阴影 模糊距离 阴影尺寸 阴影颜色  内/外阴影；
-
 ```
 
 1. 前两个属性是必须写的。其余的可以省略。
@@ -2071,7 +2227,6 @@ div {
 	/* box-shadow:水平位置 垂直位置 模糊距离 阴影尺寸（影子大小） 阴影颜色  内/外阴影； */
 	box-shadow: 0 15px 30px  rgba(0, 0, 0, .4);	
 }
-
 ```
 
 ## 盒子居中
@@ -2090,6 +2245,84 @@ http://www.cnblogs.com/2050/p/3392803.html
 1. margin-top+top定位
 2. dispaly：table-cell；vertical-align：middle；
 3. margin-top
+
+## 视觉格式化模型
+
+> `CSS`的**视觉格式化模型(visual formatting model)** 是根据 **基础盒模型(CSS basic box model)**将 **文档(doucment)** 中的元素转换一个个盒子的**实际算法**。
+>
+> 官方说法就是：**它规定了用户端在媒介中如何处理文档树( document tree )。**
+
+每个盒子的布局由以下因素决定：
+
+- 盒子的尺寸
+- 盒子的类型：**行内盒子 (inline)**、**行内级盒子 (inline-level)**、**原子行内级盒子 (atomic inline-level)**、**块盒子 (block)**
+- 定位：**普通流**、**浮动**、**绝对定位**
+- 文档树中当前盒子的**子元素** 或 **兄弟元素**
+- **视口(viewport)** 的**尺寸** 和**位置**
+- 盒子内部图片的**尺寸**
+- 其他某些外部因素
+
+**视觉格式化模型(visual formatting model)** 的计算，都取决于一个矩形的边界，这个矩形，被称作是 **包含块( containing block )** 。 一般来说，(元素)生成的框会扮演它子孙元素包含块的角色；我们称之为：一个(元素的)框为它的子孙节点建造了包含块。包含块是一个相对的概念。
+
+例子如下：
+
+```html
+<div>
+    <table>
+        <tr>
+        	<td>hi</td>
+        </tr>
+    </table>
+</div>
+```
+
+以上代码为例， `div` 和 `table` 都是包含块。 `div` 是 `table` 的包含块，同时 `table` 又是 `td`的包含块，不是绝对的。
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/y0rsINPrlZzAMxWXXgbYLvdQMkloKObC2cvH53RV1acqRcgWP4RaXV77nTbsJlN3DxwfnZTiaSTac9Z7ogUr9fg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+
+## 盒子的生成
+
+盒子的生成是 **CSS视觉格式化模型** 的一部分，用于从文档元素生成盒子。盒子的类型取决于 `CSS display` 属性。
+
+- **块级元素**
+
+  当元素的 `display` 为 `block`、 `list-item` 或 `table` 时，它就是块级元素。
+
+- **块级盒子**
+
+  块级盒子用于描述它与父、兄弟元素之间的关系。
+
+- 每个块级盒子都会参与**块格式化上下文（block formatting context）**的创建。
+
+- 每个块级元素都会至少生成一个块级盒子，即**主块级盒子（principal block-level box）**，包含由后代元素生成的盒子以及内容，同时它也会参与定位方案。
+
+- 一个同时是块容器盒子的块级盒子称为**块盒子（block box）**。
+
+- **匿名盒子**
+
+- 某些情况下需要进行视觉格式化时，需要添加一些增补性的盒子，这些盒子不能被 `CSS选择器`选中，也就是所有可继承的 CSS 属性值都为 `inherit` ，而所有不可继承的 CSS 属性值都为 `initial`。因此称为**匿名盒子(anonymous boxes)**。
+
+- **行内元素**
+
+- 当元素的 `display` 为 `inline`、 `inline-block` 或 `inline-table` 时，它就是行内级元素。
+
+- 显示时可以与其他行内级内容一起显示为多行。
+
+- **行内盒子**
+
+- 行内级元素会生成行内级盒子，该盒子同时会参与**行内格式化上下文（inlineformatting context）**创建。
+
+- **匿名行内盒子**
+
+- 类似于块盒子，CSS引擎有时候也会自动创建一些行内盒子。这些行内盒子无法被选择符选中，因此是匿名的，它们从父元素那里继承那些可继承的属性，其他属性保持默认值 `initial`。
+
+- **行盒子**
+
+- 行盒子**由行内格式化上下文创建**，用来显示一行文本。在块盒子内部，行盒子总是从块盒子的一边延伸到另一边（译注：即占据整个块盒子的宽度）。当有浮动元素时，行盒子会从向左浮动的元素的右边缘延伸到向右浮动的元素的左边缘。
+
+- **run-in 盒子**（在CSS 2.1的标准中移除了）
+
+- run-in盒子可以通过 `display:run-in`来设置，它既可以是块盒子，又可以是行内盒子，这取决于它后面的盒子的类型。
 
 # 浮动(float)
 
@@ -2133,12 +2366,6 @@ html语言当中另外一个相当重要的概念----------标准流！或者普
 
 4. 浮动可以使元素显示模式体现为**行内块特性**。
 5. 并列的盒子边框重叠的地方会变粗，可以加margin-left：-1结合浮动变细。要使用hover变色时可以用relative或z-index提升层级避免遮盖。
-
-### 回流（reflow）与重绘（repaint）
-
-[前端性能优化 —— reflow(回流)和repaint(重绘)](https://www.cnblogs.com/zhutao/p/6551216.html)
-
-[回流(reflow)与重绘(repaint)](https://www.cnblogs.com/dll-ft/p/5810639.html)
 
 # 版心和布局流程
 
@@ -2322,7 +2549,7 @@ position属性的常用值
 
 应用：取消定位
 
-## 相对定位relative(自恋型)
+## 相对定位relative
 
 相对定位是将元素相对于它在标准流中的位置进行定位，当position属性的取值为relative时，可以将元素定位于相对位置。
 
@@ -2337,7 +2564,7 @@ position属性的常用值
 
 如果说浮动的主要目的是 让多个块级元素一行显示，那么定位的主要价值就是 移动位置， 让盒子到我们想要的位置上去。
 
-## 绝对定位absolute (拼爹型)
+## 绝对定位absolute 
 
 如果文档可滚动，绝对定位元素会随着它滚动，因为元素最终会相对于正常流的某一部分定位。
 
@@ -2362,7 +2589,7 @@ position属性的常用值
 1. 首先left 50%   父盒子的一半大小
 2. 然后走自己外边距负的一半值就可以了 margin-left。
 
-## 固定定位fixed(认死理型)
+## 固定定位fixed
 
 固定定位是绝对定位的一种特殊形式，类似于 正方形是一个特殊的 矩形。它以浏览器窗口作为参照物来定义网页元素。当position属性的取值为fixed时，即可将元素的定位模式设置为固定定位。
 
@@ -2436,6 +2663,131 @@ auto : 　 超出自动显示滚动条，不超出不显示滚动条
 hidden : 　不显示超过对象尺寸的内容，超出的部分隐藏掉
 
 scroll : 　不管超出内容否，总是显示滚动条
+
+# CSS是如何工作的
+
+## 页面渲染机制
+
+页面渲染可分为下面5个步骤：
+
+1. 处理 `HTML`来创建 `DOM tree`；
+2. 处理 `CSS`来创建 `CSSOM tree；`
+3. 根据 `DOM`跟 `CSSOM`来合并 `render tree；`
+4. 根据 `render tree`来布局；
+5. 绘制 `render tree`。
+
+## CSS的工作流程
+
+从上面的页面渲染流程可以知道浏览器在解析了 `HTML`跟 `CSS`之后便开始合并渲染，简单来说就是绘制带有样式的 `HTML`规则。
+
+`CSS`的工作流程就是把 `CSS`规则定义到 `DOM tree`上。
+
+在 `CSS`工作的过程中有两个词值得注意的就是**重排（reflow）**跟**重绘（repaint）**。
+
+- **重排**： `render tree`的重新构建叫**重排**。也就是当页面布局或者 `DOM`元素的几何属性发生变化时，就会发生浏览器重排。以下几种情况便会引发浏览器回流：
+  - 页面渲染初始化；
+  - `DOM`元素的增删；
+  - `DOM`元素的位置、尺寸以及引起尺寸变化的内容改变；
+  - `resize`事件发生时。
+- **重绘**： `render tree`中只影响外观而不影响风格的属性改变就叫**重绘**。例如 `color`与 `background-color`的改变。
+
+[前端性能优化 —— reflow(回流)和repaint(重绘)](https://www.cnblogs.com/zhutao/p/6551216.html)
+
+[回流(reflow)与重绘(repaint)](https://www.cnblogs.com/dll-ft/p/5810639.html)
+
+# 逻辑属性
+
+ `CSS逻辑属性`的变革，从**物理概念**跳跃到了**逻辑概念**，也就是从 `top`、 `right` 、 `bottom`、 `left`更新为 `block`、 `inline`、 `start`、 `end`。由于**Flex box**跟**Grid box**是 `CSS3`的布局模式，所以自然而然会使用更加适应于新时代的语言属性。
+
+> 2017年5月18日，W3C的 CSS工作组(CSS Working Group) 发布了 CSS逻辑属性和值(CSS Logical Properties and Values Level 1) 的首份工作草案(First Public Working Draft)。不同的书写模式(writing mode)中，可以抽取出共性的抽象概念(如开始位置，或行)，这些逻辑抽象概念需要在不同书写模式下映射到左或右、上或下等物理的概念上。一些CSS布局可能依赖这些共性的逻辑概念。该 CSS 模块给出了用于通过逻辑方式(而不是基于物理坐标、书写方向和维映射等)控制布局的逻辑属性和取值(logical properties and values)。这个模块来源于CSS21中关于逻辑属性和值的特性。
+
+| 旧的逻辑属性   | 新的逻辑属性         |
+| :------------- | :------------------- |
+| margin-top     | margin-block-start   |
+| margin-right   | margin-inline-end    |
+| margin-bottom  | margin-block-end     |
+| margin-left    | margin-inline-start  |
+| border-top     | border-block-start   |
+| border-right   | border-inline-end    |
+| border-bottom  | border-block-end     |
+| border-left    | border-inline-start  |
+| padding-top    | padding-block-start  |
+| padding-right  | padding-inline-end   |
+| padding-bottom | padding-block-end    |
+| padding-left   | padding-inline-start |
+| width          | inline-size          |
+| height         | block-size           |
+
+`CSS`的定位属性变化如下：
+
+| 旧的逻辑属性 | 新的逻辑属性       |
+| :----------- | :----------------- |
+| top          | inset-block-start  |
+| bottom       | inset-block-end    |
+| left         | inset-inline-start |
+| right        | inset-inline-end   |
+
+浮动 `float`的属性也改了。
+
+| 旧的逻辑属性 | 新的逻辑属性        |
+| :----------- | :------------------ |
+| float: left  | float: inline-start |
+| float: right | float: inline-end   |
+
+文本 `text-align`的属性也改了。
+
+| 旧的逻辑属性      | 新的逻辑属性      |
+| :---------------- | :---------------- |
+| text-align: left  | text-align: start |
+| text-align: right | text-align: end   |
+
+# 浏览器的试图与坐标
+
+## 关于设备屏幕
+
+### 像素(Pixel)
+
+像素(pixel)是影像显示的基本单位，一个像素通常被视为影像的最小的完整取样。用来表示一幅影像的像素越多，结果更接近原始的影像。
+
+### 分辨率(Image resolution)
+
+分辨率越高代表影像质量越好，越能表现出更多的细节。
+
+### 每英寸像素(PPI)
+
+每英寸像素（英语：**P**ixels **P**er **I**nch，缩写：**PPI**），又被称为**像素密度**，是一个表示打印图像或显示器单位面积上像素数量的指数。一般用于计量电子设备屏幕的精细程度。通常情况下，每英寸像素值越高，屏幕能显示的图像也越精细。
+
+### 视网膜显示屏(Retina Display)
+
+视网膜显示屏(Retina Display)是一种由**苹果公司**设计和委托制造的显示屏。有研究表明，人类肉眼能够分辨的最高**PPI**是**300PPI**，所以超过**PPI**超过**300**的往往被称为**Retina显示屏**，这个概念是不对的，**Retina显示屏**指的是在人体正常使用距离下，无法用肉眼看到屏幕像素的显示屏。
+
+### 每英寸点数(DPI)
+
+**DPI**（英语：**D**ots **P**er **I**nch，每英寸点数）是一个量度单位，用于点阵数位影像，意思是指每一英寸长度中，取样或可显示或输出点的数目。如：打印机输出可达600DPI的分辨率，表示打印机可以在每一平方英寸的面积中可以输出**600X600＝360000**个输出点。
+
+### 设备独立像素(DIP, DP)
+
+设备独立像素(Device Independent Pixels，DIP，又称设备无关像素)是一种物理测量单位，基于计算机控制的坐标系统和抽象像素（虚拟像素），是定义UI布局时使用的虚拟像素单位。
+
+### 设备像素比(DPR)
+
+设备像素比(DPR)是设备上**物理像素**和**DIP**的比例。公式如下：
+
+`window.devicePixelRatio = 物理像素 / dips`
+
+### CSS像素(CSS Pixels)
+
+**CSS像素(CSS Pixels)**是**WEB**编程中诞生的概念，用于定于浏览器中每个模型不同 `CSS`的值大小。由于**CSS像素（CSS Pixels）**是个**逻辑性**的像素，而非物理性的像素，所以1个**CSS像素**在不同设备上大小可能会有不同。但即便是如此，对于**CSS**来说，还是希望在不同设备上大小尽可能地看起来相同。
+
+> 对于CSS设备而言，这些尺寸要么锚定(i)通过将物理单元与其物理测量关联起来，或者锚定(ii)通过将像素单元与参考像素关联起来。对于打印介质和类似的高分辨率设备，锚单元应该是标准物理单位之一（像英尺，厘米等）。对于低分辨率的设备和具有不寻常观看距离的设备，建议将锚单元作为像素大圆。对于此类设备，建议像素单元参考最接近参考像素的设备像素的整数。
+
+以上就是**1px CSS像素**的定义。也合理的解释了为什么显示设备的物理尺寸与物理像素不同，但是同样CSS值的元素大小却相差无几了。这是因为不同设备的**px**实现的参考锚点不同。
+
+## 视图
+
+### 视口
+
+
 
 # CSS精灵技术（sprite） 小妖精  雪碧
 
