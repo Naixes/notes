@@ -200,6 +200,24 @@ node.js中所有的异步代码会在同步代码都执行完之后才执行，�
 
 线程池：提前申请好的几个内存空间，不需要开发人员管理线程
 
+## 启动器
+
+npm i forever -g
+
+forever start xxx
+
+forever list
+
+forever restart xxx
+
+forever stop xxx
+
+forever stopall
+
+
+
+forever start xxx.js -l c:/a.log -e c:/err.log -a
+
 ## 核心模块
 
 ### querystring
@@ -376,24 +394,38 @@ options：persistent指是否持续监视默认true；interval监视间隔时间
 读取流
 
 ```javascript
-var readStream = fs.createReadStream('path')
-var writeSream = fs.createWriteStream('path')
+var rs = fs.createReadStream('path')
+var ws = fs.createWriteStream('path')
 
 // data事件不断被触发
-readStream.on('data', function(trunk) {
+rs.on('data', function(trunk) {
     // 如果写入速度跟不上读取速度还是会占用很大内存
     writeSream.write(trunk)
 })
-readStream.on('end', function(trunk) {
+rs.on(s'end', function(trunk) {
     ...
 })
 
 //另一种方法
 readStream.pipe(writeSream)
+    
+// 一些常用事件
+rs.on('error', err => {})
+ws.on('finish', () => {})
 
 // 一句代码写法
 fs.createReadStream(path).pipe(fs.createWriteStream(path))
 ```
+
+读写流
+
+应用：压缩，加密
+
+```js
+
+```
+
+ 
 
 ### 文件操作扩展包
 
