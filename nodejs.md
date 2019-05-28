@@ -650,7 +650,7 @@ http.createServer((req, res) => {
 
 ### jsonp
 
-不安全，使用 变少
+不安全，使用变少
 
 ### FormData
 
@@ -771,8 +771,6 @@ wsServer.on('connection', sock => {
 </body>
 </html>
 ```
-
-
 
 ## 模板引擎
 
@@ -2480,8 +2478,6 @@ http.listen(3000)
 
 
 ### TCP模块
-
-
 
 ## 其他
 
