@@ -720,6 +720,60 @@ http.createServer((req, res) => {
 - 兼容IE5
 - 自动数据解析
 
+```js
+const http  = require('http')
+const io = require('socket.io')
+
+// 建立普通的http
+let server = http.createServer((req, res) => {})
+server.listen(8080)
+
+// 建立ws
+let wsServer = io.listen(server)
+// sock建立好的连接
+wsServer.on('connection', sock => {
+	// sock.emit('name', 数据) // 发送数据
+	// sock.on('name', (数据)=>{})
+	sock.on('aaa', (a, b) => {
+		console.log(a+b)
+	})
+
+	setInterval(function() {
+		sock.emit('timer', new Date().getTime())
+	}, 1000)
+})
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<!-- socket.io库中的文件 -->
+	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
+	<script>
+		let sock = io.connect('ws://localhost:8080/')
+
+		// sock.emit
+		// sock.on
+		sock.emit('aaa', 1, 2)
+
+		sock.on('timer', time => {
+			console.log(time)
+		})
+	</script>
+</head>
+<body>
+	
+</body>
+</html>
+```
+
+
+
 ## 模板引擎
 
 ### art-template
