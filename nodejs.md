@@ -654,9 +654,71 @@ http.createServer((req, res) => {
 
 ### FormData
 
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<script>
+		window.onload = function() {
+			let oForm = document.querySelector("#form")
+
+			oForm.onsubmit = function() {
+				let formdata = new FormData(oForm)
+
+				// 脱离表单使用formdata
+				// formdata.append("username", document.querySelector("#user"))
+
+				let xhr = new XMLHttpRequest()
+
+				// 这里使用form中的数据
+				xhr.open(oForm.method, oForm.action, true)
+
+				// 脱离表单使用formdata
+				// xhr.open("post", "http://localhost:8080", true)
+
+				xhr.send(formdata)
+
+				xhr.onreadystatechange = function() {
+					if(xhr.readyState == 4) {
+						if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304) {
+							alert("成功")
+						}else {
+							alert("失败")
+						}
+					}
+				}
+
+				return false
+			}
+		}
+	</script>
+</head>
+<body>
+	<form action="http://localhost:8080" method="POST" id="form">
+		账号：<input type="text" name="account" id="user"><br/>
+		<input type="file" name="file"><br/>
+		<input type="submit" id="submit" value="提交">
+	</form>
+</body>
+</html>
+```
+
 ### webSocket
 
+- 性能高，对比ajax，基于http协议（建立连接阶段）二进制协议
+- 双向通信
+- 没有同源限制
+- 安全
 
+库：socket.io
+
+- 简单方便
+- 兼容IE5
+- 自动数据解析
 
 ## 模板引擎
 
