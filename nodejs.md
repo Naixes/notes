@@ -568,9 +568,65 @@ path.extname('c:/a/c/index.js') // '.js'
 path.isAbsolute('c:/a/c/index.js') // true
 path.parse('c:/a/c/index.js') // {root: 'c:/', dir: 'c:/a/c', base: 'index.js', ext: '.js', name: 'index'}
 
-path.join('c:/', 'b') // 'c:\\a\\b' 根据系统 将路径片段使用特定的分隔符（window：\）连接起来形成路径，并规范化生成的路径。
+path.join('c:/', 'b') // 'c:\\a\\b' 根据系统 将路径片段使用特定的分隔符（window：\）连接起来形成路径d，并规范化生成的路径。
 path.resolve('/foo/bar', './baz') // '/foo/bar/baz'把一个路径或路径片段的序列解析为一个绝对路径。/被解析为根目录。
 ```
+
+### process模块
+
+```js
+// config/index.js
+let process = require('process')
+// 环境变量
+process.env
+// 判断当前系统环境设置启动模式
+let mode = (process.env.OS=='Windeows_Nt'?'dev':'prod')
+module.exports = {
+    mode,
+    ...(mode=='dev'?require('./config.dev'):require('./config.prod'))
+}
+// config/config.dev.js
+module.exports = {
+    // database
+    DB_HOST:'localhost',
+    DB_PORT:'3306',
+    DB_USER:'root',
+    DB_PASS:'',
+    DB_NAME:'xxx'
+}
+// config/config.prod.js
+module.exports = {
+    // database
+    DB_HOST:'21.34.89.37',
+    DB_PORT:'3309',
+    DB_USER:'root',
+    DB_PASS:'123456',
+    DB_NAME:'yyy'
+}
+// server.js
+const config = require('./config')
+const db = require('./libs/database')
+(async () =>{
+    let data = await db.query('SELECT * FROM item_tabale')
+    
+})()
+// libs/database.js
+const mysql = require('mysql')
+const con = require('co-mysql')
+const {DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME} = require('../config')
+
+let conn = mysql.Pool({
+    host: DB_HOST,
+    port:DB_PORT,
+    user:DB_USER,
+    password:DB_PASS,
+    database:DB_NAME
+})
+
+module.exports = co(conn)
+```
+
+encodeURLComponent('xxxxx')
 
 ### node中的非模块成员
 
