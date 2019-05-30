@@ -984,6 +984,8 @@ app.listen(3000, function() {})
 
 ### 静态服务
 
+一般放在最后防止与接口同名
+
 ```java
 app.use('/public/', express.static('./public/')) // 可以通过/public/访问资源
 app.use(express.static('./public/')) // 没有第一个参数时，可省略/public/直接访问
@@ -994,6 +996,7 @@ app.use(express.static('./public/')) // 没有第一个参数时，可省略/pub
 ```javascript
 // get
 app.get('/', function(req, res) {
+    // send没有格式的限制
     res.send('hello')
 })
 // post
@@ -1104,6 +1107,7 @@ var app = express()
 
 // 配置过后就可以直接使用req.body获取请求体了
 // parse application/x-www-form-urlencoded
+// extended，是否开启扩展模式
 app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
@@ -1229,6 +1233,8 @@ app.use(session({
 // 访问req.session.foo
 ```
 
+存在 cookie 里的 session id 也叫 token
+
 ### 模板引擎
 
 安装：`express-art-template和art-template`
@@ -1247,7 +1253,7 @@ app.use(session({
 
 - req
 - res
-- next()，默认不会往后走
+- next()，默认不会往后走，参数是固定的，不可以通过next传参，**可以在req上增加属性当做参数**
 
 ####  应用程序级别的中间件
 
@@ -1256,7 +1262,7 @@ app.use(session({
 ```javascript
 app.use(function(req, res, next) {
     // 所有的请求都会进来
-    // 匹配下一个中间件
+    // 匹配下一个中间件 
     next()
 })
 
@@ -1276,7 +1282,7 @@ app.use('/a', function(req, res) {
 
 #### 路由级别的中间件
 
-app.get和app.post是严格匹配路径和方法的中间件
+app.get和app.post是严格匹配路径（可选）和方法的中间件
 
 还有app.put和app.delete
 
@@ -1315,9 +1321,29 @@ express.urlencoded
 
 body-parser
 
-cookie-parser
+##### cookie-parser
 
-express-session
+```js
+
+```
+
+cookie 不跨域，子级可以访问父级，父级不能访问子级，domain 设为主域名，path 可以往上访问不能向下访问，path 一般设为'/'根
+
+cookie 签名
+
+其他：express-session，express-mysql-session
+
+##### cokkie-session
+
+强制加签名
+
+默认保存到系统的临时文件夹，tempt文件夹
+
+循环秘钥，每个用户的每次登录都不同 
+
+##### multer
+
+处理文件上传
 
 ### 常用API
 
@@ -1424,6 +1450,28 @@ module.exports = app
   - body-parser请求解析
 - 挂载路由
 - 监听端口启动
+
+## KOA
+
+express：基于回调，自带路由
+
+koa：基于promise，不带路由
+
+版本：1：generator
+
+   	 2：generator&promise
+
+​	    3：未发布
+
+```js
+
+```
+
+### koa-router
+
+get，post，all（express是use）
+
+嵌套路由 
 
 ## Controllers模块
 
