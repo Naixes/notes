@@ -1469,6 +1469,28 @@ koa：基于promise，不带路由
 
 ### koa-router
 
+```js
+const Koa = require('Koa')
+const Router = require('koa-router')
+
+let server = new Koa
+server.listen(8080)
+
+let router = new Router
+// router.get('/a', (ctx, next) => {
+// 	ctx.req
+// 	ctx.res
+// })
+router.get('/a', async ctx => {
+	ctx.body = 'aa'
+	ctx.body += 'bb'
+})
+
+server.use(router.routes())
+```
+
+
+
 get，post，all（express是use）
 
 嵌套路由 
