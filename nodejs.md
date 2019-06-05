@@ -1733,6 +1733,72 @@ server.use(router.routes())
 // ctx.attachment()       
 ```
 
+### koa-static
+
+缓存
+
+结合路由设置缓存
+
+### koa-better-body
+
+ctx.request.fields
+
+### cookie
+
+自带
+
+server.keys = [] // 滚动秘钥
+
+ctx.cookies.set()/get('', '', {})
+
+### koa-session
+
+### 数据库
+
+错误处理，结合路由
+
+### 服务器渲染
+
+pug(jade)：侵入式
+
+ejs：侵入式
+
+安全
+
+耗费流量
+
+用户体验不好，需要刷新页面
+
+有利于SEO
+
+#### pug
+
+缩进，小括号，.，=，each xx in xxs
+
+#### ejs
+
+<%=xxx%>，语法和js一样，<% include 路径 -%>//-减少空行
+
+koa-ejs
+
+目录结构
+
+### 实例
+
+加路由的两种方法：/的问题，本质是字符串拼接
+
+统一处理：正常情况的数据处理
+
+管理员使用文件管理
+
+md5：散列算法
+
+crypto
+
+sha1/128/256
+
+await-fs
+
 ## Controllers模块
 
 将路由的具体操作按照业务模块进行划分如：user.js
