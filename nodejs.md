@@ -1294,16 +1294,53 @@ body-parser
 ##### cookie-parser
 
 ```js
+const express = require('express')
+const cookieParser = require('cookie-parser')
 
+let server = express()
+server.listen(8080)
+server.use(cookieParser())
+server.get('/a', (req, res) => {
+    // cookie 不跨域，子级可以访问父级，父级不能访问子级，domain 设为主域名，path 可以往上访问不能向下访问，path 一般设为'/'根
+    res.cookie('amount', 99, {
+        // domain: 'aaa.com',
+        path: '/',
+        maxAge: 14*86400*1000
+    })
+    console.log(req.cookies)
+    res.send('ok')
+})
 ```
-
-cookie 不跨域，子级可以访问父级，父级不能访问子级，domain 设为主域名，path 可以往上访问不能向下访问，path 一般设为'/'根
 
 cookie 签名
 
+```js
+const express = require('express')
+const cookieParser = require('cookie-parser')
+
+let server = express()
+server.listen(8080)
+server.use(cookieParser('naixes1995'))
+server.get('/a', (req, res) => {
+    // cookie 不跨域，子级可以访问父级，父级不能访问子级
+    res.cookie('amount', 99, {
+        // 通过js脚本将无法读取到cookie信息，这样能有效的防止XSS攻击
+        httpOnly: true,
+        maxAge: 14*86400*1000,
+        // 签名
+        signed: true
+    })
+    console.log('cookies', req.cookies)
+    // 签名cookie
+    console.log('signedCookies', req.signedCookies)
+    
+    res.send('ok')
+})
+```
+
 其他：express-session，express-mysql-session
 
-##### cokkie-session
+##### cookie-session
 
 强制加签名
 
@@ -1311,9 +1348,59 @@ cookie 签名
 
 循环秘钥，每个用户的每次登录都不同 
 
+```js
+const express = require('express')
+const cookieSession = require('cookie-session')
+
+let server = express()
+server.listen(8080)
+
+// 强制签名
+server.use(cookieSession({
+    // 循环秘钥，每个用户的每次登录都不同 
+    keys: ['naixes1995', 'sartine1995'],
+    maxAge: 20*60*1000 // 20分钟
+}))
+
+server.get('/a', (req, res) => {
+    if(!req.session['view']) {
+        req.session['view'] = 1
+    }else {
+        req.session['view']++
+    }
+    req.session['amount'] = 99
+    res.send(`欢迎你第${req.session['view']}次访问本站，你的余额为${req.session['amount']}`)
+})
+```
+
 ##### multer
 
 处理文件上传
+
+```js
+const express = require('express')
+const multer = require('multer')
+const body = require('body-parser')
+
+let server = express()
+server.listen(8080)
+
+let obj = multer({dest: './static/upload'})
+server.use(obj.any())
+
+server.use(body.urlencoded({
+    extended:false
+}))
+
+server.post('/reg', (req, res) => {
+    console.log(req.body)
+    console.log(req.files)
+    res.send('success')
+})
+
+server.use(express.static('./static/'))
+
+```
 
 ### 常用API
 
