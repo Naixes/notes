@@ -1521,6 +1521,22 @@ koa：基于promise，不带路由
 ​	       3：未发布
 
 ```js
+const Koa = require('Koa')
+const Router = require('koa-router')
+
+let server = new Koa()
+server.listen(8080)
+
+let router = new Router()
+// router.get('/a', (ctx, next) => {
+// 	ctx.req
+// 	ctx.res
+// })
+router.get('/a', async ctx => {
+	ctx.body = 'aa'
+	ctx.body += 'bb'
+})
+server.use(router.routes())
 
 ```
 
@@ -1546,11 +1562,176 @@ router.get('/a', async ctx => {
 server.use(router.routes())
 ```
 
-
-
 get，post，all（express是use）
 
-嵌套路由 
+#### 嵌套路由 
+
+```js
+const Koa = require('Koa')
+const Router = require('koa-router')
+
+let server = new Koa()
+server.listen(8080)
+
+let router = new Router()
+// router.get('/a', (ctx, next) => {
+// 	ctx.req
+// 	ctx.res
+// })
+router.get('/a', async ctx => {
+	ctx.body = 'aa'
+	ctx.body += 'bb'
+})
+
+// 嵌套路由
+let userRouter = new Router()
+userRouter.get('/', async ctx =>{ctx.body = 'user'})
+let admin = new Router()
+// /user/admin/a
+admin.get('/a', async ctx =>{ctx.body = 'admin-a'})
+let comp = new Router()
+comp.get('/a', async ctx =>{ctx.body = 'comp-a'})
+
+userRouter.use('/admin', admin.routes())
+userRouter.use('/comp', comp.routes())
+
+let newsRouter = new Router()
+
+router.use('/user', userRouter.routes())
+router.use('/news', newsRouter.routes())
+
+server.use(router.routes())
+
+```
+
+分模块
+
+```js
+// server.js
+const Koa = require('koa')
+const Router = require('koa-router')
+
+let server = new Koa()
+server.listen(8080)
+
+let router = new Router()
+
+router.get('/a', ctx => {
+    ctx.body = 'aa'
+    ctx.body += 'bb'
+})
+router.use('/user', require('./routers/user'))
+
+server.use(router.routes())
+// routers/user/index.js
+const Router = require('koa-router')
+
+let router = new Router()
+router.get('/', ctx => {
+    ctx.body = 'user'
+})
+router.use('/admin', require('./admin'))
+router.use('/comp', require('./comp'))
+
+module.exports = router.routes()
+// routers/user/admin.js
+const Router = require('koa-router')
+
+let router = new Router()
+router.get('/', ctx => {
+    ctx.body = 'admin'
+})
+router.get('/a', ctx => {
+    ctx.body = 'admin-a'
+})
+
+module.exports = router.routes()
+```
+
+#### 参数传递
+
+1. ctx.params
+2. ctx.query
+
+```js
+// 两种传参方式
+// urlencoed：顺序灵活，可省略，不利于SEO
+const Koa = require('koa')
+const Router = require('koa-router')
+
+let server = new Koa()
+server.listen(8080)
+
+let router = new Router()
+router.get('/a', ctx => {
+    ctx.body = ctx.query.id
+})
+// 可添加多个
+router.get('/a/:id', async (ctx, next) => {
+    ctx.body = ctx.params.id
+    await next()
+})
+router.get('/a/123', (ctx, next) => {
+    ctx.body += ctx.params.id
+})
+
+server.use(router.routes())
+```
+
+#### ctx参数
+
+```js
+const Koa = require('koa')
+const Router = require('koa-router')
+
+let server = new Koa()
+server.listen(8080)
+
+// server.context相当于ctx的原型
+// 可以放一些全局参数
+server.context.a = 12
+
+let router = new Router()
+router.get('/a', async (ctx, next) => {
+    let {user, pass} = ctx.query
+    if(user && pass) {
+        ctx.body = user + pass
+    }else {
+        // ctx.throw(code, msg)
+        ctx.throw(400, 'user and pass are required')
+    }
+    // ctx.assert(condition, code, msg) // 和 throw 类似
+    // ctx.assert(user, 400, 'user is required')
+    // ctx.assert(pass, 400, 'pass is required')
+    
+
+    // ctx.request
+    // ctx.response
+    // ctx.method
+    // ctx.url
+    // ctx.path
+    // ctx.query
+    // 客户端ip
+    // ctx.ip                 
+    // ctx.headers
+    console.log('ctx.url', ctx.url)
+    console.log('ctx.method', ctx.method)
+    console.log('ctx.path', ctx.path)
+    console.log('ctx.ip', ctx.ip)
+    console.log('ctx.headers', ctx.headers)
+    console.log('ctx.request', ctx.method)
+    console.log('ctx.response', ctx.method)
+})
+
+server.use(router.routes())
+
+// 设置状态码
+// ctx.state = 305
+// 重定向
+// ctx.redirect()
+// 下载文件
+// ctx.attachment()       
+```
 
 ## Controllers模块
 
