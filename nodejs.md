@@ -579,56 +579,28 @@ path.resolve('/foo/bar', './baz') // '/foo/bar/baz'把一个路径或路径片�
 let process = require('process')
 // 环境变量
 process.env
-// 判断当前系统环境设置启动模式
-let mode = (process.env.OS=='Windeows_Nt'?'dev':'prod')
-module.exports = {
-    mode,
-    ...(mode=='dev'?require('./config.dev'):require('./config.prod'))
-}
-// config/config.dev.js
-module.exports = {
-    // database
-    DB_HOST:'localhost',
-    DB_PORT:'3306',
-    DB_USER:'root',
-    DB_PASS:'',
-    DB_NAME:'xxx'
-}
-// config/config.prod.js
-module.exports = {
-    // database
-    DB_HOST:'21.34.89.37',
-    DB_PORT:'3309',
-    DB_USER:'root',
-    DB_PASS:'123456',
-    DB_NAME:'yyy'
-}
-// server.js
-const config = require('./config')
-const db = require('./libs/database')
-(async () =>{
-    let data = await db.query('SELECT * FROM item_tabale')
-    
-})()
-// libs/database.js
-const mysql = require('mysql')
-const con = require('co-mysql')
-const {DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME} = require('../config')
-
-let conn = mysql.Pool({
-    host: DB_HOST,
-    port:DB_PORT,
-    user:DB_USER,
-    password:DB_PASS,
-    database:DB_NAME
-})
-
-module.exports = co(conn)
+// 可以用来获取命令行 -- 后面的参数，使用不同的配置文件
+console.log(process.argv)
 ```
 
-encodeURLComponent('xxxxx')
+### 实现简单的原生服务器
 
-### node中的非模块成员
+<https://github.com/Naixes/demo-collection/tree/master/learnNode/native-project>
+
+```js
+config:  config.dev.js
+	     config.prod.js
+libs:    database.js
+	     http.js
+         router.js
+routers: ...
+server.js
+static:  css/html/js...
+```
+
+`encodeURLComponent('xxxxx')`
+
+## node中的非模块成员
 
 `__dirname`：**动态获取**当前文件所属目录的绝对路径
 
@@ -702,7 +674,7 @@ http.createServer((req, res) => {
 
 #### 获取解析二进制数据
 
-```js
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -733,8 +705,6 @@ http.createServer((req, res) => {
 </body>
 </html>
 ```
-
-
 
 ### jsonp
 
@@ -1459,9 +1429,9 @@ koa：基于promise，不带路由
 
 版本：1：generator
 
-   	 2：generator&promise
+   	    2：generator&promise
 
-​	    3：未发布
+​	       3：未发布
 
 ```js
 
