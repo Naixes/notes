@@ -20,22 +20,183 @@ HTML（英文Hyper Text Markup Language的缩写）中文译为“超文本标�
 </html>
 ```
 
-1.  HTML标签：所有HTML中标签的一个根节点。
+### html标签
 
-2. head标签：用于存放：title,meta,base,style,script,link
+`<html></html>`限定了文档的开始点和结束点，在它们之间是文档的头部和主体，所有HTML中标签的一个根节点。
 
-注意：在head标签中我们必须要设置的标签是title
+ `<html></html>`标签中可添加的专属属性
 
-3. title标签：让页面拥有一个属于自己的标题。
+| 属性     | 值                           | 描述                                                        |
+| :------- | :--------------------------- | :---------------------------------------------------------- |
+| manifest | url                          | 定义一个 URL，在这个 URL 上描述了文档的缓存信息。（已废弃） |
+| xmlns    | http://www.w3.org/1999/xhtml | 定义 XML namespace 属性。                                   |
 
-4. body标签：页面在的主体部分，用于存放所有的HTML标签
+**全局属性**
 
-# 文档类型声明<!DOCTYPE>
+**HTML 属性**赋予元素意义和语境。下面的全局属性可用于任何 **HTML 元素**。
+
+| 属性            | 描述                                                   |
+| :-------------- | :----------------------------------------------------- |
+| accesskey       | 规定激活元素的快捷键。                                 |
+| class           | 规定元素的一个或多个类名（引用样式表中的类）。         |
+| contenteditable | 规定元素内容是否可编辑。                               |
+| contextmenu     | 规定元素的上下文菜单。上下文菜单在用户点击元素时显示。 |
+| data-*          | 用于存储页面或应用程序的私有定制数据。                 |
+| dir             | 规定元素中内容的文本方向。                             |
+| draggable       | 规定元素是否可拖动。                                   |
+| dropzone        | 规定在拖动被拖动数据时是否进行复制、移动或链接。       |
+| hidden          | 规定元素仍未或不再相关。                               |
+| id              | 规定元素的唯一 id。                                    |
+| lang            | 规定元素内容的语言。                                   |
+| spellcheck      | 规定是否对元素进行拼写和语法检查。                     |
+| style           | 规定元素的行内 CSS 样式。                              |
+| tabindex        | 规定元素的 tab 键次序。                                |
+| title           | 规定有关元素的额外信息。                               |
+| translate       | 规定是否应该翻译元素内容。                             |
+
+### head标签
+
+用于存放：title,meta,base,style,script,link
+
+`<head>`标签用于定义文档的头部，它是所有头部元素的容器。 `<head>`描述了文档的各种属性和信息，包括文档的标题、在 Web 中的位置以及和其他文档的关系等。
+
+**<base>**
+
+`<base>` 标签为页面上的所有链接规定默认地址或默认目标。
+
+通常情况下，浏览器会从当前文档的 URL 中提取相应的元素来填写相对 URL 中的空白。使用 `<base>` 标签可以改变这一点。浏览器随后将不再使用当前文档的 URL，而使用指定的基本 URL 来解析所有的相对 URL。这其中包括 `<a>`、 `<img>`、 `<link>`、 `<form>` 标签中的 URL。
+
+| 属性   | 值                                  | 描述                                       |
+| :----- | :---------------------------------- | :----------------------------------------- |
+| href   | URL                                 | 规定页面中所有相对链接的基准 URL。（必选） |
+| target | blank  parent  _self _top framename | 在何处打开页面中所有的链接。（可选）       |
+
+**link标签**
+
+主要用于**style文件**引入
+
+| 属性     | 值                                                           | 描述                                        |
+| :------- | :----------------------------------------------------------- | :------------------------------------------ |
+| charset  | char_encoding                                                | HTML5 中不支持。                            |
+| href     | URL                                                          | 规定被链接文档的位置。                      |
+| hreflang | language_code                                                | 规定被链接文档中文本的语言。                |
+| media    | media_query                                                  | 规定被链接文档将被显示在什么设备上。        |
+| rel      | alternate author help icon licence next pingback prefetch prev search sidebar stylesheet tag | 规定当前文档与被链接文档之间的关系。        |
+| rev      | reversed relationship                                        | HTML5 中不支持。                            |
+| sizes    | height xwidth any                                            | 规定被链接资源的尺寸。仅适用于 rel="icon"。 |
+| target   | blank self top parent frame_name                             | HTML5 中不支持。                            |
+| type     | MIME_type                                                    | 规定被链接文档的 MIME 类型。                |
+
+**style标签**
+
+| 属性  | 值                                                        | 描述                                 |
+| :---- | :-------------------------------------------------------- | :----------------------------------- |
+| type  | text/css                                                  | 规定样式表的 MIME 类型。（必选）     |
+| media | screen tty tv projection handheld print braille aural all | 为样式表规定不同的媒介类型。（可选） |
+
+**title标签**
+
+让页面拥有一个属于自己的标题。注意：在head标签中我们必须要设置的标签是title
+
+**meta标签**
+
+提供了有关当前**HTML**元素的**元信息 (meta-information)**，比如描述、针对搜索引擎的关键词以及刷新频率。
+
+<meta> 的属性对象如下：
+
+| 属性       | 描述                                        |
+| :--------- | :------------------------------------------ |
+| content    | 设置或返回 元素的 content 属性的值。        |
+| http-equiv | 把 content 属性连接到一个 HTTP 头部。       |
+| name       | 把 content 属性连接到某个名称。             |
+| scheme     | 设置或返回用于解释 content 属性的值的格式。 |
+
+**content**，此属性包含 `http-equiv` 或 `name` 属性的值，具体取决于所使用的值。
+
+<meta name="keywords" content="WEB,CSS,鱼头" />
+
+**scheme**，此属性是用来设置或返回用于解释 content 属性的值的格式。例子如下：
+
+<meta name="revised" content="2019-04-03" scheme="YYYY-MM-DD" />
+
+MDN：不要用这属性，因为这属性并没什么用处。: )
+
+**name**，此属性定义文档级元数据的名称。值得注意的是，如果定义的元数据设置了 `itemprop`, `http-equiv` or `charset` ，就不能再设置**name**了。
+
+| 值               | 描述                                                         |
+| :--------------- | :----------------------------------------------------------- |
+| application-name | 定义正运行在该网页上的网络应用名称                           |
+| author           | 文档作者                                                     |
+| description      | 其中包含页面内容的简短和精确的描述。一些浏览器，如Firefox和Opera，将其用作书签页面的默认描述。 |
+| generator        | 包含生成页面的软件的标识符。                                 |
+| keywords         | 包含与逗号分隔的页面内容相关的单词。                         |
+| referrer         | 控制所有从该文档发出的 HTTP 请求中HTTP `Referer` 首部的内容。 |
+| others           | 其他的内容。                                                 |
+
+**http-equiv**，此属性把**content**属性连接到**HTTP**头部。
+
+| 值                      | 描述                                                         |
+| :---------------------- | :----------------------------------------------------------- |
+| content-security-policy | 允许站点管理者在指定的页面控制用户代理的资源。除了少数例外，这条政策将极大地指定服务源 以及脚本端点。这将帮助防止跨站脚本攻击。 |
+| default-style           | 这个属性指定了在页面上使用的首选样式表. `content`属性必须包含 `<link>` 元素的标题, `href`属性链接到CSS样式表或包含CSS样式表的 `<style>`元素的标题。 |
+| refresh                 | 这个属性指定如果 `<content>`只包含一个正整数，则是重新载入页面的时间间隔(秒)，包含一个正整数并且跟着一个字符串,则是重定向到指定链接的时间间隔(秒)。 |
+
+### body标签
+
+页面在的主体部分，用于存放所有的HTML标签
+
+` <html>`内可使用的标签大概有**357**个，其中**MDN**给 **<body>**内的元素分了11类。
+
+**1. 内容分区：**
+
+> 内容分区元素允许你将文档内容从逻辑上进行组织划分。
+
+**2. 文本内容**
+
+> 使用 HTML 文本内容元素来组织在开标签和闭标签里的块或章节的内容。这些元素能标识内容的宗旨或结构，而这对于 accessibility 和 SEO 很重要。
+
+**3. 内联文本语义**
+
+> 使用 HTML 内联文本语义（Inline text semantics）定义一个单词、一行内容，或任意文字的语义、结构或样式。
+
+**4. 图片和多媒体**
+
+> HTML 支持各种多媒体资源，例如图像，音频和视频。
+
+**5. 内嵌内容**
+
+> 除了常规的多媒体内容，HTML 可以包括各种其他的内容，即使它并不容易交互。
+
+**6. 脚本**
+
+> 为了创建动态内容和 Web 应用程序，HTML 支持使用脚本语言，最突出的就是 JavaScript。某些元素支持此功能。
+
+**7. 编辑标识**
+
+> 这些元素能标示出某个文本被更改过的部分。
+
+**8. 表格内容**
+
+> 这里的元素用于创建和处理表格数据。
+
+**9. 表单**
+
+> HTML 提供了许多可一起使用的元素，这些元素能用来创建一个用户可以填写并提交到网站或应用程序的表单。
+
+**10. 交互元素**
+
+> HTML 提供了一系列有助于创建交互式用户界面对象的元素。
+
+**11. Web组件**
+
+> Web 组件是一种与 HTML 相关联（HTML-related）的技术，简单来说，它允许创建自定义元素，并如同普通的 HTML 一样使用它们。此外，你甚至可以创建经过自定义的标准 HTML 元素。
+
+## 文档类型声明<!DOCTYPE>
 
 ~~~html
 <!DOCTYPE html>
 
-<!DOCTYPE> 标签位于文档的最前面，用于向浏览器说明当前文档使用哪种 HTML 或 XHTML 标准规范，必需在开头处使用<!DOCTYPE>标签为所有的XHTML文档指定XHTML版本和类型，只有这样浏览器才能按指定的文档类型进行解析，这里使用的是 html 5 的版本。
+<!DOCTYPE> 标签位于文档的最前面，用于向浏览器说明当前文档使用哪种 HTML 或 XHTML 标准规范，这里使用的是 html 5 的版本。
 ~~~
 
 DTD文档类型定义：浏览器会使用它来判断文档类型，从而决定使用何种协议来解析 
@@ -60,7 +221,7 @@ DTD文档类型定义：浏览器会使用它来判断文档类型，从而决�
 
 ### meta 标签
 
-### 字符集
+#### 字符集
 
 <meta charset="UTF-8">
 
@@ -74,7 +235,7 @@ GBK包含全部中文字符    是GB2312的扩展，加入对繁体字的支持�
 
 UTF-8则包含全世界所有国家需要用到的字符
 
-### 视口
+#### 视口
 
 https://www.cnblogs.com/chunyangji/p/5795487.html
 
@@ -1284,10 +1445,6 @@ vertical-align 不影响块级元素中的内容对齐，它只针对于 行内�
 3. 给父元素添加font-size： 0；
 4. 给父元素添加line-height： 0；
 
-## 函数
-
-
-
 # CSS @-rule
 
 ## @charset
@@ -1555,7 +1712,7 @@ h1:target {
 }
 ```
 
-## 关系选择器
+## 组合选择器
 
 - 交集选择器
 
@@ -1581,7 +1738,7 @@ E + E：选中符合条件的**相邻**元素
 
 E ~ E：选中符合条件的兄弟元素
 
-```
+```html
 <p>p1</p>
 <p>p2</p>
 <h3>这是一个标题</h3>
@@ -1593,6 +1750,14 @@ E ~ E：选中符合条件的兄弟元素
 如果使用p + p{color:#f00;}，那么p2, p5将会变成红色
 如果使用p ~ p{color:#f00;}，那么p2,p3,p4,p5将会变成红色；
 ```
+
+- **|**: 命名空间选择器
+
+例如：`.a|.b`。在例子中选中的就是属于 `.a`的 `.b`，跟 `.a.b`一样，属于**Selectors Leve 3**的内容。
+
+- **||**：列选择器
+
+例如：`.a||.b`。在例子中选中的就是由 `.a`表示的列的网格/表中的单元格的 `.b`，属于 `SelectorsLevel4`的内容。
 
 ## 属性选择器
 
@@ -1677,13 +1842,476 @@ div::after {
 
 E:after、E:before 在旧版本里是伪元素，CSS3的规范里“:”用来表示伪类，“::”用来表示伪元素，但是在高版本浏览器下E:after、E:before会被自动识别为E::after、E::before，这样做的目的是用来做兼容处理。
 
+# 函数
+
+根据MDN所陈列的关键字索引，**css函数**一共有**86**个。
+
+根据w3cplus中可以划分为以下几类：
+
+- **属性函数**：`attr()`；
+- **背景图片函数**：`linear-gradient()`、 `radial-gradient()`、 `conic-gradient()`、 `repeating-linear-gradient()`、 `repeating-radial-gradient()`、 `repeating-conic-gradient()`、 `image-set()`、 `image()`、 `url()`、 `element()`；
+- **颜色函数**：`rgb()`、 `rgba()`、 `hsl()`、 `hsla()`、 `hwb()`、 `color-mod()`；
+- **图形函数**：`circle()`、 `ellipse()`、 `inset()`、 `polygon()`、 `path()`
+- **滤镜函数**：`blur()`、 `brightness()`、 `contrast()`、 `drop-shadow()`、 `grayscale()`、 `hue-rotate()`、 `invert()`、 `opacity()`、 `saturate()`、 `sepia()`；
+- **转换函数**：`matrix()`、 `matrix3d()`、 `perspective()`、 `rotate()`、 `rotate3d()`、 `rotateX()`、 `rotateY()`、 `rotateZ()`、 `scale()`、 `scale3d()`、 `scaleX()`、 `scaleY()`、 `scaleZ()`、 `skew()`、 `skewX()`、 `skewY()`、 `translate()`、 `translateX()`、 `translateY()`、 `translateZ()`、 `translate3d()`；
+- **数学函数**：`calc()`、 `min()`、 `max()`、 `mixmax()`、 `repeat()`；
+- **缓动函数**：`cubic-bezier()`、 `steps()`；
+- **其他函数**：`counter()`、 `counters()`、 `toggle()`、 `var()`、 `symbols()`。
+
+这些函数各有各的功能，按需排列组合可以实现很多很酷炫的效果。在这里一定要安利大漠老师的CSS中的函数以及张鑫旭老师在**CSS CONF**中的分享，里面就讲了很多关于**CSS 函数**的应用。
+
+## 背景图片函数
+
+### element()
+
+`element()`是属于CSS Image Value and Replaced Content Module Level 4中的背景函数。
+
+`element()`可以将网站中的部分内容当成图片渲染。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+    .edit,
+    .show {
+        width: 200px;
+        height: 200px;
+        margin: 10px;
+        border: 1px solid #ccc;
+    }
+    .show {
+      background: -moz-element(#edit);
+      background-size: 100% 100%;
+    }
+    </style>
+</head>
+<body>
+    <h1>限火狐浏览器</h1>
+    <div contenteditable class="edit" id="edit"></div>
+    <div class="show" id="show"></div>
+</body>
+</html>
+```
+
+### conic-gradient()
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+    .colorful {
+        width: 300px;
+        height: 300px;
+        background: conic-gradient(
+            #9ED110,
+            #50B517,
+            #179067,
+            #476EAF,
+            #9f49ac,
+            #CC42A2,
+            #FF3BA7,
+            #FF5800,
+            #FF8100,
+            #FEAC00,
+            #FFCC00,
+            #EDE604
+        );
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.5s ease;
+    }
+    .colorful:hover {
+        /* filter：滤镜 */
+        /* blur()：调整模糊度 */
+        /* contrast()：调整对比度 */
+        /* brightness()：调整亮度 */
+        /* drop-shadow()：调整阴影 */
+        /* hue-rotate（）：色调旋转 */
+        /* grayscale()：转换为灰度 */
+        filter: hue-rotate(180deg)
+    }
+    </style>
+</head>
+<body>
+    <div class="colorful"></div>
+</body>
+</html>
+```
+
+
+
 # 单位
 
 # 布局
 
 ## 正常流
 
+正常流的盒子属于**格式化上下文(FC)**，在**CSS2.2**中可以是**表格**、**块**或**内联**。 在**CSS3**中引入了**flex**跟**grid**，当然以后会引入得更多。
+
+**块级盒子(block-level boxes)** 与创建 **块级格式化上下文(BFC)** 有关；
+
+**行内级盒子(inline-level boxes)** 与创建 **行内级格式化上下文(IFC)** 有关。
+
+### BFC
+
+https://www.cnblogs.com/lhb25/p/inside-block-formatting-ontext.html
+
+BFC(Block formatting context)：直译为"块级格式化上下文"。
+
+创建了 BFC的元素就是一个独立的盒子，它是一个独立的渲染区域，只有Block-level box参与， 它规定了内部的Block-level Box如何布局，并且与这个区域外部毫不相干。
+
+Box是CSS布局的对象和基本单位， 直观点来说，就是一个页面是由很多个Box(即boxes)组成的。元素的类型和display属性，决定了这个Box的类型。 不同类型的Box， 会参与不同的Formatting context(一个决定如何渲染文档的容器)，因此Box内的元素会以不同的方式渲染。
+
+常见的盒子类型：
+
+block-level box: display属性为block, list-item, table的元素，会生成block-level box。并且参与block fomatting context。 
+
+inline-level box: display属性为inline, inline-block, inline-table的元素，会生成inline-level box。并且参与inline formatting context。
+
+#### Formatting context
+
+Formatting context是W3C CSS2.1规范中的一个概念。它是页面中的一块渲染区域，并且有一套渲染规则，它决定了其子元素将如何定位，以及和其他元素的关系和相互作用。  
+
+#### W3C定义
+
+​	浮动元素和绝对定位元素，非块级盒子的块级容器（例如 inline-blocks, table-cells, 和 table-captions），以及overflow值不为“visiable”的块级盒子，都会为他们的内容创建新的块级格式化上下文。 
+​	在一个块级格式化上下文里，盒子从包含块的顶端开始垂直地一个接一个地排列，两个盒子之间的垂直的间隙是由他们的margin 值所决定的。两个相邻的块级盒子的垂直外边距会发生叠加。 
+
+​	在块级格式化上下文中，每一个盒子的左外边缘（margin-left）会触碰到容器的左边缘(border-left)（对于从右到左的格式来说，则触碰到右边缘），即使存在浮动也是如此，除非这个盒子创建一个新的块级格式化上下文。 
+
+#### 元素的显示模式
+
+素的显示模式 display，分为 块级元素行内元素行内块元素，其实，它还有很多其他显示模式。
+
+<img src="E:/Jennifer/other/notes/media/dis.png"  style="border: 1px dashed #ccc; padding: 5px;" />
+
+#### 参与BFC的条件
+
+**display 属性为 block, list-item, table 的元素，生成block-level box，可以参与BFC.**
+
+#### 什么情况可以产生BFC
+
+要给这些元素添加如下属性就可以触发BFC。
+
+```
+-float属性不为none
+-position为absolute或fixed
+-display为inline-block, table-cell, table-caption, flex, inline-flex
+-overflow不为visible。
+
+```
+
+#### BFC元素所具有的特性
+
+BFC布局规则特性：
+
+1. 在BFC中，盒子从顶端开始垂直地一个接一个地排列。
+2. 盒子**垂直**方向的距离由margin决定。**属于同一个BFC**的两个相邻盒子的margin会发生重叠。==》消除margin重叠问题
+3. 在BFC中，每一个盒子的左外边缘（margin-left）会触碰到容器的左边缘(border-left)不会压住边框（对于从右到左的格式来说，则触碰到右边缘）。
+4. BFC的区域不会与浮动盒子产生交集，而是紧贴浮动边缘。==》两栏右侧自适应效果
+5. 计算BFC的高度时，自然也会检测浮动或者定位的盒子高度。==》清除浮动效果
+
+#### BFC的主要用途
+
+(1) 清除元素内部浮动
+
+计算BFC的高度时，自然也会检测浮动或者定位的盒子高度。所以只要把父元素设为BFC就可以清理子元素的浮动了，最常见的用法就是在父元素上设置overflow: hidden样式，对于IE6加上zoom:1就可以了。
+
+主要用到 
+
+```
+计算BFC的高度时，自然也会检测浮动或者定位的盒子高度。
+```
+
+<img src="E:/Jennifer/other/notes/media/fu.jpg" />
+(2) 解决外边距合并问题
+
+外边距合并的问题。
+
+主要用到 
+
+```
+盒子垂直方向的距离由margin决定。属于同一个BFC的两个相邻盒子的margin会发生重叠
+
+```
+
+属于同一个BFC的两个相邻盒子的margin会发生重叠，那么我们创建不属于同一个BFC，就不会发生margin重叠了。
+
+<img src="E:/Jennifer/other/notes/media/ma.png" />
+
+(3) 制作右侧自适应的盒子问题
+
+主要用到 
+
+```
+普通流体元素BFC后，为了和浮动元素不产生任何交集，顺着浮动边缘形成自己的封闭上下文
+
+```
+
+<img src="E:/Jennifer/other/notes/media/you.png" />
+
+(4) 多列布局中防止最后一列因为浏览器四舍五入了列宽使总宽度会超出容器而掉下来，我们在多列布局中的最后一列里创建一个新的BFC，它将总是占据其他列先占位完毕后剩下的空间。 
+
+```html
+<div class="container">
+    <div class="column">column 1</div>
+    <div class="column">column 2</div>
+    <div class="column">column 3</div>
+</div>
+<style>
+.column {
+    width: 31.33%;
+    background-color: green;
+    float: left;
+    margin: 0 1%;
+}
+/*  Establishing a new block formatting 
+    context in the last column */
+.column:last-child {
+    float: none;
+	overflow: hidden; 
+}
+</style>
+```
+
+现在尽管盒子的宽度稍有改变，但布局不会打破。当然，对多列布局来说这不一定是个好办法，但能避免最后一列下掉。这个问题上弹性盒或许是个更好的解决方案，但这个办法可以用来说明元素在这些环境下的行为。
+
+### IFC
+
+跟**BFC**不一样，**IFC**内的盒子会从**包含块**的顶部一个接着一个地水平排列。这些盒子会考虑水平 `margin`， `border`跟 `padding`。垂直对齐的方式也略有复杂。然后，包含形成一条线的框的矩形区域称为**线盒（line box）**。 
+
+**线盒（line box）的宽度**：由浮动情况跟它所在的包含块决定。
+
+**线盒（line box）的高度**：由 `line-height`的计算结果决定。
+
+#### 基线（baseline）
+
+**线盒（line box）** 的高度由 `line-height`的计算结果决定。
+
+`line-height`的定义就是**线盒（line box）**内两**基线（baseline）**（W3C原文）的间距。
+
+`vertical-align`的默认值就是基线。
+
+![img](https://mmbiz.qpic.cn/mmbiz_jpg/y0rsINPrlZy47EnPpnuzxFOjUlBytKfD4GPZTqnt4gj0mWhW1fxB0seiagCqHlDxTZ7yl8zpISZN8ls2LGDhRKg/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+
+如上图所示，我们看到小写字母**x**的位置，它的上下边缘就是我们的**基线（baseline）**，但下边缘才是我们日常使用的属性值。顺便一提，CSS单位 `ex`便是指的这个**字母x**的高度。
+
+## 层叠上下文与层叠顺序
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/y0rsINPrlZy47EnPpnuzxFOjUlBytKfD8PibeV0wAgc8rZLrbic8d8CMSXEDgFr0bzgUQ7lqnJewia0icgsx5L9WHg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+
+上面便是在同样的上下文中，元素的层叠规则（CSS3以后的除外，那规则会比较复杂）。元素的 **z-index 值**只在父级层叠上下文中有意义。级层叠上下文被自动视为父级层叠上下文的一个独立单元。
+
+文档中的层叠上下文由满足以下任意一个条件的元素形成：
+
+- 根元素 (HTML),
+- z-index 值不为 `auto` 的 绝对/相对定位，
+- 一个 z-index 值不为 `auto` 的 flex 项目 (flex item)，即：父元素 `display:flex|inline-flex`，
+- `opacity` 属性值小于 1 的元素，
+- `transform` 属性值不为 `none` 的元素，
+- `mix-blend-mode` 属性值不为 "normal"的元素，
+- `filter`值不为 `none` 的元素，
+- `perspective`值不为 `none` 的元素，
+- `isolation` 属性被设置为 `isolate` 的元素，
+- `position:fixed`
+- 在 `will-change` 中指定了任意 CSS 属性，即便你没有直接指定这些属性的值
+- `-webkit-overflow-scrolling` 属性被设置 `touch` 的元素
+
 ## 弹性布局
+
+这个是 **CSS** 史上第一个以 **start-end** 来定义方向的属性，这是一个可伸缩的布局模型，使得我们对块级元素的布局排列变得十分灵活，适应性非常强，其强大的伸缩性，在响应式开中可以发挥极大的作用。
+
+一个设有 `display:flex` 或 `display:inline-flex` 的元素是一个伸缩容器，伸缩容器的子元素被称为为伸缩项目，这些子元素使用伸缩布局模型来排版。
+
+主轴：Flex容器的主轴主要用来配置Flex项目，默认是水平方向
+
+侧轴：与主轴垂直的轴称作侧轴，默认是垂直方向的
+
+方向：默认主轴从左向右，侧轴默认从上到下
+
+主轴和侧轴并不是固定不变的，通过flex-direction可以互换。
+
+![1498441839910](E:/Jennifer/other/notes/media/1498441839910.png)
+
+- flex子项目在主轴的缩放比例，不指定flex属性，则不参与伸缩分配
+
+min-width: 280px  最小宽度  不能小于 280
+
+max-width: 1280px  最大宽度  不能大于 1280
+
+### flex-direction
+
+调整主轴方向（默认为水平方向）
+
+flex-direction: column 垂直排列
+
+flex-direction: row  水平排列
+
+http://m.ctrip.com/html5/   携程网手机端地址
+
+### justify-content
+
+调整主轴对齐（水平对齐）
+
+| 值            | 描述                                             | 白话文                                         |
+| ------------- | ------------------------------------------------ | ---------------------------------------------- |
+| flex-start    | 默认值。项目位于容器的开头。                     | 让子元素从父容器的开头开始排序但是盒子顺序不变 |
+| flex-end      | 项目位于容器的结尾。                             | 让子元素从父容器的后面开始排序但是盒子顺序不变 |
+| center        | 项目位于容器的中心。                             | 让子元素在父容器中间显示                       |
+| space-between | 项目位于各行之间留有空白的容器内。               | 左右的盒子贴近父盒子，中间的平均分布空白间距   |
+| space-around  | 项目位于各行之前、之间、之后都留有空白的容器内。 | 相当于给每个盒子添加了左右margin外边距         |
+
+### align-items
+
+调整侧轴对齐（垂直对齐）
+
+子盒子如何在父盒子里面垂直对齐（单行）
+
+| 值         | 描述                           | 白话文                                                |
+| ---------- | ------------------------------ | ----------------------------------------------------- |
+| stretch    | 默认值。项目被拉伸以适应容器。 | 让子元素的高度拉伸适用父容器（子元素不给高度的前提下) |
+| center     | 项目位于容器的中心。           | 垂直居中                                              |
+| flex-start | 项目位于容器的开头。           | 垂直对齐开始位置 上对齐                               |
+| flex-end   | 项目位于容器的结尾。           | 垂直对齐结束位置 底对齐                               |
+
+### flex-wrap
+
+控制是否换行
+
+当我们子盒子内容宽度多于父盒子的时候如何处理
+
+| 值           | 描述                                                         |
+| ------------ | ------------------------------------------------------------ |
+| nowrap       | 默认值。规定灵活的项目不拆行或不拆列。  不换行，则 收缩（压缩） 显示  强制一行内显示 |
+| wrap         | 规定灵活的项目在必要的时候拆行或拆列。                       |
+| wrap-reverse | 规定灵活的项目在必要的时候拆行或拆列，但是以相反的顺序。     |
+
+### flex-flow
+
+是flex-direction、flex-wrap的简写形式
+
+```css
+flex-flow: flex-direction  flex-wrap;  
+```
+
+例如：
+
+```css
+display: flex;
+/* flex-direction: row;
+flex-wrap: wrap;   这两句话等价于下面的这句话*/
+flex-flow: column wrap;  /* 两者的综合 */
+```
+
+### flex
+
+flex属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto。后两个属性可选
+
+- flex-grow：设置子元素所占宽度的比例
+- flex-shrink: 宽度不够时收缩的比例
+- flex-basis：宽度多余时的比例
+
+`flex` 属性可以指定1个，2个或3个值。
+
+**单值语法**: 值必须为以下其中之一:
+
+- 一个无单位 **数( <number>)** : 它会被当作 `<flex-grow>的值`。
+- 一个有效的 **宽度(width)** 值: 它会被当作 `<flex-basis>的值`。
+- 关键字 `none`、 `auto`, 或 `initial` 。
+
+**双值语法**: 第一个值必须为一个无单位数，并且它会被当作 `<flex-grow>` 的值。第二个值必须为以下之一：
+
+- 一个无单位数：它会被当作 `<flex-shrink>` 的值。
+- 一个有效的宽度值: 它会被当作 `<flex-basis>` 的值。
+
+**三值语法:**
+
+- 第一个值必须为一个无单位数，并且它会被当作 `<flex-grow>` 的值。
+- 第二个值必须为一个无单位数，并且它会被当作 `<flex-shrink>` 的值。
+- 第三个值必须为一个有效的宽度值， 并且它会被当作 `<flex-basis>` 的值。
+
+### align-content
+
+堆栈（由flex-wrap产生的独立行）多行垂直对齐方式齐
+
+align-content是针对flex容器里面多轴(多行)的情况,align-items是针对一行的情况进行排列。
+
+必须对父元素设置自由盒属性display:flex;，并且设置排列方式为横向排列flex-direction:row;并且设置换行，flex-wrap:wrap;这样这个属性的设置才会起作用。
+
+| 值            | 描述                                             | 测试 |
+| ------------- | ------------------------------------------------ | ---- |
+| stretch       | 默认值。项目被拉伸以适应容器。                   |      |
+| center        | 项目位于容器的中心。                             |      |
+| flex-start    | 项目位于容器的开头。                             |      |
+| flex-end      | 项目位于容器的结尾。                             |      |
+| space-between | 项目位于各行之间留有空白的容器内。               |      |
+| space-around  | 项目位于各行之前、之间、之后都留有空白的容器内。 |      |
+
+9、order控制子项目的排列顺序，正序方式排序，从小到大
+
+用css 来控制盒子的前后顺序。  用order 就可以
+
+用整数值来定义排列顺序，数值小的排在前面。可以为负值。 默认值是 0
+
+```css
+order: 1;
+```
+
+游戏：xxx网址
+
+## Grid布局
+
+**Flex**是一维布局，**Grid**是二维布局。意思就是**Flex**只能同时在一个方向进行作用，而**Grid**却可以在纵横两个方向同时工作。
+
+### 网格轨道
+
+我们通过 **grid-template-columns** 和 **grid-template-rows** 属性来定义网格中的行和列。这些属性定义了网格的轨道。一个网格轨道就是网格中任意两条线之间的空间。
+
+#### fr单位
+
+轨道可以使用任何长度单位进行定义。 网格还引入了一个另外的长度单位来帮助我们创建灵活的网格轨道。新的`fr`单位代表网格容器中可用空间的一等份。下一个网格定义将创建三个相等宽度的轨道，这些轨道会随着可用空间增长和收缩。
+
+#### repeat()
+
+有着多轨道的大型网格可使用 `repeat()` 标记来重复部分或整个轨道列表。
+
+有规律的重复：
+
+`grid-template-columns: repeat(3, 1fr 2fr);`
+
+#### grid-auto-rows
+
+grid-template-rows/columns没有定义时，网格将会在隐式网格中创建行和列。按照默认，这些轨道将自动定义尺寸，所以会根据它里面的内容改变尺寸。 
+
+可以在隐式网格中用 grid-auto-rows 和 grid-auto-columns 属性来定义一个设置大小尺寸的轨道。 
+
+#### minmax()
+
+在设置一个显式的网格或者定义自动创建的行和列的大小的时候，我们也许想给网格一个最小的尺寸，确保他们能扩大到容纳他里面添加的内容。
+
+### 网格线
+
+应该注意的是，当我们定义网格时，我们定义的是网格轨道，而不是网格线。Grid 会为我们创建编号的网格线来让我们来定位每一个网格元素
+
+![Diagram showing numbered grid lines.](https://mdn.mozillademos.org/files/14761/1_diagram_numbered_grid_lines.png)
+
+### 网格单元
+
+一个网格单元是在一个网格元素中最小的单位， 从概念上来讲其实它和表格的一个单元格很像。现在再看回我们前面的一个例子, 一旦一个网格元素被定义在一个父级元素当中，那么他的子级元素将会排列在每个事先定义好的网格单元中。
+
+### 网格区域
+
+网格元素可以向行或着列的方向扩展一个或多个单元，并且会创建一个网格区域。网格区域的形状应该是一个矩形 - 也就是说你不可能创建出一个类似于“L”形的网格区域。
+
+### 网格间距
+
+在两个网格单元之间的 *网格横向间距*  或 *网格纵向间距*  可使用 [`grid-column-gap`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/grid-column-gap) 和 [`grid-row-gap`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/grid-row-gap) 属性来创建，或者直接使用两个合并的缩写形式 [`grid-gap`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/grid-gap)。
 
 # 标签显示模式（display）
 
@@ -1774,131 +2402,6 @@ HTML标签一般分为块标签和行内标签两种类型，它们也称块元�
 
 块、行内元素转换为行内块： display: inline-block;
 
-# BFC(块级格式化上下文)
-
-https://www.cnblogs.com/lhb25/p/inside-block-formatting-ontext.html
-
-BFC(Block formatting context)：直译为"块级格式化上下文"。
-
-创建了 BFC的元素就是一个独立的盒子，它是一个独立的渲染区域，只有Block-level box参与， 它规定了内部的Block-level Box如何布局，并且与这个区域外部毫不相干。
-
-Box是CSS布局的对象和基本单位， 直观点来说，就是一个页面是由很多个Box(即boxes)组成的。元素的类型和display属性，决定了这个Box的类型。 不同类型的Box， 会参与不同的Formatting context(一个决定如何渲染文档的容器)，因此Box内的元素会以不同的方式渲染。
-
-常见的盒子类型：
-
-block-level box: display属性为block, list-item, table的元素，会生成block-level box。并且参与block fomatting context。 
-
-inline-level box: display属性为inline, inline-block, inline-table的元素，会生成inline-level box。并且参与inline formatting context。
-
-## Formatting context
-
-Formatting context是W3C CSS2.1规范中的一个概念。它是页面中的一块渲染区域，并且有一套渲染规则，它决定了其子元素将如何定位，以及和其他元素的关系和相互作用。  
-
-## W3C定义
-
-​	浮动元素和绝对定位元素，非块级盒子的块级容器（例如 inline-blocks, table-cells, 和 table-captions），以及overflow值不为“visiable”的块级盒子，都会为他们的内容创建新的块级格式化上下文。 
-​	在一个块级格式化上下文里，盒子从包含块的顶端开始垂直地一个接一个地排列，两个盒子之间的垂直的间隙是由他们的margin 值所决定的。两个相邻的块级盒子的垂直外边距会发生叠加。 
-
-​	在块级格式化上下文中，每一个盒子的左外边缘（margin-left）会触碰到容器的左边缘(border-left)（对于从右到左的格式来说，则触碰到右边缘），即使存在浮动也是如此，除非这个盒子创建一个新的块级格式化上下文。 
-
-## 元素的显示模式
-
-素的显示模式 display，分为 块级元素行内元素行内块元素，其实，它还有很多其他显示模式。
-
-<img src="./media/dis.png"  style="border: 1px dashed #ccc; padding: 5px;" />
-
-## 那些元素会具有参与BFC的条件
-
-**display 属性为 block, list-item, table 的元素，生成block-level box，可以参与BFC.**
-
-## 什么情况下可以让元素产生BFC
-
-要给这些元素添加如下属性就可以触发BFC。
-
-```
--float属性不为none
--position为absolute或fixed
--display为inline-block, table-cell, table-caption, flex, inline-flex
--overflow不为visible。
-
-```
-
-## BFC元素所具有的特性
-
-BFC布局规则特性：
-
-1. 在BFC中，盒子从顶端开始垂直地一个接一个地排列。
-2. 盒子**垂直**方向的距离由margin决定。**属于同一个BFC**的两个相邻盒子的margin会发生重叠。==》消除margin重叠问题
-3. 在BFC中，每一个盒子的左外边缘（margin-left）会触碰到容器的左边缘(border-left)不会压住边框（对于从右到左的格式来说，则触碰到右边缘）。
-4. BFC的区域不会与浮动盒子产生交集，而是紧贴浮动边缘。==》两栏右侧自适应效果
-5. 计算BFC的高度时，自然也会检测浮动或者定位的盒子高度。==》清除浮动效果
-
-## BFC的主要用途
-
-(1) 清除元素内部浮动
-
-计算BFC的高度时，自然也会检测浮动或者定位的盒子高度。所以只要把父元素设为BFC就可以清理子元素的浮动了，最常见的用法就是在父元素上设置overflow: hidden样式，对于IE6加上zoom:1就可以了。
-
-主要用到 
-
-```
-计算BFC的高度时，自然也会检测浮动或者定位的盒子高度。
-```
-
-<img src="./media/fu.jpg" />
-(2) 解决外边距合并问题
-
-外边距合并的问题。
-
-主要用到 
-
-```
-盒子垂直方向的距离由margin决定。属于同一个BFC的两个相邻盒子的margin会发生重叠
-
-```
-
-属于同一个BFC的两个相邻盒子的margin会发生重叠，那么我们创建不属于同一个BFC，就不会发生margin重叠了。
-
-<img src="./media/ma.png" />
-
-(3) 制作右侧自适应的盒子问题
-
-主要用到 
-
-```
-普通流体元素BFC后，为了和浮动元素不产生任何交集，顺着浮动边缘形成自己的封闭上下文
-
-```
-
-<img src="./media/you.png" />
-
-(4) 多列布局中防止最后一列因为浏览器四舍五入了列宽使总宽度会超出容器而掉下来，我们在多列布局中的最后一列里创建一个新的BFC，它将总是占据其他列先占位完毕后剩下的空间。 
-
-```html
-<div class="container">
-    <div class="column">column 1</div>
-    <div class="column">column 2</div>
-    <div class="column">column 3</div>
-</div>
-
-.column {
-    width: 31.33%;
-    background-color: green;
-    float: left;
-    margin: 0 1%;
-}
-/*  Establishing a new block formatting 
-    context in the last column */
-.column:last-child {
-    float: none;
-	overflow: hidden; 
-}
-
-
-```
-
-现在尽管盒子的宽度稍有改变，但布局不会打破。当然，对多列布局来说这不一定是个好办法，但能避免最后一列下掉。这个问题上弹性盒或许是个更好的解决方案，但这个办法可以用来说明元素在这些环境下的行为。 
-
 # CSS 三大特性
 
 层叠 继承  优先级 是我们学习CSS 必须掌握的三个特性。
@@ -1943,14 +2446,17 @@ BFC布局规则特性：
 
 定义CSS样式时，经常出现两个或更多规则应用在同一元素上，这时就会出现优先级的问题。
 
+权重：内联>ID>class>标签>通用
+
 在考虑权重时，还需要注意一些特殊的情况，具体如下：
 
 ```
 继承样式的权重为0。也就是说子元素定义的样式会覆盖继承来的样式。
-行内样式优先，可以理解为远大于100。总之，他拥有比上面提高的选择器都大的优先级。
 权重相同时，CSS遵循就近原则。
 CSS定义了一个!important命令，该命令被赋予最大的优先级。
 ```
+
+其实像 `max-width`、 `mix-width`、 `max-height`、 `min-height`等条件属性是可以覆盖 `!important`的。
 
 ## CSS特殊性（Specificity）
 
@@ -1972,26 +2478,12 @@ specificity用一个四位的数 字串(CSS2是三位)来表示，更像四个�
 
 ```
 .nav ul li   ------>      0,0,1,2
-
 .nav a       ------>      0,0,1,1   
-
 #nav p       ----->       0,1,0,1
-
 ```
-
-总结优先级：
-
-1. 使用了 !important声明的规则。
-2. 内嵌在 HTML 元素的 style属性里面的声明。
-3. 使用了 ID 选择器的规则。
-4. 使用了类选择器、属性选择器、伪元素和伪类选择器的规则。
-5. 使用了元素选择器的规则。
-6. 只包含一个通用选择器的规则。
-7. 同一类选择器则遵循就近原则。
 
 ```
 总结：权重是优先级的算法，层叠是优先级的表现
-
 ```
 
 # 盒子模型
@@ -2058,7 +2550,6 @@ border-collapse:collapse; 表示边框合并在一起。
 
 ```css
 border-radius: 左上角  右上角  右下角  左下角;
-
 ```
 
 ## 内边距（padding）
@@ -2170,14 +2661,13 @@ width和height的属性值可以为不同单位的数值或相对于父元素的
 
 大多数浏览器，如Firefox、IE6及以上版本都采用了W3C规范，符合CSS规范的盒子模型的总宽度和总高度的计算原则是：
 
-```
+```css
   /*外盒尺寸计算（元素空间尺寸）*/
   Element空间高度 = content height + padding + border + margin
   Element 空间宽度 = content width + padding + border + margin
   /*内盒尺寸计算（元素实际大小）*/
   Element Height = content height + padding + border （Height为内容高度）
   Element Width = content width + padding + border （Width为内容宽度）
-
 ```
 
 注意：
@@ -2196,7 +2686,6 @@ width和height的属性值可以为不同单位的数值或相对于父元素的
 
 ```
   width >  padding  >   margin   
-
 ```
 
 原因：
@@ -2204,8 +2693,6 @@ width和height的属性值可以为不同单位的数值或相对于父元素的
 1. margin 会有外边距合并 还有 ie6下面浮动后margin 加倍的bug所以最后使用。
 2. padding  会影响盒子大小， 需要进行加减计算 其次使用。
 3. width   没有问题我们经常使用宽度剩余法 高度剩余法来做。
-
-
 
 ## 盒子阴影
 
@@ -2342,7 +2829,6 @@ html语言当中另外一个相当重要的概念----------标准流！或者普
 
 ```
 选择器{float:属性值;}
-
 ```
 
 | 属性值 | 描述                 |
@@ -2785,9 +3271,85 @@ scroll : 　不管超出内容否，总是显示滚动条
 
 ## 视图
 
-### 视口
+### 视口(viewport)
 
+视口(viewport)代表当前可见的计算机图形区域。
 
+#### 设置视口
+
+1. HTML标签
+
+   `<meta name='viewport' content=''>`
+
+   `<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes">`
+
+   | Value           | 可能值                               | 描述                                                         |
+   | :-------------- | :----------------------------------- | :----------------------------------------------------------- |
+   | `width`         | 一个正整数或者字符串 `device-width`  | 以pixels（像素）为单位， 定义viewport（视口）的宽度。        |
+   | `height`        | 一个正整数或者字符串 `device-height` | 以pixels（像素）为单位， 定义viewport（视口）的高度。        |
+   | `initial-scale` | `一个0.0` 到 `10.0之间的正数`        | 定义设备宽度（纵向模式下的设备宽度或横向模式下的设备高度）与视口大小之间的缩放比率。 |
+   | `maximum-scale` | `一个0.0` 到 `10.0之间的正数`        | 定义缩放的最大值；它必须大于或等于 `minimum-scale`的值，不然会导致不确定的行为发生。 |
+   | `minimum-scale` | 一个 `0.0` 到 `10.0`之间的正数       | 定义缩放的最小值；它必须小于或等于 `maximum-scale`的值，不然会导致不确定的行为发生。 |
+   | `user-scalable` | 一个布尔值（ `yes`或者 `no`）        | 如果设置为 `no`，用户将不能放大或缩小网页。默认值为 `yes`。  |
+
+2. css的伪类选择器@viewport
+
+   语法如下：
+
+   ```css
+   @viewport {
+       <group-rule-body>
+   }
+   ```
+   
+   ```css
+   @viewport {
+       width: device-width;
+       zoom: 1.0;
+       min-zoom: 0.5;
+       max-zoom: 2;
+       user-zoom: zoom;
+   }
+   ```
+   
+   | 属性值         | 描述                                  |
+| :------------- | :------------------------------------ |
+   | `min-width`    | 设置viewport的最小宽度                |
+   | `max-width`    | 设置viewport的最大宽度                |
+   | `width`        | 同时设置 `min-width` 和 `max-width`   |
+   | `min-height`   | 设置viewport的最小高度                |
+   | `max-height`   | 设置viewport的最大高度                |
+   | `height`       | 同时设置 `min-height` 和 `max-height` |
+   | `zoom`         | 设置初始缩放系数                      |
+   | `min-zoom`     | 设置最小缩放系数                      |
+   | `max-zoom`     | 设置最大缩放系数                      |
+   | `user-zoom`    | 设置用户是能更改缩放系数              |
+   | `orientation`  | 控制文档的方向                        |
+   | `viewport-fit` | 控制非矩形显示屏上文档的显示。        |
+
+3. VisualViewport
+
+   Window.visualViewport
+
+   这是一个**只读**的实验性的**web api**，目前只有**chrome 60 +**跟**Opera 47+**支持。
+
+   属性如下：
+
+   ```css
+   {    
+       height: 936, // 视觉视口高度，返回值为CSS像素值。    
+       offsetLeft: 0, // 视觉视口边缘与布局视口左边的偏移量    
+       offsetTop: 0, // 视觉视口边缘与布局视口顶边的偏移量    
+       onresize: null, // 视觉视口大小变化时触发    
+       onscroll: null, // 滚动视觉视口时触发。    
+       pageLeft: 0, // 视觉视口边缘的初始化包含原点的X坐标，返回值为CSS像素值。    
+       pageTop: 6680, // 视觉视口边缘的初始化包含原点的Y坐标，返回值为CSS像素值。    
+       scale: 1, // 返回值为视觉视口的缩放比例   
+       width: 1364, // 视觉视口宽度，返回值为CSS像素值。
+   }
+   ```
+
+### 坐标系
 
 # CSS精灵技术（sprite） 小妖精  雪碧
 
@@ -3387,118 +3949,7 @@ img {
 
 # 伸缩布局(CSS3)
 
-CSS3在布局方面做了非常大的改进，使得我们对块级元素的布局排列变得十分灵活，适应性非常强，其强大的伸缩性，在响应式开中可以发挥极大的作用。
 
-主轴：Flex容器的主轴主要用来配置Flex项目，默认是水平方向
-
-侧轴：与主轴垂直的轴称作侧轴，默认是垂直方向的
-
-方向：默认主轴从左向右，侧轴默认从上到下
-
-主轴和侧轴并不是固定不变的，通过flex-direction可以互换。
-
-![1498441839910](E:/Jennifer/other/notes/media/1498441839910.png)
-
-
-
-Flex布局的语法规范经过几年发生了很大的变化，也给Flexbox的使用带来一定的局限性，因为语法规范版本众多，浏览器支持不一致，致使Flexbox布局使用不多
-
-**2、各属性详解**
-
-1.flex子项目在主轴的缩放比例，不指定flex属性，则不参与伸缩分配
-
-min-width: 280px  最小宽度  不能小于 280
-
-max-width: 1280px  最大宽度  不能大于 1280
-
-2.flex-direction调整主轴方向（默认为水平方向）
-
-flex-direction: column 垂直排列
-
-flex-direction: row  水平排列
-
-http://m.ctrip.com/html5/   携程网手机端地址
-
-3、justify-content调整主轴对齐（水平对齐）
-
-| 值            | 描述                                             | 白话文                                         |
-| ------------- | ------------------------------------------------ | ---------------------------------------------- |
-| flex-start    | 默认值。项目位于容器的开头。                     | 让子元素从父容器的开头开始排序但是盒子顺序不变 |
-| flex-end      | 项目位于容器的结尾。                             | 让子元素从父容器的后面开始排序但是盒子顺序不变 |
-| center        | 项目位于容器的中心。                             | 让子元素在父容器中间显示                       |
-| space-between | 项目位于各行之间留有空白的容器内。               | 左右的盒子贴近父盒子，中间的平均分布空白间距   |
-| space-around  | 项目位于各行之前、之间、之后都留有空白的容器内。 | 相当于给每个盒子添加了左右margin外边距         |
-
-4、align-items调整侧轴对齐（垂直对齐）
-
-子盒子如何在父盒子里面垂直对齐（单行）
-
-| 值         | 描述                           | 白话文                                                |
-| ---------- | ------------------------------ | ----------------------------------------------------- |
-| stretch    | 默认值。项目被拉伸以适应容器。 | 让子元素的高度拉伸适用父容器（子元素不给高度的前提下) |
-| center     | 项目位于容器的中心。           | 垂直居中                                              |
-| flex-start | 项目位于容器的开头。           | 垂直对齐开始位置 上对齐                               |
-| flex-end   | 项目位于容器的结尾。           | 垂直对齐结束位置 底对齐                               |
-
-5、flex-wrap控制是否换行
-
-当我们子盒子内容宽度多于父盒子的时候如何处理
-
-| 值           | 描述                                                         |
-| ------------ | ------------------------------------------------------------ |
-| nowrap       | 默认值。规定灵活的项目不拆行或不拆列。  不换行，则 收缩（压缩） 显示  强制一行内显示 |
-| wrap         | 规定灵活的项目在必要的时候拆行或拆列。                       |
-| wrap-reverse | 规定灵活的项目在必要的时候拆行或拆列，但是以相反的顺序。     |
-
-6、flex-flow是flex-direction、flex-wrap的简写形式
-
-```css
-flex-flow: flex-direction  flex-wrap;  
-```
-
-例如：
-
-```css
-display: flex;
-/* flex-direction: row;
-flex-wrap: wrap;   这两句话等价于下面的这句话*/
-flex-flow: column wrap;  /* 两者的综合 */
-```
-
-7、flex：flex属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto。后两个属性可选
-
-- flex-grow：设置子元素所占宽度的比例
-- flex-shrink: 宽度不够时收缩的比例
-- flex-basis：宽度多余时的比例
-
-8、align-content堆栈（由flex-wrap产生的独立行）多行垂直对齐方式齐
-
-align-content是针对flex容器里面多轴(多行)的情况,align-items是针对一行的情况进行排列。
-
-必须对父元素设置自由盒属性display:flex;，并且设置排列方式为横向排列flex-direction:row;并且设置换行，flex-wrap:wrap;这样这个属性的设置才会起作用。
-
-| 值            | 描述                                             | 测试 |
-| ------------- | ------------------------------------------------ | ---- |
-| stretch       | 默认值。项目被拉伸以适应容器。                   |      |
-| center        | 项目位于容器的中心。                             |      |
-| flex-start    | 项目位于容器的开头。                             |      |
-| flex-end      | 项目位于容器的结尾。                             |      |
-| space-between | 项目位于各行之间留有空白的容器内。               |      |
-| space-around  | 项目位于各行之前、之间、之后都留有空白的容器内。 |      |
-
-9、order控制子项目的排列顺序，正序方式排序，从小到大
-
-用css 来控制盒子的前后顺序。  用order 就可以
-
-用整数值来定义排列顺序，数值小的排在前面。可以为负值。 默认值是 0
-
-```css
-order: 1;
-```
-
-此知识点重在理解，要明确找出主轴、侧轴、方向，各属性对应的属性值
-
-父元素flex布局时
 
 # 京东项目
 
