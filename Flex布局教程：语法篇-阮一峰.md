@@ -128,7 +128,7 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 >
 > ```
 
-### 3.4 justify-content属性  **
+### 3.4 justify-content属性  
 
 `justify-content`属性定义了项目在主轴上的对齐方式。
 
@@ -148,7 +148,7 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 > - `space-between`：两端对齐，项目之间的间隔都相等。
 > - `space-around`：每个项目两侧的间隔相等。所以，项目之间的间隔比项目与边框的间隔大一倍。
 
-### 3.5 align-items属性 **
+### 3.5 align-items属性 
 
 `align-items`属性定义项目在交叉轴上如何对齐。
 
@@ -190,7 +190,7 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 > - `space-around`：每根轴线两侧的间隔都相等。所以，轴线之间的间隔比轴线与边框的间隔大一倍。
 > - `stretch`（默认值）：轴线占满整个交叉轴。
 
-## 四、项目的属性  (橙色小盒子) *
+## 四、项目的属性  (橙色小盒子) 
 
 以下6个属性设置在项目上。
 
@@ -258,7 +258,7 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 
 它可以设为跟`width`或`height`属性一样的值（比如350px），则项目将占据固定空间。
 
-### 4.5 flex属性 **
+### 4.5 flex属性 
 
 `flex`属性是`flex-grow`, `flex-shrink` 和 `flex-basis`的简写，默认值为`0 1 auto`。后两个属性可选。
 
@@ -285,3 +285,5 @@ Webkit 内核的浏览器，必须加上`-webkit`前缀。
 ![img](./media/bg2015071016.png)
 
 该属性可能取6个值，除了auto，其他都与align-items属性完全一致。
+
+<http://www.ruanyifeng.com/blog/2015/07/flex-examples.html>
