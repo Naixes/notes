@@ -1735,27 +1735,170 @@ server.use(router.routes())
 
 ### koa-static
 
-缓存
+可缓存
+
+```js
+const Koa = require('koa')
+const Router = require('koa-router')
+const static = require('koa-static')
+
+let server = new Koa()
+server.listen(8080)
+
+let router = new Router()
+server.use(router.routes())
+
+server.use(static('./static', {
+    // 缓存时间
+    maxage: 86400*1000,
+    // 默认访问文件
+    index: '1.html'
+}))
+```
 
 结合路由设置缓存
+
+```js
+// 结合路由设置缓存时间
+let staticRouter = new Router()
+// .表示除换行符以外的单个字符需要转义，i忽略大小写
+// 图片资源
+staticRouter.all((/(\.jpg|\.png|\.gif)$/i), static('./static', {
+    maxage: 60*86400*1000
+}))
+// 其余资源
+staticRouter.all('*', static('./static', {
+    maxage: 30*86400*1000
+}))
+
+server.use(staticRouter.routes())
+```
 
 ### koa-better-body
 
 ctx.request.fields
 
+```js
+const Koa = require('koa')
+const Router = require('koa-router')
+// 会有警告
+const body = require('koa-better-body')
+
+let server = new Koa()
+server.listen(8080)
+
+let router = new Router()
+
+server.use(body({
+    uploadDir: './static/upload'
+}))
+
+router.post('/upload', ctx => {
+    // 文件和post数据
+    console.log(ctx.request.fields)
+    ctx.body = 'hhh'
+})
+
+server.use(router.routes())
+```
+
 ### cookie
 
 自带
 
-server.keys = [] // 滚动秘钥
-
-ctx.cookies.set()/get('', '', {})
+```js
+const Koa = require('koa')
+let server = new Koa()
+server.listen(8080)
+// 滚动密钥
+server.keys = [
+    '1995-naixes',
+    'sd34-naixes',
+    '89ss-naixes'
+]
+server.use(async ctx => {
+    ctx.cookies.set('user', 'naixes', {signed: true})
+    console.log(ctx.cookies.get('user', {signed: true}))
+    ctx.body = 'hhh'
+})
+```
 
 ### koa-session
 
-### 数据库
+```js
+const Koa = require('koa')
+const session = require('koa-session')
+let server = new Koa()
+server.listen(8080)
+// 滚动密钥
+server.keys = [
+    '1995-naixes',
+    'sd34-naixes',
+    '89ss-naixes'
+]
 
-错误处理，结合路由
+server.use(session({
+    maxAge: 20*60*1000,
+    // 自动续期
+    renew: true
+}, server))
+
+server.use(async ctx => {
+    if(!ctx.session['view']) {
+        ctx.session['view'] = 0
+    }else {
+        ctx.session['view']++
+    }
+
+    ctx.body = `欢迎你第${ctx.session['view']}次来访`
+})
+```
+
+### 数据库引入及错误处理
+
+```js
+const mysql = require('mysql')
+const co = require('co-mysql')
+
+let conn = mysql.createPool({
+    host: 'localhost',
+    user: 'admin',
+    password: 'root',
+    database: 'node'
+})
+let db = co(conn)
+
+module.exports = db
+```
+
+```js
+const Koa = require('koa')
+const Router = require('koa-router')
+
+let server = new Koa()
+server.listen(8080)
+// 引入数据库
+server.context.db = require('./libs/database')
+server.use(async (ctx, next) => {
+    try {
+        await next()
+    } catch (error) {
+        ctx.body = '程序出错'
+    }
+})
+let router = new Router()
+router.all('*', async (ctx, next) => {
+    try {
+        await next()
+    } catch (error) {
+        ctx.body = 'router出错'
+    }
+})
+router.get('/a', async ctx => {
+    ctx.body = div.title
+})
+server.use(router.routes())
+```
 
 ### 服务器渲染
 
@@ -1763,27 +1906,154 @@ pug(jade)：侵入式
 
 ejs：侵入式
 
-安全
+1. 安全
 
-耗费流量
+2. 耗费流量
 
-用户体验不好，需要刷新页面
+3. 用户体验不好，需要刷新页面
 
-有利于SEO
+4. 有利于SEO
 
 #### pug
 
-缩进，小括号，.，=，each xx in xxs
+```js
+doctype
+html
+	//- 缩进来表现层级关系
+    head
+        //- ()属性
+        meta(charset='utf-8')
+        meta(name='site', content='test')
+        //- =赋值
+        title=title
+        //- .多行代码
+        script.
+            window.onload = function() {
+                let dom = document.getElementById('div')
+                dom.onclick = function() {}
+            }
+    body
+        ul
+        	//- 循环：each xx in xxs
+            each user in users
+                li(class='user-item clearfix')
+                    span(class='name')=user.name
+                    span(class='pass')=user.pass
+```
+
+```js
+const pug = require('pug')
+
+pug.renderFile('./template/hello.pug', {
+    pretty: true,
+    title: 'hello',
+    users: [
+        {name: 'a', pass: '1'},
+        {name: 'b', pass: '2'},
+        {name: 'c', pass: '3'},
+    ]
+}, (err, data) => {
+    if(err) {
+        console.log(err)
+    }else {
+        console.log(data)
+    }
+})
+```
 
 #### ejs
 
 <%=xxx%>，语法和js一样，<% include 路径 -%>//-减少空行
 
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%=title%></title>
+</head>
+<body>
+    <%for(let i=0;i<users.length;i++){%>
+        <div class="">
+            name:<%=users[i].name%>
+            pass:<%=users[i].pass%>
+        </div>
+    <%}%>
+</body>
+</html>
+```
+
+```js
+// ejs内置
+const ejs = require('ejs')
+
+// 和pug一样
+ejs.renderFile('./template/hello.ejs', {
+    ...
+}, (err, data) => {
+    ...
+})
+```
+
 koa-ejs
 
-目录结构
+```js
+const Koa = require('koa')
+const ejs = require('koa-ejs')
+const path = require('path')
 
-### 实例
+let server = new Koa()
+server.listen(8080)
+
+ejs(server, {
+    // 模板目录
+    root: path.resolve(__dirname, 'template'),
+    // true会再加一层目录
+    layout: false,
+    // 扩展名
+    viewExt: 'ejs',
+    cache: false,
+    debug: false
+})
+
+server.use(async ctx => {
+    await ctx.render('hello', {
+        title: 'hello',
+        users: [
+            {name: 'a', pass: '1'},
+            {name: 'b', pass: '2'},
+            {name: 'c', pass: '3'},
+        ]
+    })
+})
+```
+
+### 案例
+
+**目录结构**
+
+```
+node-demo                      #項目目录
+│
+├── log                        #日志
+│
+├── lib                        #通用库
+│   └── database.js            #数据库配置
+│   
+├── static                     #静态资源
+|   |── upload				  #上传目录
+│   └── <other files>          #
+│
+|── upload                     #
+│   └── <other files>          #
+|
+├── config.js                #全局配置
+|
+├── node_modules                
+└── package.json                
+```
+
+
 
 加路由的两种方法：/的问题，本质是字符串拼接
 
