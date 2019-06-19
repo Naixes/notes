@@ -1113,6 +1113,98 @@ img 标签还有一组重要的属性，那就是 **srcset 和 sizes**，它们�
 
 srcset	提供了根据屏幕条件选取图片的能力，但是其实更好的做法，是使用	picture	元素。
 
+#### **Data URL**
+
+参考：[http://verymuch.site/2017/12/14/Data-URL%E7%AE%80%E4%BB%8B%E4%B8%8E%E4%BD%BF%E7%94%A8/](http://verymuch.site/2017/12/14/Data-URL简介与使用/)
+
+`Data URL`，是以`data:`模式为前缀的URL，允许内容的创建者将较小的文件嵌入到文档中，使用场合与常规URL相同。
+
+`Data URL`由**data:前缀、MIME类型（表明数据类型）、base64标志位（如果是文本，则可选）以及数据本身四部分组成**。
+
+语法格式如下：
+
+```js
+data:[<mediatype>][;base64],data
+```
+
+`mediatype`是一个MIME（Multipurpose Internet Mail Extension）类型字符串，如`image/jpeg`表示一个JPEG图片文件。如果省略，默认值为`text/plain;charset=US-ASCII`。
+
+1. Data URL的优势
+
+   和传统的外部资源引用相比：
+
+   - 当访问外部资源很麻烦或受限时，可以将外部资源转为Data URL引用（鸡肋）
+   - 当图片是在服务器端用程序动态生成，每个访问用户显示的都不同时，这是需要返回一个可用的URL（场景较少）
+   - 当图片的体积太小，**占用一个HTTP会话**不是很值得时
+
+2. Data URL的缺点
+
+   虽然Data URL允许使用者将文件嵌入到文档中，这在某些场景下较为合适，但是Data URL也有一些缺点：
+
+   - 体积更大：Base64编码的**数据体积通常是原数据的体积4/3**，也就是Data URL形式的图片会比二进制格式的图片体积大1/3
+   - 不会缓存：Data URL形式的图片**不会被浏览器缓存**，这意味着每次访问这样的页面时都被下载一次。这是一个使用效率方面的问题——尤其当这个图片被整个网站大量使用的时候。
+
+**获取base64编码**
+
+1. Linux/Mac OS X下可以使用`uuencode`命令
+
+`uuencode -m <源文件> <转码后标识>`
+
+1. Javascript中有两个函数负责编码和解码base64字符串，分别是`atob`和`btoa`。
+   - `atob()`: 负责解码已经使用base64编码了的字符串。
+   - `btoa()`: 将二进制字符串转为base64编码的ASCII字符串。
+
+两者都只针对Data URL中的data进行处理。
+
+```js
+btoa('hello base64') // "aGVsbG8gYmFzZTY0"
+atob('aGVsbG8gYmFzZTY0') // "hello base64"
+```
+
+3. Canvas提供了`toDataURL`方法，用于获取canvas绘制内容，将其转为base64格式。
+4. 使用FileReader API的`readAsDataURL`方法
+
+```html
+<div class="demo-area">
+  <input type="file" id="testReadAsDataURL">
+  <textarea id="testReadAsDataURL-content"></textarea>
+</div>
+```
+
+```js
+var reader = new FileReader()
+reader.onload = function(e) {
+  var textarea = document.getElementById('testReadAsDataURL-content');
+  textarea.value = reader.result
+}
+document.getElementById('testReadAsDataURL').onchange = function(e) {
+  var file = e.target.files[0]
+  reader.readAsDataURL(file)
+}
+```
+
+#### **base64原理**
+
+Data URL是Base64编码的，且Base64编码的数据体积通常是原数据的体积4/3。
+
+1. 为什么Base64编码可以内联到HTML中
+
+我们知道HTTP协议是文本协议，不同于常规的二进制协议那样直接进行二进制传输。Base64编码是**从二进制到字符的过程，可用于在HTTP环境下传递较长的标识信息。**
+
+2. 为什么Base64编码后，体积会增大1/3
+
+首先Base64是一种编码算法，该算法共包含64个字符。包括大小写拉丁字母各26个、数字10个、加号+和斜杠/，共64个字符。此外还有等号=用来作为后缀用途。
+
+首先，ASCII码的范围是0-127，其中0-31和127是控制字符，共33个。其余95个，即32-126是可打印字符，包括数字、大小写字母、常用符号等。早期的一些传输协议，例如邮件传输协议SMTP，只能传输可打印的ASCII字符。这样原本的8bit字节码（0-255）就会超出使用范围，从而导致无法传输。
+
+这时，就产生了Base64编码，它利用**6bit字符来表达原本的8bit字符**。6bit显然不够容纳8bit的数据。6和8的最小公倍数是24，所以我们用4个Base64字符刚好能够表示三个传统的8bit字符，所以体积会大1/3。
+
+![base64-01](E:\Jennifer\other\notes\media\base64-01.jpg)
+
+如果待编码的字符串长度不是三的倍数时需要做一个特殊处理，假设待编码字符串长度为10。这前9个字符可以用12个Base64字符表示。第10个字符的前6bit作为一个Base64字符，**剩下的2bit后面需要先补0，补到6位**作为第二个Base64字符，至于第三个和第四个Base64字符，虽然没有相对应的内容，我们仍需**以=填充**。
+
+![base64-02](E:\Jennifer\other\notes\media\base64-02.jpg)
+
 ### picture标签
 
 picture	元素可以根据屏幕的条件为其中的	img	元素提供不同的源，它的基本用法如下：
@@ -2143,6 +2235,12 @@ div::after {
 
 E:after、E:before 在旧版本里是伪元素，CSS3的规范里“:”用来表示伪类，“::”用来表示伪元素，但是在高版本浏览器下E:after、E:before会被自动识别为E::after、E::before，这样做的目的是用来做兼容处理。
 
+## 其他
+
+**:root选择器**用匹配文档的根元素。
+
+在HTML中根元素始终是HTML元素。
+
 # 函数
 
 根据MDN所陈列的关键字索引，**css函数**一共有**86**个。
@@ -2245,7 +2343,50 @@ E:after、E:before 在旧版本里是伪元素，CSS3的规范里“:”用来�
 </html>
 ```
 
+# 其他
 
+## 自定义属性
+
+参考：[http://verymuch.site/2019/04/15/CSS%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E5%8F%8A%E5%85%B6%E7%94%A8%E6%B3%95/#more](http://verymuch.site/2019/04/15/CSS自定义属性及其用法/#more)
+
+### 自定义属性名
+
+预处理器的变量也有一些缺点和限制，如下：
+
+1. **不能动态修改变量**：预处理器是在编译时进行变量的处理，编译后变量其实就不存在了。
+2. **没有DOM结构，无法级联继承**。
+3. **不能用JavaScript进行读写**。
+
+CSS自定义属性的语法格式为`--*`，双横线加上具体的自定义属性名，属性名是一个合法的CSS[标识符](https://www.w3.org/TR/css-syntax-3/#identifier)即可。
+
+自定义属性没有具体的CSS含义，其用途完全由作者和使用者决定。自定义属性可以**应用于任何元素，其可以被继承，并且支持级联，不支持动画**。
+
+注意：与CSS属性不同，自定义属性是**大小写敏感的**。
+
+### 自定义属性值
+
+可以是任何有效的CSS值，如颜色、字符、布局的值、甚至是表达式。
+
+通过`var()`函数，自定义属性的值可以用作另一个属性的值。
+
+`var( <custom-property-name> [, <declaration-value> ]? )`
+
+其中第一个参数为自定义属性名，第二个参数为后备值。当传入的自定义属性无效或者不存在时，会使用后备值。
+
+注意：
+
+1. 自定义属性不能作为一个独立属性值的一部分
+
+2. 会导致动画瑕疵，因为其只会在指定帧影响使用了自定义属性的可动画属性。
+3. 如果在计算属性的时候，发现了依赖依赖循环，则**依赖循环中的所有自定义属性值都使用初始值代替**。
+
+### 优势
+
+1. **可以动态修改自定义属性**
+2. **有DOM结构的概念，可以级联继承**。
+3. **可以用JavaScript进行读写**。
+
+CSS自定义属非常适合用来实现**主题的切换**
 
 # 单位
 
@@ -2404,6 +2545,8 @@ BFC布局规则特性：
 如上图所示，我们看到小写字母**x**的位置，它的上下边缘就是我们的**基线（baseline）**，但下边缘才是我们日常使用的属性值。顺便一提，CSS单位 `ex`便是指的这个**字母x**的高度。
 
 ## 层叠上下文与层叠顺序
+
+其他参考：[http://verymuch.site/2019/01/18/CSS%E7%9A%84%E2%80%9C%E5%B1%82%E2%80%9D%E5%B3%A6%E2%80%9C%E5%8F%A0%E2%80%9D%E7%BF%A0/#more](http://verymuch.site/2019/01/18/CSS的"层"峦"叠"翠/#more)
 
 ![img](https://mmbiz.qpic.cn/mmbiz_png/y0rsINPrlZy47EnPpnuzxFOjUlBytKfD8PibeV0wAgc8rZLrbic8d8CMSXEDgFr0bzgUQ7lqnJewia0icgsx5L9WHg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
 

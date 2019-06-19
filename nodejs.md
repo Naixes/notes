@@ -598,6 +598,7 @@ server.js
 static:  css/html/js...
 ```
 
+<http://verymuch.site/2017/12/12/escape%E3%80%81encodeURI%E5%92%8CencodeURIComponent%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E4%BD%BF%E7%94%A8/>
 `encodeURLComponent('xxxxx')`
 
 ## node中的非模块成员
