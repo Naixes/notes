@@ -58,11 +58,13 @@ HTML（英文Hyper Text Markup Language的缩写）中文译为“超文本标�
 
 用于存放：title,meta,base,style,script,link
 
-`<head>`标签用于定义文档的头部，它是所有头部元素的容器。 `<head>`描述了文档的各种属性和信息，包括文档的标题、在 Web 中的位置以及和其他文档的关系等。
+`<head>`标签用于定义文档的头部，它是所有头部元素的容器。描述了文档的各种属性和信息，包括文档的标题、在 Web 中的位置以及和其他文档的关系等。
 
-**<base>**
+head 标签规定了自身必须是 html 标签中的第一个标签，它的内容必须包含一个 title，并且最多只能包含一个 base。如果文档作为 iframe，或者有其他方式指定了文档标题时，可以允许不包含 title 标签。
 
-`<base>` 标签为页面上的所有链接规定默认地址或默认目标。
+#### base标签
+
+`<base>` 标签为页面上的所有链接规定默认地址或默认目标。base 标签最多只有一个，它改变全局的链接地址，它是一个非常危险的标签，容易造成跟JavaScript 的配合问题，所以在实际开发中，我比较建议你使用 JavaScript 来代替 base标签。
 
 通常情况下，浏览器会从当前文档的 URL 中提取相应的元素来填写相对 URL 中的空白。使用 `<base>` 标签可以改变这一点。浏览器随后将不再使用当前文档的 URL，而使用指定的基本 URL 来解析所有的相对 URL。这其中包括 `<a>`、 `<img>`、 `<link>`、 `<form>` 标签中的 URL。
 
@@ -71,7 +73,7 @@ HTML（英文Hyper Text Markup Language的缩写）中文译为“超文本标�
 | href   | URL                                 | 规定页面中所有相对链接的基准 URL。（必选） |
 | target | blank  parent  _self _top framename | 在何处打开页面中所有的链接。（可选）       |
 
-**link标签**
+#### link标签
 
 主要用于**style文件**引入
 
@@ -87,26 +89,32 @@ HTML（英文Hyper Text Markup Language的缩写）中文译为“超文本标�
 | target   | blank self top parent frame_name                             | HTML5 中不支持。                            |
 | type     | MIME_type                                                    | 规定被链接文档的 MIME 类型。                |
 
-**style标签**
+#### style标签
 
 | 属性  | 值                                                        | 描述                                 |
 | :---- | :-------------------------------------------------------- | :----------------------------------- |
 | type  | text/css                                                  | 规定样式表的 MIME 类型。（必选）     |
 | media | screen tty tv projection handheld print braille aural all | 为样式表规定不同的媒介类型。（可选） |
 
-**title标签**
+#### title标签
 
-让页面拥有一个属于自己的标题。注意：在head标签中我们必须要设置的标签是title
+让页面拥有一个属于自己的标题。
 
-**meta标签**
+heading（h1-6） 和 title 两个英文单词意义区分十分微妙，在中文中更是找不到对应的词汇来区分。但是实际使用中，两者确实有一定区别。
 
-提供了有关当前**HTML**元素的**元信息 (meta-information)**，比如描述、针对搜索引擎的关键词以及刷新频率。
+title 作为元信息，可能会被用在浏览器收藏夹、微信推送卡片、微博等各种场景，这时侯往往是上下文缺失的，所以 title 应该是完整地概括整个网页内容的。而 h1 则仅仅用于页面展示，它可以默认具有上下文，并且有链接辅助，所以可以简写，即便无法概括全文，也不会有很大的影响。
+
+#### meta标签
+
+是一组键值对，它是一种通用的元信息表示标签。提供了有关当前**HTML**元素的**元信息 (meta-information)**，比如描述、针对搜索引擎的关键词以及刷新频率。
+
+在 head 中可以出现任意多个 meta 标签。一般的 meta 标签由 name 和 content 两个属性来定义。name 表示元信息的名，content 则用于表示元信息的值。
 
 <meta> 的属性对象如下：
 
 | 属性       | 描述                                        |
 | :--------- | :------------------------------------------ |
-| content    | 设置或返回 元素的 content 属性的值。        |
+| content    | 设置或返回元素的 content 属性的值。         |
 | http-equiv | 把 content 属性连接到一个 HTTP 头部。       |
 | name       | 把 content 属性连接到某个名称。             |
 | scheme     | 设置或返回用于解释 content 属性的值的格式。 |
@@ -138,8 +146,76 @@ MDN：不要用这属性，因为这属性并没什么用处。: )
 | 值                      | 描述                                                         |
 | :---------------------- | :----------------------------------------------------------- |
 | content-security-policy | 允许站点管理者在指定的页面控制用户代理的资源。除了少数例外，这条政策将极大地指定服务源 以及脚本端点。这将帮助防止跨站脚本攻击。 |
+| content-type            | 相当于添加了 content-type 这个 http 头，值为content指定的内容 |
 | default-style           | 这个属性指定了在页面上使用的首选样式表. `content`属性必须包含 `<link>` 元素的标题, `href`属性链接到CSS样式表或包含CSS样式表的 `<style>`元素的标题。 |
-| refresh                 | 这个属性指定如果 `<content>`只包含一个正整数，则是重新载入页面的时间间隔(秒)，包含一个正整数并且跟着一个字符串,则是重定向到指定链接的时间间隔(秒)。 |
+| refresh                 | 刷新，这个属性指定如果 `<content>`只包含一个正整数，则是重新载入页面的时间间隔(秒)，包含一个正整数并且跟着一个字符串,则是重定向到指定链接的时间间隔(秒)。 |
+
+除了基本用法，meta 标签还有一些变体，主要用于简化书写方式或者声明自动化行为。下面是几种重点的内容：
+
+**具有 charset 属性的 meta**：从 HTML5 开始，为了简化写法，meta 标签新增了 charset 属性。添加了 charset 属性的 meta 标签无需再有 name 和 content。它描述了 HTML 文档自身的编码形式。因此建议这个标签放在 head 的第一个。
+
+`<mete charset='utf-8'>`
+
+**具有 http-equiv 属性的 meta**：具有 http-equiv 属性的 meta 标签，表示执行一个命令
+
+`<meta http-equiv='content-type', content='text/html'>`
+
+content-language 指定内容的语言；
+default-style 指定默认样式表；
+refresh 刷新；
+set-cookie 模拟 http 头 set-cookie，设置 cookie；
+x-ua-compatible 模拟 http 头 x-ua-compatible，声明 ua 兼容性；
+content-security-policy 模拟 http 头 content-security-policy，声明内容安全策略。
+
+**name 为 viewport 的 meta**：实际上，meta 标签可以被自由定义，只要写入和读取的双方约定好 name 和 content 的格式就可以了。name 为 viewport 的 meta，它没有在 HTML 标准中定义，却是移动端开发的事实标准：这类 meta 的 name 属性为 viewport，它的 content 是一个复杂结构，是用逗号分隔的
+键值对，键值对的格式是 key=value。
+
+width：页面宽度，可以取值具体的数字，也可以是 device-width，表示跟设备宽度相等。
+height：页面高度，可以取值具体的数字，也可以是 device-height，表示跟设备高度相等。
+initial-scale：初始缩放比例。
+minimum-scale：最小缩放比例。
+maximum-scale：最大缩放比例。
+user-scalable：是否允许用户缩放。
+
+**其它预定义的 meta**：在 HTML 标准中，还定义了一批 meta 标签的 name，可以视为一种有约定的 meta
+
+application-name：如果页面是 Web application，用这个标签表示应用名称。
+author: 页面作者。
+description：页面描述，这个属性可能被用于搜索引擎或者其它场合。
+generator: 生成页面所使用的工具，主要用于可视化编辑器，如果是手写 HTML 的网页，不需要加这个 meta。
+keywords: 页面关键字，对于 SEO 场景非常关键。
+referrer: 跳转策略，是一种安全考量。  控制所有从该文档发出的 HTTP 请求中HTTP `Referer` 首部的内容。                                                                                                                                                         theme-color: 页面风格颜色，实际并不会影响页面，但是浏览器可能据此调整页面之外的 UI（如窗口边框或者 tab 的颜色）。
+
+**常用meta**：
+
+```html
+　　搜索引擎索引方式
+　　<meta name="robots" content="index,follow" />
+　　<!--
+　　all：文件将被检索，且页面上的链接可以被查询；
+　　none：文件将不被检索，且页面上的链接不可以被查询；
+　　index：文件将被检索；
+　　follow：页面上的链接可以被查询；
+　　noindex：文件将不被检索；
+　　nofollow：页面上的链接不可以被查询。
+　　-->
+　　页面重定向和刷新
+　　<meta http-equiv="refresh" content="0;url=" />
+　　移动设备
+　　<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"/>
+　　<!-- `width=device-width` 会导致 iPhone 5 添加到主屏后以 WebApp 全屏模式打开页面时出现黑边  -->
+　　优先使用 IE 最新版本和 Chrome
+　　<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+　　<!-- 关于X-UA-Compatible -->
+　　禁止浏览器从本地计算机的缓存中访问页面内容
+　　<meta http-equiv="Pragma" content="no-cache">
+    浏览器不会自动调整文件的大小,也就是说是固定大小,不会随着浏览器拉伸缩放。
+   <meta name="MobileOptimized" content="240"/> 
+```
+
+<https://blog.csdn.net/weixin_42133469/article/details/81588097>
+
+<https://github.com/joshbuchea/HEAD>
 
 ### body标签
 
@@ -218,6 +294,10 @@ DTD文档类型定义：浏览器会使用它来判断文档类型，从而决�
 ```
 
 ## 文档元信息
+
+所谓元信息，是指描述自身的信息，元信息类标签，就是 HTML 用于描述文档自身的一类标签，它们通常出现在 head 标签中，一般都不会在页面被显示出来（与此相对，其它标签，如语义类标签，描述的是业务）。
+
+元信息多数情况下是给浏览器、搜索引擎等机器阅读的，有时候这些信息会在页面之外显示给用户，有时候则不会。
 
 ### meta 标签
 
@@ -375,34 +455,6 @@ em：重音
 del：删除文本
 
 ins：插入文本
-
-### 图像标签-img
-
-**行内元素**
-
-src属性用于指定图像文件的路径和文件名，他是img标签的必需属性。
-
-```html
-<img src="图像URL" />
-```
-
-| 属性  | 值                        | 说明           |
-| ----- | ------------------------- | -------------- |
-| src   | url                       | 路径           |
-| alt   | 文本                      | 不显示时的替换 |
-| title | 文本                      | 悬停内容       |
-| align | bottom（默认）;middle;top | 文本对齐方式   |
-
-#### 结合map实现**图像映射**
-
-``````html
-<img src="1.jpg" usemap="#Map" />
-<map name="Map">
-	<area shape="热点形状" coords="坐标" href="链接" alt="替代文字" />
-	<area shape="circle" coords="180,139,14" href ="/example/html/venus.html" target ="_blank" alt="Venus" />
-	<area shape="rect" coords="0,0,110,260" href ="/example/html/sun.html"  target ="_blank" alt="Sun" />
-</map>
-``````
 
 ### 列表标签
 
@@ -572,9 +624,17 @@ type：A，a，I，i
 </artical>
 ```
 
-## 链接标签-a
+## 链接标签
+
+链接是 HTML 中的一种机制，它是 HTML 文档和其它文档或者资源的连接关系，在 HTML 中，链接有两种类型。一种是超链接型标签，一种是外部资源链接。
+
+![链接标签](E:\Jennifer\other\notes\media\链接标签.png)
+
+### a标签
 
 **行内元素**
+
+a 标签是“anchor”的缩写，它是锚点的意思，所谓锚点，实际上也是一种比喻的用法。
 
 基本语法格式如下：
 
@@ -589,11 +649,11 @@ type：A，a，I，i
 注意：
 
 1. 外部链接 需要添加 http://
-2. 内部链接 直接链接内部页面名称即可 比如 < a href="index.html"> 首页 </a >
+2. 内部链接 直接链接内部页面名称即可 比如` < a href="index.html"> 首页 </a >`
 3. 如果当时没有确定链接目标时，通常将链接标签的href属性值定义为“#”(即href="#")，表示该链接暂时为一个空链接。
 4. 不仅可以创建文本超链接，在网页中各种网页元素，如图像、表格、音频、视频等都可以添加超链接。
 
-### 锚点定位 
+锚点定位 ：
 
 通过创建锚点链接，用户能够快速定位到目标内容。
 创建锚点链接分为两步：
@@ -603,13 +663,141 @@ type：A，a，I，i
 2.使用相应的id名标注跳转目标的位置。
 ```
 
-### base 标签
+a 标签其实同时充当了链接和目标点的角色，当 a 标签有 href 属性时，它是链接，当它有 name时，它是链接的目标。具有 href 的 a 标签跟一些 link 一样，会产生超链接，也就是在用户不操作的情况下，它们不会被主动下载的被动型链接。
 
-base 可以设置整体链接的打开状态   
+重点的内容是，a 标签也可以有 rel 属性，首先是跟 link 相同的一些 rel，包括下面的几种。这些跟 link 语义完全一致，不同的是，a 标签产生的链接是会实际显示在网页中的，而 link 标签仅仅是元信息。
 
-base 写到  <head></head>  之间
+alternate
+author
+help
+license
+next
+prev
+search
 
-`<base target='_blank' />`
+除了这些之外，a 标签独有的 rel 类型：
+
+tag 表示本网页所属的标签；
+bookmark 到上级章节的链接。
+
+a 标签还有一些辅助的 rel 类型，用于提示浏览器或者搜索引擎做一些处理：
+
+nofollow 此链接不会被搜索引擎索引；
+noopener 此链接打开的网页无法使用 opener 来获得当前页面的窗口；
+noreferrer 此链接打开的网页无法使用 referrer 来获得当前页面的 url；
+opener 打开的网页可以使用 window.opener 来访问当前页面的 window 对象，这是 a 标签的默认行为。
+
+### area标签
+
+a 标签基本解决了在页面中插入文字型和整张图片超链接的需要，但是如果我们想要在图片的某个区域产生超链接，那么就要用到另一种标签了——area 标签。
+
+area 标签与 a 标签非常相似，不同的是，它不是文本型的链接，而是区域型的链接。
+area 标签支持的 rel 与 a 完全一样，这里就不多说了。
+area 是整个 html 规则中唯一支持非矩形热区的标签，它的 shape 属性支持三种类型。
+
+圆形：circle 或者 circ，coords 支持三个值，分别表示中心点的 x,y 坐标和圆形半径 r。
+矩形：rect 或者 rectangle，coords 支持两个值，分别表示两个对角顶点 x1，y1 和 x2，y2。
+多边形：poly 或者 polygon，coords 至少包括 6 个值，表示多边形的各个顶点。
+
+因为 area 设计的时间较早，所以不支持含有各种曲线的路径，但是它也是唯一一个支持了非矩形触发区域的元素，所以，对于一些效果而言，area 是必不可少的。
+
+area 必须跟 img 和 map 标签配合使用。使用示例如下（例子来自 html 标准）。
+
+```html
+<img src="planets.gif" alt="Planets" usemap ="#planetmap" />
+
+<map id="planetmap">
+ <area shape ="rect" coords ="0,0,110,260" href ="sun.htm" alt="Sun" />
+ <area shape ="circle" coords ="129,161,10" href ="mercur.htm" alt="Mercury" />
+ <area shape ="circle" coords ="180,139,14" href ="venus.htm" alt="Venus" />
+</map>
+```
+
+这个例子展示了在一张图片上画热区并且产生链接，分别使用了矩形、圆形和多边形三种 area。
+
+### link标签
+
+HTML 标准并没有规定浏览器如何使用元信息，我们还讲到了元信息中有不少是被设计成“无需被浏览器识别，而是专门用于搜索引擎看的”。link 标签也是元信息的一种，在很多时候，它也是不会对浏览器产生任何效果的。
+
+link 标签会生成一个链接，它可能生成超链接，也可能生成外部资源链接。一些 link 标签会生成超链接，这些超链接又不会像 a 标签那样显示在网页中。这就是**超链接型的link 标签**。这意味着多数浏览器中，这些 link 标签不产生任何作用。但是，这些 link 标签能够被搜索引擎和一些浏览器插件识别，从而产生关键性作用。比如，到页面 RSS 的 link 标签，能够被浏览器的 RSS 订阅插件识别，提示用户当前页面是可以
+RSS 订阅的。
+另外一些 link 标签则会把外部的资源链接到文档中，也就是说，会实际下载这些资源，并且做出一些处理，比如我们常见的用 link 标签引入样式表。除了元信息的用法之外，多数**外部资源型的 link 标签**还能够被放在 body 中使用，从而起到把外部资源链接进文档的作用。link 标签的链接类型主要通过 rel 属性来区分，我们提到 xx 型 link 即表示属性rel 为 xx 的 link。
+
+#### 超链接类 link 标签
+
+超链接型 link 标签是一种被动型链接，在用户不操作的情况下，它们不会被主动下载。
+link 标签具有特定的 rel 属性，会成为特定类型的 link 标签。产生超链接的 link 标签包括：具有
+rel=“canonical” 的 link、具有 rel="alternate"的 link、具有 rel=“prev” rel="next"的link 等等。
+
+**canonical 型 link**
+
+`<link rel='canonical' href='xx'>`
+
+这个标签提示页面它的主 URL，在网站中常常有多个 URL 指向同一页面的情况，搜索引擎访问这类页面时会去掉重复的页面，这个 link 会提示搜索引擎保留哪一个 URL。
+
+**alternate 型 link**
+
+这个标签提示页面它的变形形式，这个所谓的变形可能是当前页面内容的不同格式、不同语言或者为不同的设备设计的版本，这种 link 通常也是提供给搜索引擎来使用的。
+alternate 型的 link 的一个典型应用场景是，页面提供 rss 订阅时，可以用这样的 link 来引入：
+
+`<link rel='alternate' type='application/rss+xml' title='RSS' href='xxx'>`
+
+除了搜索引擎外，很多浏览器插件都能识别这样的 link。
+
+**prev 型 link 和 next 型 link**
+
+在互联网应用中，很多网页都属于一个序列，比如分页浏览的场景，或者图片展示的场景，每个网页是序列中的一个项。这种时候，就适合使用 prev 和 next 型的 link 标签，来告诉搜索引擎或者浏览器它的前一项和后一项，这有助于页面的批量展示。因为 next 型 link 告诉浏览器“这是很可能访问的下一个页面”，HTML 标准还建议对 next 型link 做预处理
+
+**其它超链接类的 link**
+
+其它超链接类 link 标签都表示一个跟当前文档相关联的信息，可以把这样的 link 标签视为一种带链接功能的 meta 标签。
+
+rel=“author” 链接到本页面的作者，一般是 mailto: 协议
+rel=“help” 链接到本页面的帮助页
+rel=“license” 链接到本页面的版权信息页
+rel=“search” 链接到本页面的搜索页面（一般是站内提供搜索时使用）
+
+#### 外部资源类 link 标签
+
+外部资源型 link 标签会被主动下载，并且根据 rel 类型做不同的处理。外部资源型的标签包括：具有 icon 型的 link、预处理类 link、modulepreload 型的 link、stylesheet、pingback。
+
+**icon 型 link**
+
+这类链接表示页面的 icon。多数浏览器会读取 icon 型 link，并且把页面的 icon 展示出来。icon 型 link 是**唯一一个外部资源类的元信息 link**，其它元信息类 link 都是超链接，这意味着，icon 型 link 中的图标地址**默认会被浏览器下载和使用**。如果没有指定这样的 link，多数浏览器会使用域名根目录下的 favicon.ico，即使它并不存在，所以从性能的角度考虑，建议一定要保证页面中有 icon 型的 link。**只有 icon 型 link 有有效的 sizes 属性**，HTML 标准允许一个页面出现多个 icon 型 link，并且用sizes 指定它适合的 icon 尺寸。
+
+**预处理类 link** 
+
+我们都知道，导航到一个网站需要经过 dns 查询域名、建立连接、传输数据、加载进内存和渲染等一系列的步骤。预处理类 link 标签就是允许我们控制浏览器，提前针对一些资源去做这些操作，以提高性能（当
+然如果你乱用的话，性能反而更差）。下面我来列一下这些 link 类型：
+
+dns-prefetch 型 link 提前对一个域名做 dns 查询，这样的 link 里面的 href 实际上只有域名有意义。
+preconnect 型 link 提前对一个服务器建立 tcp 连接。
+prefetch 型 link 提前取 href 指定的 url 的内容。
+preload 型 link 提前加载 href 指定的 url。
+prerender 型 link 提前渲染 href 指定的 url。
+
+**modulepreload 型的 link**
+
+modulepreload 型 link 的作用是预先加载一个 JavaScript 的模块。这可以保证 JS 模块不必等到执行时才加载。这里的所谓加载，是指完成下载并放入内存，并不会执行对应的 JavaScript。
+
+```html
+<link rel="modulepreload" href="app.js">
+<link rel="modulepreload" href="helpers.js">
+<link rel="modulepreload" href="irc.js">
+<link rel="modulepreload" href="fog-machine.js">
+<script type="module" src="app.js">
+```
+
+这个例子来自 HTML 标准，我们假设 app.js 中有 import “irc” 和 import “fog-machine”,而 irc.js 中有 import “helpers”。这段代码使用 moduleload 型 link 来预加载了四个 js 模块。尽管，单独使用 script 标签引用 app.js 也可以正常工作，但是我们通过加入对四个 JS 文件的link 标签，使得四个 JS 文件有机会被并行地下载，这样提高了性能。
+
+**stylesheet 型 link**
+
+基本用法是从一个 CSS 文件创建一个样式表。这里 type 属性可以没有，如果有，必须是"text/css"才会生效。
+rel 前可以加上 alternate，成为 rel=“alternate stylesheet”，此时必须再指定 title 属性。这样可以为页面创建一份变体样式，一些浏览器，如 Firefox 3.0，支持从浏览器菜单中切换这些样式，当然了，大部分浏览器不支持这个功能，所以仅仅从语义的角度了解一下这种用法即可。
+
+**pingback 型 link**
+
+这样的 link 表示本网页被引用时，应该使用的 pingback 地址，这个机制是一份独立的标准，遵守 pingback 协议的网站在引用本页面时，会向这个 pingback url 发送一个消息。
 
 ## 特殊字符标签
 
@@ -863,6 +1051,211 @@ label 标签为 input 元素定义标注（标签）。
   </fieldset>
 </form>
 ```
+
+## 替换型元素
+
+链接外的另一种引入文件的方式了。替换型元素是把文件的内容引入，替换掉自身位置的一类标签。
+
+### script标签
+
+script	标签是为数不多的既可以作为替换型标签，又可以不作为替换型标签的元素。
+
+两种 script 标签的写法，一种是直接把脚本代码写在 script 标签之间，另一种是把代码放到独立的 js 文件中，用 src 属性引入。
+
+凡是替换型元素，都是使用 src 属性来引用文件的，而链接型元素是使用 href 标签的。但是 style 标签并非替换型元素，不能使用 src 属性，这样，我们用 link 标签引入 CSS 文件，当然就是用 href 标签啦。
+
+### img标签
+
+**行内元素**
+
+src属性用于指定图像文件的路径和文件名，他是img标签的必需属性。
+
+```html
+<img src="图像URL" />
+```
+
+| 属性  | 值                        | 说明           |
+| ----- | ------------------------- | -------------- |
+| src   | url                       | 路径           |
+| alt   | 文本                      | 不显示时的替换 |
+| title | 文本                      | 悬停内容       |
+| align | bottom（默认）;middle;top | 文本对齐方式   |
+
+**结合map实现图像映射**
+
+```html
+<img src="1.jpg" usemap="#Map" />
+<map name="Map">
+	<area shape="热点形状" coords="坐标" href="链接" alt="替代文字" />
+	<area shape="circle" coords="180,139,14" href ="/example/html/venus.html" target ="_blank" alt="Venus" />
+	<area shape="rect" coords="0,0,110,260" href ="/example/html/sun.html"  target ="_blank" alt="Sun" />
+</map>
+```
+
+img没有办法像 script 标签那样作为非替换型标签来使用的，它必须有 src 属性才有意义。如果一定不想要引入独立文件，可以使用 **data uri**。
+
+当我们单独指定宽度或高度后，图片会被**等比例缩放**。这个特性非常重要，适用于那种我们既要限制图片尺寸，又要保持图片比例的场景。如果从性能的角度考虑，建议你同时给出图片的宽高，因为替换型元素加载完文件后，如果尺寸发生变换，会触发重排版。
+
+**alt 属性**，这个属性很难被普通用户感知，对于视障用户非常重要，可以毫不夸张地讲，给 img 加上 alt 属性，已经做完了可访问性的一半。
+
+img 标签还有一组重要的属性，那就是 **srcset 和 sizes**，它们是 src 属性的升级版（标签必须有 src 属性，这是不严谨的说法）。
+这两个属性的作用是在不同的屏幕大小和特性下，使用不同的图片源。下面一个例子也来自MDN，它展示了 srcset 和 sizes 的用法
+
+```html
+<img srcset="elva-fairy-320w.jpg 320w, 
+             elva-fairy-480w.jpg 480w, 
+             elva-fairy-800w.jpg 800w" 
+     sizes="(max-width:	320px)	280px, 
+            (max-width:	480px)	440px,
+            800px"
+	src="elva-fairy-800w.jpg" alt="Elva	dressed as a fairy">
+```
+
+srcset	提供了根据屏幕条件选取图片的能力，但是其实更好的做法，是使用	picture	元素。
+
+#### **Data URL**
+
+参考：[http://verymuch.site/2017/12/14/Data-URL%E7%AE%80%E4%BB%8B%E4%B8%8E%E4%BD%BF%E7%94%A8/](http://verymuch.site/2017/12/14/Data-URL简介与使用/)
+
+`Data URL`，是以`data:`模式为前缀的URL，允许内容的创建者将较小的文件嵌入到文档中，使用场合与常规URL相同。
+
+`Data URL`由**data:前缀、MIME类型（表明数据类型）、base64标志位（如果是文本，则可选）以及数据本身四部分组成**。
+
+语法格式如下：
+
+```js
+data:[<mediatype>][;base64],data
+```
+
+`mediatype`是一个MIME（Multipurpose Internet Mail Extension）类型字符串，如`image/jpeg`表示一个JPEG图片文件。如果省略，默认值为`text/plain;charset=US-ASCII`。
+
+1. Data URL的优势
+
+   和传统的外部资源引用相比：
+
+   - 当访问外部资源很麻烦或受限时，可以将外部资源转为Data URL引用（鸡肋）
+   - 当图片是在服务器端用程序动态生成，每个访问用户显示的都不同时，这是需要返回一个可用的URL（场景较少）
+   - 当图片的体积太小，**占用一个HTTP会话**不是很值得时
+
+2. Data URL的缺点
+
+   虽然Data URL允许使用者将文件嵌入到文档中，这在某些场景下较为合适，但是Data URL也有一些缺点：
+
+   - 体积更大：Base64编码的**数据体积通常是原数据的体积4/3**，也就是Data URL形式的图片会比二进制格式的图片体积大1/3
+   - 不会缓存：Data URL形式的图片**不会被浏览器缓存**，这意味着每次访问这样的页面时都被下载一次。这是一个使用效率方面的问题——尤其当这个图片被整个网站大量使用的时候。
+
+**获取base64编码**
+
+1. Linux/Mac OS X下可以使用`uuencode`命令
+
+`uuencode -m <源文件> <转码后标识>`
+
+1. Javascript中有两个函数负责编码和解码base64字符串，分别是`atob`和`btoa`。
+   - `atob()`: 负责解码已经使用base64编码了的字符串。
+   - `btoa()`: 将二进制字符串转为base64编码的ASCII字符串。
+
+两者都只针对Data URL中的data进行处理。
+
+```js
+btoa('hello base64') // "aGVsbG8gYmFzZTY0"
+atob('aGVsbG8gYmFzZTY0') // "hello base64"
+```
+
+3. Canvas提供了`toDataURL`方法，用于获取canvas绘制内容，将其转为base64格式。
+4. 使用FileReader API的`readAsDataURL`方法
+
+```html
+<div class="demo-area">
+  <input type="file" id="testReadAsDataURL">
+  <textarea id="testReadAsDataURL-content"></textarea>
+</div>
+```
+
+```js
+var reader = new FileReader()
+reader.onload = function(e) {
+  var textarea = document.getElementById('testReadAsDataURL-content');
+  textarea.value = reader.result
+}
+document.getElementById('testReadAsDataURL').onchange = function(e) {
+  var file = e.target.files[0]
+  reader.readAsDataURL(file)
+}
+```
+
+#### **base64原理**
+
+Data URL是Base64编码的，且Base64编码的数据体积通常是原数据的体积4/3。
+
+1. 为什么Base64编码可以内联到HTML中
+
+我们知道HTTP协议是文本协议，不同于常规的二进制协议那样直接进行二进制传输。Base64编码是**从二进制到字符的过程，可用于在HTTP环境下传递较长的标识信息。**
+
+2. 为什么Base64编码后，体积会增大1/3
+
+首先Base64是一种编码算法，该算法共包含64个字符。包括大小写拉丁字母各26个、数字10个、加号+和斜杠/，共64个字符。此外还有等号=用来作为后缀用途。
+
+首先，ASCII码的范围是0-127，其中0-31和127是控制字符，共33个。其余95个，即32-126是可打印字符，包括数字、大小写字母、常用符号等。早期的一些传输协议，例如邮件传输协议SMTP，只能传输可打印的ASCII字符。这样原本的8bit字节码（0-255）就会超出使用范围，从而导致无法传输。
+
+这时，就产生了Base64编码，它利用**6bit字符来表达原本的8bit字符**。6bit显然不够容纳8bit的数据。6和8的最小公倍数是24，所以我们用4个Base64字符刚好能够表示三个传统的8bit字符，所以体积会大1/3。
+
+![base64-01](E:\Jennifer\other\notes\media\base64-01.jpg)
+
+如果待编码的字符串长度不是三的倍数时需要做一个特殊处理，假设待编码字符串长度为10。这前9个字符可以用12个Base64字符表示。第10个字符的前6bit作为一个Base64字符，**剩下的2bit后面需要先补0，补到6位**作为第二个Base64字符，至于第三个和第四个Base64字符，虽然没有相对应的内容，我们仍需**以=填充**。
+
+![base64-02](E:\Jennifer\other\notes\media\base64-02.jpg)
+
+### picture标签
+
+picture	元素可以根据屏幕的条件为其中的	img	元素提供不同的源，它的基本用法如下：
+
+通过包含零或多个 [`source`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/source) 元素和一个 [`img`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/img) 元素来为不同的显示/设备场景提供图像版本。浏览器会选择最匹配的子 `<source>` 元素，如果没有匹配的，就选择 `<img>` 元素的 `src` 属性中的URL。然后，所选图像呈现在`<img>`元素占据的空间中。
+
+```html
+<picture>
+		<source	srcset="image-wide.png"	media="(min-width:	600px)">
+		<img	src="image-narrow.png">
+</picture>
+```
+
+这里的 media 属性是 media query，跟 CSS 的 @media	规则一致。
+
+### video标签
+
+```html
+<video controls="controls" >
+<source src="movie.webm" type="video/webm" >
+<source src="movie.ogg" type="video/ogg" >
+<source src="movie.mp4" type="video/mp4">
+You browser does not support video.
+</video>
+```
+
+source 标签除了支持 media 之外，还可以使用 type 来区分源文件的使用场景。
+
+video 中还支持一种标签：track。是一种播放时序相关的标签，它最常见的用途就是字幕。track 标签中，必须使用 srclang来指定语言，此外，track 具有 kind 属性，共有五种。
+
+subtitles：就是字幕了，不一定是翻译，也可能是补充性说明
+captions：报幕内容，可能包含演职员表等元信息，适合听障人士或者没有打开声音的人了解音频内容
+descriptions：视频描述信息，适合视障人士或者没有视频播放功能的终端打开视频时了解视频内容用
+chapters：用于浏览器视频内容。
+metadata：给代码提供的元信息，对普通用户不可见。
+
+### audio标签
+
+```html
+<audio controls>
+<source src="song.mp3" type="audio/mpeg">
+<source src="song.ogg" type="audio/ogg">
+<p>You browser does not support audio.</p>
+</audio>
+```
+
+### iframe标签
+
+最后我们来讲一下 iframe，这个标签能够嵌入一个完整的网页。不过，在移动端，iframe	受到了相当多的限制，它无法指定大小，里面的内容会被完全平铺到父级页面上。同时很多网页也会通过	http	协议头禁止自己被放入 iframe 中。
+
+iframe 标签也是各种安全问题的重灾区。opener、window.name、甚至 css 的 opacity 都是黑客可以利用的漏洞。因此，在 2019 年，当下这个时间点，任何情况下我都不推荐在实际开发中用以前的 iframe。
 
 # 语言
 
@@ -1842,6 +2235,12 @@ div::after {
 
 E:after、E:before 在旧版本里是伪元素，CSS3的规范里“:”用来表示伪类，“::”用来表示伪元素，但是在高版本浏览器下E:after、E:before会被自动识别为E::after、E::before，这样做的目的是用来做兼容处理。
 
+## 其他
+
+**:root选择器**用匹配文档的根元素。
+
+在HTML中根元素始终是HTML元素。
+
 # 函数
 
 根据MDN所陈列的关键字索引，**css函数**一共有**86**个。
@@ -1944,7 +2343,50 @@ E:after、E:before 在旧版本里是伪元素，CSS3的规范里“:”用来�
 </html>
 ```
 
+# 其他
 
+## 自定义属性
+
+参考：[http://verymuch.site/2019/04/15/CSS%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E5%8F%8A%E5%85%B6%E7%94%A8%E6%B3%95/#more](http://verymuch.site/2019/04/15/CSS自定义属性及其用法/#more)
+
+### 自定义属性名
+
+预处理器的变量也有一些缺点和限制，如下：
+
+1. **不能动态修改变量**：预处理器是在编译时进行变量的处理，编译后变量其实就不存在了。
+2. **没有DOM结构，无法级联继承**。
+3. **不能用JavaScript进行读写**。
+
+CSS自定义属性的语法格式为`--*`，双横线加上具体的自定义属性名，属性名是一个合法的CSS[标识符](https://www.w3.org/TR/css-syntax-3/#identifier)即可。
+
+自定义属性没有具体的CSS含义，其用途完全由作者和使用者决定。自定义属性可以**应用于任何元素，其可以被继承，并且支持级联，不支持动画**。
+
+注意：与CSS属性不同，自定义属性是**大小写敏感的**。
+
+### 自定义属性值
+
+可以是任何有效的CSS值，如颜色、字符、布局的值、甚至是表达式。
+
+通过`var()`函数，自定义属性的值可以用作另一个属性的值。
+
+`var( <custom-property-name> [, <declaration-value> ]? )`
+
+其中第一个参数为自定义属性名，第二个参数为后备值。当传入的自定义属性无效或者不存在时，会使用后备值。
+
+注意：
+
+1. 自定义属性不能作为一个独立属性值的一部分
+
+2. 会导致动画瑕疵，因为其只会在指定帧影响使用了自定义属性的可动画属性。
+3. 如果在计算属性的时候，发现了依赖依赖循环，则**依赖循环中的所有自定义属性值都使用初始值代替**。
+
+### 优势
+
+1. **可以动态修改自定义属性**
+2. **有DOM结构的概念，可以级联继承**。
+3. **可以用JavaScript进行读写**。
+
+CSS自定义属非常适合用来实现**主题的切换**
 
 # 单位
 
@@ -2103,6 +2545,8 @@ BFC布局规则特性：
 如上图所示，我们看到小写字母**x**的位置，它的上下边缘就是我们的**基线（baseline）**，但下边缘才是我们日常使用的属性值。顺便一提，CSS单位 `ex`便是指的这个**字母x**的高度。
 
 ## 层叠上下文与层叠顺序
+
+其他参考：[http://verymuch.site/2019/01/18/CSS%E7%9A%84%E2%80%9C%E5%B1%82%E2%80%9D%E5%B3%A6%E2%80%9C%E5%8F%A0%E2%80%9D%E7%BF%A0/#more](http://verymuch.site/2019/01/18/CSS的"层"峦"叠"翠/#more)
 
 ![img](https://mmbiz.qpic.cn/mmbiz_png/y0rsINPrlZy47EnPpnuzxFOjUlBytKfD8PibeV0wAgc8rZLrbic8d8CMSXEDgFr0bzgUQ7lqnJewia0icgsx5L9WHg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
 
