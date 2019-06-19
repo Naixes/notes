@@ -13,35 +13,37 @@
 - 字体文件（Fonts）
   - .svg   .ttf   .eot   .woff   .woff2
 - 模板文件
-  - .ejs   .jade  .vue【这是在webpack中定义组件的方式，推荐这么用】
+  - .ejs   .jade  .vue
 
-### 引入的静态资源多有什么问题
+### 引入的静态资源多的问题
 
 1. 网页加载速度慢， 因为 我们要发起很多的二次请求；
 2. 要处理错综复杂的依赖关系
 
-### 如何解决上述两个问题
+### 解决上述两个问题
 
 1. 合并、压缩、精灵图、图片的Base64编码（将图片编码和代码一起下载存储到客户端减少请求）
-2. 可以使用之前学过的requireJS、也可以使用webpack可以解决各个包之间的复杂依赖关系；
+2. 可以使用webpack可以解决各个包之间的复 cc杂依赖关系；
 
-### 什么是webpack?
+### webpack
 
 webpack 是前端的一个项目构建工具，它是基于 Node.js 开发出来的一个前端工具；
+
+可以代码转换，文件优化，代码分割，模块合并，自动刷新，代码校验，自动发布
 
 ### 如何实现上述2种解决方案
 
 1. 使用Gulp， 是基于 task 任务的；
 2. 使用Webpack， 是基于整个项目进行构建的；
 
-- 借助于webpack这个前端自动化构建工具，可以完美实现资源的合并、打包、压缩、混淆等诸多功能。
+-   借助于webpack这个前端自动化构建工具，可以完美实现资源的合并、打包、压缩、混淆等诸多功能。
 - 根据官网的图片介绍webpack打包的过程
 - [webpack官网](http://webpack.github.io/)
 
 ### webpack安装的两种方式
 
 1. 运行`npm i webpack -g`全局安装webpack，这样就能在全局使用webpack的命令
-2. 在项目根目录中运行`npm i webpack --save-dev`安装到项目依赖中
+2. 在项目根目录中运行`npm i webpack webpack-cli --save-dev`安装到项目开发依赖中
 
 ## 使用webpack打包构建
 
@@ -74,6 +76,8 @@ webpack src/js/main.js dist/bundle.js
 1. 在项目根目录中创建`webpack.config.js`
 2. 由于运行webpack命令的时候，webpack需要指定入口文件和输出文件的路径，所以，我们需要在`webpack.config.js`中配置这两个路径：
 
+#### entry和output
+
 ```javascript
     // 导入处理路径的模块
     var path = require('path');
@@ -100,12 +104,173 @@ modile.exports = function(env, argv) {
 }
 ```
 
+单入口和多入口  
+
+```js
+var path = require('path');
+
+module.exports = {
+    entry: {
+        'index': path.resolve(__dirname, 'src/js/main.js'),
+        'admin': path.resolve(__dirname, 'src/js/admin.js')
+    }
+    output: { // 配置输出选项
+        path: path.resolve(__dirname, 'build'), // 配置输出的路径
+        filename: '[name].min.js' // name对应上面的名称index和admin
+    }
+}
+```
+
+#### mode
+
+ none|development|production：优化级别的区别
+
+### loader
+
+预处理js以外的文件
+
+#### 使用webpack打包css文件
+
+webpack不能处理js以外 的文件，会去配置文件查找第三方loader进行匹配，然后调用loader处理文件，注意：**从右到左**依次处理。处理完成后交给webpack打包合并，最后输出到bundle.js中
+
+1. 运行`cnpm i style-loader css-loader --save-dev`
+2. 修改`webpack.config.js`这个配置文件：
+
+```javascript
+module: { // 用来配置第三方loader模块的
+        rules: [ // 文件的匹配规则，从右到左依次处理
+            // css-loader： 加载css文件，成为js的一部分（读取成字符串），不要报错
+            // style-loader： 使css有作用，让样式字符串变成style标签输出到页面
+            { test: /\.css$/, use: ['style-loader', 'css-loader'] }//处理css文件的规则
+        ]
+    }
+```
+
+1. 注意：`use`表示使用哪些模块来处理`test`所匹配到的文件；`use`中相关loader模块的调用顺序是从后向前调用的；
+
+##### 打包less文件-less-loader
+
+1. 运行`cnpm i less-loader less -D`
+2. 修改`webpack.config.js`这个配置文件：
+
+```
+// less自带postcss的功能
+{ test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] }
+```
+
+##### 打包sass文件-url-loader
+
+1. 运行`cnpm i sass-loader node-sass --save-dev`
+2. 在`webpack.config.js`中添加处理sass文件的loader模块：
+
+```
+{ test: /\.scss$/, use: ['style-loader', 'css-loader', 'url-loader'] }
+```
+
+##### file-loader
+
+加载任何类型文件，并形成一个文件模块
+
+```js
+{ test: /\.(png|jpg|gif|jpeg|bmp)$/i, use: {
+    loader: 'file-loader',
+    options: {
+        // 会在打包目录新建这个目录
+		outputPath: 'images/'
+    }
+}},
+```
+
+##### 处理css中的路径-url-loader
+
+读取并输出成base64
+
+1. 运行`cnpm i url-loader file-loader --save-dev`
+2. 在`webpack.config.js`中添加处理url路径的loader模块：
+
+```
+{ test: /\.(png|jpg|gif|jpeg|bmp)$/, use: 'url-loader' } // file-loader是url-loader内部依赖，这里不需要配置
+```
+
+1. 可以通过`limit`指定进行base64编码的图片大小；只有小于指定字节（byte）的图片才会进行base64编码；
+2. `[hash:8]-[name].[ext]`可以对图片的名称进行规定：
+
+```javascript
+{ test: /\.(png|jpg|gif|jpeg|bmp)$/, use: 'url-loader?limit=43960&[hash:8]-[name].[ext]'},
+// 另一种写法    
+{ test: /\.(png|jpg|gif|jpeg|bmp)$/, use: {
+    loader: 'url-loader',
+    options: {
+        outputPath: 'images/',
+        // 小于这个大小会进行base64编码直接写到css文件
+        limit: 43960
+    }
+},
+```
+
+注意：引入时的node_models可以省略
+
+1. 处理字体文件
+
+```javascript
+{ test: /\.(ttf|eot|svg|woff|woff2)$/, use: 'url-loader'},
+```
+
+##### postcss-loader和autoprefixer
+
+用于添加css前缀
+
+postcss-loader：加载css并解析样式
+
+autoprefixer：根据浏览器兼容表添加前缀
+
+```js
+{ test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] }
+// postcss.config.js文件，也可以写在webpack.config.js里，要配置alias
+module.exports = {
+    plugins: [
+        require('autoprefixer')
+    ]
+}
+```
+
+注意：在`import {xx, xx} from xx`时只是解构赋值不会按需导入，按需导入是`import xx from xx`，除非使用有简写功能的loader
+
+##### 处理 JS语法-babel-loader
+
+1. 运行`cnpm i babel-loader @babel/core --save-dev`安装babel的相关loader包
+
+2. 运行`cnpm i @babel/preset-env --save-dev`安装babel转换的语法
+
+3. 在`webpack.config.js`中添加相关loader模块，其中需要注意的是，一定要把`node_modules`文件夹添加到排除项：
+
+```
+{ test: /\.js$/, use: 'babel-loader', exclude: /node_modules/ }
+```
+
+1. 在项目根目录中添加`.babelrc`文件，并修改这个配置文件如下：
+
+```
+{
+    "presets":["@babel/preset-env"]
+}
+```
+
+**source-map**
+
+```js
+// webpack.config.js
+// 编译报错时可以查看原始写法，但是js会很大
+devtool: 'source-map'
+```
+
 ### `webpack-dev-server`实时打包构建
 
 1. 由于每次重新修改代码之后，都需要手动运行webpack打包的命令，比较麻烦，所以使用`webpack-dev-server`来实现代码实时打包编译，当修改代码之后，会自动进行打包构建。
 2. 运行`cnpm i webpack-dev-server --save-dev`安装到开发依赖
-3. `webpack-dev-server`依赖`webpack`，需要在本地安装
-4. 安装完成之后，在命令行直接运行`webpack-dev-server`来进行打包，发现报错，此时需要借助于`package.json`文件中的指令，来进行运行`webpack-dev-server`命令，在`scripts`节点下新增`"dev": "webpack-dev-server"`指令后使用`npm run dev`可以进行实时打包，但是dist目录下并没有生成`bundle.js`文件，这是因为`webpack-dev-server`将打包好的文件放在了内存中
+3. `webpack-dev-server`依赖`webpack和webpack-cli`，需要在本地安装
+4. mode要是development
+5. 安装完成之后，在命令行直接运行`webpack-dev-server`来进行打包，发现报错，不能使用命令行直接启动，此时需要借助于`package.json`文件中的指令，来进行运行`webpack-dev-server`命令，在`scripts`节点下新增`"dev": "webpack-dev-server"`指令后使用`npm run dev`可以进行实时打包，但是dist目录下并没有生成`bundle.js`文件，这是因为`webpack-dev-server`将打包好的文件放在了内存中
 
 - 把`bundle.js`放在内存中的好处是：由于需要实时打包编译，所以放在内存中速度会非常快
 - 这个时候访问webpack-dev-server启动的`http://localhost:8080/`网站，发现是一个文件夹的面板，需要点击到src目录下，才能打开我们的index首页，此时引用不到bundle.js文件，需要修改index.html中script的src属性为:`<script src="../bundle.js"></script>`
@@ -154,7 +319,7 @@ var webpack = require('webpack');
 plugins: [new webpack.HotModuleReplacementPlugin()]
 ```
 
-### `html-webpack-plugin`插件配置index页面
+### `html-webpack-plugin`配置index页面
 
 由于使用`--contentBase`指令的过程比较繁琐，需要指定启动的目录，同时还需要修改index.html中script标签的src属性，所以推荐大家使用`html-webpack-plugin`插件配置启动页面.
 
@@ -192,85 +357,79 @@ plugins: [new webpack.HotModuleReplacementPlugin()]
 
 1. 将index.html中script标签注释掉，因为`html-webpack-plugin`插件会自动把bundle.js注入到index.html页面中！
 
-### 使用webpack打包css文件
+### 代码质量-eslint
 
-webpack不能处理js以外的文件，会去配置文件查找第三方loader进行匹配，然后调用loader处理文件，注意：从右到左依次处理。处理完成后交给webpack打包合并，最后输出到bundle.js中
+ `npm i eslint eslint-loader -D`
 
-1. 运行`cnpm i style-loader css-loader --save-dev`
-2. 修改`webpack.config.js`这个配置文件：
-
-```javascript
-module: { // 用来配置第三方loader模块的
-        rules: [ // 文件的匹配规则，从右到左依次处理
-            { test: /\.css$/, use: ['style-loader', 'css-loader'] }//处理css文件的规则
-        ]
-    }
-```
-
-1. 注意：`use`表示使用哪些模块来处理`test`所匹配到的文件；`use`中相关loader模块的调用顺序是从后向前调用的；
-
-#### 打包less文件
-
-1. 运行`cnpm i less-loader less -D`
-2. 修改`webpack.config.js`这个配置文件：
-
-```
-{ test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] },
-```
-
-#### 打包sass文件
-
-1. 运行`cnpm i sass-loader node-sass --save-dev`
-2. 在`webpack.config.js`中添加处理sass文件的loader模块：
-
-```
-{ test: /\.scss$/, use: ['style-loader', 'css-loader', 'sass-loader'] }
-```
-
-#### 处理css中的路径
-
-1. 运行`cnpm i url-loader file-loader --save-dev`
-2. 在`webpack.config.js`中添加处理url路径的loader模块：
-
-```
-{ test: /\.(png|jpg|gif|jpeg|bmp)$/, use: 'url-loader' } // file-loader是url-loader内部依赖，这里不需要配置
-```
-
-1. 可以通过`limit`指定进行base64编码的图片大小；只有小于指定字节（byte）的图片才会进行base64编码；
-2. `[hash:8]-[name].[ext]`可以对图片的名称进行规定：
-
-```javascript
-{ test: /\.(png|jpg|gif|jpeg|bmp)$/, use: 'url-loader?limit=43960&[hash:8]-[name].[ext]'},
-```
-
-注意：引入时的node_models可以省略
-
-1. 处理字体文件
-
-```javascript
-{ test: /\.(ttf|eot|svg|woff|woff2)$/, use: 'url-loader'},
-```
-
-### 使用babel处理高级JS语法
-
-1. 运行`cnpm i babel-core babel-loader babel-plugin-transform-runtime --save-dev`安装babel的相关loader包
-2. 运行`cnpm i babel-preset-es2015 babel-preset-stage-0 --save-dev`安装babel转换的语法
-3. 在`webpack.config.js`中添加相关loader模块，其中需要注意的是，一定要把`node_modules`文件夹添加到排除项：
-
-```
-{ test: /\.js$/, use: 'babel-loader', exclude: /node_modules/ }
-```
-
-1. 在项目根目录中添加`.babelrc`文件，并修改这个配置文件如下：
-
-```
-{
-    "presets":["es2015", "stage-0"],
-    "plugins":["transform-runtime"]
+```js
+module: {
+    rules: [
+        {
+            test: /\/js$/i,
+            loader: 'eslint-loader',
+            exclude: /node_modules/,
+            options: {
+                
+            }
+        }
+    ]
 }
 ```
 
-**注意：语法插件`babel-preset-es2015`可以更新为`babel-preset-env`，它包含了所有的ES相关的语法；**
+.eslintrc配置文件，`eslint init` 可以初始化
+
+```js
+{
+    // 解析
+    "parserOptions": {
+        // 版本
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        // 某些特性是否启用
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "rules": {
+        "indent": ["error", 2],
+        // Unix格式的换行/n
+        "linebreak-style": ["error", "windows"], // /r/n
+        // 双引号
+        "quotes": ["error", "double"]
+        // 结尾的分号
+        "semi": ["error", "always"]
+    }
+}
+```
+
+### 测试
+
+#### 单元测试
+
+jest
+
+`npm i jest jest-webpack -D`
+
+package.json
+
+```js
+"scripts": {
+    ...
+    "test": "jest-webpack"
+}
+```
+
+测试用例
+
+ ```js
+const mod = require('xxx')
+
+test('testName', () => {
+    expect(mod.fab(7)).toBe(13)
+})
+ ```
+
+
 
 ## 相关文章
 

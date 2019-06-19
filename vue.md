@@ -1071,6 +1071,35 @@ methods: {
 }
 ```
 
+### vue2-animate
+
+`npm i vue2-animate -D`
+
+本质是CSS，封装了animate.css库
+
+`import 'vue2-animate/dist/vue2-animate.min.css'`
+
+```css
+...
+// 指定动画类型，只能用于一个元素，一组需要用transition-group
+<transition name='fade'>
+	<div ...></div>
+<transition>
+
+.box {
+    width: 200px; height: 200px;
+    animation-duration: 5s;
+}
+
+// transition-group
+
+<transition-group name='fade' tag='ul' class='list'>
+	<li v-for=...></li>
+<transition-group>
+```
+
+
+
 ## 相关文章
 
 1. [vue.js 1.x 文档](https://v1-cn.vuejs.org/)
@@ -1780,7 +1809,11 @@ computed: {
 }
 ```
 
+分模块
 
+同名的mutation都会触发，没有自己的独立空间，actions类似
+
+引入模块
 
 ### Vue2.0组件
 
