@@ -891,13 +891,13 @@ fetch('', {method: '', body: formdata...})
 
 ### 使用过渡类名
 
-![1543925491592](C:\Users\ADMINI~1\AppData\Local\Temp\1543925491592.png)	
+![1543925491592](E:\Jennifer\other\notes\media\1543925491592.png)
 
 1. HTML结构：
 
 ```html
 <div id="app">
-    <input type="button" value="动起来" @click="myAnimate">
+    <input type="button" value="动起来" @click="isshow = !isshow">
     <!-- 使用 transition 将需要过渡的元素包裹起来，name是类名的前缀，没有时是v- -->
     <transition name="fade">
       <div v-show="isshow">动画哦</div>
@@ -915,9 +915,6 @@ var vm = new Vue({
     isshow: false
   },
   methods: {
-    myAnimate() {
-      this.isshow = !this.isshow;
-    }
   }
 });
 ```
@@ -940,7 +937,7 @@ var vm = new Vue({
 }
 ```
 
-### [使用第三方 CSS 动画库](https://cn.vuejs.org/v2/guide/transitions.html#自定义过渡类名)
+### [第三方 CSS 动画库](https://cn.vuejs.org/v2/guide/transitions.html#自定义过渡类名)
 
 animate.css
 
@@ -953,11 +950,12 @@ animate.css
 2. 定义 transition 及属性：
 
 ```html
-<transition>
-    <!-- animated也可以放在这里 -->
+
+<!-- animated也可以放在这里 -->
+<!-- 时间相同可以直接等于500 -->
+<transition
 	enter-active-class="fadeInRight"
     leave-active-class="fadeOutRight"
-    <!-- 时间相同可以直接等于500 -->
     :duration="{ enter: 500, leave: 800 }">
   	<div class="animated" v-show="isshow">动画哦</div>
 </transition>
@@ -1002,7 +1000,7 @@ methods: {
 ```css
 .show{
       transition: all 0.4s ease;
-    }
+}
 ```
 
 ### [v-for 的列表过渡](https://cn.vuejs.org/v2/guide/transitions.html#列表的进入和离开过渡)
@@ -1032,7 +1030,7 @@ methods: {
 	<!-- 需要使用 transition-group 组件把v-for循环的列表包裹起来，并且必须设置key属性 -->
     <!-- appear可以实现第一次显示时渐进的入场效果 -->
     <!-- 默认将transition-group渲染成span元素，可使用tag修改 -->
-    <transition-group tag="ul" name="list" appear tag="ul">
+    <transition-group tag="ul" name="list" appear>
       <li v-for="(item, i) in list" :key="i">{{item}}</li>
     </transition-group>
   </div>
@@ -1775,16 +1773,12 @@ const store = new Vuex.Store({
     // this.$store.getters.optCount获取
     getters: {
         optCount(state) {
-            
     },
     // 模块划分
     modules: {
-
     }
 })
-
 Vue.use(vuex)
-
 const vm = new Vue({
     el: '#app',
     render: c=>c(App),
@@ -1811,6 +1805,10 @@ computed: {
 ```
 
 分模块
+
+代码参考：<https://github.com/Naixes/demo-collection/blob/master/learnVue/vue-cli-webpack/src/components/VuexMapText.vue>
+
+state有自己独立的模块空间
 
 同名的mutation都会触发，没有自己的独立空间，actions类似
 

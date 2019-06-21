@@ -2,6 +2,12 @@
 
 HTML（英文Hyper Text Markup Language的缩写）中文译为“超文本标签语言”，主要是通过HTML标签对网页中的文本、图片、声音等内容进行描述。
 
+在上世纪80年代，“富文本”的概念在计算机领域的热门，犹如如今的“AI”和“区块链”，而TimBerners-Lee当时去设计HTML，也并非是凭空造出来，他使用了当时已有的一种语言：SGML。
+
+SGML是一种古老的标记语言，可以追溯到1969年IBM公司所使用的技术，SGML十分复杂，严格来说，HTML是SGML中规定的一种格式，但是实际的浏览器没有任何一个是通过SGML引擎来解析HTML的。
+
+今天的HTML仍然有SGML的不少影子，SGML留给HTML的重要的遗产：基本语法和DTD。
+
 ## HTML骨架格式
 
 ```html
@@ -2077,10 +2083,15 @@ id选择器使用“#”进行标识，后面紧跟id名。
 
 - E:active    /* 选定的链接 */
 
+- :focus 表示焦点落在这个元素之上。
+
+- :target 用于选中浏览器 URL 的 hash 部分所指示的元素。
+
   注意写的时候，他们的顺序尽量不要颠倒  按照  lvha 的顺序。   love   hate  爱上了讨厌 记忆法
 
 ### 结构(位置)伪类选择器（CSS3)
 
+- :root :表示树的根元素，在选择器是针对完整的 html 文档情况，我们一般用 html 标签即可选中根元素。但是随着 scoped css 和 shadow root 等场景出现，选择器可以针对某一子树来选择，这时候就很需要 root 伪类了。
 - E:first-child :选取属于其父元素的首个子元素的指定选择器（CSS2）
 - E:last-child :选取属于其父元素的最后一个子元素的指定选择器
 - E:nth-child(n) ： 匹配属于其父元素的第 N 个子元素，不论元素的类型
@@ -2090,9 +2101,39 @@ id选择器使用“#”进行标识，后面紧跟id名。
 - E:nth-child(odd): 所有的奇数
 - E:nth-of-type(n):指定类型
 - E:nth-last-of-type(n):指定类型，从最后一个子元素开始计数。  
-- E:empty 选中没有任何子节点的E元素，注意，空格也算子元素
+- E:empty 选中没有任何子节点的E元素，注意，空格也算子元素。
+- :only-child :按字面意思理解即可，选中唯一一个子元素。
 
 **重点：n遵循线性变化，其取值0、1、2、3、4、... 但是当n<=0时，选取无效 **
+
+### 逻辑伪类选择器
+
+- E:not()
+
+```css
+/* 类名不是 `.fancy` 的 <p> 元素 */
+p:not(.fancy) {
+  color: green;
+}
+
+/* 非 <p> 元素 */ 
+body :not(p) {
+  text-decoration: underline;
+}
+
+/* 非 <div> 或 <span> 的元素 */
+body :not(div):not(span) {
+  font-weight: bold;
+}
+
+/* 类名不是 `.crazy` or `.fancy` 的元素 */
+/* 注意，此语法尚未被较好地支持。 */
+body :not(.crazy, .fancy) {
+  font-family: sans-serif;
+}
+```
+
+
 
 ## 目标伪类选择器(CSS3)
 
