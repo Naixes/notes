@@ -404,6 +404,47 @@ const ul = {
 
   ![Diff算法图](F:/01_video/%E5%89%8D%E7%AB%AF/16.react4.js%EF%BC%88%E5%85%B155%E9%9B%86%EF%BC%89/reactjs%E7%B2%BE%E5%93%81%E6%95%99%E7%A8%8B%E8%B5%84%E6%96%99/day1%E8%B5%84%E6%96%99/%E7%AC%94%E8%AE%B0/images/Diff.png)
 
+## 初识React
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <!-- 解析jsx,babel中的 -->
+    <script src="browser.js" charset="utf-8"></script>
+    <script src="react.development.js" charset="utf-8"></script>
+    <!-- 渲染 -->
+    <script src="react-dom.development.js" charset="utf-8"></script>
+</head>
+<body>
+    <div id="div"></div>
+</body>
+<!-- 必须使用text/babel -->
+<script type="text/babel">
+let root = document.getElementById("div")
+
+// 渲染页面
+ReactDOM.render(
+    // className替换class,htmlFor替换label的for
+    // 只能有一个根元素
+    <div className="box">
+        <div>aaa</div>
+        <div>bbb</div>
+        <div>
+            <label htmlFor="user">用户名：</label>
+            <input id="user" type="text" />
+        </div>
+    </div>,
+    root
+)
+</script>
+</html>
+```
+
+### 组件
+
 ## 创建基本的webpack4.x项目
 
 1. 运行`npm init -y` 快速初始化项目
