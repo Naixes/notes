@@ -3163,10 +3163,46 @@ var router = new VueRouter({
 
 ### 组件中的css作用域问题
 
-scoped属性会让组件内的根元素增加一个独有的data属性，并利用属性选择器中就可以实现组件内部作用域
+#### scoped
+
+scoped属性会让组件内的根元素增加一个独有的data属性，并利用属性选择器中就可以实现组件内部作用域，阻止上层的css样式传递到下层，使其只对当前组件生效。
 
 ```html
 <style scoped lang='scss'>
+</style>
+```
+
+#### module
+
+module的用法也很简单，只要在style中增加`module`属性即可。不同之处是它在布局中的引用，都需要添加前缀`$style`。因为通过module作用的style都被保存到`$style`对象中。我可以通过console查看它的具体引用名，通过module作用的style将会重新命名为：文件名_原style名_不定后缀。
+
+相对于scoped的方式，module的方式能够一眼知道该元素时属于哪个文件组件中。在大型项目中能够帮助我们迅速定位到要查找的组件。
+
+除了上述的快速定位，由于module会将所有的style都归入`$style`中，所以我们可以很灵活的将任意的父组件样式传递到任意深层的子组件中。例如，将父组件中的`title-wrap`通过props传递到子组件中
+
+module还有一个特性非常不错，它可以导出定义的变量，将变量归入`$style`中
+
+```html
+<template>
+  <div :class="$style.content">
+    <div :class="$style['title-wrap']">我是红色的</div>
+    <green-title :styleTitle="$style['title-wrap']"></green-title>
+    <div>{{$style.titleColor}}</div>
+  </div>
+</template>
+ 
+<style lang="scss" module>
+$title-color: red;
+:export {
+  titleColor: $title-color
+}
+/* 可以使用标签选择器 */ 
+.content {
+  .title-wrap {
+    font-size: 20px;
+    color: $title-color;
+  }
+}
 </style>
 ```
 
