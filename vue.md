@@ -891,13 +891,13 @@ fetch('', {method: '', body: formdata...})
 
 ### 使用过渡类名
 
-![1543925491592](C:\Users\ADMINI~1\AppData\Local\Temp\1543925491592.png)	
+![1543925491592](E:\Jennifer\other\notes\media\1543925491592.png)
 
 1. HTML结构：
 
 ```html
 <div id="app">
-    <input type="button" value="动起来" @click="myAnimate">
+    <input type="button" value="动起来" @click="isshow = !isshow">
     <!-- 使用 transition 将需要过渡的元素包裹起来，name是类名的前缀，没有时是v- -->
     <transition name="fade">
       <div v-show="isshow">动画哦</div>
@@ -915,9 +915,6 @@ var vm = new Vue({
     isshow: false
   },
   methods: {
-    myAnimate() {
-      this.isshow = !this.isshow;
-    }
   }
 });
 ```
@@ -940,7 +937,7 @@ var vm = new Vue({
 }
 ```
 
-### [使用第三方 CSS 动画库](https://cn.vuejs.org/v2/guide/transitions.html#自定义过渡类名)
+### [第三方 CSS 动画库](https://cn.vuejs.org/v2/guide/transitions.html#自定义过渡类名)
 
 animate.css
 
@@ -953,11 +950,12 @@ animate.css
 2. 定义 transition 及属性：
 
 ```html
-<transition>
-    <!-- animated也可以放在这里 -->
+
+<!-- animated也可以放在这里 -->
+<!-- 时间相同可以直接等于500 -->
+<transition
 	enter-active-class="fadeInRight"
     leave-active-class="fadeOutRight"
-    <!-- 时间相同可以直接等于500 -->
     :duration="{ enter: 500, leave: 800 }">
   	<div class="animated" v-show="isshow">动画哦</div>
 </transition>
@@ -1002,7 +1000,7 @@ methods: {
 ```css
 .show{
       transition: all 0.4s ease;
-    }
+}
 ```
 
 ### [v-for 的列表过渡](https://cn.vuejs.org/v2/guide/transitions.html#列表的进入和离开过渡)
@@ -1032,7 +1030,7 @@ methods: {
 	<!-- 需要使用 transition-group 组件把v-for循环的列表包裹起来，并且必须设置key属性 -->
     <!-- appear可以实现第一次显示时渐进的入场效果 -->
     <!-- 默认将transition-group渲染成span元素，可使用tag修改 -->
-    <transition-group tag="ul" name="list" appear tag="ul">
+    <transition-group tag="ul" name="list" appear>
       <li v-for="(item, i) in list" :key="i">{{item}}</li>
     </transition-group>
   </div>
@@ -1775,16 +1773,12 @@ const store = new Vuex.Store({
     // this.$store.getters.optCount获取
     getters: {
         optCount(state) {
-            
     },
     // 模块划分
     modules: {
-
     }
 })
-
 Vue.use(vuex)
-
 const vm = new Vue({
     el: '#app',
     render: c=>c(App),
@@ -1811,6 +1805,10 @@ computed: {
 ```
 
 分模块
+
+代码参考：<https://github.com/Naixes/demo-collection/blob/master/learnVue/vue-cli-webpack/src/components/VuexMapText.vue>
+
+state有自己独立的模块空间
 
 同名的mutation都会触发，没有自己的独立空间，actions类似
 
@@ -2242,7 +2240,10 @@ const Foo = {
         })
     },
     beforeRouteUpdate(to, from, next) {
-        // 可以使用 this
+        // 在当前路由改变，但是该组件被复用时调用
+        // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
+        // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
+        // 可以访问组件实例 `this`
         this.name = to.params.name
     },
     beforeRouteLeave(to, from, next) {
@@ -3165,10 +3166,46 @@ var router = new VueRouter({
 
 ### 组件中的css作用域问题
 
-scoped属性会让组件内的根元素增加一个独有的data属性，并利用属性选择器中就可以实现组件内部作用域
+#### scoped
+
+scoped属性会让组件内的根元素增加一个独有的data属性，并利用属性选择器中就可以实现组件内部作用域，阻止上层的css样式传递到下层，使其只对当前组件生效。
 
 ```html
 <style scoped lang='scss'>
+</style>
+```
+
+#### module
+
+module的用法也很简单，只要在style中增加`module`属性即可。不同之处是它在布局中的引用，都需要添加前缀`$style`。因为通过module作用的style都被保存到`$style`对象中。我可以通过console查看它的具体引用名，通过module作用的style将会重新命名为：文件名_原style名_不定后缀。
+
+相对于scoped的方式，module的方式能够一眼知道该元素时属于哪个文件组件中。在大型项目中能够帮助我们迅速定位到要查找的组件。
+
+除了上述的快速定位，由于module会将所有的style都归入`$style`中，所以我们可以很灵活的将任意的父组件样式传递到任意深层的子组件中。例如，将父组件中的`title-wrap`通过props传递到子组件中
+
+module还有一个特性非常不错，它可以导出定义的变量，将变量归入`$style`中
+
+```html
+<template>
+  <div :class="$style.content">
+    <div :class="$style['title-wrap']">我是红色的</div>
+    <green-title :styleTitle="$style['title-wrap']"></green-title>
+    <div>{{$style.titleColor}}</div>
+  </div>
+</template>
+ 
+<style lang="scss" module>
+$title-color: red;
+:export {
+  titleColor: $title-color
+}
+/* 可以使用标签选择器 */ 
+.content {
+  .title-wrap {
+    font-size: 20px;
+    color: $title-color;
+  }
+}
 </style>
 ```
 
