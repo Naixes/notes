@@ -462,6 +462,30 @@ ReactDOM.render(
 
 ### 配置html-webpack-plugin配置
 
+## 使用react
+
+需要用到。。。
+
+react：核心
+
+react-dom：渲染
+
+jsx：创建元素方便，语法糖，会编译成js
+
+组件
+
+参数-props：只读
+
+状态-state：constructor中初始化，要用setState({})修改更新后会重新渲染
+
+传参：利用refs，props
+
+生命周期：
+
+脚手架：create-react-app  需要yarn或者用npm重新下
+
+npm i -g xxx
+
 ## 在项目中使用 react
 
 1. 运行 `cnpm i react react-dom -S` 安装包
@@ -1271,6 +1295,39 @@ import 'antd/dist/antd.css';
 ### 组件
 
 分页
+
+## Redux
+
+provider：包在最外面
+
+connect：状态映射，合并冲突
+
+reducer：状态对象
+
+状态更新：action
+
+npm i redux react-redux -D
+
+```js
+import {createStore} from 'redux'
+import {Provider} from 'react-redux'
+
+// 初始化和每次更新状态对象都会执行
+function reducer1(state, action) {
+    if(!state) {
+        // 初始化
+    }
+    return state
+}
+// 简写
+function reducer1(state={xxx}, action) {
+    return state
+}
+// 创建存储对象
+const store = createStore(reducer1)
+```
+
+## React-Server
 
 # 豆瓣电影案例
 
