@@ -1320,11 +1320,65 @@ function reducer1(state, action) {
     return state
 }
 // 简写
+// 传入旧状态返回新状态
 function reducer1(state={xxx}, action) {
     return state
 }
 // 创建存储对象
 const store = createStore(reducer1)
+// 用<Provider>包装根组件传入store对象store = {store}
+// 使用
+import {connect} from 'react-redux'
+// export default App
+// state来自reducer，props来自组件
+// 只能接收不能修改，单向数据流，组件内也不能赋值
+export default connect(function(state, props){
+    // 混合，解决冲突
+    // 使用state，组件props中会包含state的内容
+    return state
+    return {
+        ...state,
+        // 会重复的属性使用props
+		name: props.name
+        // 都进行保留
+        name: [state.name, props.name]
+    }
+}, {
+	// 当做组件的一部分，用props访问使用
+    // 参数自定义
+    setName(name) {
+    	// 必须return，返回值为action，在reducer中
+        return {
+			type: 'set_name',
+            name
+        }
+	}
+})(App)
+// reducer
+function reducer1(state={xxx}, action) {
+    if(action.type === 'set_name') {
+        return {
+            ...state,
+            name: action.name
+        }
+    }
+    // 要返回一个新的state
+    return state
+}
+// 优化
+// 单独的actions.js，找不到时会报错
+export const SET_NAME = 'set_name'
+// 单独的store.js
+// 多个reducer
+import {combineReducers} from 'redux'
+let reducers = combineReducers({
+    user: reducer1,
+    comp: reducer2
+})
+export default createStorer(reducers)
+// 修改相应的映射，修改时会触发所有的reducer
+// 分模块，分成单独的文件
+
 ```
 
 ## React-Server
