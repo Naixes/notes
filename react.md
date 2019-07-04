@@ -1183,9 +1183,18 @@ handleMsg3(arg1, arg2) {
 
 react-router-dom
 
+```js
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+...
+```
+
+
+
 ```jsx
 import React from 'react'
-// HashRouter，路由根容器，所有与路由相关的东西都包裹在它里面，一个网站只需要一个
+// BrowserRouter，以path为键，会刷新页面
+// HashRouter，以哈希值为键，路由根容器，所有与路由相关的东西都包裹在它里面，一个网站只需要一个
+// MemoryRouter，路由信息保存在内存中，刷新后状态不会保留
 // Route，表示路由规则，重要的属性path， component
 // Link，路由链接，有to属性
 import {HashRouter, Route, Link} from 'react-router-dom'
@@ -1237,9 +1246,31 @@ history
 
 `<Route path="/movie/:type/:id" component={Movie} exact></Route>`
 
-获取参数，可以把路由参数保存到state中去
+获取参数，可以把路由参数保存到state中去，但是参数改变不会让组件销毁重新渲染，需要在componentDidUpdate中更新，由于state，props更新都会update，会导致重复更新，直接使用props更新不会有这个问题
 
 `{this.props.match.params.type}`
+
+```js
+componentDidUpdate(old_props, old_state){
+    // 判断是否更新
+    if (old_state.id === this.props.match.params.id) {
+        // 一般是获取数据，更新数据
+        this.setState({
+            // 设置状态也会导致update
+            // props.location.params也行
+            id: this.props.match.params.id
+        })
+    }
+}
+```
+
+不提供query的传参可以自己解析，一般不会用，会导致页面刷新
+
+### 嵌套路由
+
+在组件中继续添加路由path需要包含父级路由，直接写不好维护，可以使用this.props.match.path
+
+在父级设置默认路由：直接修改path
 
 ### 编程式导航
 
@@ -1380,6 +1411,10 @@ export default createStorer(reducers)
 // 分模块，分成单独的文件
 
 ```
+
+基本思想：单向数据流
+
+state-》（component）props-》action-》state
 
 ## React-Server
 
