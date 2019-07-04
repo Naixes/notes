@@ -402,7 +402,7 @@ const ul = {
 
 - **element diff:**在进行组件对比的时候，如果两个组件类型相同，则需要进行 元素级别的对比，这叫做 Element Diff；
 
-  ![Diff算法图](F:/01_video/%E5%89%8D%E7%AB%AF/16.react4.js%EF%BC%88%E5%85%B155%E9%9B%86%EF%BC%89/reactjs%E7%B2%BE%E5%93%81%E6%95%99%E7%A8%8B%E8%B5%84%E6%96%99/day1%E8%B5%84%E6%96%99/%E7%AC%94%E8%AE%B0/images/Diff.png)
+  ![Diff算法图](./media/Diff.png)
 
 ## 初识React
 
@@ -443,8 +443,6 @@ ReactDOM.render(
 </html>
 ```
 
-### 组件
-
 ## 创建基本的webpack4.x项目
 
 1. 运行`npm init -y` 快速初始化项目
@@ -464,27 +462,19 @@ ReactDOM.render(
 
 ## 使用react
 
-需要用到。。。
+需要用到
+
+```html
+<script src="browser.js" charset="utf-8"></script>
+<script src="react.development.js" charset="utf-8"></script>
+<script src="react-dom.development.js" charset="utf-8"></script>
+```
 
 react：核心
 
 react-dom：渲染
 
 jsx：创建元素方便，语法糖，会编译成js
-
-组件
-
-参数-props：只读
-
-状态-state：constructor中初始化，要用setState({})修改更新后会重新渲染
-
-传参：利用refs，props
-
-生命周期：
-
-脚手架：create-react-app  需要yarn或者用npm重新下
-
-npm i -g xxx
 
 ## 在项目中使用 react
 
@@ -526,6 +516,13 @@ npm i -g xxx
    ReactDOM.render(myh1, document.getElementById('app'))
    ```
 
+### 脚手架-create-react-app
+
+需要yarn或者用npm重新下
+
+`npm i -g create-react-app`
+
+`create-react-add xxx`
 
 ## JSX语法
 
@@ -629,16 +626,15 @@ ReactDOM.render({arr.map(item => <h3>{item}</h3>)}, document.getElementById('app
 - 为组件传递数据：
 
   ```jsx
-  // 使用组件并 为组件传递 props 数据
+  // 使用组件并为组件传递 props 数据
   <Hello name={dog.name} age={dog.age} gender={dog.gender}></Hello>
   <Hello {...dog}></Hello>
   
-  // 在构造函数中，使用 props 形参，接收外界 传递过来的数据
+  // 在构造函数中，使用 props 形参，接收外界传递过来的数据
   function Hello(props) {
     // props.name = 'zs'
     console.log(props)
     // 结论：不论是 Vue 还是 React，组件中的 props 永远都是只读的；不能被重新赋值；
-  
     return <div>这是 Hello 组件 --- {props.name} --- {props.age} --- {props.gender}</div>
   }
   ```
@@ -667,10 +663,6 @@ ReactDOM.render({arr.map(item => <h3>{item}</h3>)}, document.getElementById('app
 6. 在导入组件的时候，配置和使用`@`路径符号
 
 ### class创建组件
-
-> 使用 class 关键字来创建组件
->
-> ES6 中 class 关键字，是实现面向对象编程的新形式；
 
 #### ES6中 class 关键字的使用
 
@@ -725,6 +717,12 @@ class Chinese extends Person{
    ```jsx
    // 如果要使用 class 定义组件，必须 让自己的组件，继承自 React.Component
    class 组件名称 extends React.Component {
+       constructor(...args){
+           super(...args)
+           // 状态：constructor中初始化，要用setState({})修改更新后会重新渲染
+           this.state = {
+           }
+       }
        // 在组件内部，必须有 render 函数,作用：渲染当前组件对应的 虚拟DOM结构
        render(){
            // render 函数中，必须 返回合法的 JSX 虚拟DOM结构
@@ -736,36 +734,25 @@ class Chinese extends Person{
 
 传递的参数不用接收，直接使用this.props访问，只读
 
-## 两种创建组件方式的对比
+### 两种创建组件方式的对比
 
-> 注意：使用 class 关键字创建的组件，有自己的私有数据（this.state） 和 生命周期函数；
+> 注意：使用 class 关键字创建的组件，有自己的私有数据（this.state） 和生命周期函数；
 >
-> 注意：使用 function 创建的组件，只有props，没有自己的私有数据和 生命周期函数；
+> 注意：使用 function 创建的组件，只有props，没有自己的私有数据和生命周期函数；
 
-1. 用**构造函数**创建出来的组件：叫做“无状态组件”【无状态组件今后用的不多】
-2. 用**class关键字**创建出来的组件：叫做“有状态组件”【今后用的最多】
-3. 什么情况下使用有状态组件？什么情况下使用无状态组件？
-   - 如果一个组件需要有自己的私有数据，则推荐使用：class创建的有状态组件；
-   - 如果一个组件不需要有私有的数据，则推荐使用：无状态组件；
-   - React官方说：无状态组件，由于没有自己的state和生命周期函数，所以运行效率会比 有状态组件稍微高一些；
+1. 用**构造函数**创建出来的组件：叫做“无状态组件”【不需要有自己的私有数据时使用】
+2. 用**class关键字**创建出来的组件：叫做“有状态组件”【需要有自己的私有数据时使用】
+3. React官方说：无状态组件，由于没有自己的state和生命周期函数，所以运行效率会比有状态组件稍微高一些；
 
-> 有状态组件和无状态组件之间的**本质区别**就是：有无state属性、和 有无生命周期函数；
+### 渲染评论列表
 
-1. 组件中的 `props` 和 `state/data` 之间的区别
-   - props 中的数据都是外界传递过来的；
-   - state/data 中的数据，都是组件私有的；（通过 Ajax 获取回来的数据，一般都是私有数据）；
-   - props  中的数据都是只读的；不能重新赋值；
-   - state/data 中的数据，都是可读可写的；
-
-## 渲染评论列表
-
-![效果](F:/01_video/%E5%89%8D%E7%AB%AF/16.react4.js%EF%BC%88%E5%85%B155%E9%9B%86%EF%BC%89/reactjs%E7%B2%BE%E5%93%81%E6%95%99%E7%A8%8B%E8%B5%84%E6%96%99/%E7%AC%AC%E4%BA%8C%E5%A4%A9%E8%B5%84%E6%96%99/%E7%AC%94%E8%AE%B0/images/cmtlist.png)
+![效果](./media/cmtlist.png)
 
 有两个组件，一个父组件一个子组件
 
-### 通过for循环生成多个组件
+#### 通过for循环生成多个组件
 
-```js
+```jsx
 import React from 'react'
 import ReactDOM from 'react-dom'
 
@@ -788,15 +775,126 @@ class Comments extends React.Component {
         ]
     }
     render() {
-        return <div>
-            <h1>评论列表</h1>
-            {this.state.CommentList.map(item => <CommentsItem {...item} key={item.id}></CommentsItem>}
-        </div>
+        return (
+            <div>
+            	<h1>评论列表</h1>
+            	{this.state.CommentList.map(item => <CommentsItem {...item} key={item.id}>				 </CommentsItem>}
+        	</div>
+		)
     }
 }
 ```
 
 抽离组件
+
+### 组件通信
+
+props
+
+```jsx
+let root = document.getElementById("div")
+// 父组件向子组件传值，子组件可修改
+class Comp extends React.Component{
+    constructor(...args){
+        super(...args)
+        this.state = {
+            a: 0
+        }
+    }
+    add(n){
+        this.setState({
+            a: this.state.a + n
+        })
+    }
+    render() {
+        return (
+            <div>
+                {this.state.a}
+                <Sub par={this}/>
+            </div>
+        )
+    }
+}
+class Sub extends React.Component {
+    constructor(...args){
+        super(...args)
+        this.state = {
+        }
+    }
+    fn(){
+        this.props.par.add(1)
+    }
+    render() {
+        return (
+            <div>
+                <input type="button" value="+1" onClick={this.fn.bind(this)} />
+            </div>
+        )
+    }
+}
+ReactDOM.render(
+    <div className="box">
+        <div>
+            <Comp a={2}/>
+        </div>
+    </div>,
+    root
+)
+```
+
+ref
+
+```jsx
+let root = document.getElementById("div")
+// 子组件向父组件传值，父组件可修改
+
+class Comp extends React.Component{
+    constructor(...args){
+        super(...args)
+        this.state = {
+        }
+    }
+    fn(){
+        this.refs['sub'].add(1);
+    }
+    render() {
+        return (
+            <div>
+                <input type="button" value="+1" onClick={this.fn.bind(this)} />
+                <Sub ref='sub'/>
+            </div>
+        )
+    }
+}
+class Sub extends React.Component{
+    constructor(...args){
+        super(...args)
+        this.state = {
+            a: 2
+        }
+    }
+    add(n){
+        this.setState({
+            a: this.state.a + n
+        })
+    }
+    render() {
+        return (
+            <div>
+                {this.state.a}
+            </div>
+        )
+    }
+}
+ReactDOM.render(
+    <div className="box">
+        <div>
+            <Comp a={2}/>
+        </div>
+    </div>,
+    root
+)
+```
 
 ## 设置样式
 
@@ -1031,11 +1129,12 @@ this.setState({
   - **组件销毁阶段**：只执行一次；
 
   > componentWillUnmount: 组件将要被卸载，此时组件还可以正常使用；
+  >
 
-[vue中的生命周期图](https://cn.vuejs.org/v2/guide/instance.html#生命周期图示)
 [React Native 中组件的生命周期](http://www.race604.com/react-native-component-lifecycle/)
 
-![React中组件的生命周期](E:/%E4%B8%B4%E6%97%B6/26%20React/%E7%AC%94%E8%AE%B0+%E6%BA%90%E4%BB%A3%E7%A0%81/%E7%AC%94%E8%AE%B0+%E6%BA%90%E4%BB%A3%E7%A0%81/React%E8%B5%84%E6%96%99/%E6%B7%B7%E5%90%88app%E8%B5%84%E6%96%99/code/day04/%E7%AC%94%E8%AE%B0/images/React%E4%B8%AD%E7%BB%84%E4%BB%B6%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.png)
+
+![React中组件的生命周期](./images/LifeCycle.png)
 
 ### defaultProps
 
@@ -1174,12 +1273,97 @@ handleMsg3(arg1, arg2) {
 
 使用：`this.context.color`
 
-## 相关文章
+### 相关文章
 
 [类型校验](https://facebook.github.io/react/docs/typechecking-with-proptypes.html)
 [Animation Add-Ons](https://reactjs.org/docs/animation.html#high-level-api-reactcsstransitiongroup)
 
-## react中的路由
+## Redux
+
+provider：包在最外面
+
+connect：状态映射，合并冲突
+
+reducer：状态对象
+
+状态更新：action
+
+npm i redux react-redux -D
+
+```js
+import {createStore} from 'redux'
+import {Provider} from 'react-redux'
+
+// 初始化和每次更新状态对象都会执行
+function reducer1(state, action) {
+    if(!state) {
+        // 初始化
+    }
+    return state
+}
+// 简写
+// 传入旧状态返回新状态
+function reducer1(state={xxx}, action) {
+    return state
+}
+// 创建存储对象
+const store = createStore(reducer1)
+// 用<Provider>包装根组件传入store对象store = {store}
+// 使用
+import {connect} from 'react-redux'
+// export default App
+// state来自reducer，props来自组件
+// 只能接收不能修改，单向数据流，组件内也不能赋值
+export default connect(function(state, props){
+    // 混合，解决冲突
+    // 使用state，组件props中会包含state的内容
+    return state
+    return {
+        ...state,
+        // 会重复的属性使用props
+		name: props.name
+        // 都进行保留
+        name: [state.name, props.name]
+    }
+}, {
+	// 当做组件的一部分，用props访问使用
+    // 参数自定义
+    setName(name) {
+    	// 必须return，返回值为action，在reducer中
+        return {
+			type: 'set_name',
+            name
+        }
+	}
+})(App)
+// reducer
+function reducer1(state={xxx}, action) {
+    if(action.type === 'set_name') {
+        return {
+            ...state,
+            name: action.name
+        }
+    }
+    // 要返回一个新的state
+    return state
+}
+// 优化
+// 单独的actions.js，找不到时会报错
+export const SET_NAME = 'set_name'
+// 单独的store.js
+// 多个reducer
+import {combineReducers} from 'redux'
+let reducers = combineReducers({
+    user: reducer1,
+    comp: reducer2
+})
+export default createStorer(reducers)
+// 修改相应的映射，修改时会触发所有的reducer
+// 分模块，分成单独的文件
+
+```
+
+## 路由
 
 react-router-dom
 
@@ -1327,6 +1511,7 @@ import 'antd/dist/antd.css';
 
 分页
 
+<<<<<<< HEAD
 ## Redux
 
 provider：包在最外面
@@ -1416,6 +1601,8 @@ export default createStorer(reducers)
 
 state-》（component）props-》action-》state
 
+=======
+>>>>>>> a8502d06a257e3f1120bae6c2dbe692ade794034
 ## React-Server
 
 # 豆瓣电影案例
