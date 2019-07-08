@@ -2,15 +2,14 @@
 
 ## 什么是移动App开发
 
-1. 苹果上的软件是如何开发出来的：使用IOS平台的开发工具和开发语言进行设计开发的！苹果上的开发语言：OC、Swift
-2. 安卓平台上的软件又是如何开发出来的：使用Java，结合一些Android控件，就可以开发安卓上的手机软件；
-3. 苹果和安卓平台上共有的软件是如何开发出来的：招聘两部分的开发人员，分别是苹果开发人员和安卓开发人员；
-4. 现在，我们可以使用混合App开发的方式，来同时进行两个平台上软件的开发；
-5. 也就是说，抛开OC、Swift、Java、Android；可以直接使用前端技术（HTML + CSS + JS）来进行移动端App开发；这种开发方式叫做混合App开发！
+1. 苹果上的软件使用IOS平台的开发工具和开发语言进行设计开发的！苹果上的开发语言：OC、Swift
+2. 安卓平台上的软件使用Java，结合一些Android控件，就可以开发安卓上的手机软件；
+3. 现在，我们可以使用混合App开发的方式，来同时进行两个平台上软件的开发；
+4. 也就是说，抛开OC、Swift、Java、Android；可以直接使用前端技术（HTML + CSS + JS）来进行移动端App开发；这种开发方式叫做混合App开发！
 
 > 什么是移动App开发：通俗的理解，就是把开发Web网站的技术，通过某种方式，移植到移动App开发上进行使用，这种利用Web开发技术进行移动端开发体验的方式，叫做混合App开发！
 
-### 关于移动App开发，需要知道的几个概念：
+### 关于移动App开发
 
 - 原生开发（NativeApp）：是使用手机平台官方推荐的开发语言和框架，进行开发的方式，叫做原生开发！
 
@@ -40,18 +39,10 @@
 
 ## 混合App开发的优点
 
-### 从程序员的角度：
-
-1. 挣钱多【知识多且杂】
-2. 对于找工作来说：市场需求量大，好找工作，提高我们的行业竞争力
-3. 能接触到前端流行的技术和框架   ES6    React
-
-### 从企业的角度分析:
-
 - 节省开发成本
 
-- 从工资上
-- 从时间上:使用前端技术开发App的话，速度很快，因为前端技术够简单（HTML+CSS+JS），但是原生的 安卓和 IOS 语言就很难学，其次，一些复杂的概念比较难懂，
+  - 从工资上
+  - 从时间上:使用前端技术开发App的话，速度很快，因为前端技术够简单（HTML+CSS+JS），但是原生的 安卓和 IOS 语言就很难学，其次，一些复杂的概念比较难懂，
 
 1. 市面上常见的App开发方式
 
@@ -1722,8 +1713,28 @@ fetchJSONP('')
 # ReactNative
 
 1. ReactNative是基于React这门框架的语法来进行开发的；
-2. RN中，提供了 移动端 专用的一些组件，这时候，我们在网页中使用的一些 元素，div, p, img 都不能用了，只能使用RN固有的组件；
-3. 最终，开发出来的项目，是要运行到手机上的，那么，如何把一个 RN 的项目，完整的发布到手机上去运行呢，这里，需要结合 安卓的 签名打包步骤，并使用 RN 提供的打包命令，进行完整 apk 文件的发布；最终发布出来的就是 Release 版本的项目，可以上传到应用商店；
+2. 因为RN不是网页，我们在网页中使用html，css都不能用，RN中提供了移动端 专用的一些组件，只能使用RN固有的组件；
+3. 最终，开发出来的项目，是要运行到手机上的，那么，把一个 RN 的项目，完整的发布到手机上需要结合 安卓的签名打包步骤，并使用 RN 提供的打包命令，进行完整 apk 文件的发布；最终发布出来的就是 Release 版本的项目，可以上传到应用商店；
+
+## 安装
+
+Android Studio
+
+yarn---npm i -g yarn
+
+jdk 1.8
+
+
+
+安卓环境：developer.android.com/studio
+
+
+
+react-native-cli：npm i -g react-native-cli
+
+react-native init xxx 
+
+react-native run-android
 
 ## 配置ReactNative基本开发环境
 
@@ -1764,13 +1775,37 @@ fetchJSONP('')
 ## 基本组件的使用介绍
 
 - View：
-- Text：
+- Text：文字必须放在这里，rr更新
 - TextInput：
 - Image：
 - Button：
 - ActivityIndicator：
 - ScrollView：这是一个列表滚动的组件
 - ListView：也是一个列表滚动的组件，但是，这个组件已经过时了，官方推荐使用 FlatList 来代替它
+
+都是block
+
+可以写一些基本样式:color bacgrondColor textAlign lineHeight 
+
+单位：绝对值/百分比
+
+换算：
+
+```js
+import {Dimensions} from 'react-native'
+
+const BASE_width = 750
+export function calc(size) {
+    let {width} = Dimensions.get('window')
+    return size*width/BASE_WIDTH
+}
+```
+
+flex布局
+
+父级：flexDirection: 'row', justifyContent:'flex-start'
+
+子级：flex:1
 
 ## 判断组件是否被卸载
 
