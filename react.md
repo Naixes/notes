@@ -1533,7 +1533,6 @@ import 'antd/dist/antd.css';
 
 分页
 
-<<<<<<< HEAD
 ## Redux
 
 provider：包在最外面
