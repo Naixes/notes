@@ -1332,7 +1332,7 @@ export default connect(function(state, props){
     	// 必须return，返回值为action，在reducer中
         return {
 			type: 'set_name',
-            name
+             name
         }
 	}
 })(App)
@@ -1347,6 +1347,12 @@ function reducer1(state={xxx}, action) {
     // 要返回一个新的state
     return state
 }
+
+```
+
+优化
+
+```js
 // 优化
 // 单独的actions.js，找不到时会报错
 export const SET_NAME = 'set_name'
@@ -1360,7 +1366,6 @@ let reducers = combineReducers({
 export default createStorer(reducers)
 // 修改相应的映射，修改时会触发所有的reducer
 // 分模块，分成单独的文件
-
 ```
 
 ## 路由
@@ -1455,6 +1460,23 @@ componentDidUpdate(old_props, old_state){
 在组件中继续添加路由path需要包含父级路由，直接写不好维护，可以使用this.props.match.path
 
 在父级设置默认路由：直接修改path
+
+```jsx
+render() {
+    const path = this.props.match.path
+
+    return (
+        <div>
+            {/* 嵌套路由 */}
+            <Link to={`${path}/inter`}>国际</Link>
+            <Link to={`${path}/society`}>社会</Link>
+
+            <Route path={`${path}/inter`} componet={inter}></Route>
+            <Route path={`${path}/society`} componet={society}></Route>
+        </div>
+	)
+}
+```
 
 ### 编程式导航
 
@@ -1601,8 +1623,6 @@ export default createStorer(reducers)
 
 state-》（component）props-》action-》state
 
-=======
->>>>>>> a8502d06a257e3f1120bae6c2dbe692ade794034
 ## React-Server
 
 # 豆瓣电影案例
