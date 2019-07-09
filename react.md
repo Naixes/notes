@@ -1726,10 +1726,6 @@ jdk 1.8
 
 
 
-安卓环境：developer.android.com/studio
-
-
-
 react-native-cli：npm i -g react-native-cli
 
 react-native init xxx 
@@ -1768,9 +1764,7 @@ react-native run-android
 
 ## 项目结构介绍以及一些注意事项
 
-## 使用样式
-
-## 修改项目首屏页面
+## 样式
 
 ## 基本组件的使用介绍
 
@@ -1785,9 +1779,9 @@ react-native run-android
 
 都是block
 
-可以写一些基本样式:color bacgrondColor textAlign lineHeight 
+可以写一些基本样式：`color bacgrondColor textAlign lineHeight等`，没有继承
 
-单位：绝对值/百分比
+### 单位：绝对值/百分比
 
 换算：
 
@@ -1801,11 +1795,17 @@ export function calc(size) {
 }
 ```
 
-flex布局
+### flex布局
 
-父级：flexDirection: 'row', justifyContent:'flex-start'
-
-子级：flex:1
+```jsx
+<Text>flex布局也是可以用的</Text>
+{/* rr可以重新渲染 */}
+<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+    <Text style={{flex:1, color: '#333'}}>欢迎~</Text>
+    <Text style={{flex:1}}>来到</Text>
+    <Text style={{flex:1}}>RN</Text>
+</View>
+```
 
 ## 判断组件是否被卸载
 
@@ -1843,7 +1843,7 @@ if (this._reactInternalInstance){
 4. 其中，在Swiper身上，`showsPagination={false}`是用来控制页码的；`showsButtons={false}`是用来控制左右箭头显示与隐藏；`height={160}`是用来控制轮播图区域的高度的！
 5. 设置轮播图的样式：
 
-```
+```css
 var styles = StyleSheet.create({
     wrapper: {},
     slide1: {
@@ -1873,7 +1873,7 @@ var styles = StyleSheet.create({
 
 1. 将组件的代码结构引入到页面上：
 
-```
+```jsx
 <Swiper style={styles.wrapper} showsButtons={true} height={160} autoplay={true}>
                 <View style={styles.slide1}>
                     <Image source={{uri:'http://www.itcast.cn/images/slidead/BEIJING/2017410109413000.jpg'}} style={styles.image}></Image>
