@@ -1718,11 +1718,13 @@ fetchJSONP('')
 
 ## 安装
 
-Android Studio
+Android Studio：作用：安装SDK，自带模拟器
 
 yarn---npm i -g yarn
 
 jdk 1.8
+
+genymotion：安卓模拟器，注意设置SDK路径
 
 
 
@@ -1731,6 +1733,16 @@ react-native-cli：npm i -g react-native-cli
 react-native init xxx 
 
 react-native run-android
+
+### 遇到的问题
+
+**adb server version（39）doesn't match this client（40）；killing……**
+
+使用genymotion时遇到
+
+原因：**启动Genymotion Android模拟器时遇到版本不一致问题**
+
+解决方法：**设置SDK路径**
 
 ## 配置ReactNative基本开发环境
 
