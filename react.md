@@ -1833,6 +1833,131 @@ if (this._reactInternalInstance){
 
 > 注意：使用图标，需要使用 `Android SDK Manager` 安装 `Android SDK Build-tools 26.0.1` 并接收其 license;
 
+## 组件
+
+### 对话框组件
+
+Modal，Lightbox
+
+```jsx
+import {Lightbox} from 'react-native-router-flux'
+
+export default class App extends Component {
+  render() {
+    return (
+      <Router>
+            // 会将第一个子元素作为页面，其他为弹框
+            <Lightbox>
+                <Scene key="root">
+                  <Scene key="pageOne" component={PageOne} title="PageOne" initial={true} />
+                  <Scene key="pageTwo" component={PageTwo} title="PageTwo" />
+                </Scene>
+                <Scene key="modal" component={Modal} title="Modal" />
+            </Lightbox>
+      </Router>
+    )
+  }
+}
+```
+
+### 选择器
+
+```jsx
+import {Picker} from 'react-native'
+
+export default class App extends Component {
+    constructor(...args) {
+        super(...args)
+        this.state = {
+            income: 0
+        }
+    }
+    render() {
+        return (
+            <View>
+                <Picker selectedValue={this.state.income} onValueChange={(value, index) => {this.setState({income: value})}}>
+                    <Picker.Item label="支出" value={0}></Picker.Item>
+                    <Picker.Item label="收入" value={1}></Picker.Item>
+                </Picker>
+            </View>
+        )
+    }
+}
+
+```
+
+### 文字输入
+
+```jsx
+import {TextInput} from 'react-native'
+
+export default class App extends Component {
+    constructor(...args) {
+        super(...args)
+        this.state = {
+            title: '',
+            amount: 0
+        }
+    }
+    render() {
+        return (
+            <View>
+                <TextInput onChangeText={(text) => {this.setState({title: text})}} placehoder='请输入'>
+                </TextInput>
+                <TextInput onChangeText={(text) => {this.setState({amount: text})}} placehoder='请输入金额' keyboardType='number-pad'>
+                </TextInput>
+            </View>
+        )
+    }
+}
+```
+
+### 按钮
+
+```jsx
+import {Button} from 'react-native'
+
+export default class App extends Component {
+    constructor(...args) {
+        super(...args)
+        this.state = {
+            title: '',
+            amount: 0
+        }
+    }
+    render() {
+        return (
+            <View>
+                <Button title='提交' color='#ccc' onPress={() => { }}></Button>
+            </View>
+        )
+    }
+}
+```
+
+### 提示
+
+```jsx
+import {Alert} from 'react-native'
+
+export default class App extends Component {
+    constructor(...args) {
+        super(...args)
+        this.state = {
+            title: '',
+            amount: 0
+        }
+    }
+    render() {
+        return (
+            <View>
+                <Button title='提交' color='#ccc' onPress={() => {Alert.alert('xxx', [{text: '确定'}])}}></Button>
+            </View>
+        )
+    }
+}
+```
+
 ## 案例：豆瓣电影列表
 
 - 电影列表数据：`https://api.douban.com/v2/movie/in_theaters`
@@ -1855,6 +1980,7 @@ import PageTwo from './PageTwo';
 export default class App extends Component {
   render() {
     return (
+      // router中只能有一个子元素
       <Router>
         <Scene key="root">
           <Scene key="pageOne" component={PageOne} title="PageOne" initial={true} />
@@ -1959,7 +2085,7 @@ var styles = StyleSheet.create({
 
 1. 打开项目中的`android`->`app`->`src`->`main`->`java`->`com`->`当前项目名称文件夹`->`MainActivity.java`文件，修改配置如下：
 
-   ```
+   ```js
    package com.native_camera;
    import com.facebook.react.ReactActivity;
    
@@ -1984,7 +2110,7 @@ var styles = StyleSheet.create({
 
 2. 在项目中添加如下代码：
 
-   ```
+   ```js
    // 第1步：
    import {View, Button, Image} from 'react-native'
    import ImagePicker from 'react-native-image-picker'
