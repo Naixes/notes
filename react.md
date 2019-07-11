@@ -1368,8 +1368,6 @@ import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
 ...
 ```
 
-
-
 ```jsx
 import React from 'react'
 // BrowserRouter，以path为键，会刷新页面
@@ -1468,6 +1466,26 @@ render() {
 	)
 }
 ```
+
+### 应用
+
+通过路由跳转的方式显示模态框，防止刷新关闭，如果还想保存数据，可以写到localstorage里。
+
+问题：跳转时也会请求数据，解决：将数据放到redux中
+
+利用ref获取表单数据
+
+问题：提交数据时如果使用原来的：window.location='xxx'，会导致页面刷新重新访问接口，解决：使用Link，但是处理失败有问题（不能阻止跳转）；使用编程式导航
+
+删除：封装提示框
+
+### 高阶组件
+
+动态组件：返回一个方法可以传参，方法返回组件，在父组件中要先创建组件，通过传参创建动态组件
+
+本质是利用工厂模式
+
+应用：转换数据源 
 
 ### 编程式导航
 
