@@ -1845,6 +1845,37 @@ if (this._reactInternalInstance){
 3. 路由相关配置：`https://github.com/aksonov/react-native-router-flux/blob/master/docs/API.md`
 4. 路由简单的DEMO：`https://github.com/aksonov/react-native-router-flux/blob/v3/docs/MINI_TUTORIAL.md`
 
+```jsx
+import React, { Component } from 'react';
+import { Router, Scene } from 'react-native-router-flux';
+
+import PageOne from './PageOne';
+import PageTwo from './PageTwo';
+
+export default class App extends Component {
+  render() {
+    return (
+      <Router>
+        <Scene key="root">
+          <Scene key="pageOne" component={PageOne} title="PageOne" initial={true} />
+          <Scene key="pageTwo" component={PageTwo} title="PageTwo" />
+        </Scene>
+      </Router>
+    )
+  }
+}
+```
+
+each route (or page) is called a `<Scene>`. Conventionally, your Scenes should be wrapped inside a **root Scene** before being finally wrapped inside a `<Router>` component that is returned in the `render()` function.
+
+At the very minimum, each `<Scene>` component should have the following props:
+
+- **key**: A unique string that can be used to refer to the particular scene.
+- **component**: The component to be rendered for that `Scene` or page.
+- **title**: The string to be displayed in the nav bar at the top of the screen.
+
+Note that the first scene we wish to load has the prop `initial={true}` to indicate that it's the scene that should be initially rendered.
+
 ## 路由的一些基本使用方法
 
 ## 配置首页的轮播图
