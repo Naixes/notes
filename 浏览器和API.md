@@ -641,11 +641,9 @@ Cache-control: max-age=30
 
 回退：减小系统不正常造成的影响
 
+## 通用优化
 
-
-通用优化
-
-开发阶段：
+### 开发阶段：
 
 文件/请求数量 ---》   合并打包webpack/合并请求
 文件体积   ---》   压缩，比如接口的url
@@ -661,7 +659,8 @@ Cache-control: max-age=30
 埋点，前端，服务器获取不到的信息
 统计
 
-部署阶段：本质是省钱
+### 部署阶段：本质是省钱
+
 // 服务器负载，uptime命令
 
 CDN   ---》   变动不大，体积较大的数据，优点：安全，节约带宽
@@ -669,9 +668,33 @@ P2P ---》   对等网络，客户端也可以当作服务器，比如百度网�
 静态化，缓存
 异构计算   ---》   
 
-找出性能瓶颈：内存？cpu？数据库？
+### **找出性能瓶颈**
 
-数据库优化
+找出瓶颈，内存？cpu？数据库？
+
+**工具：**阿里云pts，百度apm，webpagetest.org，tools.pingdom.com，gtmetrix.com，network，yslow
+
+**network：**
+
+waterflow（瀑布流）：Stalled：开始连接，和服务器负载有关；Request sent：发送请求的时间；waiting：等待响应，和服务器负载有关；content download：下载数据时间
+
+**数据库：**
+
+**测试工具：**数据库管理工具中的性能监测工具，high cost SQL statements 监测sql执行的时间
+
+NoSQL：redis，内存型分布式
+
+浏览器---》服务器---》redis---》数据库---》服务器---》redis---》浏览器
+
+解决问题
+
+
+
+
+
+
+
+
 
 
 
