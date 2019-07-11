@@ -3563,3 +3563,54 @@ Vue.use(VueResource);
 ## 使用ngrok将本机映射为一个外网的Web服务器
 
 注意：由于默认使用的美国的服务器进行中间转接，所以访问速度炒鸡慢，访问时可启用FQ软件，提高网页打开速度！
+
+# Weex
+
+`npm i -g weex-toolkit`
+
+`weex create xxx`
+
+下载`weex playground`或者 `weex platform add android`
+
+android.config.js：SplashText：欢迎文字
+
+运行：npm start server（配合playground）或者`weex run android`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
