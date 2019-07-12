@@ -1493,7 +1493,7 @@ render() {
 
 ### switch组件
 
-```js
+```jsx
 import {HashRouter, Route, Link, Switch} from 'react=router-dom'
 
 // 表示已经匹配到一个路由的情况下不再继续匹配
@@ -1855,7 +1855,7 @@ if (this._reactInternalInstance){
 
 ### 对话框组件
 
-Modal，Lightbox
+Modal，Lightbox（路由的一部分）：通过Actions.push('xx', {})显示
 
 ```jsx
 import {Lightbox} from 'react-native-router-flux'
