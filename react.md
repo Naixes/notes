@@ -1477,7 +1477,9 @@ render() {
 
 问题：提交数据时如果使用原来的：window.location='xxx'，会导致页面刷新重新访问接口，解决：使用Link，但是处理失败有问题（不能阻止跳转）；使用编程式导航
 
-删除：封装提示框
+删除：封装提示框，不用使用路由跳转，使用状态
+
+封装数据通信
 
 ### 高阶组件
 
@@ -1493,7 +1495,7 @@ render() {
 
 ### switch组件
 
-```js
+```jsx
 import {HashRouter, Route, Link, Switch} from 'react=router-dom'
 
 // 表示已经匹配到一个路由的情况下不再继续匹配
