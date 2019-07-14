@@ -1857,7 +1857,7 @@ if (this._reactInternalInstance){
 
 ### 对话框组件
 
-Modal，Lightbox
+Modal，Lightbox（路由的一部分）：通过Actions.push('xx', {})显示
 
 ```jsx
 import {Lightbox} from 'react-native-router-flux'
