@@ -1370,11 +1370,12 @@ import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
 
 ```jsx
 import React from 'react'
-// BrowserRouter，以path为键，会刷新页面
+// BrowserRouter，以path为键，需要服务器支持，刷新会请求服务器
 // HashRouter，以哈希值为键，路由根容器，所有与路由相关的东西都包裹在它里面，一个网站只需要一个
-// MemoryRouter，路由信息保存在内存中，刷新后状态不会保留
+// MemoryRouter，路由信息保存在内存中，刷新后状态不会保留，应用：RN
 // Route，表示路由规则，重要的属性path， component
 // Link，路由链接，有to属性
+// redirect 和link类似也是一个标签，会自动跳转，可以用三目控制
 import {HashRouter, Route, Link} from 'react-router-dom'
 
 export default class app extends React.Component{
@@ -1489,7 +1490,9 @@ render() {
 
 应用：转换数据源 
 
-### 编程式导航
+### 编程式导航 
+
+需要用到withRouter：`import {withRouter} from 'reacte-router-dom' ... export default withRouter(Component)`
 
 `this.props.hisory.push('')`
 
