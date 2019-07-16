@@ -82,8 +82,8 @@ var vm = new Vue({
 - [生命周期钩子](https://cn.vuejs.org/v2/api/#选项-生命周期钩子)：就是生命周期事件的别名而已；
 - **创建期间**的生命周期函数：
 
-  - `beforeCreate`：实例刚在内存中被创建出来，只初始化了**默认事件和生命周期函数**。此时，还没有初始化好 data 和 methods 属性
-  - `created`：实例已经在内存中创建OK，此时 **data 和 methods** 已经创建OK，此时还没有开始 编译模板。可以在这里**请求数据**
+  - `beforeCreate`：实例刚在内存中被创建出来，只初始化了**默认事件和生命周期函数**。还没有初始化好 data 和 methods 属性
+  - `created`：实例已经在内存中创建OK，此时 **data 和 methods** 已经创建，此时还没有开始 编译模板。可以在这里**请求数据**
   经验：如果请求得到的数据需要传递给其他组件并且需要操作后使用时可以在组件的路由守卫beforeRouteEnter中获取，利用next()保证在数据操作之前完成数据的获取
   - `beforeMount`：此时已经完成了模板的编译，开始创建` VDOM`，但是还没有挂载到页面中
   - `mounted`：此时，将 `VDOM` 渲染为真实 DOM 并且渲染数据。组件中如果有子组件的话，会递归挂载子组件，只有当所有子组件全部挂载完毕，才会执行根组件的挂载钩子。 **可以操作组件元素**。
@@ -391,7 +391,7 @@ Vue 2x中：
     directives: {
       color: { // 为元素设置指定的字体颜色
         bind(el, binding) {
-        el.style.color = binding.value;
+        	el.style.color = binding.value;
         }
       },
       'font-weight': function (el, binding2) { // 自定义指令的简写形式，等同于定义了 bind 和 update 两个钩子函数
@@ -673,7 +673,7 @@ postInfo() {
 }
 ```
 
-#### `Axios.create()`
+#### Axios.create()
 
 返回一个`axios`实例，后面可以直接使用
 
@@ -687,8 +687,6 @@ axios.Axios.create({
     ]
 })
 ```
-
-
 
 #### all()方法
 
@@ -723,8 +721,6 @@ axios.interceptor.response.use(function(response) {
 ### [vue-resource](https://github.com/pagekit/vue-resource)
 
 #### http请求
-
-除了 vue-resource 之外，还可以使用 `axios` 的第三方包实现实现数据的请求
 
 JSONP的实现原理
 
@@ -1373,6 +1369,10 @@ if(vm.$el.querySelector('li').innerHTML == '') {
 
 应用：测试
 
+### 递归组件
+
+可用来实现树状结构
+
 ### 组件通信
 
 #### 父子通信
@@ -1473,6 +1473,54 @@ if(vm.$el.querySelector('li').innerHTML == '') {
 
 使用语法糖 `v-model` 来直接实现，因为 `v-model` 默认会解析成名为 `value` 的 `prop` 和名为 `input` 的事件。这种语法糖的方式是典型的双向绑定，常用于 UI 控件上，但是究其根本，还是通过事件的方法让父组件修改数据。
 
+**children组件**
+
+```html
+<template lang="pug">
+  .demo
+    .demo-example(@click="changePropsValue") {{value}}
+</template>
+
+<script>
+export default {
+  props: ['value'],
+  methods: {
+    changePropsValue () {
+      this.$emit('input', '通过$emit触发input事件了')
+    }
+  }
+}
+</script>
+```
+
+这里的value前面说过了就是v-model传过来的value (  v-bind:value="something")，但是只能用value去接收
+这里主要巧用了一点，平时我们改变input输入框的时候，input事件是自己主动触发的，但是，我们也同时可以给他手动触发，我们用$emit进行了手动触发(input)事件
+
+**parent组件**
+
+```html
+<template lang="pug">
+  div
+    demo(v-model ='msg')
+</template>
+
+<script>
+import Demo from './demo.vue'
+export default {
+  data () {
+    return {
+      msg: '首次数据传递'
+    }
+  },
+  components: {
+    Demo
+  }
+}
+</script>
+```
+
+这个我们直接用v-model像表单那样绑定就直接可以进行父子组件双向绑定了。在v-model的语法糖里封装了v-on:input 去进行监听事件
+
 ##### $emit 和 $on
 
 ```html
@@ -1486,7 +1534,7 @@ if(vm.$el.querySelector('li').innerHTML == '') {
     <script type="x-template" id="son">
       <div>
         {{num}}
-       </div>
+      </div>
     </script>
 </div>
 
@@ -1521,56 +1569,6 @@ if(vm.$el.querySelector('li').innerHTML == '') {
   </script>
 ```
 
-
-
-**children组件**
-
-```html
-<template lang="pug">
-  .demo
-    .demo-example(@click="changePropsValue") {{value}}
-</template>
-
-<script>
-export default {
-  props: ['value'],
-  methods: {
-    changePropsValue () {
-      this.$emit('input', '通过$emit触发input事件了')
-    }
-  }
-}
-</script>复制代码
-```
-
-这里的value前面说过了就是v-model传过来的value (  v-bind:value="something")，但是只能用value去接收
-这里主要巧用了一点，平时我们改变input输入框的时候，input事件是自己主动触发的，但是，我们也同时可以给他手动触发，我们用$emit进行了手动触发(input)事件
-
-**parent组件**
-
-```html
-<template lang="pug">
-  div
-    demo(v-model ='msg')
-</template>
-
-<script>
-import Demo from './demo.vue'
-export default {
-  data () {
-    return {
-      msg: '首次数据传递'
-    }
-  },
-  components: {
-    Demo
-  }
-}
-</script>复制代码
-```
-
-这个我们直接用v-model像表单那样绑定就直接可以进行父子组件双向绑定了。在v-model的语法糖里封装了v-on:input 去进行监听事件
-
 ##### $parent 或者 $children
 
 当然我们还可以通过访问 `$parent` 或者 `$children` 对象来访问组件实例中的方法和数据。
@@ -1594,7 +1592,7 @@ export default {
     }
   }
 }
-</script>复制代码
+</script>
 ```
 
 子组件，通过点击按钮，显示的改变了父组件的parent.msg里面的数据
@@ -1620,7 +1618,7 @@ export default {
     Demo
   }
 }
-</script>复制代码
+</script>
 ```
 
 ##### $listeners 和 .sync
@@ -1649,7 +1647,7 @@ export default {
     }
   }
 }
-</script>复制代码
+</script>
 ```
 
 1.通过props来进行msg的数据接收
@@ -1675,7 +1673,7 @@ export default {
     Demo
   }
 }
-</script>复制代码
+</script>
 ```
 
 主要看demo(:msg.sync="msg") 这里直接在向子组件传递的时候还是像1.0的时候加一个.sync,本质上还是它会被扩展为一个自动更新父组件属性的 v-on 侦听器
@@ -1905,8 +1903,6 @@ Vue.mixin({
     });
   </script>
 ```
-
-#### 
 
 ## 路由
 
@@ -2297,7 +2293,7 @@ const Foo = {
       <router-view name="a"></router-view>
       <router-view name="b"></router-view>
     </div>
-  </div>
+</div>
 ```
 
 2. JS代码：
@@ -2985,8 +2981,6 @@ if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
 ```
 
 以上代码很简单，就是判断能不能使用相应的 API。
-
-https://segmentfault.com/a/1190000009065987)
 
 ## 在webpack中使用vue
 
