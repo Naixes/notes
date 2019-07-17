@@ -1777,6 +1777,8 @@ server.use(staticRouter.routes())
 
 ### koa-better-body
 
+可以处理二进制数据
+
 ctx.request.fields
 
 ```js
@@ -1900,6 +1902,18 @@ router.get('/a', async ctx => {
 })
 server.use(router.routes())
 ```
+
+### uuid
+
+token用
+
+`npm i uuid`
+
+```js
+const guid = require('uuid/v4')
+```
+
+
 
 ### 服务器渲染
 
