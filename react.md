@@ -1741,11 +1741,11 @@ fetchJSONP('')
 
 ## 安装
 
-Android Studio：作用：安装SDK，自带模拟器
+Android Studio：作用：安装SDK，自带模拟器，环境变量：ANDROID_HOME（SDK路径）
 
 yarn---npm i -g yarn
 
-jdk 1.8
+jdk 1.8：环境变量：JAVA_HOME（安装路径）和Path（bin路径）
 
 genymotion：安卓模拟器，注意设置SDK路径
 
