@@ -2579,7 +2579,7 @@ npm install -g @vue/cli-init
 vue init webpack my-project
 ```
 
-## 应用vue-minipro项目
+## 应用：vue-minipro项目
 
 地址：<https://github.com/Naixes/demo-collection/tree/master/learnVue/vue-minipro>
 
@@ -2614,6 +2614,14 @@ export const SERVER = server
 **配置跨域**
 
 所在地区，同时返回或分级返回
+
+**Token**
+
+session依赖cookie收到跨域限制，token比较通用，多个有联系的项目可以一次登录（单点登录 ）
+
+**封装fetch**
+
+ **多级下拉**
 
 # Vue进阶
 
