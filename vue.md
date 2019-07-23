@@ -3556,7 +3556,128 @@ lunbo: [
 原因：（是chrome为了提高页面的滑动流畅度而新折腾出来的一个东西） http://www.cnblogs.com/pearl07/p/6589114.html
 https://developer.mozilla.org/zh-CN/docs/Web/CSS/touch-action
 
-## 在`.vue`组件中使用`vue-resource`获取数据
+## UI轮子
+
+### UI设计
+
+用户体验
+
+可用性，易用性，美观性
+
+#### 网站开发流程
+
+立项----人员，预算等
+
+**需求**----收集和分析，收集更难；可以使用用例图
+
+可行性分析----资源等
+
+系统设计（功能，框架）----UML图，时序图
+
+**原型设计**（草稿，线框图）----线框图可以用Baisamiq----可用性，易用性
+
+**交互设计**----Axure RP，墨刀，Sketch.app----易用性
+
+**视觉设计**----PS，Fireworks，Sketch.app
+
+**程序开发**
+
+**测试**
+
+功能预演
+
+内测
+
+灰度发布----对部分用户先发布，逐步提高比例，防止崩溃
+
+**正式发布** 
+
+#### Sketch
+
+可以用墨刀代替
+
+- 功能少
+- 操作方便
+- 贴近前端
+
+#### 交互设计
+
+**设计约定**
+
+1. 有反馈----比如键盘的tab，输入不合法时有提示
+2. 一致性（可学习）----提交时按钮不可用
+3. 可预测
+
+### 需求分析
+
+#### 按钮
+
+##### 状态分析
+
+1. 点击：loading状态
+
+2. 不可点击
+
+3. hover（手机没有）
+
+4.  按下
+
+##### 画用例图
+
+### 项目搭建
+
+创建README
+
+将空目录上传github：
+
+```
+git init
+git add .
+git commit -m "init"
+git remote add origin xxx
+git push -u origin master
+```
+
+在github中新建文件LICENSE，选择一个模板
+
+`npm init`
+
+`npm i vue`
+
+构建.gitignore文件
+
+新建index.html
+
+引入vue（min.js）
+
+按钮组件
+
+css变量声明：
+
+```css
+:root {
+    --变量名: 变量值;
+}
+div {
+    var(变量名)
+}
+```
+
+parcel构建工具
+
+`npm i -D parcel-bundler`
+
+...
+
+运行：`node_modules/bin/parsel --no-cache`，简写`npx parcel`
+
+报错：修改vue版本，vue官网有代码
+
+查看兼容性：caniuse.com
+
+git工具：`npm i -g git-open`，命令：`git open `可以直接打开git仓库网页
+
+## vue-resource
 
 1. 运行`cnpm i vue-resource -S`安装模块
 2. 导入 vue-resource 组件
@@ -3571,7 +3692,7 @@ import VueResource from 'vue-resource'
 Vue.use(VueResource);
 ```
 
-##移除严格模式
+## 移除严格模式
 
 [babel-plugin-transform-remove-strict-mode](https://github.com/genify/babel-plugin-transform-remove-strict-mode)
 

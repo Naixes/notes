@@ -3690,8 +3690,6 @@ var io = require('socket.io')(http)
 http.listen(3000)
 ```
 
-
-
 ### TCP模块
 
 ## 其他
