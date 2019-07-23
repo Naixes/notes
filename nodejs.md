@@ -3198,7 +3198,9 @@ app.use(function(req,res,next){
     res.end(new Date().toLocaleTimeString());
 });
 app.listen(8080);
+```
 
+ ```html
 <body>
     <div id="clock"></div>
     <script> 
@@ -3214,9 +3216,9 @@ app.listen(8080);
             }, 1000);
     </script>
 </body>
-```
+ ```
 
- 需要服务器有很快的处理速度和资源           
+需要服务器有很快的处理速度和资源           
 
 #### 长轮询
 
@@ -3243,7 +3245,7 @@ app.listen(8080);
 
 clock.html
 
-```js
+```html
   <div id="clock"></div>
     <script>
         (function poll() {
@@ -3309,15 +3311,15 @@ client.html
 - `error`事件会在通信错误（连接中断、服务端返回数据失败）的情况下触发
 - 同时`EventSource`规范允许服务端指定自定义事件，客户端侦听该事件即可
 
-```js
+```html
  <script>
-var eventSource = new EventSource('/eventSource');
-eventSource.onmessage  = function(e){
-    console.log(e.data);
-}
-eventSource.onerror  = function(err){
-    console.log(err);
-}
+    var eventSource = new EventSource('/eventSource');
+    eventSource.onmessage  = function(e){
+        console.log(e.data);
+    }
+    eventSource.onerror  = function(err){
+        console.log(err);
+    }
  </script>
 ```
 
@@ -3325,18 +3327,12 @@ eventSource.onerror  = function(err){
 
 - 事件流的对应MIME格式为`text/event-stream`，而且其基于HTTP长连接。针对HTTP1.1规范默认采用长连接，针对HTTP1.0的服务器需要特殊设置。
 
-- event-source必须编码成
-
-  ```
-  utf-8
-  ```
-
-  的格式，消息的每个字段使用"\n"来做分割，并且需要下面4个规范定义好的字段：
+- event-source必须编码成`utf-8`的格式，消息的每个字段使用"\n"来做分割，并且需要下面4个规范定义好的字段：
 
   - Event: 事件类型
   - Data: 发送的数据
   - ID: 每一条事件流的ID
-  - Retry： 告知浏览器在所有的连接丢失之后重新开启新的连接等待的时间，在自动重新连接的过程中，之前收到的最后一个事件流ID会被发送到服务端
+- Retry： 告知浏览器在所有的连接丢失之后重新开启新的连接等待的时间，在自动重新连接的过程中，之前收到的最后一个事件流ID会被发送到服务端
 
 ```js
 let  express = require('express');
