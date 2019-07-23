@@ -3677,6 +3677,18 @@ parcel构建工具
 
 git工具：`npm i -g git-open`，命令：`git open `可以直接打开git仓库网页
 
+添加icon
+
+icon位置：用css控制，用变量绑定类名，order控制位置，不对齐时加vertical-align:middle
+
+slot不能加class
+
+props的validator
+
+icon组件
+
+loading
+
 ## vue-resource
 
 1. 运行`cnpm i vue-resource -S`安装模块
