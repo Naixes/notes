@@ -2,11 +2,19 @@
 
 **js的增强**
 
-添加可选择类型标注
+类型标注和编译时类型检查
+
+基于类的面向对象编程
+
+泛型
+
+接口
+
+声明文件
 
 提供不断发展的js特性
 
-**前端开发趋势和技术转型趋势**
+...
 
 ## 安装
 
@@ -54,6 +62,18 @@ let user = new User('S', 'in')
  console.log(greeter(user))
 ```
 
+#### 类型标注和类型检查
+
+直接赋值可以不用注解，有类型推论
+
+多种类型（|）
+
+没有赋值时可以用！表示一定会赋值
+
+函数参数只要声明就是必选参数，？表示可选参数
+
+重载（使用参数或返回值区分函数）：需要先声明再 实现
+
 ### 基础类型
 
 ```ts
@@ -92,6 +112,7 @@ console.log(cName)
 // any
 let notSure: any = 4
 notSure = 'aaa'
+// 用于数组
 let arr: any[] = [1, 'aaa', false]
 
 // void
@@ -460,6 +481,58 @@ let grid = new Grid(1)
 console.log(grid.calculateDistanceFromOrigin({x: 3, y: 4}))
 ```
 
+## 在Vue中使用
+
+新建一个基于ts的vue项目`vue create vue-ts`
+
+选项选择：
+
+- 自定义选项 - Manually select features
+- 添加ts支持 - TypeScript
+- 基于类的组件 - y
+- tslint 
+
+> 已有项目引入ts（cli3环境）：
+>
+> 查看cli文档：`vue add @vue/typescript`
+
+配置文件：tsconfig.json，tslint.json
 
 
- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
