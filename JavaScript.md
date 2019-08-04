@@ -2412,6 +2412,8 @@ test()
 
 #### Array
 
+##### map，filter和reduce
+
 `map` 作用是生成一个新数组，遍历原数组，将每个元素拿出来做一些变换然后放入到新的数组中。
 
 `map` 的回调函数接受三个参数，分别是当前索引元素，索引，原数组
@@ -2504,6 +2506,28 @@ arr.reduce((tmp, i, index)=>{
 
 - `let str = JSON.strinify(json)`会做标准化处理
 - `let json = JSON.parse(str)`
+
+#### SET
+
+无序且唯一的项组成，key和value相同，value不重复
+
+```js
+// 创建
+const s = new Set([1,2,3])
+// 属性
+console.log(s.size)
+// 方法
+set.add(val) // 返回Set本身
+set.delete(val) // 返回布尔
+set.has(val) // 返回布尔
+set.clear() // 清空
+set.keys() // 返回键遍历器
+set.values() // 返回值遍历器
+set.entries() // 返回键值遍历器
+set.forEach(fn(val, key, set)) // 返回键值遍历器
+```
+
+数组去重
 
 ### 异步处理
 
