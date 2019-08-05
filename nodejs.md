@@ -3922,11 +3922,19 @@ conf目录==》nginx.conf
 - svn：集中式，中心服务器，只有一个最新版
 - git：分布式，每个客户端都是服务器，多个最新版，需要先本地提交
 
-`git config --global user.name "" `
+### Git
 
 更新：`git pull`
 
 合并：出现冲突后，`git pull`会自动合并成一个文件，需要手动合并，自动合并工具`git mergtool`默认使用svn的合并工具，合并后重新commit，push
+
+**将本地仓库上传到GitHub：**
+
+1. 连接到github：`git remote add origin https://github.com/xxx`
+
+2. 上传代码：`git push origin master`
+
+`git config --global user.name "" `
 
 ### 搭建svn服务器
 
