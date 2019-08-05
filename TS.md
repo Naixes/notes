@@ -176,6 +176,8 @@ let {a: c, b: d} = a
 
 ### 接口
 
+interface，仅定义结构，不需要实现  
+
 TypeScript 的核心原则之一是对值所具有的结构进行类型检查。它有时被称做“鸭式辨型法”或“结构性子类型化”。 在 TypeScript 里，接口的作用就是为这些类型命名和为你的代码或第三方代码定义契约。 
 
 ```typescript
@@ -390,7 +392,7 @@ class Animal {
 	name: string
 	// 私有成员：不能在外部（实例）使用，包括子类
 	// private age: number
-	// 保护成员：不能在外部（实例）使用，不包括子类
+	// 保护成员：不能在外部（实例）使用，不包括子类 
 	// protected age: number
 	// readonly：只读修饰符
 	// readonly age: number
@@ -398,6 +400,7 @@ class Animal {
 	// 构造函数也可以加protected
 	// protected constructor(name: string, age: number) {
 	// 参数属性（给构造函数参数前加访问限定符来声明），readonly也可以直接写到这里，创建和初始化
+    // 参数前加修饰符，能定义并初始化一个成员变量
 	constructor(name: string, readonly age: number) {
 		this.name = name 
 		// this.age = age 
@@ -481,6 +484,115 @@ let grid = new Grid(1)
 console.log(grid.calculateDistanceFromOrigin({x: 3, y: 4}))
 ```
 
+语法糖
+
+```js
+class Person{ // 类指向构造函数
+    constructor(name, age){ // constructor是默认方法，new实例时自动调用
+    this.name = name; // 属性会声明在实例上，因为this指向实例
+    this.age = age;
+	} 
+    say(){ // 方法会声明在原型上
+		return "我的名字叫" + this.name + "今年" + this.age + "岁了";
+	}
+} 
+console.log(typeof Person); // function
+console.log(Person === Person.prototype.constructor); // true
+// 等效于
+function Person(name,age) {
+    this.name = name;
+    this.age = age;
+} 
+Person.prototype.say = function(){
+	return "我的名字叫" + this.name+"今年"+this.age+"岁了";
+}
+```
+
+
+
+### 访问修饰符
+
+private，public，protected
+
+### 泛型
+
+Generics是指在定义函数、接口或类的时候，不预先指定具体的类型，而在使用的时候再指定类型的一种特性。 增加代码的通用性
+
+```js
+// 定义泛型接口
+interface Result<T> {
+    ok: 0 | 1;
+    data: T[];
+} 
+// 定义泛型函数
+function getData<T>(): Result<T> {
+    const data: any[] = [
+        { id: 1, name: "类型注解", version: "2.0" },
+        { id: 2, name: "编译型语言", version: "1.0" }
+    ];
+    return { ok: 1, data };
+} 
+// 使用泛型
+this.features = getData<Feature>().data;
+
+function getData<T>(): Promise<Result<T>> {
+    const data: any[] = [
+        { id: 1, name: "类型注解", version: "2.0" },
+        { id: 2, name: "编译型语言", version: "1.0" }
+    ];
+    return Promise.resolve<Result<T>>({ ok: 1, data });
+}
+async created() {
+    const result = await getData<Feature>();
+    this.features = result.data;
+}
+```
+
+### 装饰器
+
+装饰器实际上是工厂函数，传入一个对象，输出处理后的新对象。 
+
+**组件声明**
+
+```js
+import {Componet, Prop, Vue, Emit} from "vue-property-decorator"
+// 类装饰器
+@Component
+export default class Hello extends Vue {
+    // 属性装饰器：也可以写在外面
+    @Prop({ required: true, type: String }) private msg!: string;
+    // 函数装饰器
+    @Watch("features", {deep: true})
+    onFeaturesChange(val: string, oldVal: any) {
+    	console.log(val, oldVal);
+	} 
+	// 函数装饰器
+    @Emit('add')
+    private addFeature(event: any) {
+        const feature = {
+            name: event.target.value,
+            id: this.features.length + 1,
+            version: "1.0"
+        };
+        this.features.push(feature);
+        event.target.value = feature;
+        return event.target.value;
+    }
+}
+```
+
+**事件处理**
+
+```js
+@Emit()
+foo(e: any) {
+    // 返回值就是参数
+    return xxx
+}
+```
+
+**变更监测**
+
 ## 在Vue中使用
 
 新建一个基于ts的vue项目`vue create vue-ts`
@@ -497,6 +609,31 @@ console.log(grid.calculateDistanceFromOrigin({x: 3, y: 4}))
 > 查看cli文档：`vue add @vue/typescript`
 
 配置文件：tsconfig.json，tslint.json
+
+范例
+
+```html
+<template>
+    <div>
+        {{msg}}
+    	<ul>
+    	<li v-for="feature in features" :key="feature">{{feature}}</li>
+    	</ul>
+    </div>
+</template>
+<script lang='ts'>
+import { Component, Prop, Vue } from "vue-property-decorator";
+@Component
+export default class Hello extends Vue {
+    @Prop() msg!: string;
+    features: string[];
+    constructor() {
+        super();
+        this.features = ["类型注解", "编译型语言"];
+    }
+} <
+/script>
+```
 
 
 
