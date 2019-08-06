@@ -61,6 +61,39 @@ Node.js
 
 当代码以[、(、`开头时要在前面加分号
 
+### debug
+
+vscode左侧的debug图标
+
+### 与前端开发的区别
+
+服务稳定性
+
+- 可能遭受到恶意攻击和误操作
+- 服务端不能意外挂掉
+- PM2做进程守候（挂掉后自动重启）
+
+考虑内存和cpu（优化，扩展）
+
+- 客户端独占一个浏览器，内存和cpu不是大问题，服务端的cpu和内存都是稀缺资源
+- stream写日志，使用redis存session
+
+日志记录
+
+- 前端也会参与，但只是发起方
+
+- 服务端要记录，存储，分析日志
+
+安全
+
+- 接收各种恶意攻击
+- 越权操作，数据库攻击等
+- 防止xss攻击和sql注入
+
+集群和服务拆分
+
+- 流量增加，利用扩展机器和服务拆分来承载大流量
+
 ## 模块系统
 
 ### 模块化
@@ -109,6 +142,8 @@ Node中
     ```javascript
     module.exports = fn
     ```
+
+
 
 ## npm
 
@@ -220,12 +255,141 @@ forever start xxx.js -l c:/a.log -e c:/err.log -a
 
 ## 核心模块
 
+### http模块
+
+```javascript
+// 一个简单的服务器
+var http = require('http')
+var server = http.createServer()
+server.on('request', function(req, res){
+    // 请求路径，端口号之后的部分，以/开头
+	req.url
+})
+// 监听，等待客户端的连接
+server.listen('3000', fn)
+
+// 更简单的写法
+var http = require('http')
+http
+  .createServer(function(req, res){
+      // 请求路径，端口号之后的部分，以/开头
+      req.url
+  })
+  .listen('3000', fn)
+  // 关闭服务器
+  .close()
+```
+
+#### 请求对象
+
+获取请求头
+
+`var headers = req.headers`
+
+- message.headers
+
+- message.httpVersion
+- message.method
+- message.url
+
+##### 解析post请求的数据
+
+request对象本身是一个数据流，所以可以通过监视request对象的data事件，将数据拼接到自定义的变量中，接收完毕后，会触发end事件
+
+```javascript
+var queryStr = require('querystring')
+function bodyParser(req, next) {
+    // post请求判断是否有请求参数
+    if('content-length' in req.headers) {
+        let data = ''
+        req.on('data', function(chunck) {
+            data += chunck
+        })
+        req.on('end', function() {
+            req.body = queryStr.parse(data)
+            next()
+        })
+    }else {
+        req.body = {}
+        next()
+    }
+}
+```
+
+#### 响应对象
+
+- 发送响应
+
+`res.write()` 可以使用多次，也可以用append追加内容，但是一定要用`res.end()`来结束，否则客户端会一直等待，也可以用`res.end()`直接发送响应
+
+**响应内容必须是字符串或者二进制数据**
+
+将数组或者对象转换为字符串：`JSON.stringify(arr)`
+
+将字符串转换为数组或者对象：`JSON.parse('str')`
+
+- 响应内容类型
+
+`res.setHeader('Content-Type', 'text/plain; charset=utf-8') //响应类型为普通文本 `，也可以使用html的meta元数据指定编码格式`<meta charset="UTF-8" />`
+
+[在线工具](tool.oschina.net)
+
+- 设置响应头
+
+`res.writeHead(200, {'Set-Cookie':'isVisited=true'})`
+
+#### 客户端重定向
+
+- 设置状态码为302临时重定向，客户端发现状态码为302时会去找响应头的Location
+  - `res.statusCode = 302`
+  - 301：永久重定向，浏览器会记住。第二次请求时，会直接请求重定向后的路径
+  - 302：临时重定向，浏览器不会记住
+- 在响应头中通过Location重定向
+  - `res.setHeader('Location', '/')`
+- 结束响应
+  - `res.end()`
+
+### url模块
+
+```javascript
+// 接受表单提交的数据
+// true表示将查询字符串转为对象
+url.parse('url', true) // 返回对象，包含：search、query、hash、path、href、pathname等
+```
+
+- search：包含？及后面的部分
+- query：？后面的部分
+- pathname：？前面的部分
+
+### path路径模块
+
+```javascript
+path.basename('c:/a/c/index.js') // 'index.js'
+path.basename('c:/a/c/index.js', '.js') // 'index'
+path.dirname('c:/a/c/index.js') // 'c:/a/c'
+path.extname('c:/a/c/index.js') // '.js'
+path.isAbsolute('c:/a/c/index.js') // true
+path.parse('c:/a/c/index.js') // {root: 'c:/', dir: 'c:/a/c', base: 'index.js', ext: '.js', name: 'index'}
+
+path.join('c:/', 'b') // 'c:\\a\\b' 根据系统 将路径片段使用特定的分隔符（window：\）连接起来形成路径d，并规范化生成的路径。
+path.resolve('/foo/bar', './baz') // '/foo/bar/baz'把一个路径或路径片段的序列解析为一个绝对路径。/被解析为根目录。
+```
+
 ### querystring
 
 ```js
 const querystr = quire("querystring")
 querystr.parse("a=1&b=2&c=3") // 解析为json
 querystr.stringify(json) // 解析为json
+
+const http = require('http')
+const querystr = quire("querystring")
+const server = http.createServer((req, res) => {
+    const url = req.url
+    req.query = querystring.parse(url.split('?')[1])
+    res.end(JSON.stringify(req.query))
+})
+server.listen(8000)
 ```
 
 ### assert
@@ -449,127 +613,6 @@ const rl = readline.creatInterface({
 })
 // line为当前行内容
 rl.on('line', function(line) {})
-```
-
-### http模块
-
-``````javascript
-// 一个简单的服务器
-var http = require('http')
-var server = http.createServer()
-server.on('request', function(req, res){
-    // 请求路径，端口号之后的部分，以/开头
-	req.url
-})
-// 监听，等待客户端的连接
-server.listen('3000', fn)
-
-// 更简单的写法
-var http = require('http')
-http
-  .createServer(function(req, res){
-  // 请求路径，端口号之后的部分，以/开头
-  req.url
-  })
-  .listen('3000', fn)
-  // 关闭服务器
-  .close()
-``````
-
-#### 请求对象
-
-- message.headers
-
-获取请求头
-
-`var headers = req.headers`
-
-- message.httpVersion
-- message.method
-- message.url
-
-解析post请求的数据：request对象本身是一个刻毒流，所以可以通过监视request对象的data事件，将数据拼接到自定义的变量中，接收完毕后，会触发end事件
-
-```javascript
-var queryStr = require('querystring')
-function bodyParser(req, next) {
-    if('content-length' in req.headers) {
-        let data = ''
-        req.on('data', function(chunck) {
-            data += chunck
-        })
-        req.on('end', function() {
-            req.body = queryStr.parse(data)
-            next()
-        })
-    }else {
-        req.body = {}
-        next()
-    }
-}
-```
-
-post请求判断是否有请求参数
-
-`'content-length' in req.headers`
-
-#### 响应对象
-
-- 发送响应
-
-`res.write()` 可以使用多次，也可以用append追加内容，但是一定要用`res.end()`来结束，否则客户端会一直等待，也可以用`res.end()`直接发送响应
-
-**响应内容必须是字符串或者二进制数据**
-
-将数组或者对象转换为字符串：`JSON.stringify(arr)`
-
-将字符串转换为数组或者对象：`JSON.parse('str')`
-
-- 响应内容类型
-
-`res.setHeader('Content-Type', 'text/plain; charset=utf-8') //响应类型为普通文本 `，也可以使用html的meta元数据指定编码格式`<meta charset="UTF-8" />`
-
-[在线工具](tool.oschina.net)
-
-- 设置响应头
-
-`res.writeHead(200, {'Set-Cookie':'isVisited=true'})`
-
-#### 客户端重定向
-
-- 设置状态码为302临时重定向，客户端发现状态码为302时会去找响应头的Location
-  - `res.statusCode = 302`
-  - 301：永久重定向，浏览器会记住。第二次请求时，会直接请求重定向后的路径
-  - 302：临时重定向，浏览器不会记住
-- 在响应头中通过Location重定向
-  - `res.setHeader('Location', '/')`
-- 结束响应
-  - `res.end()`
-
-### url模块
-
-``````javascript
-// 接受表单提交的数据
-// true表示将查询字符串转为对象
-url.parse('url', true) // 返回对象，包含：search、query、hash、path、href、pathname等
-``````
-
-- search：包含？及后面的部分
-- query：？后面的部分
-- pathname：？前面的部分
-
-### path路径模块
-
-```javascript
-path.basename('c:/a/c/index.js') // 'index.js'
-path.basename('c:/a/c/index.js', '.js') // 'index'
-path.dirname('c:/a/c/index.js') // 'c:/a/c'
-path.extname('c:/a/c/index.js') // '.js'
-path.isAbsolute('c:/a/c/index.js') // true
-path.parse('c:/a/c/index.js') // {root: 'c:/', dir: 'c:/a/c', base: 'index.js', ext: '.js', name: 'index'}
-
-path.join('c:/', 'b') // 'c:\\a\\b' 根据系统 将路径片段使用特定的分隔符（window：\）连接起来形成路径d，并规范化生成的路径。
-path.resolve('/foo/bar', './baz') // '/foo/bar/baz'把一个路径或路径片段的序列解析为一个绝对路径。/被解析为根目录。
 ```
 
 ### process模块
