@@ -4924,7 +4924,17 @@ console.log(reg.test(dateStr));
 
 ### 正则提取
 
-- 提取匹配内容：`Str.match(RegExp)返回匹配到的内容`，返回**数组**
+- 提取匹配内容：`Str.match(RegExp)`
+
+  **返回值**
+
+  如果使用g标志，则将返回与完整正则表达式匹配的所有结果（`Array`），但不会返回捕获组，或者未匹配 `null`。
+
+  如果未使用g标志，则仅返回第一个完整匹配及其相关的捕获组（`Array`）。 在这种情况下，返回的项目将具有如下所述的其他属性，或者未匹配 `null`。
+
+  - `groups`: 一个捕获组数组 或 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)（如果没有定义命名捕获组）。
+  - `index`: 匹配的结果的开始位置
+  - `input`: 搜索的字符串.
 
   `RegExp.exec(Str)`返回匹配到的内容，返回数组,同上，但需要多次调用或while循环返回多个匹配字符，匹配到null后又从头开始
 
