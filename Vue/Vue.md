@@ -1389,6 +1389,16 @@ npm install -g @vue/cli-init
 vue init webpack my-project
 ```
 
+## 快速原型开发
+
+可以快速识别vue文件，封装组件插件等功能
+
+```js
+sudo npm i @vue/cli -g
+sudo npm i @vue/cli-service-global -g
+vue serve App.vue
+```
+
 ## 应用：vue-minipro项目
 
 地址：<https://github.com/Naixes/demo-collection/tree/master/learnVue/vue-minipro>
@@ -1434,6 +1444,52 @@ session依赖cookie收到跨域限制，token比较通用，多个有联系的�
  **多级下拉**
 
 # Vue进阶
+
+## render函数和jsx
+
+### 函数式组件
+
+```jsx
+// 返回t级标题
+export default {
+    props: {
+        t: {}
+    },
+    render(h) {
+        // 标签名，属性，内容
+        // return h('h1', {
+        //     on: {
+        //         click() {}
+        //     },
+        //     attrs: {
+        //         a: 1
+        //     }
+        // }, 'xxx')
+        let tag = 'h' + this.t
+        return <tag on-click={() => {}}>{this.$slots.default}</tag>
+    }
+}
+```
+
+应用：自定义模板标签，向子组件传render函数，子组件将render传给函数式组件渲染自定义标签
+
+#### 作用域插槽
+
+也可以实现自定义模板标签，在子组件中执行，普通插槽在父组件中执行
+
+```js
+// 传递参数
+<slot :data1="item" :data2="item"></slot>
+<slot name="a" :data1="item" :data2="item"></slot>
+
+// 接收传递的参数 v-slot替代了scope-slot
+<template v-slot="obj"></template>
+<template v-slot:a="obj"></template>
+```
+
+
+
+
 
 ## 在webpack中使用vue
 
@@ -1521,13 +1577,13 @@ resolve: {
 
 都是ES6中向外暴露成员的方式
 
-export default`export default var data = {}`
+export default：`export default var data = {}`
 
 - 可以使用任意变量来接收
 - 只能导出一次
 - 可以同时使用这两种方式
 
-export`export var title = ''`
+export：`export var title = ''`
 
 - 必须通过`{}`的形式接收，叫按需导出
 - 不能改变导出时的变量名
