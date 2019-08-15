@@ -1103,8 +1103,6 @@ methods: {
 6. [navicat如何导入sql文件和导出sql文件](https://jingyan.baidu.com/article/a65957f4976aad24e67f9b9b.html)
 7. [贝塞尔在线生成器](http://cubic-bezier.com/#.4,-0.3,1,.33)
 
-#### 
-
 ## mixin 和 mixins 区别
 
 `mixin` 用于全局混入，会影响到每个组件实例，通常插件都是这样做初始化的。
@@ -1389,7 +1387,7 @@ npm install -g @vue/cli-init
 vue init webpack my-project
 ```
 
-## 快速原型开发
+### 快速原型开发
 
 可以快速识别vue文件，封装组件插件等功能
 
@@ -1472,24 +1470,6 @@ export default {
 ```
 
 应用：自定义模板标签，向子组件传render函数，子组件将render传给函数式组件渲染自定义标签
-
-#### 作用域插槽
-
-也可以实现自定义模板标签，在子组件中执行，普通插槽在父组件中执行
-
-```js
-// 传递参数
-<slot :data1="item" :data2="item"></slot>
-<slot name="a" :data1="item" :data2="item"></slot>
-
-// 接收传递的参数 v-slot替代了scope-slot
-<template v-slot="obj"></template>
-<template v-slot:a="obj"></template>
-```
-
-
-
-
 
 ## 在webpack中使用vue
 
