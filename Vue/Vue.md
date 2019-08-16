@@ -1394,7 +1394,7 @@ vue init webpack my-project
 ```js
 sudo npm i @vue/cli -g
 sudo npm i @vue/cli-service-global -g
-vue serve App.vue
+vue serve App.vue // 启动
 ```
 
 ## 应用：vue-minipro项目
@@ -1435,13 +1435,11 @@ export const SERVER = server
 
 **Token**
 
-session依赖cookie收到跨域限制，token比较通用，多个有联系的项目可以一次登录（单点登录 ）
+session依赖cookie受到跨域限制，token比较通用，多个有联系的项目可以一次登录（单点登录 ）
 
 **封装fetch**
 
  **多级下拉**
-
-# Vue进阶
 
 ## render函数和jsx
 
@@ -1741,21 +1739,23 @@ import VueResource from 'vue-resource'
 Vue.use(VueResource);
 ```
 
-## 移除严格模式
+## 其他
+
+### 移除严格模式
 
 [babel-plugin-transform-remove-strict-mode](https://github.com/genify/babel-plugin-transform-remove-strict-mode)
 
-## [vue-preview](https://github.com/LS1231/vue-preview)
+### [vue-preview](https://github.com/LS1231/vue-preview)
 
 一个Vue集成PhotoSwipe图片预览插件
 
-## 在手机中调试的方式
+### 在手机中调试的方式
 
 处于同一个局域网
 
 在package.json的dev脚本中添加一个--host值设为当前wifi的ip地址
 
-## 开启Apache的gzip压缩
+### 开启Apache的gzip压缩
 
 要让apache支持gzip功能，要用到deflate_Module和headers_Module。打开apache的配置文件httpd.conf，大约在105行左右，找到以下两行内容：（这两行不是连续在一起的）
 
@@ -1776,18 +1776,6 @@ Vue.use(VueResource);
 
 最少需要加上以上内容，才可以生gzip功能生效。由于没有做其它的额外配置，所以其它相关的配置均使用Apache的默认设置。这里说一下参数“DeflateCompressionLevel”，它表示压缩级别，值从1到9，值越大表示压缩的越厉害。
 
-## 使用ngrok将本机映射为一个外网的Web服务器
+### 使用ngrok将本机映射为一个外网的Web服务器
 
 注意：由于默认使用的美国的服务器进行中间转接，所以访问速度炒鸡慢，访问时可启用FQ软件，提高网页打开速度！
-
-# Weex
-
-`npm i -g weex-toolkit`
-
-`weex create xxx`
-
-下载`weex playground`或者 `weex platform add android`
-
-android.config.js：SplashText：欢迎文字
-
-运行：npm start server（配合playground）或者`weex run android`
