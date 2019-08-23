@@ -14,7 +14,7 @@ windows必须安装git bush才能使用
 
 - Emacs：神的编辑器，相当于一个操作系统
 
-### 官方教程
+## 官方教程
 
 命令：vimtutor
 
@@ -32,14 +32,22 @@ insert：插入（在前面插入，append：在后面插入，I：行首插入�
 
 dd：删除一整行（ctrl+d/u：翻页），3dd：删除3行（其他操作也适用数字），x：向后删除一个字符，delete word：向后删除单词，db：向前删除一个单词，di(：删除括号里面的内容，da(：删除括号包括内容，di{，dit：删除tag中的内容
 
+# FQ
+
+1. 下载**Shadosocks**：<https://github.com/shadowsocks/shadowsocks-windows/releases>中搜索assets下载zip
+
+   > Windows 7 用户可能无法打开客户端软件，这个时候你只需要下载 .NET Framework 4.6.2 就可以了
+
+2. 
+
 # electron
 
 - 一个个性化浏览器
 - 支持nodejs和浏览器js
 
-### 开始
+## 开始
 
-#### 安装
+### 安装
 
 ```js
 npm init -y
@@ -48,9 +56,22 @@ npm i electron --dev
 npx electron -v
 ```
 
+安装报错：read ECONNRESET，无法翻墙导致
+
+设置淘宝镜像：
+
+```js
+// 设置临时镜像*
+npm --registry https:*//registry.npm.taobao.org install express*
+// 设置永久镜像*
+npm config set registry https:*//registry.npm.taobao.org*
+// 单独设置某个包的镜像*
+npm config set electron_mirror https:*//npm.taobao.org/mirrors/electron/*
+```
+
 创建index.html和main.js
 
-#### 配置
+### 配置
 
 添加脚本命令：`"start": "electron ."`
 
@@ -58,22 +79,33 @@ npx electron -v
 
 编写main.js打开index.html
 
-#### 打包
+### 打包
 
 安装electron-builder
 
-添加命令脚本`"build": {xxx} ...`，从github上面拷贝
+添加命令脚本``，从github上面拷贝
 
-`npm run build`
+```js
+"scripts": {
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+},
+"build": {
+    "appId": "your.id",
+	"mac": {
+		"category": "your.app.category.type"
+    }
+}
+```
 
 也可以直接打开一个网站，win.loadURL()
 
-dist --win可以打包一个windows
+npm run dist --win可以打包一个windows
 
 
 
 移植vue项目，开一个服务，gitbash打开命令行，http-server打开一个服务，打包到根目录，将文件拖到electron项目中，打包
 
-#### 缺点
+### 缺点
 
 功能不全面，安装包体积大，程序占用内存大，不能做大型游戏
