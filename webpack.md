@@ -298,7 +298,7 @@ module: { // 用来配置第三方loader模块的
 2. 在`webpack.config.js`中添加处理sass文件的loader模块：
 
 ```
-{ test: /\.scss$/, use: ['style-loader', 'css-loader', 'url-loader'] }
+{ test: /\.scss$/, use: ['style-loader', 'css-loader', 'sass-loader'] }
 ```
 
 #### file-loader
@@ -315,9 +315,21 @@ module: { // 用来配置第三方loader模块的
 }},
 ```
 
+#### 处理图片
+
+1. js中创建图片：import或者require
+
+   file-loader在内部生成一张图片，返回名字
+
+2. css中引入background
+
+3. html中的img
+
+   html-withimg-loader
+
 #### 处理css中的路径-url-loader
 
-读取并输出成base64
+读取并输出成base64（减少请求但是图片大小会增大原来的三分之一）
 
 1. 运行`cnpm i url-loader file-loader --save-dev`
 2. 在`webpack.config.js`中添加处理url路径的loader模块：
@@ -336,7 +348,7 @@ module: { // 用来配置第三方loader模块的
     loader: 'url-loader',
     options: {
         outputPath: 'images/',
-        // 小于这个大小会进行base64编码直接写到css文件
+        // 小于这个大小会进行base64编码直接写到css文件，否则使用file-loader产生真实文件
         limit: 43960
     }
 },
@@ -399,7 +411,15 @@ module.exports = {
 }
 ```
 
-ES7的语法不支持，会报错提示
+**source-map**
+
+```js
+// webpack.config.js
+// 编译报错时可以查看原始写法，但是js会很大
+devtool: 'source-map'
+```
+
+##### ES7的语法不支持
 
 1. 添加提案中语法，安装 `@babel/plugin-proposal-class-properties`
 2. 在`webpack.config.js`中
@@ -420,13 +440,15 @@ ES7的语法不支持，会报错提示
 
 有不支持的语法时会报错提示，按照提示去babel官网寻找配置，比如装饰器@xxx
 
-**source-map**
+##### 存在重复的公共校验，generator或promise等会报错
 
-```js
-// webpack.config.js
-// 编译报错时可以查看原始写法，但是js会很大
-devtool: 'source-map'
-```
+需要代码运行时的包：@babel/plugin-transform-runtime @babel/runtime(上线后也需要：--save)
+
+##### 实例上的高级方法不支持
+
+@babel/polyfill(--save)
+
+在代码中引入：`require('@babel/polyfill')`
 
 ### 代码质量-eslint
 
@@ -436,16 +458,22 @@ devtool: 'source-map'
 module: {
     rules: [
         {
-            test: /\/js$/i,
-            loader: 'eslint-loader',
-            exclude: /node_modules/,
-            options: {
-                
+            test: /\.js$/i,
+            // loader: 'eslint-loader',
+            use: {
+                loader: 'eslint-loader',
+                options: {
+                	// 强制在普通loader之前执行
+                	enforce: 'pre' // post
+                }
             }
+            exclude: /node_modules/
         }
     ]
 }
 ```
+
+在官网配置下载配置文件
 
 .eslintrc配置文件，`eslint init` 可以初始化
 
@@ -472,6 +500,53 @@ module: {
     }
 }
 ```
+
+### 全局变量引入
+
+1. 引入jquery，安装，引入，引入后不会暴露在window中
+
+   `import $ from 'jquery'; window.$ // 没有`
+
+   **expose-loader** // 全局的loader。其他的还有pre前置loader，normal普通loader，内联loader，post后置loader
+
+   安装loader
+
+   `import $ from 'expose-loader?$!jquery'`
+
+   或者在配置文件中配置
+
+```js
+rules: [
+    test: require.resolve('jquery'),
+    use: 'expose-loader?$'
+]
+```
+
+2. 不引入不通过window直接使用$：给每个模块注入$（注释掉之前的配置）
+
+ ```js
+let webpack = require('webpack')
+...
+plugins: [
+    new webpack.ProvidePlugin: ({
+    	$: 'jquery'
+    })
+]
+ ```
+
+3. 通过cnd引入的jquery
+
+   可以直接使用window.$或$
+
+   可以配置忽略防止重复引入
+
+```js
+externals: {
+jquery: "$"
+}
+```
+
+   
 
 ### 测试
 
@@ -610,7 +685,7 @@ devServer:{
         open: true,
         port: 4321,
         contentBase: 'src'
-    }
+}
 ```
 
 1. 要启用热更新还要在头部引入`webpack`模块：
