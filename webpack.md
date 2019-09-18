@@ -23,13 +23,7 @@
 ### 解决上述两个问题
 
 1. 合并、压缩、精灵图、图片的Base64编码（将图片编码和代码一起下载存储到客户端减少请求）
-2. 可以使用webpack可以解决各个包之间的复 cc杂依赖关系；
-
-### webpack
-
-webpack 是前端的一个项目构建工具，它是基于 Node.js 开发出来的一个前端工具；
-
-可以代码转换，文件优化，代码分割，模块合并，自动刷新，代码校验，自动发布
+2. 可以使用webpack可以解决各个包之间的复杂依赖关系；
 
 ### 如何实现上述2种解决方案
 
@@ -40,13 +34,19 @@ webpack 是前端的一个项目构建工具，它是基于 Node.js 开发出来
 - 根据官网的图片介绍webpack打包的过程
 - [webpack官网](http://webpack.github.io/)
 
-### webpack安装的两种方式
+### webpack
+
+webpack 是前端的一个项目构建工具，它是基于 Node.js 开发出来的一个前端工具；
+
+可以代码转换，文件优化，代码分割，模块合并，自动刷新，代码校验，自动发布
+
+#### 安装的两种方式
 
 1. 运行`npm i webpack -g`全局安装webpack，这样就能在全局使用webpack的命令
 2. 在项目根目录中运行`npm i webpack webpack-cli --save-dev`安装到项目开发依赖中
 3. `npx webpack`运行，5.2支持，默认找node_module中bin中的webpack.cmd文件执行，执行过程中用到webpack-cli，cli会查找配置文件
 
-**0配置**
+#### 0配置
 
 打包：支持js的模块化（require）
 
@@ -372,10 +372,27 @@ autoprefixer：根据浏览器兼容表添加前缀
 
 ```js
 { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] } // 配置less时加在css-loader的后面
-// postcss.config.js文件，也可以写在webpack.config.js里，要配置alias
+// postcss.config.js文件，也可以写在webpack.config.js中postcss-loader的options里，要配置alias
 module.exports = {
     plugins: [
         require('autoprefixer')
+    ]
+}
+
+// 注意！！！如果以上配置不起作用
+module.exports = {
+    plugins: [
+        require('autoprefixer')({
+            // 必须设置支持的浏览器才会自动添加添加浏览器兼容
+            "overrideBrowserslist": [
+                "defaults",
+                "not ie < 11",
+                "last 2 versions",
+                "> 1%",
+                "iOS 7",
+                "last 3 iOS versions"
+            ]
+        })
     ]
 }
 ```
@@ -871,7 +888,7 @@ webpack4使用
 ```javascript
 // 导入处理路径的模块
 const path = require('path');
-// 导入自动生成HTMl文件的插件
+// 导入抽取css文件的插件
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // 可以使用多个
 const LessMiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -909,24 +926,22 @@ module.exports = {
     ...
     optimization: {
         // 优化项
-        minimizer: {
-            [
-            	// 压缩了css后js没有压缩
-            	new OptimizeCss()
-            ]
-        }
+        minimizer: [
+            // 压缩了css后js没有压缩
+            new OptimizeCss()
+        ]
     }
 }
 ```
 
 3. 压缩js
-   1. 安装uglifyjs-webpack-plugin
+   1. 安装uglifyjs-webpack-plugin（uglifyjs-webpack-plugin现在又改成了terser-webpack-plugin，参考：https://www.npmjs.com/package/mini-css-extract-plugin）
    2. 修改`webpack.config.js`配置文件如下：
 
 ```javascript
 // 导入处理路径的模块
 const path = require('path');
-
+// uglifyjs-webpack-plugin现在又改成了terser-webpack-plugin，参考：https://www.npmjs.com/package/mini-css-extract-plugin
 const UglifyjsWebpackPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
