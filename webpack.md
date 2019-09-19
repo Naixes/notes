@@ -438,6 +438,8 @@ devtool: 'source-map'
 
 ##### ES7的语法不支持
 
+比如class的属性
+
 1. 添加提案中语法，安装 `@babel/plugin-proposal-class-properties`
 2. 在`webpack.config.js`中
 
@@ -463,9 +465,15 @@ devtool: 'source-map'
 
 ##### 实例上的高级方法不支持
 
-@babel/polyfill(--save)
+**！！已弃用↓**
+
+@babel/polyfill(--save) 
 
 在代码中引入：`require('@babel/polyfill')`
+
+**！！已弃用↑**
+
+<https://babeljs.io/docs/en/babel-plugin-transform-runtime#docsNav>
 
 ### 代码质量-eslint
 
