@@ -323,13 +323,15 @@ module: { // 用来配置第三方loader模块的
 
 2. css中引入background
 
+   file-loader也可以处理
+
 3. html中的img
 
    html-withimg-loader
 
 #### 处理css中的路径-url-loader
 
-读取并输出成base64（减少请求但是图片大小会增大原来的三分之一）
+根据限制读取并输出成base64（减少请求但是图片大小会增大原来的三分之一）
 
 1. 运行`cnpm i url-loader file-loader --save-dev`
 2. 在`webpack.config.js`中添加处理url路径的loader模块：
@@ -342,14 +344,15 @@ module: { // 用来配置第三方loader模块的
 2. `[hash:8]-[name].[ext]`可以对图片的名称进行规定：
 
 ```javascript
-{ test: /\.(png|jpg|gif|jpeg|bmp)$/, use: 'url-loader?limit=43960&[hash:8]-[name].[ext]'},
+{ test: /\.(png|jpg|gif|jpeg|bmp)$/, use: 'url-loader?limit=43960&[path]-[name].[ext]'},
 // 另一种写法    
 { test: /\.(png|jpg|gif|jpeg|bmp)$/, use: {
     loader: 'url-loader',
     options: {
         outputPath: 'images/',
         // 小于这个大小会进行base64编码直接写到css文件，否则使用file-loader产生真实文件
-        limit: 43960
+        limit: 43960,
+	    name: '[hash:8]-[name].[ext]'
     }
 },
 ```
@@ -483,7 +486,7 @@ devtool: 'source-map'
 module: {
     rules: [
         {
-            test: /\.js$/i,
+            test: /\.js$/,
             // loader: 'eslint-loader',
             use: {
                 loader: 'eslint-loader',
@@ -498,9 +501,7 @@ module: {
 }
 ```
 
-在官网配置下载配置文件
-
-.eslintrc配置文件，`eslint init` 可以初始化
+.eslintrc配置文件，在官网配置下载配置文件，或者`eslint --init` 可以初始化
 
 ```js
 {
@@ -530,7 +531,7 @@ module: {
 
 1. 引入jquery，安装，引入，引入后不会暴露在window中
 
-   `import $ from 'jquery'; window.$ // 没有`
+   `import $ from 'jquery'; $; // 有 window.$ // 没有`
 
    **expose-loader** // 全局的loader。其他的还有pre前置loader，normal普通loader，内联loader，post后置loader
 
@@ -542,8 +543,10 @@ module: {
 
 ```js
 rules: [
-    test: require.resolve('jquery'),
-    use: 'expose-loader?$'
+    {
+        test: require.resolve('jquery'),
+    	use: 'expose-loader?$'
+    }
 ]
 ```
 
@@ -567,7 +570,7 @@ plugins: [
 
 ```js
 externals: {
-jquery: "$"
+	jquery: "$"
 }
 ```
 
