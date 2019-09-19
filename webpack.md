@@ -228,20 +228,33 @@ modile.exports = function(env, argv) {
 
 在命令行传参：`npm run build -- --config webpack.config.my.js // --后面会当做字符串`
 
-**单入口和多入口**  ：
+**多入口**  ：
 
 ```js
 var path = require('path');
+const HtmlWebpackPlugin = reuqire('html-webpack-plugin')
 
 module.exports = {
     entry: {
         'index': path.resolve(__dirname, 'src/js/main.js'),
         'admin': path.resolve(__dirname, 'src/js/admin.js')
-    }
+    },
     output: { // 配置输出选项
         path: path.resolve(__dirname, 'build'), // 配置输出的路径
         filename: '[name].min.js' // name对应上面的名称index和admin
-    }
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './src/index.html',
+            filename: 'home.html',
+            chunks: ['home']
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/index.html',
+            filename: 'other.html',
+            chunks: ['other']
+        })
+    ]
 }
 ```
 
