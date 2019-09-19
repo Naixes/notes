@@ -444,12 +444,18 @@ module.exports = {
 }
 ```
 
-**source-map**
+##### source-map
 
 ```js
 // webpack.config.js
-// 编译报错时可以查看原始写法，但是js会很大
+// source-map源码映射，单独生成一个文件，编译报错时可以查看原始写法，但是js会很大
 devtool: 'source-map'
+// eval-source-map源码映射，不会单独生成一个文件，打包到打包文件中，报错会显示行列
+devtool: 'eval-source-map'
+// cheap-module-source-map源码映射，单独生成一个文件，不会显示列
+devtool: 'cheap-module-source-map'
+// cheap-module-eval-source-map源码映射，不会单独生成一个文件，不会显示列
+devtool: 'cheap-module-eval-source-map'
 ```
 
 ##### ES7的语法不支持
@@ -490,6 +496,17 @@ devtool: 'source-map'
 **！！已弃用↑**
 
 <https://babeljs.io/docs/en/babel-plugin-transform-runtime#docsNav>
+
+##### 懒加载
+
+```js
+// es6草案语法，jsonp实现动态加载文件
+import('./source.js').then(data => {
+    console.log(data)
+})
+```
+
+插件：@babel/plugn-syntax-dynamic-import
 
 ### 代码质量-eslint
 
@@ -667,7 +684,7 @@ test('testName', () => {
 
 ## 插件
 
-### `webpack-dev-server`实时打包构建
+### `webpack-dev-server`实时构建
 
 1. 由于每次重新修改代码之后，都需要手动运行webpack打包的命令，比较麻烦，所以使用`webpack-dev-server`来实现代码实时打包编译，当修改代码之后，会自动进行打包构建。
 2. 运行`cnpm i webpack-dev-server --save-dev`安装到开发依赖
@@ -790,11 +807,11 @@ module.exports = {
 
 每次重新构建时候删除dist目录
 
-1. 运行`cnpm i clean-webpack-plugin --save-dev`
+1. 运行`npm i clean-webpack-plugin --save-dev`
 2. 在头部引入这个插件：
 
 ```
-var cleanWebpackPlugin = require('clean-webpack-plugin');
+var cleanWebpackPlugin = require('clean-webpack-plugin')
 ```
 
 1. 在`plugins`节点下使用这个插件：
@@ -805,11 +822,38 @@ new cleanWebpackPlugin(['dist'])
 
 ### copy-webpack-plugin
 
+将一些数据信息和代码打包到一起
 
+1. 运行`npm i copy-webpack-plugin --save-dev`
+2. 在头部引入这个插件：
+
+```
+var copyWebpackPlugin = require('copy-webpack-plugin')
+```
+
+1. 在`plugins`节点下使用这个插件：
+
+```
+new copyWebpackPlugin([{from: './doc', to: './'}])
+```
 
 ### banner-plugin
 
-内置
+内置，版权说明插件
+
+1. 在头部引入webpack：
+
+```
+var webpack = require('webpack')
+```
+
+1. 在`plugins`节点下使用这个插件：
+
+```
+new webpack.BannerPlugin('make 2019') // 打包到打包结果头部
+```
+
+### 
 
 ### 分离第三方包改造`webpack.publish.config.js`
 
@@ -994,6 +1038,103 @@ module.exports = {
 #### 自动添加前缀
 
 参考loader中的autoprefixer
+
+### 其他
+
+#### 实时打包
+
+```js
+watch: true
+watchOptions: {
+    poll: 1000, // 每秒询问1000次
+    aggregateTimeout: 500, // 防抖：500毫秒
+    ignored: /node_modules/
+}
+```
+
+#### 跨域问题
+
+```js
+devServer: {
+    proxy: {
+        // 1
+        // 将前端服务器请求代理到3000
+        // '/api': 'http://localhost:3000'
+        '/api': {
+            target: 'http://localhost:3000',
+            pathRewrite: {'api': ''}
+        }
+        // 2模拟数据
+        before(app) {
+            app.get('/user', (req, res) => {
+                res.json({name: 'sin'})
+            })
+        }
+        // 3有服务端，不使用代理，在服务端启动webpack，端口使用服务端端口
+    }
+}
+```
+
+
+
+#### resolve配置
+
+```js
+resolve: { // 解析 第三方包 common
+    // 第三方包的查找路径
+    modules: [path.resolve('node_modules')],
+    // 别名
+    alias: {
+        // 1.bootstrap: 'bootstrap/dist/css/bootstrap.css'
+    },
+    // 2.先找style，再找main
+    mainFields: ['style', 'main'],
+    // 入口文件的名字，默认index.js
+    mainFiles: []
+    // 后缀，从左往右
+    extensions: ['.js', '.css', 'json']
+}
+```
+
+#### 定义环境变量
+
+内置插件：
+
+```js
+plugins: [
+    new webpack.DefinePlugin({
+        // DEV: "'dev'" // 定义了一个DEV = 'dev'的环境变量可以判断当前环境
+        DEV: JSON.stringify('dev')
+    })
+]
+```
+
+区分不同的环境：三个配置文件（webpack.base.js/webpack.dev.js/webpack.prod.js）
+
+包： webpack-merge
+
+```js
+let {smart} = require('webpack-maege')
+let base = require('./webpack.base.js')
+
+module.exports = smart(base, {
+    mode: 'development',
+    dev...
+})
+
+// prod
+let {smart} = require('webpack-maege')
+let base = require('./webpack.base.js')
+
+module.exports = smart(base, {
+    mode: 'product',
+    // 优化
+})
+
+// 执行npm run build -- --config webpack.dev.js
+```
+
+
 
 ### Webpack 性能优化
 
