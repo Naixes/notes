@@ -446,8 +446,30 @@ module.exports = {
 
 ##### source-map
 
+参考：<https://www.cnblogs.com/tugenhua0707/p/9464984.html>
+
+**eval** 会将每一个module模块，执行eval，执行后不会生成sourcemap文件，仅仅是在每一个模块后，增加sourceURL来关联模块处理前后对应的关系。
+
+**优点是：**打包速度非常快，因为不需要生成sourcemap文件。
+**缺点是：**由于会映射到转换后的代码，而不是映射到原始代码，所以不能正确的显示行数。
+
+**source-map** 在webpack中配置加上 devtool: 'source-map' 配置完成后，source-map会为每一个打包后的模块生成独立的sourcemap文件
+
+**inline（比如 inline-source-map）** 该属性不会生成独立的 .map文件，而是将 .map文件以dataURL的形式插入。
+
+**缺点：**它会使得bundle.js文件变得非常大，因为它需要把 sourceMappingURL 以dataurl的形式插入到bundle.js里面去。
+
+**cheap(如：cheap-source-map)** 该属性在打包后同样会为每一个文件模块生成 .map文件，但是与source-map的区别在于cheap生成的 map文件会忽略原始代码中的列信息
+
+使用cheap属性后，也不会有loader模块之间对应的sourcemap，因为webpack打包最终会将所有的非js资源，通过loader形式转换成js资源，比如 vue 中的文件，xx.vue -> vue-loader转换 -> js -> 压缩 -> 压缩后的js
+
+所以说如果没有loader之间的sourcemap文件的话，那么在debug的时候，定义到压缩前的js中的时候，不能跟踪到vue中。
+
+**module(如：cheap-module-source-map)** 该属性的配置也是生成一个没有列的信息的sourceMaps文件，同时loader的sourcemap也被简化成为只包含对应行的。
+
 ```js
 // webpack.config.js
+// 可以直接使用 SourceMapDevToolPlugin/EvalSourceMapDevToolPlugin 来替代使用 devtool 选项，它有更多的选项。切勿同时使用 devtool 选项和 SourceMapDevToolPlugin/EvalSourceMapDevToolPlugin 插件。
 // source-map源码映射，单独生成一个文件，编译报错时可以查看原始写法，但是js会很大
 devtool: 'source-map'
 // eval-source-map源码映射，不会单独生成一个文件，打包到打包文件中，报错会显示行列
@@ -456,6 +478,36 @@ devtool: 'eval-source-map'
 devtool: 'cheap-module-source-map'
 // cheap-module-eval-source-map源码映射，不会单独生成一个文件，不会显示列
 devtool: 'cheap-module-eval-source-map'
+```
+
+**开发环境和线上环境如何选择**
+
+**1. 源代码中的列信息是没有任何作用，因此我们打包后的文件不希望包含列相关信息，只有行信息能建立打包前后的依赖关系。因此不管是开发环境或生产环境，我们都希望添加cheap的基本类型来忽略打包前后的列信息。**
+
+**2. 不管是开发环境还是正式环境，我们都希望能定位到bug的源代码具体的位置，比如说某个vue文件报错了，我们希望能定位到具体的vue文件，因此我们也需要module配置。**
+
+**3. 我们需要生成map文件的形式，因此我们需要增加 source-map属性。**
+
+**4. 我们介绍了eval打包代码的时候，知道eval打包后的速度非常快，因为它不生成map文件，但是可以对eval组合使用 eval-source-map使用会将map文件以DataURL的形式存在打包后的js文件中，比如如下：**
+
+![img](https://images2018.cnblogs.com/blog/561794/201808/561794-20180812212332038-199268065.png)
+
+它的效果类似于inline的效果，因此在正式环境中不要使用 eval-source-map, 因为它会增加文件的大小，但是在开发环境中，可以试用下，因为他们打包的速度很快。
+
+**在开发环境中我们可以使用** 
+
+```
+module.exports = {
+  devtool: 'cheap-module-eval-source-map'
+}
+```
+
+**在正式环境中我们可以使用**  
+
+```
+module.exports = { 
+  devtool: 'cheap-module-source-map';
+}
 ```
 
 ##### ES7的语法不支持
@@ -811,13 +863,13 @@ module.exports = {
 2. 在头部引入这个插件：
 
 ```
-var cleanWebpackPlugin = require('clean-webpack-plugin')
+var {cleanWebpackPlugin} = require('clean-webpack-plugin')
 ```
 
 1. 在`plugins`节点下使用这个插件：
 
 ```
-new cleanWebpackPlugin(['dist'])
+new cleanWebpackPlugin()
 ```
 
 ### copy-webpack-plugin
@@ -852,8 +904,6 @@ var webpack = require('webpack')
 ```
 new webpack.BannerPlugin('make 2019') // 打包到打包结果头部
 ```
-
-### 
 
 ### 分离第三方包改造`webpack.publish.config.js`
 
@@ -910,6 +960,8 @@ minify:{// 压缩HTML代码
 
 默认的打包css都在页面的style标签中
 
+**已废弃↓**
+
 ####  extract-text-webpack-plugin
 
 1. 运行`npm install --save-dev extract-text-webpack-plugin`安装抽取CSS文件的插件。
@@ -944,7 +996,7 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 new ExtractTextPlugin("css/styles.css"), // 抽取CSS文件的插件
 ```
 
-**已废弃**
+**已废弃↑**
 
 #### mini-css-extract-plugin
 
@@ -1064,18 +1116,25 @@ devServer: {
             target: 'http://localhost:3000',
             pathRewrite: {'api': ''}
         }
-        // 2模拟数据
-        before(app) {
-            app.get('/user', (req, res) => {
-                res.json({name: 'sin'})
-            })
-        }
-        // 3有服务端，不使用代理，在服务端启动webpack，端口使用服务端端口
+    }
+    // 2模拟数据
+    before(app) {
+        app.get('/user', (req, res) => {
+            res.json({name: 'sin'})
+        })
     }
 }
+
+// 3有服务端，不使用代理，在服务端启动webpack，端口使用服务端端口
+let express = require('express')
+let app = express()
+
+app.get('/user', (req, res) => {
+    res.json({name: 'sin'})
+})
+
+app.listen(8080)
 ```
-
-
 
 #### resolve配置
 
@@ -1133,8 +1192,6 @@ module.exports = smart(base, {
 
 // 执行npm run build -- --config webpack.dev.js
 ```
-
-
 
 ### Webpack 性能优化
 
