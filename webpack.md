@@ -1195,6 +1195,8 @@ module.exports = smart(base, {
 
 ### Webpack 性能优化
 
+
+
 - 有哪些方式可以减少 Webpack 的打包时间
 - 有哪些方式可以让 Webpack 打出来的包更小
 
@@ -1234,13 +1236,13 @@ loader: 'babel-loader?cacheDirectory=true'
 
 ##### HappyPack
 
-受限于 Node 是单线程运行的，所以 Webpack 在打包的过程中也是单线程的，特别是在执行 Loader 的时候，长时间编译的任务很多，这样就会导致等待的情况。
+受限于 Node 是单线程运行的，所以 Webpack 在打包的过程中也是单线程的，特别是在执行 Loader 的时候，长时间编译的任务很多，这样就会导致等待的情况。小项目不需要。
 
-**HappyPack 可以将 Loader 的同步执行转换为并行的**，这样就能充分利用系统资源来加快打包效率了
+**HappyPack 可以将 Loader 的同步执行转换为并行的**，这样就能充分利用系统资源来加快打包效率了，小项目不需要。
 
 ```js
 module: {
-  loaders: [
+  rules: [
     {
       test: /\.js$/,
       include: [resolve('src')],
@@ -1253,18 +1255,38 @@ module: {
 plugins: [
   new HappyPack({
     id: 'happybabel',
-    loaders: ['babel-loader?cacheDirectory'],
-    // 开启 4 个线程
+    use: {
+	    loader: 'babel-loader?cacheDirectory',
+        options: {
+            preset: [
+                '@babel/preset-env',
+                '@babel/preset-react'
+            ]
+        }
+    }
+    // 开启4个线程，默认3
     threads: 4
   })
 ]
 ```
 
-#### DllPlugin
+##### noParse
+
+@babel-preset-react // 解析react
+
+用到三方库比如jquery时webpack会去寻找它的依赖包，给没有依赖包的库配置该项可以减少打包时间
+
+```js
+ noParse: /jquery/
+```
+
+##### 
+
+##### DllPlugin
+
+动态链接库
 
 **DllPlugin 可以将特定的类库提前打包然后引入**。这种方式可以极大的减少打包类库的次数，只有当类库更新版本才有需要重新打包，并且也实现了将公共代码抽离成单独文件的优化方案。
-
-接下来我们就来学习如何使用 DllPlugin
 
 ```js
 // 单独配置在一个文件中
@@ -1272,14 +1294,16 @@ plugins: [
 const path = require('path')
 const webpack = require('webpack')
 module.exports = {
+    mode: 'development',
   entry: {
     // 想统一打包的类库
     vendor: ['react']
   },
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[name].dll.js',
-    library: '[name]-[hash]'
+    filename: '[name].dll.js', // 产生的文件名
+    library: '[name]-[hash]', // 导出的变量名
+    libraryTarget: 'var' // 导出方式，默认是var，commonjs、umd、this。。。
   },
   plugins: [
     new webpack.DllPlugin({
@@ -1287,11 +1311,14 @@ module.exports = {
       name: '[name]-[hash]',
       // 该属性需要与 DllReferencePlugin 中一致
       context: __dirname,
+      // 产生的一个清单，里面有对应的路径
       path: path.join(__dirname, 'dist', '[name]-manifest.json')
     })
   ]
 }
 ```
+
+html中需要引入打包后的[name].dll.js，找到变量名
 
 然后我们需要执行这个配置文件生成依赖文件，接下来我们需要使用 `DllReferencePlugin` 将依赖文件引入项目中
 
@@ -1303,6 +1330,7 @@ module.exports = {
     new webpack.DllReferencePlugin({
       context: __dirname,
       // manifest 就是之前打包出来的 json 文件
+      // 会先去查找清单如果没有才进行打包
       manifest: require('./dist/vendor-manifest.json'),
     })
   ]
@@ -1325,13 +1353,22 @@ module.exports = {
 
 #### 减少 Webpack 打包后的文件体积
 
-> 注意：该内容也属于性能优化领域。
-
-#### 按需加载
+##### 按需加载
 
 想必大家在开发 SPA 项目的时候，项目中都会存在十几甚至更多的路由页面。如果我们将这些页面全部打包进一个 JS 文件的话，虽然将多个请求合并了，但是同样也加载了很多并不需要的代码，耗费了更长的时间。那么为了首页能更快地呈现给用户，我们肯定是希望首页能加载的文件体积越小越好，**这时候我们就可以使用按需加载，将每个路由页面单独打包为一个文件**。当然不仅仅路由可以按需加载，对于 `loadash` 这种大型类库同样可以使用这个功能。
 
 按需加载的代码实现这里就不详细展开了，因为鉴于用的框架不同，实现起来都是不一样的。当然了，虽然他们的用法可能不同，但是底层的机制都是一样的。都是当使用的时候再去下载对应文件，返回一个 `Promise`，当 `Promise` 成功以后去执行回调。
+
+###### IgnorePlugin
+
+内置插件可以忽略三方库中一些不需要的文件，比如moment库支持多语言，直接使用体积过大
+
+```js
+plugins: [
+    // 忽略moment中的locale，此时的moment.locale('zh-cn')不会生效需要手动引入，import 'moment/locale/zh-cn'
+    new webpack.IgnorePlugin(/\.\locale/, /moment/)
+]
+```
 
 #### Scope Hoisting把模块合并到一个函数中
 
