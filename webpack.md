@@ -549,17 +549,6 @@ module.exports = {
 
 <https://babeljs.io/docs/en/babel-plugin-transform-runtime#docsNav>
 
-##### 懒加载
-
-```js
-// es6草案语法，jsonp实现动态加载文件
-import('./source.js').then(data => {
-    console.log(data)
-})
-```
-
-插件：@babel/plugn-syntax-dynamic-import
-
 ### 代码质量-eslint
 
  `npm i eslint eslint-loader -D`
@@ -779,7 +768,7 @@ module.exports = {
 
 方式1：
 
-- 修改`package.json`的script节点如下，其中`--open`表示自动打开浏览器，`--port 4321`表示打开的端口号为4321，`--hot`表示启用浏览器热更新，保存后修改部分代码更新，不使用会全部更新，无刷新重载：
+- 修改`package.json`的script节点如下，其中`--open`表示自动打开浏览器，`--port 4321`表示打开的端口号为4321，`--hot`表示启用浏览器热更新，只更新改动过的模块，保存后修改部分代码更新，不使用会全部更新，无刷新重载：
 
 ```
 "dev": "webpack-dev-server --hot --port 4321 --open"
@@ -807,10 +796,27 @@ var webpack = require('webpack');
 1. 在`plugins`节点下新增：
 
 ```
-plugins: [new webpack.HotModuleReplacementPlugin()]
+plugins: [
+	new webpack.NameModulesPlugin(), // 打印更新的模块
+	new webpack.HotModuleReplacementPlugin() // 热更新插件 
+]
 ```
 
-### `html-webpack-plugin`配置index页面
+​	这样配置过后页面是强制更新会刷新页面，可以使用require改为热更新
+
+```js
+// index.js
+if(module.hot) {
+    // 指定文件更新时的回调
+    module.hot.accept('./source', () => {
+        require('./source')
+    })
+}
+```
+
+
+
+### html-webpack-plugin`配置index页面
 
 由于使用`--contentBase`指令的过程比较繁琐，需要指定启动的目录，同时还需要修改index.html中script标签的src属性，所以推荐大家使用`html-webpack-plugin`插件配置启动页面.
 
@@ -1376,9 +1382,9 @@ plugins: [
 ]
 ```
 
-#### Scope Hoisting把模块合并到一个函数中
+##### Scope Hoisting把模块合并到一个函数中
 
-**Scope Hoisting 会分析出模块之间的依赖关系，尽可能的把打包出来的模块合并到一个函数中去。**
+**Scope Hoisting ，直译过来就是「作用域提升」，webpack 会把引入的 js 文件“提升到”它的引入者顶部。会分析出模块之间的依赖关系，尽可能的把打包出来的模块合并到一个函数中去。**
 
 比如我们希望打包两个文件
 
@@ -1425,9 +1431,9 @@ module.exports = {
 }
 ```
 
-#### Tree Shaking删除未被引用的代码
+##### Tree Shaking删除未被引用的代码
 
-**Tree Shaking 可以实现删除项目中未被引用的代码**，比如
+**Tree Shaking 可以实现删除项目中未被引用的代码（import引入，require不支持，require会把引用到的结果放到default中）**，比如
 
 ```js
 // test.js
@@ -1441,8 +1447,59 @@ import { a } from './test.js'
 
 如果使用 Webpack 4 的话，开启生产环境就会自动启动这个优化功能。
 
-### 相关文章
+##### 提取公共代码
+
+之前会用到插件：commonChunkPlugin，webpack4不需要
+
+多个文件引用到同样的代码时使用，可以缓存代码
+
+```js
+optimization: {
+    splitChuncks: {
+        cacheGroups: { // 缓存组
+            commom: {
+                chunks: 'initial', // 从入口处开始
+                minSize: 0, // 文件大于0字节
+                minChunks: 2, // 使用2次以上
+            },
+            vendor: {
+                // 由于从上到下执行，可能会和自定义的通用模块抽取到一起，增加权重
+                priority: 1,
+                test: /node_modules/,
+                chunks: 'initial',
+                miniSize: 0,
+                minChunks: 2
+            }
+        }
+    }
+}
+```
+
+#### 懒加载
+
+```js
+// es6草案语法，jsonp实现动态加载文件
+// vue，react的懒加载也是同样的方式
+import('./source.js').then(data => {
+    console.log(data)
+})
+```
+
+插件：@babel/plugn-syntax-dynamic-import
+
+#### 相关文章
 
 1. [Sass 基础教程](http://www.sasschina.com/guide/)
 2. [webpack-dev-server](https://github.com/webpack/webpack-dev-server/releases)
 3. [You have not accepted the license agreements of the following ](http://majing.io/questions/804)
+
+### tapable
+
+webpack本质上是一种事件流的机制，它的工作流核心就是将各个插件串联起来，实现的核心就是tapable，有点类似node的events库，核心原理也是发布订阅模式
+
+compile.js核心模块引用了tapable
+
+应用tapable：
+
+安装tapable
+
