@@ -1195,8 +1195,6 @@ module.exports = smart(base, {
 
 ### Webpack 性能优化
 
-
-
 - 有哪些方式可以减少 Webpack 的打包时间
 - 有哪些方式可以让 Webpack 打出来的包更小
 
@@ -1236,6 +1234,8 @@ loader: 'babel-loader?cacheDirectory=true'
 
 ##### HappyPack
 
+包名：happypack
+
 受限于 Node 是单线程运行的，所以 Webpack 在打包的过程中也是单线程的，特别是在执行 Loader 的时候，长时间编译的任务很多，这样就会导致等待的情况。小项目不需要。
 
 **HappyPack 可以将 Loader 的同步执行转换为并行的**，这样就能充分利用系统资源来加快打包效率了，小项目不需要。
@@ -1270,23 +1270,19 @@ plugins: [
 ]
 ```
 
-##### noParse
-
-@babel-preset-react // 解析react
-
-用到三方库比如jquery时webpack会去寻找它的依赖包，给没有依赖包的库配置该项可以减少打包时间
-
-```js
- noParse: /jquery/
-```
-
-##### 
-
 ##### DllPlugin
+
+<https://www.cnblogs.com/tugenhua0707/p/9520780.html>
+
+<https://gitee.com/mr-hu-pan/codes/hznjc518abmxtp6k34uor79>
 
 动态链接库
 
 **DllPlugin 可以将特定的类库提前打包然后引入**。这种方式可以极大的减少打包类库的次数，只有当类库更新版本才有需要重新打包，并且也实现了将公共代码抽离成单独文件的优化方案。
+
+比如抽离react
+
+@babel/preset-react // 解析react
 
 ```js
 // 单独配置在一个文件中
@@ -1296,8 +1292,8 @@ const webpack = require('webpack')
 module.exports = {
     mode: 'development',
   entry: {
-    // 想统一打包的类库
-    vendor: ['react']
+    // 想统一打包的类库，键对应下面的name
+    react: ['react', 'react-dom']
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -1309,7 +1305,7 @@ module.exports = {
     new webpack.DllPlugin({
       // name 必须和 output.library 一致
       name: '[name]-[hash]',
-      // 该属性需要与 DllReferencePlugin 中一致
+      // manifest文件中请求的上下文，默认为该webpack文件上下文。该属性需要与 DllReferencePlugin 中一致
       context: __dirname,
       // 产生的一个清单，里面有对应的路径
       path: path.join(__dirname, 'dist', '[name]-manifest.json')
@@ -1318,7 +1314,7 @@ module.exports = {
 }
 ```
 
-html中需要引入打包后的[name].dll.js，找到变量名
+html中需要引入打包后的[name].dll.js，找到变量名。由于动态链接库我们一般只编译一次，除非依赖的三方库更新，之后就不用编译，因此入口的 index.js 文件中不包含这些模块，所以要在 index.html 中单独引入。
 
 然后我们需要执行这个配置文件生成依赖文件，接下来我们需要使用 `DllReferencePlugin` 将依赖文件引入项目中
 
@@ -1351,6 +1347,16 @@ module.exports = {
 - `resolve.alias`：可以通过别名的方式来映射一个路径，能让 Webpack 更快找到路径
 - `module.noParse`：如果你确定一个文件下没有其他依赖，就可以使用该属性让 Webpack 不扫描该文件，这种方式对于大型的类库很有帮助
 
+##### noParse
+
+用到三方库比如jquery时webpack会去寻找它的依赖包，给没有依赖包的库配置该项可以减少打包时间
+
+```js
+module: {
+	noParse: /jquery/
+}
+```
+
 #### 减少 Webpack 打包后的文件体积
 
 ##### 按需加载
@@ -1359,14 +1365,14 @@ module.exports = {
 
 按需加载的代码实现这里就不详细展开了，因为鉴于用的框架不同，实现起来都是不一样的。当然了，虽然他们的用法可能不同，但是底层的机制都是一样的。都是当使用的时候再去下载对应文件，返回一个 `Promise`，当 `Promise` 成功以后去执行回调。
 
-###### IgnorePlugin
+##### IgnorePlugin
 
 内置插件可以忽略三方库中一些不需要的文件，比如moment库支持多语言，直接使用体积过大
 
 ```js
 plugins: [
     // 忽略moment中的locale，此时的moment.locale('zh-cn')不会生效需要手动引入，import 'moment/locale/zh-cn'
-    new webpack.IgnorePlugin(/\.\locale/, /moment/)
+    new webpack.IgnorePlugin(/\.\/locale/, /moment/)
 ]
 ```
 
@@ -1433,7 +1439,7 @@ import { a } from './test.js'
 
 对于以上情况，`test` 文件中的变量 `b` 如果没有在项目中使用到的话，就不会被打包到文件中。
 
-如果你使用 Webpack 4 的话，开启生产环境就会自动启动这个优化功能。
+如果使用 Webpack 4 的话，开启生产环境就会自动启动这个优化功能。
 
 ### 相关文章
 
