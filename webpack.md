@@ -797,7 +797,7 @@ var webpack = require('webpack');
 
 ```
 plugins: [
-	new webpack.NameModulesPlugin(), // 打印更新的模块
+	new webpack.NamedModulesPlugin(), // 打印更新的模块
 	new webpack.HotModuleReplacementPlugin() // 热更新插件 
 ]
 ```
@@ -1061,13 +1061,13 @@ module.exports = {
 ```
 
 3. 压缩js
-   1. 安装uglifyjs-webpack-plugin（uglifyjs-webpack-plugin现在又改成了terser-webpack-plugin，参考：https://www.npmjs.com/package/mini-css-extract-plugin）
+   1. 安装**uglifyjs-webpack-plugin**（uglifyjs-webpack-plugin现在又改成了**terser-webpack-plugin**，参考：https://www.npmjs.com/package/mini-css-extract-plugin）
    2. 修改`webpack.config.js`配置文件如下：
 
 ```javascript
+// uglifyjs-webpack-plugin
 // 导入处理路径的模块
 const path = require('path');
-// uglifyjs-webpack-plugin现在又改成了terser-webpack-plugin，参考：https://www.npmjs.com/package/mini-css-extract-plugin
 const UglifyjsWebpackPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
@@ -1090,6 +1090,23 @@ module.exports = {
             ]
         }
     }
+}
+
+// terser-webpack-plugin
+// 压缩js，生产环境下起作用
+const TerserJSPlugin = require('terser-webpack-plugin')
+optimization: {
+    // 压缩css和js
+    minimizer: [ 
+        new TerserJSPlugin({
+            terserOptions: {
+                output: {
+                    // 去除注释
+                    comments: false,
+                },
+            },
+        }),
+        new OptimizeCss({}) ]
 }
 ```
 
@@ -1421,7 +1438,12 @@ import { a } from './test.js'
 ]
 ```
 
-这样的打包方式生成的代码明显比之前的少多了。如果在 Webpack4 中你希望开启这个功能，只需要启用 `optimization.concatenateModules` 就可以了。
+它的好处是：
+
+- 代码体积更小，因为函数申明语句会产生大量代码；
+- 代码在运行时因为创建的函数作用域更少了，内存开销也随之变小。
+
+如果在 Webpack4 中你希望开启这个功能，只需要启用 `optimization.concatenateModules` 就可以了。
 
 ```js
 module.exports = {
@@ -1449,6 +1471,8 @@ import { a } from './test.js'
 
 ##### 提取公共代码
 
+<https://www.cnblogs.com/kwzm/p/10314438.html>
+
 之前会用到插件：commonChunkPlugin，webpack4不需要
 
 多个文件引用到同样的代码时使用，可以缓存代码
@@ -1456,13 +1480,17 @@ import { a } from './test.js'
 ```js
 optimization: {
     splitChuncks: {
+        // cacheGroups其实是splitChunks里面最核心的配置，splitChunks就是根据cacheGroups去拆分模块的，包括chunks属性等属性其实都是对缓存组进行配置的。splitChunks默认有两个缓存组：vender和default
         cacheGroups: { // 缓存组
             commom: {
+                // 'async':只拆分动态引入的，'all':所有引入
                 chunks: 'initial', // 从入口处开始
                 minSize: 0, // 文件大于0字节
-                minChunks: 2, // 使用2次以上
+                minChunks: 2, // 使用2次及以上
             },
-            vendor: {
+            // vendors的test默认设置为 /[\\/]node_modules[\\/]/ 表示只筛选从node_modules文件夹下引入的模块，所有第三方模块会被拆分出来。
+            // default缓存组，minChunks: 2，它的权重小于vendors
+            vendors: {
                 // 由于从上到下执行，可能会和自定义的通用模块抽取到一起，增加权重
                 priority: 1,
                 test: /node_modules/,
@@ -1475,6 +1503,41 @@ optimization: {
 }
 ```
 
+参考：
+
+```js
+// splitChuncks的默认配置
+module.exports = {
+  //...
+  optimization: {
+    splitChunks: {
+      // 动态引入的模块
+      chunks: 'async',
+      minSize: 30000,
+      minChunks: 1,
+      // 用来限制异步模块内部的并行最大请求数的，可以理解为是每个import()它里面的最大并行请求数量
+      maxAsyncRequests: 5,
+      // 它表示允许入口并行加载的最大请求数，为了对拆分数量进行限制，不至于拆分出太多模块导致请求数量过多而得不偿失。
+      // 如果同时又两个模块满足cacheGroup的规则要进行拆分，但是maxInitialRequests的值只能允许再拆分一个模块，那尺寸更大的模块会被拆分出来
+      maxInitialRequests: 3,
+      automaticNameDelimiter: '~',
+      name: true,
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10
+        },
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
+    }
+  }
+};
+```
+
 #### 懒加载
 
 ```js
@@ -1485,7 +1548,7 @@ import('./source.js').then(data => {
 })
 ```
 
-插件：@babel/plugn-syntax-dynamic-import
+插件：@babel/plugin-syntax-dynamic-import，在js的rules中的plugins中声明
 
 #### 相关文章
 
