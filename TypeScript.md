@@ -198,6 +198,7 @@ interface Square {
 }
 
 interface SquareConfig {
+    // 为了解决导航时变量值为null时，页面运行时出错的问题
 	color?: string
 	width?: number
 
@@ -514,9 +515,48 @@ Person.prototype.say = function(){
 
 private，public，protected
 
+### 函数
+
+
+
 ### 泛型
 
 Generics是指在定义函数、接口或类的时候，不预先指定具体的类型，而在使用的时候再指定类型的一种特性。 增加代码的通用性
+
+可以理解为类型变量，使返回值的类型与传入参数的类型是相同的，不同于使用 `any`，它不会丢失信息
+
+```js
+// 定义函数
+function identity<T>(arg: T): T {
+    return arg;
+}
+// 使用
+// 方法1
+let output = identity<string>("myString"); 
+// 方法2：利用了类型推论 -- 即编译器会根据传入的参数自动地帮助我们确定T的类型
+let output = identity("myString");
+
+// 使用泛型变量
+// 报错
+function loggingIdentity<T>(arg: T): T {
+    console.log(arg.length);  // Error: T doesn't have .length
+    return arg;
+}
+// 这可以让我们把泛型变量T当做类型的一部分使用，而不是整个类型，增加了灵活性。
+function loggingIdentity<T>(arg: T[]): T[] {
+    console.log(arg.length);  // Array has a .length, so no more error
+    return arg;
+}
+
+// 泛型类型
+function identity<T>(arg: T): T {
+    return arg;
+}
+// =>后面表示函数的返回值类型
+let myIdentity: <T>(arg: T) => T = identity;
+```
+
+
 
 ```js
 // 定义泛型接口
@@ -560,6 +600,7 @@ import {Componet, Prop, Vue, Emit} from "vue-property-decorator"
 @Component
 export default class Hello extends Vue {
     // 属性装饰器：也可以写在外面
+    // !非空断言
     @Prop({ required: true, type: String }) private msg!: string;
     // 函数装饰器
     @Watch("features", {deep: true})
@@ -631,8 +672,8 @@ export default class Hello extends Vue {
         super();
         this.features = ["类型注解", "编译型语言"];
     }
-} <
-/script>
+} 
+</script>
 ```
 
 
