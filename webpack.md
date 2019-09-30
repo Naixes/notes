@@ -780,20 +780,16 @@ module.exports = {
 
 ```
 devServer:{
-        hot: true,
-        open: true,
-        port: 4321,
-        contentBase: 'src'
+    hot: true,
+    open: true,
+    port: 4321,
+    contentBase: 'src'
 }
 ```
 
-1. 要启用热更新还要在头部引入`webpack`模块：
+#### 启用热更新
 
-```
-var webpack = require('webpack');
-```
-
-1. 在`plugins`节点下新增：
+在`plugins`节点下新增：
 
 ```
 plugins: [
@@ -802,7 +798,7 @@ plugins: [
 ]
 ```
 
-​	这样配置过后页面是强制更新会刷新页面，可以使用require改为热更新
+这样配置过后页面是强制更新会刷新页面，可以使用require改为热更新
 
 ```js
 // index.js
@@ -1564,5 +1560,9 @@ compile.js核心模块引用了tapable
 
 应用tapable：
 
-安装tapable
+
+
+安装tapable：
+
+
 
