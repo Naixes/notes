@@ -3098,25 +3098,80 @@ backface-visibility：visible/hidden 属性定义当元素不面向屏幕时是�
 
 ```css
 animation:动画名称 动画时间 运动曲线  何时开始  播放次数  是否反方向;
-
 ```
 
-![1498461096243](E:/Jennifer/other/notes/media/1498461096243.png)
+![1498461096243](./media/1498461096243.png)
 
-关于几个值，除了名字，动画时间，延时有严格顺序要求其它随意r
+关于几个值，除了名字，动画时间，延时有严格顺序要求其它随意
 
 ```css
 @keyframes 动画名称 {
   from{ 开始位置 }  0%
   to{  结束  }  100%
 }
-
 ```
 
 ```
 animation-iteration-count:infinite;  无限循环播放
 animation-play-state:paused;   暂停动画"
+```
 
+## 贝赛尔曲线
+
+https://cubic-bezier.com/#.17,.67,.83,.67
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+</head>
+<style>
+	* { margin: 0; padding: 0; }
+
+	@keyframes ver {
+		0% {
+			/* transform: translateY(0) */
+			transform: matrix(1, 0, 0, 1, 0, 0)
+		}
+
+		100% {
+			/* transform: translateY(400px) */
+			transform: matrix(1, 0, 0, 1, 0, 400)
+		}
+	}
+	@keyframes hor {
+		0% {
+			/* transform: translateX(0) */
+			transform: matrix(1, 0, 0, 1, 0, 0)
+		}
+
+		100% {
+			/* transform: translateX(400px) */
+			transform: matrix(1, 0, 0, 1, 400, 0)
+		}
+	}
+	.wrapper {
+		padding: 10px;
+		animation: hor 2s cubic-bezier(.1, 1.29, .88, .27);
+	}
+	.item {
+		height: 20px;
+		width: 20px;
+		background-color: #ccc;
+		border-radius: 50%;
+		animation: ver 2s linear;
+	}
+</style>
+<body>
+	<div class="wrapper">
+		<div class="item"></div>
+	</div>
+</body>
+</html>
 ```
 
 ## 小汽车案例
@@ -3429,11 +3484,11 @@ left 50%   然后 margin-left  版心宽度一半。
 
 ## 背景渐变
 
-在线性渐变过程中，颜色沿着一条直线过渡：从左侧到右侧、从右侧到左侧、从顶部到底部、从底部到顶部或着沿任何任意轴。如果你曾使用过制作图件，比如说Photoshop，你对线性渐变并不会陌生。
+在线性渐变过程中，颜色沿着一条直线过渡：从左侧到右侧、从右侧到左侧、从顶部到底部、从底部到顶部或着沿任何任意轴。
 
-兼容性问题很严重，我们这里之讲解线性渐变
+兼容性问题很严重
 
-语法格式： 
+线性渐变语法格式： 
 
 ```css
 background:-webkit-linear-gradient(渐变的起始位置， 起始颜色， 结束颜色)；
@@ -3442,6 +3497,45 @@ background:-webkit-linear-gradient(渐变的起始位置， 起始颜色， 结�
 ```css
 background:-webkit-linear-gradient(渐变的起始位置， 颜色 位置， 颜色位置....)；
 ```
+
+## 矩阵
+
+性能高，应用：svg，canvas，webgl，css
+
+### css
+
+#### 2D
+
+transform，矩阵为3*3，无论是旋转还是位移，本质上都是由matrix()实现的
+
+```js
+matrix(sx,tan(θy),tan(θx),sy,n,m) // n:水平偏移，m:垂直偏移，sx:缩放x，sy:缩放y
+// 旋转
+Math.cos(this.value * Math.PI / 180);
+Math.sin(this.value * Math.PI / 180); 
+```
+
+#### 3D
+
+矩阵为4*4
+
+### 工具
+
+matrix3d
+http://ds-overdesign.com/transform/matrix3d.html 
+
+CSS-Matrix3d：webpack转换
+https://github.com/Zhangdroid/CSS-Matrix3d 
+
+matrix
+http://meyerweb.com/eric/tools/matrix/ 
+
+tools：设计动画
+http://www.f2e.name/case/css3/tools.html 
+
+css 3d
+
+tridiv.com
 
 
 
