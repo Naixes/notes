@@ -128,11 +128,9 @@ title 作为元信息，可能会被用在浏览器收藏夹、微信推送卡�
 **content**，此属性包含 `http-equiv` 或 `name` 属性的值，具体取决于所使用的值。
 
 <meta name="keywords" content="WEB,CSS,鱼头" />
-
 **scheme**，此属性是用来设置或返回用于解释 content 属性的值的格式。例子如下：
 
 <meta name="revised" content="2019-04-03" scheme="YYYY-MM-DD" />
-
 MDN：不要用这属性，因为这属性并没什么用处。: )
 
 **name**，此属性定义文档级元数据的名称。值得注意的是，如果定义的元数据设置了 `itemprop`, `http-equiv` or `charset` ，就不能再设置**name**了。
