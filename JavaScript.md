@@ -5823,6 +5823,69 @@ readFile('./user.txt')
 .chain(print)
 ```
 
+完整代码：
+
+```js
+var fs = require('fs');
+var _ = require('lodash');
+//基础函子
+class Functor {
+    constructor(val) {
+        this.val = val;
+    }
+    map(f) {
+        return new Functor(f(this.val));
+    }
+}
+//Monad 函子
+class Monad extends Functor {
+    join() {
+        return this.val;
+    }
+    flatMap(f) {
+        //1.f == 接受一个函数返回的是IO函子
+        //2.this.val 等于上一步的脏操作
+        //3.this.map(f)==>IO(compose(f, this.val))=join=>compose(f, this.val) 函数组合 需要手动执行
+        //4.返回这个组合函数并执行 注意先后的顺序
+        return this.map(f).join();
+    }
+}
+var compose = _.flowRight;
+//IO函子用来包裹📦脏操作
+class IO extends Monad {
+    //val是最初的脏操作
+    static of (val) {
+        return new IO(val);
+    }
+    map(f) {
+        return IO.of(compose(f, this.val))
+    }
+}
+var readFile = function (filename) {
+    return IO.of(function () {
+        return fs.readFileSync(filename, 'utf-8');
+    });
+};
+var print = function (x) {
+    console.log("橘子🍊");
+    return IO.of(function () {
+        console.log("苹果🍎")
+        return x + "函数式";
+    });
+}
+var tail = function (x) {
+    console.log(x);
+    return IO.of(function () {
+        return x+"【京程一灯】";
+    });
+}
+const result = readFile('./user.txt') // 包裹脏操作的IO函子
+    //flatMap 继续脏操作的链式调用
+    .flatMap(print)
+    // .flatMap(tail);
+console.log('result',result().val());
+```
+
 #### 幂等
 
 指同一个函数对一个变量无论执行几次结果都是一样，幂等性在函数式编程中与纯度相关，但有不一致。
@@ -5839,11 +5902,33 @@ readFile('./user.txt')
 
 #### underscore.js
 
+Underscore 是一个 JavaScript 工具库，它提供了一整套函数式编程 的实用功能，但是没有扩展任何 JavaScript 内置对象。 他解决了 这个问题：“如果我面对一个空白的 HTML 页面，并希望立即开始 工作，我需要什么？” 他弥补了 jQuery 没有实现的功能，同时又 是 Backbone 必不可少的部分。  
+
+Underscore 提供了100多个函数，包括常用的：map、filter、invoke  — 当然还有更多专业的辅助函数，如：函数绑定、JavaScript 模板 功能、创建快速索引、强类型相等测试等等。
+
 源码可以看一下
 
 #### lodash.js
 
+lodash是一个具有一致接口、模块化、高性能等特性的JavaScript工 具库，是underscore.js的fork，其最初目标也是“一致的跨浏览器行为...，并改善性能”。  
+
+lodash采用延迟计算，意味着我们的链式方法在显式或者隐式的 value()调用之前是不会执行的，因此lodash可以进行shortcut（捷 径） fusion（融合）这样的优化，通过合并链式大大降低迭代的次 数，从而大大提升其执行性能。  
+
+就如同jQuery在全部函数前加全局的$一样，lodash使用全局的_来 提供对工具的快速访问。
+
 #### ramdajs
+
+ramda是一个非常优秀的js工具库，跟同类比更函数式主要体现在 
+
+以下几个原则  
+
+1. ramda里面的提供的函数全部都是curry的意味着函数没有默认参数可选参数从而减轻认知函数的难度。  
+
+2. ramda推崇pointfree简单的说是使用简单函数组合实现一个复杂功能，而不是单独写一个函数操作临时变量。  
+
+3. ramda有个非常好用的参数占位符 R._ 大大减轻了函数在pointfree 过程中参数位置的问题  
+
+相比underscore/lodash 感觉要干净很多。
 
 #### 实际应用场景
 
