@@ -20,13 +20,9 @@ JavaScript的解释器被称为JavaScript引擎，为浏览器的一部分，广
 
 Netscape在最初将其脚本语言命名为`LiveScript`，后来Netscape在与Sun合作之后将其改名为JavaScript。JavaScript最初受Java启发而开始设计的，因此语法上有类似之处，一些名称和命名规范也借自Java。JavaScript与Java名称上的近似，是当时Netscape为了营销考虑与Sun微系统达成协议的结果。
 
-### JavaScript最初的目的
+### JavaScript的应用
 
-最初的目的是为了处理表单的验证操作。
-
-### JavaScript现在的意义(应用场景)
-
-JavaScript 发展到现在几乎无所不能。
+最初的目的是为了处理表单的验证操作，JavaScript 发展到现在几乎无所不能。
 
 1. 网页特效
 2. 服务端开发(Node.js)
@@ -5192,37 +5188,68 @@ function getRuleByRuleName(rules, ruleName) {
 
 ## 函数式编程
 
+参考：<http://www.ruanyifeng.com/blog/2017/02/fp-tutorial.html>
+
 ### 思维
 
 #### 范畴论
 
-1. 函数式编程是范畴论的数学分支是一门很复杂的数学，认为世界上所有概念体系都可以抽象出一个个范畴
-2. 彼此之间存在某种关系概念、事物、对象等等，都构成范畴。任何事物只要找出他们之间的关系，就能定义
-3. 箭头表示范畴成员之间的关系，正式的名称叫做"态射"（morphism）。范畴论认为，同一个范畴的所有成员，就是不同状态的"变形"（transformation）。通过"态射"，一个成员可以变形成另一个成员。 
+1. 函数式编程是范畴论的数学分支，认为世界上所有概念体系都可以抽象出一个个范畴
+2. 彼此之间存在某种关系概念、事物、对象等等，都构成范畴。任何事物只要找出他们之间的关系，就能定义一个"范畴"。
+3. 范畴成员之间的关系正式的名称叫做"态射"（morphism）。范畴论认为，同一个范畴的所有成员，就是不同状态的"变形"（transformation）。通过"态射"，一个成员可以变形成另一个成员。 
+
+##### 数学模型
 
 - 所有成员是一个集合
 - 变形关系是函数 
 
+也就是说，范畴论是集合论更上层的抽象，简单的理解就是"集合 + 函数"。理论上通过函数，就可以从范畴的一个成员，算出其他所有成员。
+
+##### 范畴与容器
+
+我们可以把"范畴"想象成是一个容器，里面包含**值和值的变形关系（函数）**
+
+```js
+// 这里的范畴，就是所有彼此之间相差1的数字。
+class Category {
+  constructor(val) { 
+    this.val = val; 
+  }
+
+  addOne(x) {
+    return x + 1;
+  }
+}
+```
+
+##### 范畴论与函数式编程
+
+伴随着范畴论的发展，就发展出一整套函数的运算方法。这套方法起初只用于数学运算，后来有人将它在计算机上实现了，就变成了今天的"函数式编程"。
+
+**本质上，函数式编程只是范畴论的运算方法，跟数理逻辑、微积分、行列式是同一类东西，都是数学方法，只是碰巧它能用来写程序。**
+
+所以，为什么函数式编程要求函数必须是纯的，不能有副作用？因为它是一种数学运算，原始目的就是求值，不做其他事情，否则就无法满足函数运算法则了。
+
 #### 概念
 
 1. 函数式编程（Functional Programming）其实相对于计算机的历史，而言是一个非常古老的概念，甚至早于第一台计算机的诞生。它是在 20 世纪 三十年代引入的一套**用于研究函数定义、函数应用和递归**的形式系统。
-2. 函数式编程不是用函数来编程，也不是传统的面向过程编程。主旨在于**将复杂的函数符合成简单的函数**（计算理论，或者递归论，或者拉姆达演算）。运算过程尽量写成一系列嵌套的函数调用
-3. JavaScript 是披着 C 外衣的 Lisp。
+2. 函数式编程不是用函数来编程，也不是传统的面向过程编程。主旨在于**将复杂的函数符合成简单的函数**（计算理论，或者递归论，或者拉姆达演算）。运算过程尽量写成**一系列嵌套的函数调用**
+3. JavaScript 是披着 C 外衣的 Lisp。//不太明白
 4. 真正的火热是随着React的高阶函数而逐步升温。 
 
 #### 特点
 
 1. 函数是一等公民。所谓”第一等公民”（first class），指的是函数与其他数据类型一样，处于平等地位，可以赋值给其他变量，也可以作为参数，传入另一个函数，或者作为别的函数的返回值。 
-2. 不可改变量。在函数式编程中变量仅仅代表某个表达式。这里所说的’变量’是不能被修改的。所有的变量只能被赋一次初值
+2. 不可改变量。在函数式编程中变量仅仅代表某个表达式。这里所说的’变量’是不能被修改的。所有的变量**只能被赋一次初值**
 3. map & reduce他们是最常用的函数式编程的方法。 
-4. 只用”表达式"，不用"语句"
+4. **只用”表达式"，不用"语句"**
 3. 没有”副作用"
 4. 不修改状态
 5. 引用透明（函数运行只靠参数） 
 
-#### 核心概念
+### 核心概念
 
-##### 纯函数
+#### 纯函数
 
 对于相同的输入，永远会得到相同的输出，而且没有任何可观察的副作用，也不依赖外部环境的状态。 
 
@@ -5230,77 +5257,575 @@ function getRuleByRuleName(rules, ruleName) {
 
 优点：可缓存，降低系统复杂度
 
+```js
+import _ from 'lodash'; 
+var sin = _.memorize(x => 
+Math.sin(x)); 
+//第一次计算的时候会稍慢一点 
+var a = sin(1); 
+//第二次有了缓存，速度极快 
+var b = sin(1);
+
+//不纯的
+var min = 18; 
+var checkage = age => age > min; 
+//纯的，这很函数式 
+var checkage = age => age > 18;
+```
+
 缺点：可能存在硬编码，降低了可扩展性，柯里化可以解决
 
-##### 函数柯里化
+#### 偏应用函数
 
-传递给函数一部分参数来调用它，让它返回一个函数去处理剩下的参数。
+- 传递给函数一部分参数来调用它，让它返回一个函数去 处理剩下的参数。  
 
- 避免硬编码或依赖外部
+- 偏函数之所以“偏”，在就在于其只能处理那些能与至少 一个case语句匹配的输入，而不能处理所有可能的输入。
 
-bind是一个经典的柯里化 
+```js
+// 带⼀个函数参数 和 该函数的部分参数
+const partial = (f, ...args) => 
+ (...moreArgs) => 
+ f(...args, ...moreArgs) 
+const add3 = (a, b, c) => a + b + c 
+// 偏应⽤ `2` 和 `3` 到 `add3` 给你⼀个单参数的函数
+const fivePlus = partial(add3, 2, 3) 
+fivePlus(4) 
+//bind实现
+const add1More = add3.bind(null, 2, 3) // (c) => 2 + 3 + c
+```
+
+#### 最基本的运算
 
 ##### 函数组合
 
-解决函数嵌套的问题
+如果一个值要经过多个函数，才能变成另外一个值，就可以把所有中间步骤合并成一个函数，这叫做"函数的合成"（compose）。
 
-##### Point Free
+解决函数嵌套的问题（ [Ramda](http://www.ruanyifeng.com/blog/2017/03/ramda.html) 函数库的[`pipe`](http://ramdajs.com/docs/#pipe)方法）
 
-将一些对象自带的方法转换成纯函数
+```js
+const compose = (f, g) => (x => f(g(x)));
+var first = arr => arr[0];
+var reverse = arr => arr.reverse();
+var last = compose(first, reverse);
+last([1,2,3,4,5]);
 
-可以减少不必要的命名，让代码简洁通用
+// 函数的合成还必须满足结合律。
+compose(f, compose(g, h))
+// 等同于
+compose(compose(f, g), h)
+// 等同于
+compose(f, g, h)
+```
 
-##### 声明式与命令式
+##### 函数柯里化
+
+`f(x)`和`g(x)`合成为`f(g(x))`，有一个隐藏的前提，就是`f`和`g`都只能接受一个参数。如果可以接受多个参数，比如`f(x, y)`和`g(a, b, c)`，函数合成就非常麻烦。
+
+这时就需要函数柯里化了。所谓"柯里化"，就是把一个多参数的函数，转化为单参数函数。
+
+利用偏应用函数实现，传递给函数一部分参数来调用它，让它返回一个函数去处理剩下的参数。
+
+```js
+// 柯里化之后，避免硬编码或依赖外部
+var checkage = min => (age => age > min);
+var checkage18 = checkage(18);
+checkage18(20);
+
+// 柯⾥化之前
+function add(x, y) { 
+ return x + y; 
+} 
+add(1, 2) // 3 
+// 柯⾥化之后
+function addX(y) { 
+ return function (x) { 
+ 	return x + y; 
+ }; 
+} 
+addX(2)(1) // 3
+
+// bind是一个经典的柯里化 
+function foo(p1, p2) { 
+ this.val = p1 + p2; 
+} 
+// 将this值为null
+var bar = foo.bind(null, "p1"); 
+var baz = new bar("p2"); 
+console.log(baz.val);
+
+// 创建一个函数，该函数接收 func 的参数，要么调用func返回的结果，如果 func 所需参数已经提供，则直接返回 func 所执行的结果。或返回一个函数，接受余下的func 参数的函数，可以使用 func.length 强制需要累积的参数个数。
+import { curry } from 'lodash'; 
+var match = curry((reg, str) => str.match(reg)); 
+var filter = curry((f, arr) => arr.filter(f)); 
+var haveSpace = match(/\s+/g); 
+//haveSpace(“ffffffff”); 
+//haveSpace(“a b"); 
+//filter(haveSpace, ["abcdefg", "Hello World"]); 
+filter(haveSpace)(["abcdefg", "Hello World"])
+```
+
+事实上柯里化是一种“预加载”函数的方法，通过传递较少的参数， 得到一个已经记住了这些参数的新函数，某种意义上讲，这是一种 **对参数的“缓存”**，是一种非常高效的编写函数的方法
+
+#### Point Free编程风格
+
+参考：<http://www.ruanyifeng.com/blog/2017/03/pointfree.html>
+
+把数据处理的过程，定义成一种与参数无关的合成运算。不需要用到代表数据的那个参数，只要把一些简单的运算步骤合成在一起即可。**这就叫做 Pointfree：不使用所要处理的值，只合成运算过程。**中文可以译作"无值"风格。
+
+将一些对象自带的方法转换成纯函数，可以减少不必要的命名，让代码简洁通用
+
+```js
+const f = str => str.toUpperCase().split(' ');
+// 改造后
+var toUpperCase = word => word.toUpperCase(); 
+var split = x => (str => str.split(x)); 
+// var f = compose(split(' '), toUpperCase); 
+var f = R.pipe(split(' '), toUpperCase); 
+f("abcd efgh");
+
+// 示例
+var isWorker = s => s === 'worker';
+var getWorkers = R.filter(R.pipe(propRole, isWorker));
+
+var data = [
+  {name: '张三', role: 'worker'},
+  {name: '李四', role: 'worker'},
+  {name: '王五', role: 'manager'},
+];
+getWorkers(data)
+// [
+//   {"name": "张三", "role": "worker"},
+//   {"name": "李四", "role": "worker"}
+// ]
+```
+
+Pointfree 就是运算过程抽象化，处理一个值，但是不提到这个值。这样做有很多好处，它能够让代码更清晰和简练，更符合语义，更容易复用，测试也变得轻而易举。
+
+#### 声明式与命令式
 
 命令式：通过编写一条条的指令让计算机执行，涉及到很多的细节，比如for
 
 声明式：通过表达式的方式来声明，比如map
 
-##### 惰性求值、惰性函数
+```js
+//命令式
+let CEOs = [];
+for(var i = 0; i < companies.length; i++)
+ CEOs.push(companies[i].CEO)
+}
+//声明式：这种声明式的代码，对于无副作用的纯函数，我们完全可以不考虑函数内部是如何实现的，专注于编写业务代码。
+let CEOs = companies.map(c => c.CEO);
+```
+
+#### 惰性求值、惰性函数??
 
 举例：ajax封装
 
-##### 高阶函数
+#### 高阶函数
 
-函数当做参数，将传入的函数封装并返回，达到更高的抽象
+函数当做参数，将传入的函数封装并返回封装后的函数，达到更高的抽象
 
-##### 尾递归优化
+```js
+//命令式
+var add = function(a,b){ 
+ return a + b;
+};
+function math(func,array){ 
+ return func(array[0],array[1]);
+}
+math(add,[1,2]); // 3
+```
 
- 指函数内部的最后一个动作是函数调用。该调用的返回值，直接返回给函数。函数调用自身，称为递归。如果尾调用自身，就称为尾递归。递归需要保存大量的调用记录，很容易发生栈溢出错误，如果使用尾递归优化，将递归变为循 环，那么只需要保存一个调用记录，这样就不会发生栈溢出错误了。 
+#### 尾递归优化??
+
+```js
+function foo(n) { 
+ return bar(n*2); 
+} 
+function bar() { 
+ //查看调⽤帧
+ console.trace(); 
+} 
+foo(1);
+
+//强制指定 只留下bar 
+return continue 
+!return
+#function() 
+//遗憾的是浏览器并未⽀持
+```
+
+指函数内部的最后一个动作是函数调用。该调用的返回值，直接返回给函数。递归需要**保存大量的调用记录**，很容易发生栈溢出错误，如果使用尾递归优化，将**递归变为循环**，那么只需要保存一个调用记录，这样就不会发生栈溢出错误了。 
+
+```js
+// 不是尾递归，无法优化 斐波那契数列
+function factorial(n) { 
+ if (n === 1) return 1;
+ return n * factorial(n - 1);
+}
+// 调用一次sum(x, total)后，会进入下一个栈，相关的数据信息和跟随进入，不再放在堆栈上保存。当计算完最后的值之后，直接返回到最上层的sum(5,0)。这能有效的防止堆栈溢出。 在ECMAScript 6，我们将迎来尾递归优化，通过尾递归优化，javascript代码在解释成机器码的时候，将会向while看起，也就是说，同时拥有数学表达能力和while的效能。
+function factorial(n, total) { 
+ if (n === 1) return total;
+ return factorial(n - 1, n * total);
+} //ES6强制使用尾递归
+```
 
 1. 尾递归的判断标准是函数运行【最后一步】是否调用自身，而不是 是否在函数的【最后一行】调用自身,最后一行调用其他函数 并返回叫尾调用。  
-2. 按道理尾递归调用调用栈永远都是更新当前的栈帧而已，这样就完全避免了爆栈的危险。但是现如今的浏览器并未完全支持☹原因有二 ①在引擎层面消除递归是一个隐式的行为，程序员意识不到。（改为while）②堆栈信息丢失了 开发者难已调试。
+
+2. 按道理尾递归调用调用栈永远都是更新当前的栈帧而已，这样就完全避免了爆栈的危险。但是现如今的浏览器并未完全支持
+
+   原因：①在引擎层面消除递归是一个隐式的行为，程序员意识不到。（改为while）②堆栈信息丢失了 开发者难已调试。
+
 3. 既然浏览器不支持我们可以把这些递归写成while~ 
 
-##### 闭包
+#### 闭包
 
 ### 函子
 
-#### 范畴与容器
+函数不仅可以用于同一个范畴之中值的转换，还可以用于将一个范畴转成另一个范畴。这就涉及到了函子（Functor）。
 
-#### 容器、Functor（函子）
+函子是函数式编程里面最重要的数据类型，也是基本的运算单位和功能单位。
 
-#### map
+它首先是一种范畴，也就是说，是一个容器，包含了值和变形关系。**比较特殊的是，它的变形关系可以依次作用于每一个值，将当前容器变形成另一个容器。**
 
-#### of
+#### 代码实现
+
+##### map
+
+任何具有`map`方法的数据结构，都可以当作函子的实现。
+
+```js
+// Functor是一个函子，它的map方法接受函数f作为参数，然后返回一个新的函子，里面包含的值是被f处理过的（f(this.val)）。
+class Functor {
+  constructor(val) { 
+    this.val = val; 
+  }
+
+  // 一般约定，函子的标志就是容器具有map方法。该方法将容器里面的每一个值，映射到另一个容器。
+  map(f) {
+    return new Functor(f(this.val));
+  }
+}
+```
+
+**一般约定，函子的标志就是容器具有map方法。该方法将容器里面的每一个值，映射到另一个容器。**
+
+```js
+(new Functor(2)).map(function (two) {
+  return two + 2;
+});
+// Functor(4)
+
+(new Functor('bombs')).map(_.concat(' away')).map(_.prop('length'));
+// Functor(10)
+```
+
+上面的例子说明，函数式编程里面的**运算，都是通过函子完成**，即运算不直接针对值，而是针对这个值的容器----函子。函子本身具有对外接口（`map`方法），各种函数就是运算符，通过接口接入容器，引发容器里面的值的变形。这样容器就可以自由地选择何时何地如何操作这个函数，以致于 拥有惰性求值、错误处理、异步调用等等非常牛掰的特性。
+
+因此，**学习函数式编程，实际上就是学习函子的各种运算。**由于可以把运算方法封装在函子里面，所以又衍生出各种不同类型的函子，有多少种运算，就有多少种函子。函数式编程就变成了运用不同的函子，解决实际问题。
+
+##### of
+
+上面生成新的函子的时候，用了`new`命令。这实在太不像函数式编程了，因为`new`命令是面向对象编程的标志。
+
+**函数式编程一般约定，函子有一个of方法，用来生成新的容器。**
+
+```js
+Functor.of = function(val) {
+  return new Functor(val);
+};
+
+Functor.of(2).map(function (two) {
+  return two + 2;
+});
+// Functor(4)
+```
 
 #### Maybe函子
 
-利用三元表达式，也可以当做if...else用
+函子接受各种函数，处理容器内部的值。这里就有一个问题，容器内部的值可能是一个空值（比如`null`），而外部函数未必有处理空值的机制，如果传入空值，很可能就会出错。
+
+Maybe 函子就是为了解决这一类问题而设计的。简单说，它的`map`方法里面设置了空值检查。
+
+```js
+class Maybe extends Functor {
+  map(f) {
+    // 利用三元表达式，也可以当做if...else用
+    return this.val ? Maybe.of(f(this.val)) : Maybe.of(null);
+  }
+}
+
+// or
+var Maybe = function(x) { 
+ this.__value = x; 
+} 
+Maybe.of = function(x) { 
+ return new Maybe(x); 
+} 
+Maybe.prototype.map = function(f) { 
+ return this.isNothing() ? Maybe.of(null) : Maybe.of(f(this.__value)); 
+} 
+Maybe.prototype.isNothing = function() { 
+ return (this.__value === null || this.__value === undefined); 
+} 
+
+Maybe.of(null).map(function (s) {
+  return s.toUpperCase();
+});
+// Maybe(null)
+```
 
 #### 错误处理、Either函子
 
-代替try...catch
+条件运算`if...else`是最常见的运算之一，函数式编程里面，使用 Either 函子表达。
 
-#### AP函子 
+Either 函子内部有两个值：左值（`Left`）和右值（`Right`）。右值是正常情况下使用的值，左值是右值不存在时使用的默认值。
 
-#### IO函子
+用途：
+
+1. 提供默认值
+2. 代替try...catch
+
+```js
+class Either extends Functor {
+  constructor(left, right) {
+    this.left = left;
+    this.right = right;
+  }
+
+  map(f) {
+    return this.right ? 
+      Either.of(this.left, f(this.right)) :
+      Either.of(f(this.left), this.right);
+  }
+}
+
+Either.of = function (left, right) {
+  return new Either(left, right);
+};
+
+var addOne = function (x) {
+  return x + 1;
+};
+
+Either.of(5, 6).map(addOne);
+// Either(5, 7);
+
+Either.of(1, null).map(addOne);
+// Either(2, null);
+
+// Either 函子的常见用途是提供默认值。下面是一个例子。
+Either
+.of({address: 'xxx'}, currentUser.address)
+.map(updateField);
+
+// 代替try...catch
+// 1
+function parseJSON(json) {
+  // 左值为空，就表示没有出错，否则左值会包含一个错误对象e。一般来说，所有可能出错的运算，都可以返回一个 Either 函子。
+  try {
+    return Either.of(null, JSON.parse(json));
+  } catch (e: Error) {
+    return Either.of(e, null);
+  }
+}
+//2
+var Left = function(x) { 
+ this.__value = x; 
+} 
+var Right = function(x) { 
+ this.__value = x; 
+} 
+Left.of = function(x) { 
+ return new Left(x); 
+} 
+Right.of = function(x) { 
+ return new Right(x); 
+}
+// 这⾥不同！！！
+// Left 可以让调用链中任意一环的错误立刻返回到调用链的尾部，这给我们错误处理带来了很大的方便，再也不用一层又一层的 try/catch。
+Left.prototype.map = function(f) { 
+ return this; 
+} 
+Right.prototype.map = function(f) { 
+ return Right.of(f(this.__value)); 
+}
+var getAge = user => user.age ? Right.of(user.age) : 
+Left.of("ERROR!"); 
+getAge({name: 'stark', age: '21'}).map(age => 'Age is ' + age); 
+//=> Right('Age is 21') 
+getAge({name: 'stark'}).map(age => 'Age is ' + age); 
+//=> Left('ERROR!')
+```
+
+#### AP函子
+
+函子里面包含的值，完全可能是函数。我们可以想象这样一种情况，一个函子的值是数值，另一个函子的值是函数。
+
+```js
+function addTwo(x) {
+  return x + 2;
+}
+
+const A = Functor.of(2);
+const B = Functor.of(addTwo)
+```
+
+上面代码中，函子`A`内部的值是`2`，函子`B`内部的值是函数`addTwo`。有时，我们想让函子`B`内部的函数，可以使用函子`A`内部的值进行运算。这时就需要用到 ap 函子。
+
+ap 是 applicative（应用）的缩写。凡是部署了`ap`方法的函子，就是 ap 函子。
+
+```js
+class Ap extends Functor {
+  // ap方法的参数不是函数，而是另一个函子。
+  ap(F) {
+    return Ap.of(this.val(F.val));
+  }
+}
+
+Ap.of(addTwo).ap(Functor.of(2))
+// Ap(4)
+```
+
+ap 函子的意义在于，对于那些多参数的函数，就可以从多个容器之中取值，实现函子的链式操作。
+
+```js
+function add(x) {
+  return function (y) {
+    return x + y;
+  };
+}
+
+Ap.of(add).ap(Maybe.of(2)).ap(Maybe.of(3));
+// Ap(5)
+// 例外一种写法
+Ap.of(add(2)).ap(Maybe.of(3));
+```
 
 #### Monad函子
 
+1. Monad就是一种设计模式，表示将一个运算过程，通过 函数拆解成互相连接的多个步骤。你只要提供下一步运算 
+
+所需的函数，整个运算就会自动进行下去。  
+
+2. Promise 就是一种 Monad。  
+
+3. Monad 让我们避开了嵌套地狱，可以轻松地进行深度嵌 套的函数式编程，比如IO和其它异步任务。 
+
+
+
+
+
+函子是一个容器，可以包含任何值。函子之中再包含一个函子，也是完全合法的。但是，这样就会出现多层嵌套的函子。
+
+```js
+Maybe.of(
+  Maybe.of(
+    Maybe.of({name: 'Mulburry', number: 8402})
+  )
+)
+```
+
+上面这个函子，一共有三个`Maybe`嵌套。如果要取出内部的值，就要连续取三次`this.val`。这很不方便，因此就出现了 Monad 函子。
+
+**Monad 函子的作用是，总是返回一个单层的函子。**它有一个**`flatMap`方法**，与`map`方法作用相同，唯一的区别是如果生成了一个嵌套函子，它会取出后者内部的值，保证返回的永远是一个单层的容器，不会出现嵌套的情况。
+
+```js
+class Monad extends Functor {
+  // join方法保证了flatMap方法总是返回一个单层的函子
+  join() {
+    return this.val;
+  }
+  flatMap(f) {
+    // 如果函数f返回的是一个函子，那么this.map(f)就会生成一个嵌套的函子
+    return this.map(f).join();
+  }
+}
+```
+
+#### IO函子
+
+1. 真正的程序总要去接触肮脏的世界。 
+
+2. IO 跟前面那几个 Functor 不同的地方在于，它的 __value 是一个函数。 它把不纯的操作（比如 IO、网络请求、DOM）包裹到一个函数内，从而 延迟这个操作的执行。所以我们认为，IO 包含的是被包裹的操作的返回 值。  
+
+3. IO其实也算是惰性求值。  
+
+4. IO负责了调用链积累了很多很多不纯的操作，带来的复杂性和不可维 护性
+
+Monad 函子的重要应用，就是实现 I/O （输入输出）操作。
+
+```js
+import _ from 'lodash'; 
+var compose = _.flowRight; 
+class IO extends Monad{
+    map(f){
+        return IO.of(compose(f, this.__value))
+    }
+ }
+```
+
+I/O 是不纯的操作，普通的函数式编程没法做，这时就需要把 IO 操作写成`Monad`函子，通过它来完成。
+
+```js
+var fs = require('fs');
+
+var readFile = function(filename) {
+  return new IO(function() {
+    return fs.readFileSync(filename, 'utf-8');
+  });
+};
+
+readFile('./user.txt') 
+.flatMap(tail) 
+.flatMap(print) 
+// 等同于
+readFile('./user.txt') 
+.chain(tail) 
+.chain(print)
+
+var print = function(x) {
+  return new IO(function() {
+    console.log(x);
+    return x;
+  });
+}
+```
+
+上面代码中，读取文件和打印本身都是不纯的操作，但是`readFile`和`print`却是纯函数，因为它们总是返回 IO 函子。
+
+如果 IO 函子是一个`Monad`，具有`flatMap`方法，那么我们就可以像下面这样调用这两个函数。
+
+```js
+readFile('./user.txt')
+.flatMap(print)
+```
+
+这就是神奇的地方，上面的代码完成了不纯的操作，但是因为`flatMap`返回的还是一个 IO 函子，所以这个表达式是纯的。我们通过一个纯的表达式，完成带有副作用的操作，这就是 Monad 的作用。
+
+由于返回还是 IO 函子，所以可以实现链式操作。因此，在大多数库里面，`flatMap`方法被改名成`chain`。
+
+```js
+var tail = function(x) {
+  return new IO(function() {
+    return x[x.length - 1];
+  });
+}
+
+// 读取文件user.txt，然后选取最后一行输出。
+readFile('./user.txt')
+.flatMap(tail)
+.flatMap(print)
+
+// 等同于
+readFile('./user.txt')
+.chain(tail)
+.chain(print)
+```
+
 #### 幂等
 
-同一个函数对一个变量无论执行几次结果都是一样的
+指同一个函数对一个变量无论执行几次结果都是一样，幂等性在函数式编程中与纯度相关，但有不一致。
 
 ### 应用场景
 
