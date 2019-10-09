@@ -430,16 +430,6 @@ HTML提供了6个等级的标题，即 <h1>、<h2>、<h3>、<h4>、<h5>和<h6>
 <br />
 ```
 
-### div span标签
-
-div（分类**块级元素**）  span（分类**行内元素**）    
-
-是没有语义的，是我们网页布局主要的2个容器，可用于对大的内容块设置样式属性。 
-
-```html
-<div> 这是头部 </div>    <span>今日价格</span>
-```
-
 ### 文本格式化标签
 
 使文字以特殊的方式显示：
@@ -528,20 +518,6 @@ type：A，a，I，i
 | <wbr>       | 表示可以换行的位置，把多个单词粘成很长时使用       |
 | <menu>      | ul的变体，功能菜单                                 |
 
-### HTML4语义化
-
-div用来布局
-
-strong、em
-
-dl、dd、dt
-
-label
-
-ol
-
-#### 布局
-
 ### HTML5语义化标签
 
 | 标签         | 描述                                                         |
@@ -592,8 +568,6 @@ ol
 </figure> 
 ```
 
-
-
 #### 语义化标签呈现Wiki百科
 
 开这个页面：https://en.wikipedia.org/wiki/World_Wide_Web
@@ -643,6 +617,16 @@ ol
     	</pre>
     </p>
 </artical>
+```
+
+## div span标签
+
+div（分类**块级元素**）  span（分类**行内元素**）    
+
+是没有语义的，是我们网页布局主要的2个容器，可用于对大的内容块设置样式属性。 
+
+```html
+<div> 这是头部 </div>    <span>今日价格</span>
 ```
 
 ## 链接标签
@@ -820,7 +804,7 @@ rel 前可以加上 alternate，成为 rel=“alternate stylesheet”，此时�
 
 这样的 link 表示本网页被引用时，应该使用的 pingback 地址，这个机制是一份独立的标准，遵守 pingback 协议的网站在引用本页面时，会向这个 pingback url 发送一个消息。
 
-## 特殊字符标签
+## 特殊字符
 
 | 特殊字符 | 描述     | 代码    |
 | -------- | -------- | ------- |
@@ -899,6 +883,7 @@ rel 前可以加上 alternate，成为 rel=“alternate stylesheet”，此时�
 
 ```html
 <table border="1">
+  <caption></caption>
   <thead>
     <tr>
       <th>Month</th>

@@ -1,4 +1,4 @@
-# 5常见浏览器介绍
+# 常见浏览器介绍
 
 ```
 浏览器是网页运行的平台，五大浏览器：IE、火狐（Firefox）、谷歌（Chrome）、Safari和Opera。
@@ -51,18 +51,20 @@ Windows Phone 8 系统浏览器内核是 Trident。
 
 # Web存储
 
-### cookie，localStorage，sessionStorage，indexDB
+## cookie，localStorage，sessionStorage，indexDB，indexDB
+
+### 对比
 
 | 特性         | cookie                                     | localStorage             | sessionStorage | indexDB                  | Web SQL      |
 | ------------ | ------------------------------------------ | ------------------------ | -------------- | ------------------------ | ------------ |
 | 数据生命周期 | 一般由服务器生成，可以设置过期时间         | 除非被清理，否则一直存在 | 页面关闭就清理 | 除非被清理，否则一直存在 |              |
-| 数据存储大小 | 4K                                         | 5M                       | 5M             | 无限、50M                | 50M          |
-| 与服务端通信 | 每次都会携带在 header 中，对于请求性能影响 | 不参与，同步             | 不参与         | 不参与，异步读取数据     | 异步读取数据 |
+| 数据存储大小 | 4K                                         | 2.5-10M（根据浏览器）    | 5M             | 大于250M、无限           | 50M          |
+| 与服务端通信 | 每次都会携带在 header 中，对于请求性能影响 | 不参与，同步             | 不参与         | 异步读取数据             | 异步读取数据 |
 |              |                                            |                          |                | 关系型数据库             | 关系型数据库 |
 
 从上表可以看到，`cookie` 已经不建议用于存储。如果没有大量数据存储需求的话，可以使用 `localStorage` 和 `sessionStorage` 。对于不怎么改变的数据尽量使用 `localStorage` 存储，否则可以用 `sessionStorage` 存储。
 
-sessionStorage/localStorage：将数据存储到本地
+**sessionStorage/localStorage**：将数据存储到本地
 
 API：
 
@@ -73,19 +75,21 @@ window.sessionStorage.removeItem('name')
 window.sessionStorage.clear()
 ```
 
-**sessionStorage**
+### sessionStorage
 
 1. 存储在当前页面内存中
 2. 5M左右
 
-**localStorage**
+### localStorage
 
 1. 同一个浏览器可以共享
 2. 永久存储，存储在硬盘
-3. 20M左右，超过2.5M时会有性能问题
-4. 移动端的一些离线异步js会放到这里
+3. 2.5-10M左右，所以超过2.5M时会有性能问题
+4. 移动端的一些离线异步js可能会放到这里
 
-对于 `cookie` 来说，我们还需要注意安全性。
+### cookie
+
+对于 **`cookie`** 来说，我们还需要注意安全性。
 
 | 属性      | 作用                                                         |
 | --------- | ------------------------------------------------------------ |
@@ -94,7 +98,29 @@ window.sessionStorage.clear()
 | secure    | 只能在协议为 HTTPS 的请求中携带                              |
 | same-site | 规定浏览器不能在跨域请求中携带 Cookie，减少 CSRF 攻击        |
 
-### Service Worker
+### indexDB
+
+参考：<http://www.ruanyifeng.com/blog/2018/07/indexeddb.html>
+
+特点：
+
+**（1）键值对储存。** IndexedDB 内部采用对象仓库（object store）存放数据。所有类型的数据都可以直接存入，包括 JavaScript 对象。对象仓库中，数据以"键值对"的形式保存，每一个数据记录都有对应的主键。
+
+**（2）异步。** IndexedDB 操作时不会锁死浏览器，用户依然可以进行其他操作，这与 LocalStorage 形成对比，后者的操作是同步的。为了防止大量数据的读写，拖慢网页的表现。
+
+**（3）支持事务。** IndexedDB 支持事务（transaction），这意味着一系列操作步骤之中，只要有一步失败，整个事务就都取消，数据库回滚到事务发生之前的状态。
+
+**（4）同源限制** IndexedDB 受到同源限制，每一个数据库对应创建它的域名。网页只能访问自身域名下的数据库，而不能访问跨域的数据库。
+
+**（5）储存空间大** IndexedDB 的储存空间比 LocalStorage 大得多，一般来说不少于 250MB，甚至没有上限。
+
+**（6）支持二进制储存。** IndexedDB 不仅可以储存字符串，还可以储存二进制数据（ArrayBuffer 对象和 Blob 对象）。
+
+### Web SQL
+
+参考：<https://www.cnblogs.com/ljwsyt/p/9760266.html>
+
+## Service Worker
 
 Service Worker 是运行在浏览器背后的**独立线程**，一般可以用来实现缓存功能。使用 Service Worker的话，传输协议必须为 **HTTPS**。因为 Service Worker 中涉及到请求拦截，所以必须使用 HTTPS 协议来保障安全。
 
@@ -332,7 +358,7 @@ Memory Cache 也就是内存中的缓存，读取内存中的数据肯定比磁�
 - 对于大文件来说，大概率是不存储在内存中的，反之优先
 - 当前系统内存使用率高的话，文件优先存储进硬盘
 
-###Disk Cache
+### Disk Cache
 
 Disk Cache 也就是存储在硬盘中的缓存，读取速度慢点，但是什么都能存储到磁盘中，比之 Memory Cache **胜在容量和存储时效性上。**
 
@@ -392,7 +418,7 @@ Cache-control: max-age=30
 
 ![img](https://user-gold-cdn.xitu.io/2018/12/5/1677ef2cd7bf1bba?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)常见指令作用
 
-###协商缓存
+### 协商缓存
 
 如果缓存过期了，就需要发起请求验证资源是否有更新。协商缓存可以通过设置两种 HTTP Header 实现：`Last-Modified` 和 `ETag` 。
 
@@ -419,21 +445,21 @@ Cache-control: max-age=30
 
 对于这种情况，浏览器会采用一个**启发式的算法**，通常会取响应头中的 `Date` 减去 `Last-Modified` 值的 10% 作为缓存时间。
 
-##实际场景应用缓存策略
+## 实际场景应用缓存策略
 
 单纯了解理论而不付诸于实践是没有意义的，接下来我们来通过几个场景学习下如何使用这些理论。
 
-###频繁变动的资源
+### 频繁变动的资源
 
 对于频繁变动的资源，首先需要使用 `Cache-Control: no-cache` 使浏览器每次都请求服务器，然后配合 `ETag` 或者 `Last-Modified` 来验证资源是否有效。这样的做法虽然不能节省请求数量，但是能显著减少响应数据大小。
 
-###代码文件
+### 代码文件
 
 这里特指除了 HTML 外的代码文件，因为 HTML 文件一般不缓存或者缓存时间很短。
 
 一般来说，现在都会使用工具来打包代码，那么我们就可以对文件名进行哈希处理，只有当代码修改后才会生成新的文件名。基于此，我们就可以给代码文件设置缓存有效期一年 `Cache-Control: max-age=31536000`，这样只有当 HTML 文件中引入的文件名发生了改变才会去下载最新的代码文件，否则就一直使用缓存。
 
-#浏览器渲染原理
+# 浏览器渲染原理
 
 学习浏览器渲染原理更多的是为了解决性能的问题，如果不了解这部分的知识，你就不知道什么情况下会对性能造成损伤。
 
@@ -633,17 +659,83 @@ Cache-control: max-age=30
 
 
 
+
+
 # 同源策略
 
-设置同源策略：domain
+参考：<http://www.ruanyifeng.com/blog/2016/04/same-origin-policy.html>
 
-img，iframe，script(jsonp)，link(css:url)可以跨域
+## 含义
 
-websocket，postMessage(iframe，image)
+- 协议相同
+- 域名相同
+- 端口相同
 
-把代码压缩成图片
+目的，是为了保证用户信息的安全，防止恶意的网站窃取数据。
+
+**img，iframe，script(jsonp)，link(css:url)不受同源策略限制**
+
+## 限制范围
+
+（1） Cookie、LocalStorage 和 IndexDB 无法读取。
+
+（2） DOM 无法获得。
+
+（3） AJAX 请求不能发送。
+
+## domain
+
+两个网页一级域名相同，只是二级域名不同，浏览器允许通过设置`document.domain`共享 Cookie。
+
+举例来说，A网页是`http://w1.example.com/a.html`，B网页是`http://w2.example.com/b.html`，那么只要设置相同的`document.domain`，两个网页就可以共享Cookie。
+
+```javascript
+// A
+document.domain = 'example.com';
+document.cookie = "test1=hello";
+// B
+var allCookie = document.cookie;
+```
+
+注意，这种方法只适用于 Cookie 和 iframe 窗口，LocalStorage 和 IndexDB 无法通过这种方法，规避同源政策，要使用PostMessage API。
+
+另外，服务器也可以在设置Cookie的时候，指定Cookie的所属域名为一级域名，比如`.example.com`。
+
+```http
+Set-Cookie: key=value; domain=.example.com; path=/
+```
+
+这样的话，二级域名和三级域名不用做任何设置，都可以读取这个Cookie。
+
+## 跨域
+
+### jsonp
+
+利用script标签没用跨域限制的特点，向服务端发送一个带有回调函数名称和参数的请求，服务端根据参数获取数据后将数据作为参数，返回一个回调函数的调用脚本。
+
+### CORS（跨域资源共享）
+
+需要前后端同时支持，主要是在服务端配置access-control-allow-origin
+
+分为两种请求简单请求和复杂请求，复杂请求会先发一个预检请求，服务端允许后响应会多几条access-control-allow-origin相关字段，不允许会正常返回但不包含这些字段
+
+### hash
+
+hash改变不会刷新页面
+
+在A页面包含跨域页面B时，获取B页面改变hash传递参数，在B页面监听hash的改变
+
+### postMessage
+
+H5类似于hash，利用window.postMessage传递参数，在另一个页面监听message事件执行回调
+
+### webSocket
+
+应对HTTP协议只能客户端发起请求效率低的缺陷一种网络通信协议，客户端服务端都能发送请求，不受同源限制
 
 
+
+把代码压缩成图片？？？
 
 # 前端优化
 
@@ -869,8 +961,6 @@ const debounce = (func, wait = 50) => {
 CDN 的原理是尽可能的在各个地方分布机房缓存数据，这样即使我们的根服务器远在国外，在国内的用户也可以通过国内的机房迅速加载资源。
 
 因此，我们可以将静态资源尽量使用 CDN 加载，由于浏览器对于单个域名有并发请求上限，可以考虑使用多个 CDN 域名。并且对于 CDN 加载静态资源需要注意 CDN 域名要与主站不同，否则每次请求都会带上主站的 Cookie，平白消耗流量。
-
- 
 
 - 减少重绘避免重排，本质是合并修改
 
