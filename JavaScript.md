@@ -2353,6 +2353,187 @@ console.log(obj.name);
 console.log(obj.age);
 ```
 
+## ES5
+
+es5shim
+
+参考：https://www.zhangxinxu.com/wordpress/2012/01/introducing-ecmascript-5-1/
+
+### 严格模式
+
+开启：“use strict”
+
+- 未声明的变量赋值抛出一个`ReferenceError`, 而不是创建一个全局变量。
+- 不止一次对对象字面量分配相同的属性会抛出`SyntaxError`.（Chrome未重现）
+- 使用`with`语句抛出`SyntaxError`.
+
+https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Strict_mode
+
+### JSON
+
+ES5提供一个全局的`JSON`对象，用来序列化(`JSON.stringify`)和反序列化(JSON.parse)对象为JSON格式。
+
+之前使用eval反序列化json
+
+- `let str = JSON.strinify(json)`会做标准化处理
+- `let json = JSON.parse(str)`
+
+**JSON.parse(text [, reviver])**
+
+`JSON.parse`接受文本(JSON格式)并转换成一个ECMAScript值。该可选的reviver参数是有带有`key`和`value`两个参数的函数，其作用于结果——让过滤和转换返回值成为可能。
+
+如果我们想确保解析的值是个整数，我们可以使用reviver方法。
+
+```js
+var result = JSON.parse('{"a": 1, "b": "2"}', function(key, value){
+  if (typeof value == 'string'){
+    return parseInt(value);
+  } else {
+    return value; 
+  }
+})
+
+>> result.b
+2
+```
+
+**JSON.stringify(value [, replacer [, space]])**
+
+`JSON.stringify`允许作者接受一个ECMAScript值然后转换成JSON格式的字符串。 在其最简单的形式中，`JSON.stringify`接受一个值返回一个字符串，如果我们需要改变值字符串化的方式，或是对我们选择的提供过滤，我们可以将其传给replacer函数。
+
+```js
+var nums = {
+  "first": 7,
+  "second": 14,
+  "third": 13
+}
+
+var luckyNums = JSON.stringify(nums, function(key, value){
+  if (value == 13) {
+    return undefined;
+  } else {
+    return value;
+  }
+});
+
+>> luckyNums
+'{"first": 7, "second": 14}'
+```
+
+如果replacer方法返回`undefined`, 则键值对就不会包含在最终的JSON中。我们同样可以传递一个space参数以便获得返回结果的可读性帮助。space参数可以是个数字，表明了作缩进的JSON字符串或字符串每个水平上缩进的空格数。如果参数是个超过10的数值，或是超过10个字符的字符串，将导致取数值10或是截取前10个字符。
+
+```js
+var luckyNums = JSON.stringify(nums, function(key, value) {
+  if (value == 13) {
+    return undefined;
+  } else {
+    return value;
+  }
+}, 2);
+
+>> luckyNums
+'{
+  "first":7,
+  "second":14
+}'
+```
+
+### 新增对象
+
+下面的方法是添加到`Object`上的构造器：
+
+- `Object.getPrototypeOf`
+- `Object.getOwnPropertyDescriptor`
+- `Object.getOwnPropertyNames`
+- `Object.create` // 生成副本，实现继承
+- `Object.defineProperty`
+- `Object.defineProperties`
+- `Object.seal`
+- `Object.freeze`
+- `Object.preventExtensions`
+- `Object.isSealed`
+- `Object.isFrozen`
+- `Object.isExtensible`
+- `Object.keys` // 返回所有属性值
+
+这些新增的好处之一是对象的属性有了更多控制，例如哪些是允许被修改的，哪些是可以枚举的，哪些是可以删除的等。这个的实现通过程序访问对象的*属性描述符(property descriptors)*. 例如：
+
+```js
+var cat = {};
+
+Object.defineProperty(cat, "name", {
+  value: "Maru",
+  writable: false,
+  enumerable: true,
+  configurable: false
+});
+
+Object.defineProperty(cat, "skill", {
+  value: "exploring boxes",
+  writable: true,
+  enumerable: true,
+  configurable: true
+});
+```
+
+对于我们的`cat`对象, 其名字`name`不能被改变，但是会出现在`for-in`循环中。
+
+### 新增数组
+
+以下方法添加到了Array `prototype`对象上:
+
+- `Array.prototype.indexOf`
+- `Array.prototype.lastIndexOf`
+- `Array.prototype.every`
+- `Array.prototype.some`
+- `Array.prototype.forEach`
+- `Array.prototype.map`
+- `Array.prototype.filter`
+- `Array.prototype.reduce`
+- `Array.prototype.reduceRight`
+
+关于[ES5数组”extras”](http://dev.opera.com/articles/view/javascript-array-extras-in-detail/) Dmitry Soshnikov写过一篇有深度的参考文章。
+
+Dmitry的文章中有一个没有提到，就是`Array.isArray`, 正如你看到的，这厮直接写在了`Array`构造器上，而不是`prototype`对象上。`Array.isArray`会按照你所期待的那样去做 — 这是一个根据参数的[[Class]]内部属性是否是”Array”返回`true`或`false`.
+
+```js
+Array.isArray("NO U")
+>> false
+
+Array.isArray(["NO", "U"])
+>> true
+```
+
+在ES3中，唯一可靠的确定一个值是数组的方式就是使用[“the Miller Device”](http://www.songhaysystem.com/kb/number/2076072056/subject/htmlscrp), 即比对一个数组其内在的`[[Class]]`属性。
+
+```js
+Object.prototype.toString.apply(value) === '[object Array]'
+```
+
+### bind
+
+`Function.prototype.bind(thisArg [, arg1 [, arg2, …]])`
+
+`Function.prototype.bind`返回一个新的函数对象，该函数对象的*this*绑定到了`thisArg`参数上。从本质上讲，这允许你在其他对象链中执行一个函数。
+
+```js
+function locate(){
+  console.log(this.location);
+}
+
+function Maru(location){
+  this.location = location;
+}
+
+var kitty = new Maru("cardboard box");
+
+var locateMaru = locate.bind(kitty);
+
+locateMaru();
+```
+
+在这个例子中，我们将Maru对象的上下文应用在`location`函数中。因为`location`是个全局对象的属性，其`this`值就是全局对象(`window`)。在这种情况下，我们向上寻找cat, 并不是`Location`对象，因为我们可以通过绑定的总是`kitty`的`this`值创建一个新方法`locateMaru`.
+
 ## ES6
 
 ### 面向对象
@@ -2556,11 +2737,6 @@ arr.reduce((tmp, i, index)=>{
 
 - 模板字符串
 - `str.startWith('')/endWith('')`
-
-#### JSON
-
-- `let str = JSON.strinify(json)`会做标准化处理
-- `let json = JSON.parse(str)`
 
 #### SET
 
@@ -3880,10 +4056,6 @@ if (true) {
 }
 
 ```
-
-### 严格模式
-
-“use strict”
 
 ### 函数的调用方式
 
