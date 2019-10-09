@@ -528,6 +528,20 @@ type：A，a，I，i
 | <wbr>       | 表示可以换行的位置，把多个单词粘成很长时使用       |
 | <menu>      | ul的变体，功能菜单                                 |
 
+### HTML4语义化
+
+div用来布局
+
+strong、em
+
+dl、dd、dt
+
+label
+
+ol
+
+#### 布局
+
 ### HTML5语义化标签
 
 | 标签         | 描述                                                         |
@@ -578,7 +592,9 @@ type：A，a，I，i
 </figure> 
 ```
 
-### 语义化标签呈现Wiki百科
+
+
+#### 语义化标签呈现Wiki百科
 
 开这个页面：https://en.wikipedia.org/wiki/World_Wide_Web
 副本：<http://static001.geekbang.org/static/time/quote/World_Wide_Web-Wikipedia.html>
