@@ -1,4 +1,4 @@
-# CSS的发展历程
+CSS的发展历程
 
 # 引入CSS样式表
 
@@ -2975,21 +2975,17 @@ transform:skew(30deg,0deg);
 
 # 3D变形(CSS3) transform
 
-2d    x  y  
-
-3d  x  y  z
-
- 左手坐标系
+左手坐标系
 
 伸出左手，让拇指和食指成“L”形，大拇指向右，食指向上，中指指向前方。这样我们就建立了一个左手坐标系，拇指、食指和中指分别代表X、Y、Z轴的正方向。如下图
 
-![1498445587576](E:/Jennifer/other/notes/media/1498445587576.png)
+![1498445587576](./media/1498445587576.png)
 
 
 
 CSS3中的3D坐标系与上述的3D坐标系是有一定区别的，相当于其绕着X轴旋转了180度，如下图
 
-![1498459001951](E:/Jennifer/other/notes/media/1498459001951.png)
+![1498459001951](./media/1498459001951.png)
 
 简单记住他们的坐标：
 
@@ -3089,6 +3085,93 @@ transformZ的直观表现形式就是大小变化，实质是XY平面相对于�
 ## backface-visibility 
 
 backface-visibility：visible/hidden 属性定义当元素不面向屏幕时是否可见。
+
+## 其他
+
+720yun.com
+
+h5doo
+
+### 陀螺仪
+
+角度：gamma（y90~-90），alpha（z0~360），beta（x180~-180）
+
+1. deviceorientation		
+   设备的物理⽅向信息，表示为⼀系列本地坐标系的旋⻆。
+2. devicemotion	
+   提供设备的加速信息
+3. compassneedscalibration	
+   用于通知Web站点使罗盘信息校准上述事件 
+
+获取旋转角
+
+```js
+window.addEventListener('deviceorientation',	
+function(event)	{	
+	//	处理event.alpha、 event.beta及event.gamma	
+},	true);
+```
+
+校准罗盘
+
+```js
+window.addEventListener("compassneedscalibration", function(event)	{	
+    alert('您的罗盘需要校准');	
+    event.preventDefault();	
+},	true);	
+```
+
+获取重力加速度
+
+```js
+window.addEventListener("devicemotion",	
+function(event)	{	
+    //处理event.acceleration	
+    //x(y,z):设备在x(y,z)方向上的移动加速度值
+    //event.accelerationIncludingGravity	
+    //考虑了重力加速度后设备在x(y,z)	
+    //event.rotationRate	
+    //alpha,beta,gamma:设备绕x,y,z轴旋转的⻆度
+},	true);
+```
+
+摇一摇
+
+```js
+var speed = 30;//speed
+var x = y = z = lastX = lastY = lastZ = 0;
+function deviceMotionHandler(eventData) {
+    var acceleration =event.accelerationIncludingGravity;
+    x = acceleration.x;
+    y = acceleration.y;
+    z = acceleration.z;
+    if(Math.abs(x-lastX) > speed || Math.abs(y-lastY) >
+    speed || Math.abs(z-lastZ) > speed) {
+        //简单的摇一摇触发代码
+        alert(1);
+    }
+}
+```
+
+### 3D模型
+
+#### 投影
+
+球形投影
+
+立方体投影
+
+#### 原理
+
+### Touch事件
+
+### 3D库
+
+css3d-engine
+
+案例：3D魔方，造物节
+
+
 
 # 动画(CSS3) animation
 
