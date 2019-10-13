@@ -6,7 +6,7 @@ linux和mac都是类unix
 
 linux和windows：windows作为服务器成本高，性能不如linux
 
-常用linux发行版：centos，ubuntu
+linux发行版：简单来说就是linux内核和应用软件的打包，常用linux发行版：CentOS，ubuntu，redhat，Debain，Fedora等
 
 ### 内核
 
@@ -34,7 +34,21 @@ CPU和进程管理
 
 系统调用
 
+### 虚拟机
+
+vmware
+
+virtualbox
+
+virtualpc
+
 ### 安装
+
+#### ubuntu
+
+#### CentOS
+
+mini版：没有图形界面，一般用在服务器
 
 1. vmware：注册后安装
 
