@@ -92,3 +92,82 @@ mini版：没有图形界面，一般用在服务器
 - sbin：和bin类似（历史原因遗留）
 - sys：扩展目录（历史原因遗留）
 
+### 命令行
+
+```cmd
+ls #默认在home路径下，ls显示当前路径下所有文件
+dir #和ls效果一样
+ls -l #长格式目录
+ls -a #显示隐藏文件，.表示当前目录，..表示上一级目录
+ls -al
+cd xxx #切换目录，文件名严格区分大小写
+cd .. #上级目录
+cd ~ # 当前用户路径
+cd / #根路径 
+cat xxx # 查看当前文件
+mkdir xxx # 创建目录                                                       md # windows
+touch xxx # 创建文件
+cp copyname path/newname # cp bb.bb aaa/bb.bc 拷贝文件到指定目录并重命名    copy copyname filename # 拷贝文件到指定目录   rename filename newname # 重命名
+cp -R copyname newname # 拷贝目录
+pwd # 显示完整路径
+rm filename # 删除文件                                                     del # 直接删除文件
+rm -r filename # 删除文件夹
+rm -rf # 删除所有文件 
+mv # 移动文件
+
+init [0123456] # 0：关机，1：单用户，2：多用户有网络，3：多用户无网络，4：系统未使用保留给用户，5：图形界面，6：重启
+```
+
+#### 文件夹权限
+
+文件类型：1链接d目录-文件
+
+文件所有者权限：r可读4，w可写2，x可执行1
+
+文件所在组对该文件权限
+
+其他组用户对该文件的权限
+
+### cygwin
+
+在windows下运行的uniux环境
+
+安装，完整安装full
+
+## vim
+
+windows必须安装git bush才能使用
+
+进入：vim
+
+退出：依次esc:q!
+
+- vim：编辑器之神，可以配置成ide
+  - Linux自带，也自带nano但是不好用
+  - 键盘控制
+  - 支持宏，插件
+  - 等等
+- Emacs：神的编辑器，相当于一个操作系统
+
+### 官方教程
+
+命令：vimtutor
+
+命令都是单词的首字母
+
+yank：拷贝，paste：向后粘贴，P：向前粘贴
+
+undo：撤销，redo：撤销撤销（ctrl+r，r是replace）
+
+insert：插入（在前面插入，append：在后面插入，I：行首插入，A：行尾插入）进入**插入模式**
+
+**正常模式**下输入冒号进入**命令行模式**，write：保存
+
+**delete：表示删除**：
+
+dd：删除一整行（ctrl+d/u：翻页），3dd：删除3行（其他操作也适用数字），x：向后删除一个字符，delete word：向后删除单词，db：向前删除一个单词，di(：删除括号里面的内容，da(：删除括号包括内容，di{，dit：删除tag中的内容
+
+```cmd
+
+```
+
