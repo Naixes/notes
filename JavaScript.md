@@ -548,6 +548,61 @@ iframe.contentWindow.Symbol.for('foo') === Symbol.for('foo')
 // iframe 窗口生成的 Symbol 值，可以在主页面得到。
 ```
 
+##### 实例：消除魔术字符串
+
+魔术字符串指的是，在代码之中多次出现、与代码形成强耦合的某一个具体的字符串或者数值。风格良好的代码，应该尽量消除魔术字符串，改由含义清晰的变量代替。
+
+```javascript
+function getArea(shape, options) {
+  let area = 0;
+
+  switch (shape) {
+    case 'Triangle': // 魔术字符串
+      area = .5 * options.width * options.height;
+      break;
+    /* ... more code ... */
+  }
+
+  return area;
+}
+
+getArea('Triangle', { width: 100, height: 100 }); // 魔术字符串
+```
+
+上面代码中，字符串`Triangle`就是一个魔术字符串。它多次出现，与代码形成“强耦合”，不利于将来的修改和维护。
+
+常用的消除魔术字符串的方法，就是把它写成一个变量。
+
+```javascript
+const shapeType = {
+  triangle: 'Triangle'
+};
+
+function getArea(shape, options) {
+  let area = 0;
+  switch (shape) {
+    case shapeType.triangle:
+      area = .5 * options.width * options.height;
+      break;
+  }
+  return area;
+}
+
+getArea(shapeType.triangle, { width: 100, height: 100 });
+```
+
+上面代码中，我们把`Triangle`写成`shapeType`对象的`triangle`属性，这样就消除了强耦合。
+
+如果仔细分析，可以发现`shapeType.triangle`等于哪个值并不重要，只要确保不会跟其他`shapeType`属性的值冲突即可。因此，这里就很适合改用 Symbol 值。
+
+```javascript
+const shapeType = {
+  triangle: Symbol()
+};
+```
+
+上面代码中，除了将`shapeType.triangle`的值设为一个 Symbol，其他地方都不用修改。
+
 ##### 实例：模块的 Singleton 模式（单例模式）
 
 Singleton 模式指的是调用一个类，任何时候返回的都是同一个实例。
@@ -3007,6 +3062,107 @@ babel
   添加脚本命令：配置scripts：babel xx -d xx
 
   配置.babelrc：{"preset":["@babel/predet-env"]}
+
+### 装饰器
+
+```js
+// 类的装饰
+
+// 装饰器对类的行为的改变，是代码编译时发生的，而不是在运行时。这意味着，装饰器能在编译阶段运行代码。也就是说，装饰器本质就是编译时执行的函数。
+@testable
+class MyTestableClass {
+  // ...
+}
+
+function testable(target) {
+  target.isTestable = true;
+}
+
+MyTestableClass.isTestable // true
+
+// 装饰器的行为就是下面这样。
+@decorator
+class A {}
+
+// 等同于
+
+class A {}
+A = decorator(A) || A;
+```
+
+#### core-decorators.js 
+
+[core-decorators.js](https://github.com/jayphelps/core-decorators.js)是一个第三方模块，提供了几个常见的装饰器，通过它可以更好地理解装饰器。
+
+**（1）@autobind**
+
+`autobind`装饰器使得方法中的`this`对象，绑定原始对象。
+
+```javascript
+import { autobind } from 'core-decorators';
+
+class Person {
+  @autobind
+  getPerson() {
+    return this;
+  }
+}
+
+let person = new Person();
+let getPerson = person.getPerson;
+
+getPerson() === person;
+// true
+```
+
+**（2）@readonly**
+
+`readonly`装饰器使得属性或方法不可写。
+
+```javascript
+import { readonly } from 'core-decorators';
+
+class Meal {
+  @readonly
+  entree = 'steak';
+}
+
+var dinner = new Meal();
+dinner.entree = 'salmon';
+// Cannot assign to read only property 'entree' of [object Object]
+```
+
+**（3）@override**
+
+`override`装饰器检查子类的方法，是否正确覆盖了父类的同名方法，如果不正确会报错。
+
+```javascript
+import { override } from 'core-decorators';
+
+class Parent {
+  speak(first, second) {}
+}
+
+class Child extends Parent {
+  @override
+  speak() {}
+  // SyntaxError: Child#speak() does not properly override Parent#speak(first, second)
+}
+
+// or
+
+class Child extends Parent {
+  @override
+  speaks() {}
+  // SyntaxError: No descriptor matching Child#speaks() was found on the prototype chain.
+  //
+  //   Did you mean "speak"?
+}
+```
+
+### Symbol
+
+见上数据结构
 
 ### ES6+
 
