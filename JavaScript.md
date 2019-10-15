@@ -2569,6 +2569,7 @@ class Animal {
 
 ```js
 // 右边必须是可遍历的结构,可指定默认值	
+// 根据位置赋值
 let [a,b,c,d=4] = [1,2,3]
 // 默认值可以是表达式，只有在用到时才会执行
 ```
@@ -2646,7 +2647,51 @@ test()
 
 ### 系统对象
 
+#### Function
+
+```js
+const fn = function pp(args) {
+    // todo
+}
+console.log(fn.name) // pp
+```
+
+#### Object
+
+```js
+Object.is() // 可以判断NaN === NaN
+
+const eat = {
+    getEat() {
+        console.log('eat')
+    }
+}
+const drink = {
+    getDrink() {
+        console.log('drink')
+    }
+}
+// 指定原型创建对象
+const person = Object.create(eat)
+person.eat()
+// 旧：获取原型
+Object.getPrototypeOf(person)
+// 更改原型
+Object.setPrototypeOf(person, drink)
+
+let person = {
+    __proto__: drink,
+    getDrink() {
+        super.getDrink()
+        console.log('hehe')
+    }
+}
+person.__proto__ = eat
+```
+
 #### Array
+
+##### Array.from
 
 ##### map，filter和reduce
 
@@ -2737,14 +2782,16 @@ arr.reduce((tmp, i, index)=>{
 
 - 模板字符串
 - `str.startWith('')/endWith('')`
+- `str.includes('xx')`
 
-#### SET
+#### Set
 
 无序且唯一的项组成，key和value相同，value不重复
 
 ```js
 // 创建
 const s = new Set([1,2,3])
+const a = new Set('123')
 // 属性
 console.log(s.size)
 // 方法
@@ -2756,9 +2803,114 @@ set.keys() // 返回键遍历器
 set.values() // 返回值遍历器
 set.entries() // 返回键值遍历器
 set.forEach(fn(val, key, set)) // 返回键值遍历器
+// 可以用for-of遍历
 ```
 
 数组去重
+
+### Map
+
+```js
+let food = new Map()
+let fruit = {}
+let cook = function() {}
+food.set(fruit, 'haha')
+food.set(cook, 'heihei')
+food.get(fruit)
+food.size
+food.delete(fruit)
+food.clear()
+```
+
+### Module
+
+```js
+import j from 'jquery'
+
+// xx.js
+let xx = function() {}
+// 1
+export xx
+// 2
+export default xx as yy
+
+// 1
+import {xx}  from 'xx.js'
+// 2
+import yy from 'xx.js'
+```
+
+### async
+
+
+
+### Class
+
+```js
+class Person {
+    constructor(age) {
+        this.age = age
+    }
+    tell() {
+        console.log(`年龄是${this.age}`)
+    }
+}
+class Man {
+    constructor(age) {
+        super(age)
+        this.arr = []
+    }
+    set menu(data) {
+        this.arr.push(data)
+    }
+    get menu() {
+        return this.arr 
+    }
+    tell() {
+        super.tell()
+        console.log("hello")
+    }
+    static init() {
+        console.log("static")
+    }
+}
+const sin = new Person(18)
+const sartine = new Man(30)
+// get,set
+sartine.menu = 'aaa'
+console.log(sartine.menu)
+
+Man.init()
+```
+
+### Iterator
+
+```js
+let sin = function*() {
+    yield "xxx"
+    yield "yyy"
+}
+let result = sin()
+console.log(result.next()) // {value: 'xxx', done: false}
+// ...
+
+const arr = [1, 2, 3] 
+const obj = {
+    a: 1,
+    b: 2
+}
+for(let v of arr) {
+    console.log(v) // 1,2,3 值
+}
+for(let v in arr) {
+    console.log(v) // 0,1,2 索引
+}
+for(let v of obj) {
+    console.log(v) // 报错
+}
+```
+
+
 
 ### 异步处理
 
