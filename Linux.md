@@ -38,11 +38,23 @@ CPU和进程管理
 
 vmware
 
-virtualbox
+virtualbox 
 
 virtualpc
 
+### cygwin
+
+在windows下运行的uniux环境
+
+安装，完整安装full
+
 ### 安装
+
+#### 发行版
+
+CentOS：使用redhat的源代码，redhat：商业系统，Fedora：桌面好用，在CentOS的基础上      ===     rpm安装包
+
+ubuntu：桌面好用（可以用来开发），在Debain的基础上，Debain：国外用的多     ===    deb安装包
 
 #### ubuntu
 
@@ -128,11 +140,47 @@ init [0123456] # 0：关机，1：单用户，2：多用户有网络，3：多�
 
 其他组用户对该文件的权限
 
-### cygwin
+### 远程登录Linux
 
-在windows下运行的uniux环境
+#### win
 
-安装，完整安装full
+##### putty
+
+##### xshell
+
+##### cmder终端使用ssh命令
+
+安装cmder：绿色软件，配置环境变量，使用
+
+#### linux和mac
+
+##### ssh命令
+
+```cmd
+ssh 用户名@ip #ssh root@192.168.0.21  回车
+输入密码 # 输入密码  回车
+# #表示超级管理员 $普通用户 ubuntu是禁用root用户的 centos不会禁用
+```
+
+### 常用命令
+
+#### vi/vim
+
+见下
+
+#### 其他
+
+**服务管理命令**
+
+systemctl：
+
+**网络管理命令**
+
+ifconfig：显示网络配置
+
+ip：
+
+router：
 
 ## vim
 
@@ -149,17 +197,15 @@ windows必须安装git bush才能使用
   - 等等
 - Emacs：神的编辑器，相当于一个操作系统
 
-### 官方教程
+### 官方教程 
 
-命令：vimtutor
+> 命令都是单词的首字母
 
-命令都是单词的首字母
+**yank：拷贝**，paste：向后粘贴，P：向前粘贴
 
-yank：拷贝，paste：向后粘贴，P：向前粘贴
+**undo：撤销**，**redo：撤销撤销**（ctrl+r，r是replace）
 
-undo：撤销，redo：撤销撤销（ctrl+r，r是replace）
-
-insert：插入（在前面插入，append：在后面插入，I：行首插入，A：行尾插入）进入**插入模式**
+**insert：插入**（在前面插入，append：在后面插入，I：行首插入，A：行尾插入）进入**插入模式**
 
 **正常模式**下输入冒号进入**命令行模式**，write：保存
 
@@ -168,6 +214,11 @@ insert：插入（在前面插入，append：在后面插入，I：行首插入�
 dd：删除一整行（ctrl+d/u：翻页），3dd：删除3行（其他操作也适用数字），x：向后删除一个字符，delete word：向后删除单词，db：向前删除一个单词，di(：删除括号里面的内容，da(：删除括号包括内容，di{，dit：删除tag中的内容
 
 ```cmd
-
+vi 文件名 # 打开文件
+# i ：插入
+# esc: ：底线命令行模式
+# esc:w ：保存
+# esc:wq ：保存并退出
+# /xxx ：检索xxx，下一个n，上一个shift+n
 ```
 
