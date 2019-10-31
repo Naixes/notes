@@ -32,10 +32,6 @@ Netscape在最初将其脚本语言命名为`LiveScript`，后来Netscape在与S
 6. 控制硬件-物联网(Ruff)
 7. 游戏开发(cocos2d-js)
 
-- [知乎 - JavaScript 能做什么，该做什么？](https://www.zhihu.com/question/20796866)
-
-- [最流行的编程语言 JavaScript 能做什么？](https://github.com/phodal/articles/issues/1)
-
 ## JavaScript 的组成
 
 - ECMAScript  - 语法规范：JavaScript的核心，描述了语言的基本语法和数据类型，ECMAScript是一套标准，定义了一种语言的标准与具体实现无关
@@ -72,8 +68,8 @@ JavaScript 运行分为两个阶段：
     - 普通变量
 - 执行
 
-先预解析全局作用域，然后执行全局作用域中的代码，
-在执行全局代码的过程中遇到函数调用就会先进行函数预解析，然后再执行函数内代码。
+  - 先预解析全局作用域，然后执行全局作用域中的代码
+  - 在执行全局代码的过程中遇到函数调用就会先进行函数预解析，然后再执行函数内代码。
 
 ## JavaScript的引入
 
@@ -130,11 +126,11 @@ Number、String、Boolean、Undefined、Null
 	var num = 0xA;
 	数字序列范围：0~9以及A~F
 八进制
-    var num1 = 07;   // 对应十进制的7
-    var num2 = 019;  // 对应十进制的19
-    var num3 = 08;   // 对应十进制的8
+    var num2 = 0o11;  // 对应十进制的9
     数字序列范围：0~7
     如果字面值中的数值超出了范围，那么前导零将被忽略，后面的数值将被当作十进制数值解析
+二进制
+    var num2 = 0b11;  // 对应十进制的3
 ```
 
 - 浮点数
@@ -155,6 +151,7 @@ Number、String、Boolean、Undefined、Null
 ```js
 最小值：Number.MIN_VALUE，这个值为： 5e-324
 最大值：Number.MAX_VALUE，这个值为： 1.7976931348623157e+308
+两个可表示(representable)数之间的最小间隔：Number.EPSILON
 无穷大：Infinity
 无穷小：-Infinity
 如果计算中超过数值范围会转换成Infinity/-Infinity，无法继续计算，isInfinity(xx)判断是否超过范围
@@ -169,9 +166,30 @@ Number、String、Boolean、Undefined、Null
   - isNaN(): 函数用于检查其参数是否是非数字值。 
   
 - 数值转换
-  - Number()
+  - Number()可以转换数字字符串或Date对象
+  
+    ```js
+    var d = new Date("December 17, 1995 03:24:00");
+    print(Number(d));
+    Number('123')     // 123
+    Number('12.3')    // 12.3
+    Number('12.00')   // 12
+    Number('123e-1')  // 12.3
+    Number('')        // 0
+    Number(null)      // 0
+    Number('0x11')    // 17
+    Number('0b11')    // 3
+    Number('0o11')    // 9
+    Number('foo')     // NaN
+    Number('100a')    // NaN
+    Number('-Infinity') //-Infinity
+    ```
+  
   - parseInt()忽略空格找到第一个非空字符，如果不是数字或负号返回NaN，可以解析八进制和十六进制，ECMAScript5之后不能解析八进制，可以传入**第二个参数**表示`var num = parseInt("070", 8)`建议明确指定基数
+  
   - parseFloat()只能解析十进制，如果是可解析为整数的值则返回整数
+  
+  - 其他可以将字符串转换为数字的方法：`+str/-str/str-0`
   
 -  +0 和 -0
 
@@ -277,6 +295,14 @@ parseFloat((0.1 + 0.2).toFixed(10)) === 0.3 // true
 
   JavaScript 字符串把每个 UTF16 单元当作一个字符来处理，所以处理非 BMP（超出U+0000 - U+FFFF 范围）的字符时，应该格外小心。
 
+- 字符串操作
+
+  ```js
+  // 获取单个字符
+  return 'cat'.charAt(1); // returns "a"
+  return 'cat'[1]; // returns "a" ES5
+  ```
+
 #### Boolean类型
 
 - Boolean字面量：  true和false，区分大小写
@@ -288,16 +314,18 @@ parseFloat((0.1 + 0.2).toFixed(10)) === 0.3 // true
 Undefined类型只有一个值即undefined，为了区分空对象指针和未初始化的变量，没有必要将一个变量显示得设置为undefined
 
 1. undefined表示一个**声明了没有赋值的变量**，变量只声明的时候值默认是undefined，对没有声明的变量使用`typeof`也返回undefined
-2. 函数**没有明确返回值**，如果接收了，结果为undefined
-3. 和数值计算结果是NaN
+2. 函数参数未传递时也是undefined
+3. 函数**没有明确返回值**，如果接收了，结果为undefined
+4. 和数值计算结果是NaN
 
 Null类型只有一个值即null，如果变量将用于保存对象，最好初始化为null
 
 1. null表示一个**空对象指针**，变量的值如果想为null，必须手动设置
 
-   ```
+   ```js
    var null = null
    typeof null // object
+   // 可以理解为空对象，实际上只是JS的一个悠久 Bug。在JS的最初版本中使用的是 32 位系统，为了性能考虑使用低位存储变量的类型信息，000 开头代表是对象，然而 null 表示为全零，所以将它错误的判断为 object。
    ```
 
 2. undefined的值派生自null因此相等性测试返回true（==会转换操作数）
@@ -308,9 +336,9 @@ Null类型只有一个值即null，如果变量将用于保存对象，最好初
 
 任何变量在赋值前是 Undefined 类型、值为 undefined，一般我们可以用全局变量 undefined（就是名为undefined 的这个变量）来表达这个值，或者 void 运算来把任一一个表达式变成undefined 值。
 
-但是呢，因为 JavaScript 的代码 **undefined 是一个变量**，而并非是一个关键字，这是JavaScript 语言公认的设计失误之一，所以，我们为了避免无意中被篡改，我建议使用void 0 来获取 undefined 值。
+但是呢，因为 JavaScript 的代码 **undefined 是一个变量**，而并非是一个关键字，这是JavaScript 语言公认的设计失误之一，所以，我们为了避免无意中被篡改，建议使用void 0 来获取 undefined 值。
 
-Naixes：在ant-design-vue的select组件中将选择内容重置为空时用到过
+> Naixes：在ant-design-vue的select组件中将选择内容重置为空时用到过
 
 #### Symbol
 
@@ -320,7 +348,6 @@ Symbol 值**通过`Symbol`函数生成**。这就是说，对象的属性名现�
 
 ```js
 let s = Symbol();
-
 typeof s
 // "symbol"
 ```
@@ -679,14 +706,14 @@ const FOO_KEY = Symbol('foo');
 
 Object每个实例都有以下方法和属性
 
-```
-constructor：保存用于创建当前对象的构造函数
-hasOwnProperty(propertyName)：属性是否在实例中而非实例原型
-isPrototypeOf(object)：是否传入对象原型
-propertyIsEnumrable(propertyName)：是否可用for-in枚举
-toLocalString()：返回对象的字符串表示，该字符串与执行环境对应
-toString()：返回对象的字符串表示
-valueOf()：返回对象的字符串，数值或布尔值表示
+```js
+constructor // 保存用于创建当前对象的构造函数
+hasOwnProperty(propertyName) // 属性是否在实例中而非实例原型
+isPrototypeOf(object) // 是否传入对象原型
+propertyIsEnumrable(propertyName) // 是否可用for-in枚举
+toLocalString() // 返回对象的字符串表示，该字符串与执行环境对应
+toString() // 返回对象的字符串表示
+valueOf() // 返回对象的字符串，数值或布尔值表示
 ```
 
 ### 引用类型
@@ -701,29 +728,35 @@ valueOf()：返回对象的字符串，数值或布尔值表示
 
 - 堆和栈	
 
-  ```
+  ```js
   堆栈空间分配区别：
   　　1、栈（操作系统）：先进后出，由操作系统自动分配释放 ，存放函数的参数值，局部变量的值等。 
   　　2、堆（操作系统）： 存储复杂类型的值(对象)，一般由程序员分配释放， 若程序员不释放，由垃圾回收机制回收。
+  // 栈的运行速度大于堆，由于对象结构复杂且可扩展，所以将引用类型的真实对象放到堆中是为了不影响栈的效率。值的查找也是先栈后堆
+  // 闭包中的变量保存在堆内存中，这也就解释了函数执行之后为什么闭包还能引用到函数内的变量。
   ```
 
 - 注意：JavaScript中没有堆和栈的概念，此处我们用堆和栈来讲解，目的方便理解和方便以后的学习。
 
 #### 基本类型在内存中的存储
 
-![1498288494687](d:/note/%E5%89%8D%E7%AB%AF/html/media/1498288494687.png)
+原始类型存储的是值，因为值类型在内存中分别占有固定大小的空间。64位浮点数储存到栈中
+
+![1498288494687](./media/1498288494687.png)
 
 #### 复杂类型在内存中的存储
 
-![1498700592589](D:/note/%E5%89%8D%E7%AB%AF/html/media/1498700592589.png)
+对象类型存储的是地址（指针）。这种值的大小不固定，但内存地址大小的固定的，因此在栈内存中存放访问地址，堆中储存数据，由于js不允许直接访问堆内存中的数据，要按引用访问引用数据类型，即先从栈中读取内存地址， 然后再通过地址找到堆中的值。
+
+![1498700592589](./media/1498700592589.png)
 
 #### 基本类型作为函数的参数
 
-![1497497605587](D:/note/%E5%89%8D%E7%AB%AF/html/media/1497497605587-8288640195.png)
+![1497497605587](./media/1497497605587-8288640195.png)
 
 #### 复杂类型作为函数的参数
 
-![1497497865969](D:/note/%E5%89%8D%E7%AB%AF/html/media/1497497865969.png)
+![1497497865969](./media/1497497865969.png)
 
 ```javascript
 // 下面代码输出的结果?
@@ -787,33 +820,26 @@ typeof new RegExp(); //function/object 无效
 
 内部机制是通过原型链来判断的
 
+```js
+[] instanceof Array; // true
+{} instanceof Object;// true
+new Date() instanceof Date;// true
+ 
+function Person(){};
+new Person() instanceof Person;
+ 
+[] instanceof Object; // true
+new Date() instanceof Object;// true
+new Person instanceof Object;// true
+```
+
+instanceof 只能用来判断两个对象是否属于实例关系， 而不能判断一个对象实例具体属于哪种类型。
+
+ES5 提供了 Array.isArray() 方法是更好的判断数组的方法
+
 [判断数据类型的四种方法](http://www.cnblogs.com/onepixel/p/5126046.html)
 
 [web前端知识体系精简](https://www.cnblogs.com/onepixel/p/7021506.html)
-
-### 字面量
-
-在源代码中一个固定值的表示法。
-
-## 注释
-
-- 单行注释
-
-```javascript
-// 这是一行注释
-```
-
-- 多行注释
-
-用来注释多条代码
-
-```javascript
-/*
-var age = 18;
-var name = 'zs';
-console.log(name, age);
-*/
-```
 
 ## 数据类型转换
 
@@ -830,7 +856,7 @@ console.log(name, age);
 
 当然你也可以重写 `Symbol.toPrimitive` ，该方法在转原始类型时调用优先级最高。
 
-```
+```js
 let a = {
   valueOf() {
     return 0
@@ -968,14 +994,6 @@ name = 'zs';
 var age = 10, name = 'zs';
 ```
 
-### 变量在内存中的存储
-
-```javascript
-var age = 18;
-```
-
-![1496981558575](media/1496981558575.png)
-
 ### 变量的命名规则和规范
 
 - 规则 - 必须遵守的，不遵守会报错
@@ -1026,8 +1044,6 @@ var age = 18;
      console.log(a)
      console.log(b)
    ``````
-
-- 
 
 ## 操作符
 
