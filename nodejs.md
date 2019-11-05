@@ -3212,7 +3212,7 @@ mpa+swg
 3. proxy代理，削减api
 4. 跨端
 
-### 异 步IO原理浅析 
+### 异步IO原理浅析 
 
 #### 异步IO
 
@@ -3234,9 +3234,30 @@ mpa+swg
 
 LIBUV：负责管理通知
 
+![node eventloop](E:\Jennifer\other\notes\media\node eventloop.png)
+
+根据上图，Node.js的运行机制如下：
+
+1. 写的JavaScript脚本会交给V8引擎解析
+2. 解析后的代码，调用Node API，Node会交给 [Libuv库](https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Fjoyent%2Flibuv) 处理
+3. [Libuv库](https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Fjoyent%2Flibuv) 将不同的任务分配给不同的线程，形成一个Event Loop（事件循环），以异步的方式将任务的执行结果返回给V8引擎
+4. V8引擎再将结果返回给用户
+
 ##### 几个特殊的API
 
-1. SetTimeout和SetInterval 线程池不参与LIBUV
+1. SetTimeout和SetInterval 线程池不参与 
 2. process.nextTick() 实现类似SetTimeout(function(){},0);每次调用放入队列中，在下一轮循环中取出。
 3. setImmediate();比process.nextTick()优先级低
-4. Node如何实现一个Sleep? 
+
+`process.nextTick` 方法可以在当前"执行栈"的尾部----下一次Event Loop（主线程读取"任务队列"）之前----触发回调函数。也就是说，它指定的任务总是发生在所有异步任务之前。 `setImmediate` 方法则是在当前"任务队列"的尾部添加事件，也就是说，它指定的任务总是在下一次Event Loop时执行，这与 `setTimeout(fn, 0)` 很像。
+
+
+
+
+
+
+
+
+
+
+

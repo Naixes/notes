@@ -6884,7 +6884,7 @@ if (!window.cancelAnimationFrame) {
 
 ### 进程与线程与cpu
 
-相信大家经常会听到 **JS** 是**单线程**执行的
+相信大家经常会听到 **JS** 是**单线程**执行的，但是这里的单线程指的是主线程是单线程的。 
 
 线程和进程本质上来说，都是 CPU **工作时间片**的一个描述。
 
@@ -6909,22 +6909,22 @@ if (!window.cancelAnimationFrame) {
 
 - 主进程
 
-- - 协调控制其他子进程（创建、销毁）
+  - 协调控制其他子进程（创建、销毁）
   - 浏览器界面显示，用户交互，前进、后退、收藏
   - 将渲染进程得到的内存中的Bitmap，绘制到用户界面上
   - 处理不可见操作，网络请求，文件访问等
 
 - 第三方插件进程
 
-- - 每种类型的插件对应一个进程，仅当使用该插件时才创建
+  - 每种类型的插件对应一个进程，仅当使用该插件时才创建
 
 - GPU进程
 
-- - 用于3D绘制等
+  - 用于3D绘制等
 
 - `渲染进程`，就是我们说的 `浏览器内核`
 
-- - 负责页面渲染，脚本执行，事件处理等
+  - 负责页面渲染，脚本执行，事件处理等
   - 每个tab页一个渲染进程
 
 对于普通的前端操作来说，最重要的是 `渲染进程`，也就是我们常说的 `浏览器内核`
@@ -6935,30 +6935,29 @@ if (!window.cancelAnimationFrame) {
 
 - `GUI渲染线程`
 
-- - 负责渲染页面，布局和绘制
+  - 负责渲染页面，布局和绘制
   - 页面需要重绘和回流时，该线程就会执行
   - 与js引擎线程互斥，防止渲染结果不可预期
 
 - `JS引擎线程`
 
-- - 负责处理解析和执行javascript脚本程序
+  - 负责处理解析和执行javascript脚本程序
   - 只有一个JS引擎线程（单线程）
   - 与GUI渲染线程互斥，防止渲染结果不可预期
 
 - `事件触发线程`
 
-- - 用来控制事件循环（鼠标点击、setTimeout、ajax等）
+  - 用来控制事件循环（鼠标点击、setTimeout、ajax等）
   - 当事件满足触发条件时，将事件放入到JS引擎所在的执行队列中
 
 - `定时触发器线程`
 
-- - setInterval与setTimeout所在的线程
+  - setInterval与setTimeout所在的线程
   - 定时任务并不是由JS引擎计时的，是由定时触发线程来计时的
   - 计时完毕后，通知事件触发线程
 
 - `异步http请求线程`
-
-- - 浏览器有一个单独的线程用于处理AJAX请求
+  - 浏览器有一个单独的线程用于处理AJAX请求
   - 当请求完成时，若有回调函数，通知事件触发线程
 
 **为什么 GUI 渲染线程为什么与 JS 引擎线程互斥**
@@ -6968,8 +6967,7 @@ if (!window.cancelAnimationFrame) {
 **js为什么是单线程**
 
 1. 历史原因，在创建 javascript 这门语言时，多进程多线程的架构并不流行，硬件支持并不好。
-
-2. 其次是因为多线程的复杂性，多线程操作需要加锁，编码的复杂性会增高。
+2. 其次是因为多线程的复杂性。JS主要用于操作DOM，如果是有两个线程，一个在DOM上添加内容，一个在DOM上删除内容，多线程操作需要加锁，所以为了避免复杂性，JavaScript从诞生起就是单线程的。
 
 ### 执行栈
 
@@ -7044,18 +7042,20 @@ bar()
 
  `JS引擎线程`和 `GUI渲染线程`是互斥的关系，浏览器为了能够使 `宏任务`和 `DOM任务`有序的进行，会在一个 `宏任务`执行结果后，在下一个 `宏任务`执行前， `GUI渲染线程`开始工作，对页面进行渲染。
 
+包括 `script` ， `setTimeout` ，`setInterval` ，`setImmediate` ，`I/O` ，`UI rendering`。
+
 ##### 微任务
 
  `宏任务`结束后，会执行渲染，然后执行下一个 `宏任务`， 而微任务可以理解成在当前 `宏任务`执行后立即执行的任务。也就是说，当 `宏任务`执行完，会在渲染前，将执行期间所产生的所有 `微任务`都执行完。
 
-Promise，process.nextTick等，属于 `微任务`。
+包括 `process.nextTick` ，`promise` ，`MutationObserver`，其中 `process.nextTick` 为 Node 独有。
 
 ##### 总结
 
 - 执行一个 `宏任务`（栈中没有就从 `事件队列`中获取）
 - 执行过程中如果遇到 `微任务`，就将它添加到 `微任务`的任务队列中
-- `宏任务`执行完毕后，立即执行当前 `微任务队列`中的所有 `微任务`（依次执行）
-- 当前 `宏任务`执行完毕，开始检查渲染，然后 `GUI线程`接管渲染
+- `宏任务`执行完毕后，立即执行当前 `微任务队列`中的所有 `微任务`（依次执行）微任务有嵌套时也会执行内部的微任务
+- 当前 `微任务`执行完毕，开始检查渲染，然后 `GUI线程`接管渲染
 - 渲染完毕后， `JS线程`继续接管，开始下一个 `宏任务`（从事件队列中获取）
 
 过程：将当前执行上下文压入执行调用栈（js线程），js调用栈执行当前的同步任务。遇到异步任务，宏任务由对应的其他线程接管（事件触发线程，定时器线程，http请求线程），当这些线程处理完这些任务后，将**回调添加到事件队列（event queue）队尾**；微任务直接添加到微任务的事件队列中。当此次evet loop结束后（执行栈为空），会查看**微任务队列**中是否有任务等待执行，有的话将任务全部依次执行。执行完微任务后，从event queue队列首部取出一个回调压入执行栈进行执行。依次类推。
@@ -7066,32 +7066,29 @@ Promise，process.nextTick等，属于 `微任务`。
 console.log('script start')1
 
 async function async1() {
-  await async2() // 执行后让出线程
-  console.log('async1 end')5
+  await async2() // 执行后让出线程，await相当于promise，后面的代码相当于then
+  console.log('async1 end')5 // 加入微任务1
 }
 async function async2() {
   console.log('async2 end')2
 }
 async1() // 执行async1
 
-setTimeout(function() { // 加入宏任务
+setTimeout(function() { // 加入宏任务2
   console.log('setTimeout')8
 }, 0)
 
 new Promise(resolve => {
   console.log('Promise')3 
   resolve()
+}).then(function() {
+    console.log('promise1')6 // 加入微任务2
+}).then(function() {
+    console.log('promise2')7 // 加入微任务3
 })
-  .then(function() {
-    console.log('promise1')6 // 加入微任务
-  })
-  .then(function() {
-    console.log('promise2')7 // 加入微任务
-  })
 	
 console.log('script end')4
 // script start => async2 end => Promise => script end => async1 end => promise1 => promise2 => setTimeout
-
 ```
 
 首先先来解释下上述代码的 `async` 和 `await` 的执行顺序。当我们调用 `async1` 函数时，会马上输出 `async2 end`，并且函数返回一个 `Promise`，接下来在遇到 `await`的时候会就让出线程开始执行 `async1` 外的代码，所以我们完全可以把 `await` 看成是**让出线程**的标志。
@@ -7109,7 +7106,6 @@ new Promise((resolve, reject) => {
 }).then(() => {
   console.log('async1 end')
 })
-
 ```
 
 所以 Event Loop 执行顺序如下所示：
@@ -7130,11 +7126,26 @@ new Promise((resolve, reject) => {
 
 ### Node 中的 Event Loop
 
+<http://www.ruanyifeng.com/blog/2014/10/event-loop.html>
+
 > 涉及面试题：Node 中的 Event Loop 和浏览器中的有什么区别？process.nexttick 执行顺序？
 
 Node 中的 Event Loop 和浏览器中的是完全不相同的东西。
 
-Node 的 Event Loop 分为 6 个阶段，它们会按照**顺序**反复运行。每当进入某一个阶段的时候，都会从对应的回调队列中取出函数去执行。当队列为空或者执行的回调函数数量到达系统设定的阈值，就会进入下一阶段。
+![node eventloop](E:\Jennifer\other\notes\media\node eventloop.png)
+
+根据上图，Node.js的运行机制如下：
+
+1. 写的JavaScript脚本会交给V8引擎解析
+2. 解析后的代码，调用Node API，Node会交给 [Libuv库](https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Fjoyent%2Flibuv) 处理
+3. [Libuv库](https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Fjoyent%2Flibuv) 将不同的任务分配给不同的线程，形成一个Event Loop（事件循环），以异步的方式将任务的执行结果返回给V8引擎
+4. V8引擎再将结果返回给用户
+
+除了 `setTimeout` 和 `setInterval` 这两个方法，Node.js还提供了另外两个与"任务队列"有关的方法：process.nextTick和 [setImmediate](https://link.juejin.im/?target=http%3A%2F%2Fnodejs.org%2Fdocs%2Flatest%2Fapi%2Ftimers.html%23timers_setimmediate_callback_arg) 。
+
+`process.nextTick` 方法可以在当前"执行栈"的尾部----下一次Event Loop（主线程读取"任务队列"）之前----触发回调函数。也就是说，它指定的任务总是发生在所有异步任务之前。 `setImmediate` 方法则是在当前"任务队列"的尾部添加事件，也就是说，它指定的任务总是在下一次Event Loop时执行，这与 `setTimeout(fn, 0)` 很像。即setImmediate();比process.nextTick()优先级低
+
+当Node.js启动时会初始化event loop, 每一个event loop都会包含按如下顺序六个循环阶段，它们会按照**顺序**反复运行。每当进入某一个阶段的时候，都会从对应的回调队列中取出函数去执行。当队列为空或者执行的回调函数数量到达系统设定的阈值，就会进入下一阶段。
 
 ![img](https://user-gold-cdn.xitu.io/2018/6/1/163b9278853a7eec?imageView2/0/w/1280/h/960/format/webp/ignore-error/1) 
 
@@ -7144,13 +7155,13 @@ timers 阶段会执行 `setTimeout` 和 `setInterval` 回调，并且是由 poll
 
 同样，在 Node 中定时器指定的时间也不是准确时间，只能是**尽快**执行。
 
-#### I/O
+#### I/O callbacks
 
-I/O 阶段会处理一些上一轮循环中的**少数未执行**的 I/O 回调
+I/O 阶段会处理一些上一轮循环中的**少数未执行**的 I/O 回调以及其他回调
 
 #### idle, prepare
 
-idle, prepare 阶段内部实现，这里就忽略不讲了。
+idle, prepare 阶段内部实现，这里忽略。
 
 #### poll
 
@@ -7159,14 +7170,14 @@ poll 是一个至关重要的阶段，这一阶段中，系统会做两件事情
 1. 回到 timer 阶段执行回调
 2. 执行 I/O 回调
 
-并且在进入该阶段时如果没有设定了 timer 的话，会发生以下两件事情
+并且在进入该阶段时如果**没有设定了 timer** 的话，会发生以下两件事情
 
 - 如果 poll 队列不为空，会遍历回调队列并同步执行，直到队列为空或者达到系统限制
 - 如果 poll 队列为空时，会有两件事发生
   - 如果有 `setImmediate` 回调需要执行，poll 阶段会停止并且进入到 check 阶段执行回调
   - 如果没有 `setImmediate` 回调需要执行，会等待回调被加入到队列中并立即执行回调，这里同样会有个超时时间设置防止一直等待下去
 
-当然设定了 timer 的话且 poll 队列为空，则会判断是否有 timer 超时，如果有的话会回到 timer 阶段执行回调。
+当然**设定了 timer** 的话且 poll 队列为空，则会判断是否有 timer 超时，如果有的话会回到 timer 阶段执行回调。
 
 #### check
 
@@ -7178,7 +7189,7 @@ close callbacks 阶段执行 close 事件
 
 - 由于node event中微任务不在event loop的任何阶段执行，而是在各个阶段切换的中间执行,即从一个阶段切换到下个阶段前执行。所以当times阶段的callback执行完毕，准备切换到下一个阶段时，执行微任务 
 
-在以上的内容中，我们了解了 Node 中的 Event Loop 的执行顺序，接下来我们将会通过代码的方式来深入理解这块内容。
+接下来通过代码的方式来深入理解这块内容。
 
 首先在有些情况下，定时器的执行顺序其实是**随机**的
 
@@ -7189,14 +7200,13 @@ setTimeout(() => {
 setImmediate(() => {
     console.log('setImmediate')
 })
-
 ```
 
 对于以上代码来说，`setTimeout` 可能执行在前，也可能执行在后
 
 - 首先 `setTimeout(fn, 0) === setTimeout(fn, 1)`，这是由源码决定的
 - 进入事件循环也是需要成本的，如果在准备时候花费了大于 1ms 的时间，那么在 timer 阶段就会直接执行 `setTimeout` 回调
-- 那么如果准备时间花费小于 1ms，那么就是 `setImmediate` 回调先执行了
+- 那么如果准备时间花费小于 1ms， timer 阶段计时器时间还没到，那么就是 `setImmediate` 回调先执行了
 
 当然在某些情况下，他们的执行顺序一定是固定的，比如以下代码：
 
@@ -7211,7 +7221,6 @@ fs.readFile(__filename, () => {
         console.log('immediate')
     })
 })
-
 ```
 
 在上述代码中，`setImmediate` 永远**先执行**。因为两个代码写在 IO 回调中，IO 回调是在 poll 阶段执行，当回调执行完毕后队列为空，发现存在 `setImmediate` 回调，所以就直接跳转到 check 阶段去执行回调了。
@@ -7260,6 +7269,74 @@ process.nextTick(() => {
 ```
 
 对于以上代码，大家可以发现无论如何，永远都是先把 nextTick 全部打印出来。
+
+另一个例子
+
+```js
+setTimeout(function () {
+ console.log(1); // 5 第一轮poll阶段发现定时器时间到了进入第二轮timers执行
+}, 0);
+setImmediate(function () {
+ console.log(2); // 6 第二轮poll阶段发现有setImmediate进入第二轮check阶段执行
+});
+process.nextTick(() => {
+ console.log(3); // 3 第一轮timer->IO
+});
+new Promise((resovle,reject)=>{
+ console.log(4); // 1 同步
+ resovle(4);
+}).then(function(){
+ console.log(5); // 4 第一轮IO阶段
+});
+console.log(6); // 2 同步
+// 4 6 3 5 1 2
+```
+
+### node和浏览器的差异
+
+Browser端**执行完一个宏任务就会去检查微任务队列是否有需要执行的微任务**，即使微任务内嵌套微任务，也会将嵌套的微任务执行完毕后（这点上nodejs与browser是相同的，对应的就是清空微任务的队列），再去宏任务队列执行下一个宏任务；
+
+nodejs端则会将同源的任务放在一起执行，如果涉及到同源宏任务的嵌套，仍会将同源任务放在一起，但是内部的任务会放在下一次事件循环时执行。
+
+```js
+'use strict';  // 浏览器   node   node阶段
+console.log(1);  // 1   1   同步
+setTimeout(() => {  // 宏任务1   第一阶段设置定时器，启动事件循环
+    console.log(2)  // 6   6   第二轮poll阶段->第三轮timers执行
+    new Promise((resolve) => { 
+        console.log(6);  // 7   7   第三轮IO阶段执行
+        resolve(7);
+    }).then((num) => {  // 微任务1.1   放入第四轮IO
+        console.log(num);  // 8   10   第四轮IO阶段执行
+    })
+});
+setTimeout(() => {  // 宏任务2   第一阶段设置定时器
+    console.log(3);  // 9   8   第三轮poll阶段->第四轮timers阶段执行
+    new Promise((resolve) => {
+        console.log(9);  //10   9   第四轮IO阶段执行
+        resolve(10);
+    }).then((num) => {  // 微任务1.1.1   放入第五轮IO
+        console.log(num);  // 11   11   第五轮IO阶段执行
+    })
+    setTimeout(()=>{  // 宏任务3   第四轮设置定时器
+        console.log(8);  // 12   12   第五轮poll阶段->第六轮timers阶段执行
+    })
+})
+new Promise((resolve) => {
+    console.log(4);  // 2   2   同步
+    resolve(5)
+}).then((num) => {  // 微任务1
+    console.log(num);  // 3   3   第一轮IO阶段执行
+    new Promise((resolve)=>{
+        console.log(11);  // 4   4   第一轮IO阶段执行
+        resolve(12);
+    }).then((num)=>{  // ！！微任务2，要清空所有微任务，多加几层也是一样的
+        console.log(num);  // 5   5   第一轮IO阶段执行
+    })
+})
+// 1 4 5 11 12 2 6 7 3 9 10 8
+// 1 4 5 11 12 2 6 3 9 7 10 8
+```
 
 ## 垃圾回收机制
 
