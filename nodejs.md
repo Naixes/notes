@@ -3234,7 +3234,7 @@ mpa+swg
 
 LIBUV：负责管理通知
 
-![node eventloop](E:\Jennifer\other\notes\media\node eventloop.png)
+![node eventloop](.\media\node eventloop.png)
 
 根据上图，Node.js的运行机制如下：
 
@@ -3245,19 +3245,48 @@ LIBUV：负责管理通知
 
 ##### 几个特殊的API
 
-1. SetTimeout和SetInterval 线程池不参与 
+1. SetTimeout和SetInterval  
 2. process.nextTick() 实现类似SetTimeout(function(){},0);每次调用放入队列中，在下一轮循环中取出。
 3. setImmediate();比process.nextTick()优先级低
 
 `process.nextTick` 方法可以在当前"执行栈"的尾部----下一次Event Loop（主线程读取"任务队列"）之前----触发回调函数。也就是说，它指定的任务总是发生在所有异步任务之前。 `setImmediate` 方法则是在当前"任务队列"的尾部添加事件，也就是说，它指定的任务总是在下一次Event Loop时执行，这与 `setTimeout(fn, 0)` 很像。
 
+LIBUV不负责这些
 
+##### 实现sleep函数
 
+```js
+async function test() {
+    console.log('Hello')
+    await sleep(1000)
+    console.log('world!')
+}
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms))
+}
+test()
+```
 
+##### 函数式编程在Node中的应用 
 
+1.高阶函数：可以将函数作为输入或者返回值，形成一种后续传递风格的结果接受方式，而非单一的返回值形式。后续传递风格的程序将函数业务重点从返回值传递到回调函数中。 
 
+```js
+app.use(function(){//todo})
+var emitter = new events.EventEmitter;
+emitter.on(function(){//……….todo})
+```
 
+2.偏函数：指定部分参数产生一个新的定制函数的形式就是偏函数。Node中异步编程非常常见，我们通过哨兵变量会很容易造成业务的混乱。underscore，after变量（面向切面编程）
 
+##### 常用的Node控制异步技术手段
 
+1. Step、wind（提供等待的异步库）、Bigpipe、Q.js
+2. Async、Await
+3. Promise/Defferred是一种先执行异步调用，延迟传递的处理方式。Promise是高级接口，事件是低级接口。低级接口可以构建更多复杂的场景，高级接口一旦定义，不太容易变化，不再有低级接口的灵活性，但对于解决问题非常有效
+4. 由于Node基于V8的原因，目前还不支持协程。协程不是进程或线程，其执行过程更类似于子例程，或者说不带返回值的函数调用。一个程序可以包含多个协程，可以对比与一个进程包含多个线程，因而下面我们来比较协程和线程。我们知道多个线程相对独立，有自己的上下文，切换受系统控制；而协程也相对独立，有自己的上下文，但是其切换由自己控制，由当前协程切换到其他协程由当前协程来控制。 
 
+#### 内存管理与优化
+
+##### V8垃圾回收机制
 
