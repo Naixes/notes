@@ -3192,4 +3192,51 @@ ngnix反向代理服务器：用户没有直接和node进行交互，而是通�
 
 conf目录==》nginx.conf
 
-5. 
+## nodejs应用
+
+**前端常用模式**
+
+spa：vue-cli，nginx处理跨域；nodejs处理跨域：路由冲突问题（koa.history-fallback解决）
+
+mpa+vue+swg：没有跨域问题
+
+mpa+swg
+
+同构化
+
+**应用**
+
+1. node前端：proxy，自己提供api
+
+2. vue同构化，ssr+nodejs
+3. proxy代理，削减api
+4. 跨端
+
+### 异 步IO原理浅析 
+
+#### 异步IO
+
+优点：
+
+- 前端通过异步IO可以消除UI堵塞。
+- 假设请求资源A的时间为M,请求资源B的时间为N.那么同步的请求耗时为M+N.如果采用异步方式占用时间为Max(M,N)。
+- 随着业务的复杂，会引入分布式系统，时间会线性的增加，M+N+...和Max(M,N…)，这会放大同步和异步之间的差异。
+- I/O是昂贵的，分布式I/O是更昂贵的。
+  - CPU时钟周期： 1/cpu主频 -> 1s/3.1 GHz
+  - 同步和异步没有绝对的好坏
+- NodeJS 适用于IO密集型（读写）不适用CPU密集型（计算）
+  - 操作系统对计算机进行了抽象，将所有输入 输出设备抽象为文件。内核在进行文件I/O操作时，通过文件描述符进行管理。应用程序如果需要进行IO需要打开文件描述符，在进行文件和数据的读写。异步IO不带数据直接返回，要获取数据还需要通过文件描述符再次读取。 
+  - nodejs多线程不如Java等，nodejs是解释性语言所以不适用CPU密集型
+
+##### Node对异步IO的实现
+
+完美的异步IO应该是应该是应用程序发起非阻塞调用，无需通过遍历或者事件循环等方式轮询。 
+
+LIBUV：负责管理通知
+
+##### 几个特殊的API
+
+1. SetTimeout和SetInterval 线程池不参与LIBUV
+2. process.nextTick() 实现类似SetTimeout(function(){},0);每次调用放入队列中，在下一轮循环中取出。
+3. setImmediate();比process.nextTick()优先级低
+4. Node如何实现一个Sleep? 
