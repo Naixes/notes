@@ -3389,3 +3389,12 @@ enum AllocationSpace {
 
 但在 2018 年，GC 技术又有了一个重大突破，这项技术名为**并发标记**。该技术可以让 GC 扫描和标记对象时，同时允许 JS 运行，你可以点击 [该博客](https://link.juejin.im/?target=https%3A%2F%2Fv8project.blogspot.com%2F2018%2F06%2Fconcurrent-marking.html) 详细阅读。
 
+### Node集群的应用
+
+#### 服务器集群
+
+网络层负载均衡：nginx（本机pm2）
+
+nginx--pm2--缓存--java--db--读写集群（读写冷热备份）
+
+cdn集群（静态资源）
