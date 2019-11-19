@@ -7422,6 +7422,18 @@ enum AllocationSpace {
 3. 任何模块内的私有变量和方法均是永驻内存的 a = null，比如闭包
 4. 大循环，无GC机会
 
+## 元编程
+
+1. 
+
+2. tco
+
+3. proxy
+
+4. 反射，比如Reflect.apply
+
+   reflect-metadata 包
+
 ## 附录
 
 ### A 代码规范
