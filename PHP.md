@@ -1,3 +1,11 @@
+
+
+## PHP
+
+超文本预处理器，脚本语言。
+
+主要适用于web开发领域，PHP做出的动态网页，是将程序嵌入到HTML里去执行，效率比完全生成HTML标记的CGI要高很多，PHP还可以执行编译后代码，编译可以加密和优化代码执行，使代码运行更快。
+
 ## 语法
 
 1. 块级作用域
@@ -39,20 +47,94 @@
     echo $arrayTest[0]
     
     // session
-    echo $_SESSION['view']
+
+	// 会话存储
+	session_start(); 
+	$_SESSION['views'] = 'home';
+	echo $_SESSION['views'];
         
     // 处理表单
-    header("Content-type:text/html;charset=utf-8")
-    $username = $_GET["usernmae"]
-    $username = $_POST["usernmae"]
-    $username = $_REQUEST["usernmae"]
-    if($username == 'damin') {
-        echo json_encode(array('mag'=>'登陆成功', 'errCode'=>'ok'))
-    }
+?>
+<form action="submit.php" method="get">
+	<p>
+		<label for="username">账号</label>
+		<input type="text" name="username">
+	</p>
+	<p>
+		<label for="password">密码</label>
+		<input type="password" name="password">
+	</p>
+	<input type="submit" value="提交">
+</form>
+            
+// submit.php
+            
+<?php
+// 设置报头
+// header("Content-type:text/html;charset=utf-8");
+header("Content-type:text/json;charset=utf-8");
+$username = $_REQUEST['username'];
+// $username = $_GET['username'];
+// $username = $_POST['username'];
+if($username === 'admin') {
+	echo json_encode(array('msg'=>'登陆成功','code'=>"200"));
+}else {
+	echo json_encode(array('msg'=>'登陆失败','code'=>"500"));
+}
 ?>
 ```
 
-##  mysql
+7. jquery
+
+```php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>PHP</title>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
+	<?php
+
+	?>
+	<form action="submit.php" method="get">
+		<p>
+			<label for="username">账号</label>
+			<input id="username" type="text" name="username">
+		</p>
+		<p>
+			<label for="password">密码</label>
+			<input type="password" name="password">
+		</p>
+		<input id="btn" type="submit" value="提交">
+	</form>
+	<script>
+		console.log($)
+		$('#btn').click(function(e) {
+			console.log('click')
+			e.preventDefault()
+			$.ajax({
+				url: 'submit.php',
+				method: 'GET',
+				data: {
+					username: $('#username').val()
+				},
+				success: function(data) {
+					console.log(data)
+				}
+			})
+		})
+	</script>
+</body>
+</html>
+```
+
+## mysql
+
+LAMP(linux, apache, mysql, php)开发环境
 
 ### phpMyAdmin
 
