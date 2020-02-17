@@ -4,7 +4,7 @@ Node.js
 
 ### Node.js 是什么
 
-- 基于 Chrome V8 引擎的JavaScript 运行时环境
+- 基于 Chrome V8 引擎的JavaScript 运行时环境，本质就是一个js解释器
   - 既不是语言，也不是框架，它是一个平台
   - 可以解析执行js代码，完全脱离浏览器执行
 
@@ -221,11 +221,33 @@ ctrl+d # Linux，退出REPL
 
 ### 全局函数
 
-`setTimeout,setInterval, clearTimeout, clearInterval, require, Buffer`
+`setTimeout, setInterval, clearTimeout, clearInterval, require, Buffer, console`
 
 ### 伪全局变量
 
-`__dirname, __filename`
+```js
+__dirname // 动态获取当前文件所属目录的绝对路径
+__filename // 动态获取当前文件的绝对路径
+// node中文件操作中的相对路径是相对执行node命令的路径，不可靠。应该使用`__dirname`和`join`方法
+path.join(__dirname, '')
+
+process // 描述当前nodejs进程状态的对象
+// 事件：
+// exit：进程准备退出时触发
+// beforeExit：node清空事件循环，并且没有其他安排时触发
+// uncaughtException：一个异常冒泡回到事件循环是触发
+// Signal：进程接收到信号时触发
+process.on('exit', code => {
+    // todo
+    // code：退出码
+})
+// 属性：
+// 方法：
+
+console // 控制台输出
+```
+
+
 
 ## 原理解析
 
@@ -285,8 +307,6 @@ forever restart xxx
 forever stop xxx
 
 forever stopall
-
-
 
 forever start xxx.js -l c:/a.log -e c:/err.log -a
 
@@ -663,6 +683,30 @@ process.env
 console.log(process.argv)
 ```
 
+### util模块
+
+**util.inherits(constructor, superConstructor)** 是一个实现对象间原型继承的函数。
+
+JavaScript 的面向对象特性是基于原型的，与常见的基于类的不同。JavaScript 没有提供对象继承的语言级别特性，而是通过原型复制来实现的
+
+**util.inspect(object,[showHidden],[depth],[colors])** 是一个将任意对象转换为字符串的方法。
+
+showHidden 是一个可选参数，如果值为 true，将会输出更多隐藏信息。
+
+depth 表示最大递归的层数。如果不指定depth，默认会递归 2 层，指定为 null 表示将不限递归层数完整遍历对象。 如果 colors 值为 true，输出格式将会以 ANSI 颜色编码，通常用于在终端显示更漂亮的效果。
+
+util.inspect 并不会简单地直接把对象转换为字符串，即使该对 象定义了 toString 方法也不会调用。
+
+**util.isArray(object)**
+
+**util.isRegExp(object)**
+
+**util.isDate(object)**
+
+**underscore工具库**
+
+
+
 ### 实现简单的原生服务器
 
 <https://github.com/Naixes/demo-collection/tree/master/learnNode/native-project>
@@ -681,15 +725,9 @@ static:  css/html/js...
 <http://verymuch.site/2017/12/12/escape%E3%80%81encodeURI%E5%92%8CencodeURIComponent%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E4%BD%BF%E7%94%A8/>
 `encodeURLComponent('xxxxx')`
 
-## node中的非模块成员
 
-`__dirname`：**动态获取**当前文件所属目录的绝对路径
 
-`__filename`：**动态获取**当前文件的绝对路径改成绝对路径
 
-node中文件操作中的相对路径是相对执行node命令的路径，不可靠。应该使用`__dirname`和`join`方法
-
-`path.join(__dirname, '')`
 
 ## 数据通信
 
