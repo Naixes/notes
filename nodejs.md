@@ -1,5 +1,3 @@
-Node.js
-
 ## 概述
 
 ### Node.js 是什么
@@ -1626,6 +1624,12 @@ module.exports = app
   - body-parser请求解析
 - 挂载路由
 - 监听端口启动
+
+### 脚手架
+
+`npm i express -g`
+
+`express projectname`
 
 ## KOA
 
@@ -3545,3 +3549,38 @@ enum AllocationSpace {
 nginx--pm2--缓存--java--db--读写集群（读写冷热备份）
 
 cdn集群（静态资源）
+
+## 爬虫
+
+**爬虫**：自动获取网页内容的程序。搜索引擎的重要组成部分，搜索引擎的优化很大程度上就是针对爬虫进行优化
+
+**robots.txt**：一个文本文件，是一个协议不是命令。爬虫要查看的第一个文件，告诉爬虫在服务器上什么文件是可以被查看的，搜索机器人会按照文件的内容来确定访问范围。
+
+### 环境
+
+express脚手架+request+cheerio
+
+修改app.js，开启`supervisor start app.js`启动并监测node进程
+
+```js
+var express = require('express');
+var app = express();
+var request = require('request')
+var cheerio = require('cheerio')
+
+app.get('/', function (req, res) {
+	request('https://www.jikexueyuan.com/', function (error, response, body) {
+		if (!error && response.statusCode === 200) {
+			$ = cheerio.load(body) // 拿到了整个body的选择器
+			res.send({
+				'classnum': $('.aside-allCategory .aside-cList>li').length
+			})
+		}
+	})
+});
+
+app.listen(3000);
+
+module.exports = app;
+```
+
