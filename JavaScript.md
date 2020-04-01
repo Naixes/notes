@@ -3023,7 +3023,7 @@ prm
   }, function(err) {})
 ```
 
-两个任务并行Promise.all()，不能处理p1，p2之间的逻辑
+两个任务并行Promise.all()，不能处理p1，p2之间的逻辑，如果有一个出错就会进入reject
 
 ```javascript
 var p1 = new Promise(function (resolve, reject) {
