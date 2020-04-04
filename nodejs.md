@@ -3584,3 +3584,14 @@ app.listen(3000);
 module.exports = app;
 ```
 
+## 利用HAPI构建Node应用
+
+专注接口
+
+> 不知道为什么官方的demo报语法错误
+>
+> 经查阅github，找到原因：node版本需要升级
+>
+> 升级node版本：npm i -g n --force //安装node版本管理模块  n --stable //升级到稳定版（windows不支持n模块。。。window系统升级node就只有到[node官网](https://nodejs.org/zh-cn/download/)下载window安装包来覆盖之前的node）
+
+demo：路由，log，返回页面
