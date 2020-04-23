@@ -178,6 +178,8 @@ let {a: c, b: d} = a
 
 interface，仅定义结构，不需要实现  
 
+面向接口编程
+
 TypeScript 的核心原则之一是对值所具有的结构进行类型检查。它有时被称做“鸭式辨型法”或“结构性子类型化”。 在 TypeScript 里，接口的作用就是为这些类型命名和为你的代码或第三方代码定义契约。 
 
 ```typescript
@@ -259,7 +261,7 @@ interface StringArray {
 let myArray: StringArray = ['Bob', 'Fred']
 let str: string = myArray[0]
 
-	// 可以同时使用但是数字索引的返回值必须是字符串索引返回值的子类型 
+// 可以同时使用但是数字索引的返回值必须是字符串索引返回值的子类型 
 // class Animal {
 // 	name: string
 // }
@@ -455,7 +457,7 @@ let employee = new Employee('ee', 6)
 animal = rhino
 // animal = employee
 
-// 存取器
+// 存取器，vue中实现计算属性
 class Person {
 	private _fullNme: string
 	get fullName(): string {
@@ -517,7 +519,10 @@ private，public，protected
 
 ### 函数
 
-
+```js
+// 参数只要声明就是必选，?表示可选参数
+// 函数重载，先声明，后统一实现
+```
 
 ### 泛型
 
@@ -588,51 +593,7 @@ async created() {
 }
 ```
 
-### 装饰器
 
-装饰器实际上是工厂函数，传入一个对象，输出处理后的新对象。 
-
-**组件声明**
-
-```js
-import {Componet, Prop, Vue, Emit} from "vue-property-decorator"
-// 类装饰器
-@Component
-export default class Hello extends Vue {
-    // 属性装饰器：也可以写在外面
-    // !非空断言
-    @Prop({ required: true, type: String }) private msg!: string;
-    // 函数装饰器
-    @Watch("features", {deep: true})
-    onFeaturesChange(val: string, oldVal: any) {
-    	console.log(val, oldVal);
-	} 
-	// 函数装饰器
-    @Emit('add')
-    private addFeature(event: any) {
-        const feature = {
-            name: event.target.value,
-            id: this.features.length + 1,
-            version: "1.0"
-        };
-        this.features.push(feature);
-        event.target.value = feature;
-        return event.target.value;
-    }
-}
-```
-
-**事件处理**
-
-```js
-@Emit()
-foo(e: any) {
-    // 返回值就是参数
-    return xxx
-}
-```
-
-**变更监测**
 
 ## 在Vue中使用
 
@@ -675,6 +636,79 @@ export default class Hello extends Vue {
 } 
 </script>
 ```
+
+### 装饰器
+
+装饰器实际上是工厂函数，传入一个对象，输出处理后的新对象。 
+
+#### 组件声明
+
+```js
+import {Componet, Prop, Vue, Emit} from "vue-property-decorator"
+// 类装饰器
+// 也可以声明在@Component({props: {msg: {xxx}}, components: [xxx]})
+@Component
+export default class Hello extends Vue {
+    // 属性装饰器：也可以写在外面
+    // !非空断言
+    @Prop({ required: true, type: String }) private msg!: string;
+    // 函数装饰器
+    @Watch("features", {deep: true})
+    onFeaturesChange(val: string, oldVal: any) {
+    	console.log(val, oldVal);
+	} 
+	// 函数装饰器
+    @Emit('add')
+    private addFeature(event: any) {
+        const feature = {
+            name: event.target.value,
+            id: this.features.length + 1,
+            version: "1.0"
+        };
+        this.features.push(feature);
+        event.target.value = feature;
+        return event.target.value;
+    }
+}
+```
+
+#### 事件处理
+
+```js
+// 父组件中@foo="fn"
+// 名称也可以指定@Emit('foo')??
+ @Emit()
+foo(e: any) {
+    // 返回值就是参数
+    return xxx
+}
+```
+
+#### 变更监测
+
+```js
+// 函数装饰器
+@Watch("features", {deep: true})
+onFeaturesChange(val: string, oldVal: any) {
+    console.log(val, oldVal);
+} 
+```
+
+#### vuex
+
+安装vue-class
+
+映射
+
+```js
+@State('xx') cc!:number[]
+@Action('xx') foo:any // 映射到computed
+@Mutation('xx') doo:any // 映射到methods
+```
+
+#### 原理
+
+实际是一个工厂 函数
 
 
 
