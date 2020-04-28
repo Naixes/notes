@@ -265,15 +265,17 @@ jsx：创建元素方便，语法糖，会编译成js
 
 ### 脚手架-create-react-app
 
-需要yarn或者用npm重新下
-
 `npm i -g create-react-app`
 
 `create-react-add xxx`
 
+由于cra项目是打包封装过的，有一些细节会看不到，使用`npm run eject`命令会多出两个目录，可以用来查看具体配置
+
+通过查看env.js，尝试一下修改port，webpack配置查看
+
 ## JSX语法
 
-> 什么是JSX语法：就是符合 xml 规范的 JS 语法；（语法格式相对来说，要比HTML严谨很多）
+> 什么是JSX语法：就是符合 xml 规范的 JS 语法；（语法格式相对来说，要比HTML严谨很多），可以理解成虚拟dom
 
 1. **如何启用 jsx 语法？**
 
@@ -305,7 +307,7 @@ jsx：创建元素方便，语法糖，会编译成js
      }
      ```
 
-2. **jsx 语法的本质：**并不是直接把 jsx 渲染到页面上，而是 内部先转换成了 createElement 形式，再渲染的；
+2. **jsx 语法的本质：**并不是直接把 jsx 渲染到页面上，而是内部先转换成了 createElement 形式，再渲染的；
 
 3. **在 jsx 中混合写入 js 表达式**：在 jsx 语法中，要把 JS代码写到 `{ }` 中
 
@@ -316,6 +318,7 @@ jsx：创建元素方便，语法糖，会编译成js
    - 渲染jsx元素
    - 渲染jsx元素数组
    - 将普通字符串数组，转为jsx数组并渲染到页面上【两种方案】
+   - 条件语句和循环语句不能使用 
 
 ```jsx
 const arr = ['aa', 'bb', 'cc']
@@ -466,7 +469,7 @@ class Chinese extends Person{
    class 组件名称 extends React.Component {
        constructor(...args){
            super(...args)
-           // 状态：constructor中初始化，要用setState({})修改更新后会重新渲染
+           // 状态：constructor中初始化，要用setState({})修改更新后会重新渲染，同时修改同一个key，只会有一个起作用
            this.state = {
            }
        }
@@ -645,6 +648,8 @@ ReactDOM.render(
 
 ## 设置样式
 
+直接写样式会报错
+
 1. 使用普通的 `style` 样式，第一层括号表示js代码，第二层括号表示样式对象
 
    ```jsx
@@ -724,6 +729,8 @@ ReactDOM.render(
    - [local]  表示样式的类名定义名称
    - [hash:length]  表示32位的hash值
    - 例子：`{ test: /\.css$/, use: ['style-loader', 'css-loader?modules&localIdentName=[path][name]-[local]-[hash:5]'] }`
+
+在脚手架中配置约定xx.module.xx名称的文件可以模块化导入
 
 ### 使用 `:local()` 和 `:global()`
 
