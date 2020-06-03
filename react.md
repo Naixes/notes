@@ -16,7 +16,7 @@ Vue 的表单可以使用 `v-model` 支持**双向绑定**，相比于 React 来
 
 改变数据方式不同，Vue **修改状态**相比来说要简单许多，React 需要使用 `setState` 来改变状态，并且使用这个 API 也有一些坑点。并且 Vue 的底层使用了依赖追踪，页面更新渲染已经是最优的了，但是 React 还是需要用户手动去优化这方面的问题。
 
-React 16以后，有些钩子函数会执行多次，这是因为引入 Fiber 的原因，这在后续的章节中会讲到。
+React 16以后，有些钩子函数会执行多次，这是因为引入 Fiber 的原因。
 
 React 需要**使用 JSX**，有一定的上手成本，并且需要一整套的**工具链支持**，但是**完全可以通过 JS 来控制页面，更加的灵活**。Vue 使用了**模板语法**，相比于 JSX 来说**没有那么灵活，但是完全可以脱离工具链**，通过直接编写 `render` 函数就能在浏览器中运行。
 
@@ -79,7 +79,6 @@ React 需要**使用 JSX**，有一定的上手成本，并且需要一整套的
     - 本质： 用JS对象，来模拟DOM元素和嵌套关系；
     - 目的：就是为了实现页面元素的高效更新；
 
-    ![虚拟DOM - 表格排序案例](F:/01_video/%E5%89%8D%E7%AB%AF/16.react4.js%EF%BC%88%E5%85%B155%E9%9B%86%EF%BC%89/reactjs%E7%B2%BE%E5%93%81%E6%95%99%E7%A8%8B%E8%B5%84%E6%96%99/day1%E8%B5%84%E6%96%99/%E7%AC%94%E8%AE%B0/images/%E8%99%9A%E6%8B%9FDOM%E5%BC%95%E5%85%A5%E5%9B%BE%E7%89%87.png)
 
 相较于 DOM 来说，操作 JS 对象会快很多，可以通过 JS 来模拟 DOM
 
@@ -227,8 +226,8 @@ jsx：创建元素方便，语法糖，会编译成js
 
 1. 运行 `cnpm i react react-dom -S` 安装包
 
-   - react： 专门用于创建组件和虚拟DOM的，同时组件的生命周期都在这个包中
-   - react-dom： 专门进行DOM操作的，最主要的应用场景，就是`ReactDOM.render()`
+   - react： React负责逻辑控制，专门用于创建组件和虚拟DOM的，同时组件的生命周期都在这个包中，数据 -> VDOM
+   - react-dom： 渲染实际DOM，专门进行DOM操作的，如果换到移动端，就用别的库来渲染，最主要的应用场景，就是`ReactDOM.render()`，VDOM -> DOM
 
 2. 在`index.html`页面中，创建容器：
 
@@ -263,7 +262,7 @@ jsx：创建元素方便，语法糖，会编译成js
    ReactDOM.render(myh1, document.getElementById('app'))
    ```
 
-### 脚手架-create-react-app
+### 使用脚手架-create-react-app
 
 `npm i -g create-react-app`
 
@@ -271,11 +270,73 @@ jsx：创建元素方便，语法糖，会编译成js
 
 由于cra项目是打包封装过的，有一些细节会看不到，使用`npm run eject`命令会多出两个目录，可以用来查看具体配置
 
-通过查看env.js，尝试一下修改port，webpack配置查看
+```
+├── config 
+	├── env.js 处理.env环境变量配置文件 
+	├── paths.js 提供各种路径 
+	├── webpack.config.js webpack配置文件 
+	└── webpackDevServer.config.js 测试服务器配置文件 
+└── scripts 启动、打包和测试脚本 
+	├── build.js 打包脚本、 
+	├── start.js 启动脚本 
+	└── test.js 测试脚本
+```
+
+env.js用来处理.env文件中配置的环境变量
+
+```js
+// node运行环境：development、production、test等 
+const NODE_ENV = process.env.NODE_ENV; // 要扫描的文件名数组 
+var dotenvFiles = [
+    `${paths.dotenv}.${NODE_ENV}.local`, // .env.development.local
+    `${paths.dotenv}.${NODE_ENV}`, // .env.development 
+    NODE_ENV !== 'test' && `${paths.dotenv}.local`, // .env.local 
+    paths.dotenv, // .env 
+].filter(Boolean); 
+// 从.env*文件加载环境变量 
+dotenvFiles.forEach(dotenvFile => {
+    if (fs.existsSync(dotenvFile)) {
+        require('dotenv-expand')( 
+            require('dotenv').config({ 
+            path: dotenvFile, 
+            }) 
+        ); 
+    } 
+});
+```
+
+实践一下，修改一下默认端口号，创建.env文件
+
+```js
+PORT=8080	
+```
+
+webpack.confifig.js 是webpack配置文件，开头的常量声明可以看出cra能够支持ts、sass及css模块化
+
+```js
+// Check if TypeScript is setup 
+const useTypeScript = fs.existsSync(paths.appTsConfig); 
+// style files regexes 
+const cssRegex = /\.css$/; 
+const cssModuleRegex = /\.module\.css$/; 
+const sassRegex = /\.(scss|sass)$/; 
+const sassModuleRegex = /\.module\.(scss|sass)$/;
+// 入口文件定义
+entry: [ 
+    // WebpackDevServer客户端，它实现开发时热更新功能 
+    isEnvDevelopment && require.resolve('react-dev-utils/webpackHotDevClient'), 
+    // 应用程序入口：
+    src/index paths.appIndexJs, 
+].filter(Boolean),
+```
 
 ## JSX语法
 
 > 什么是JSX语法：就是符合 xml 规范的 JS 语法；（语法格式相对来说，要比HTML严谨很多），可以理解成虚拟dom
+>
+> JSX是一种JavaScript的语法扩展，其格式比较像模版语言，但事实上完全是在JavaScript内部实现的。 
+>
+> JSX可以很好地描述UI，能够有效提高开发效率
 
 1. **如何启用 jsx 语法？**
 
@@ -358,7 +419,7 @@ ReactDOM.render({arr.map(item => <h3>{item}</h3>)}, document.getElementById('app
 
 ## React中创建组件
 
-### 构造函数创建组件
+### function组件
 
 > **使用构造函数来创建组件**，如果要接收外界传递的数据，需要在构造函数的参数列表中使用`props`来接收；
 >
@@ -412,7 +473,26 @@ ReactDOM.render({arr.map(item => <h3>{item}</h3>)}, document.getElementById('app
 
 6. 在导入组件的时候，配置和使用`@`路径符号
 
-### class创建组件
+#### 状态管理
+
+```js
+import { useState, useEffect } from "react"; 
+function ClockFunc() { 
+    // useState创建一个状态和修改该状态的函数 
+    const [date, setDate] = useState(new Date()); 
+    // useEffect编写副作用代码 
+    useEffect(() => { 
+        // 启动定时器是我们的副作用代码 
+        const timerID = setInterval(() => { setDate(new Date()); }, 1000); 
+        // 返回清理函数 
+        return () => clearInterval(timerID); 
+    }, []);
+    // 参数2传递空数组使我们参数1函数仅执行一次 
+    return <div>{date.toLocaleTimeString()}</div>; 
+}
+```
+
+### class组件
 
 #### ES6中 class 关键字的使用
 
@@ -440,7 +520,7 @@ class Animal {
 }
 ```
 
-1. 使用 `extends` 关键字实现继承
+4. 使用 `extends` 关键字实现继承
 
 ```javascript
 class Person {}
@@ -456,9 +536,9 @@ class Chinese extends Person{
 // 子类可以访问父类的实例方法
 ```
 
-1. 为子类挂载独有的实例方法和属性
+5. 为子类挂载独有的实例方法和属性
 
-   放到super()后面
+放到super()后面
 
 #### 基于class关键字创建组件
 
@@ -475,14 +555,78 @@ class Chinese extends Person{
        }
        // 在组件内部，必须有 render 函数,作用：渲染当前组件对应的 虚拟DOM结构
        render(){
+           const name = "react study"
+           const user = { firstName: "tom", lastName: "jerry" }
+           function formatName(user) { 
+               return user.firstName + " " + user.lastName;
+           }
+           const greet = <p>hello, Jerry</p>;
+           const arr = [1, 2, 3].map(num => <li key={num}>{num}</li>)
            // render 函数中，必须 返回合法的 JSX 虚拟DOM结构
-           return <div>这是 class 创建的组件</div>
+           return ( 
+               <div> 
+                   {/* 条件语句 */} 
+                   {name ? <h2>{name}</h2> : null} 
+                   {/* 函数也是表达式 */} 
+                   {formatName(user)} 
+                   {/* jsx也是表达式 */} 
+                   {greet} 
+                   {/* 数组 */} 
+                   <ul>{arr}</ul> 
+                   {/* 属性 */} 
+                   <img src={logo} className={style.img} alt="" /> 
+               </div> 
+           )
        }
    }
    // 使用<名称></名称>相当与'组件名称'类的实例对象
    ```
 
 传递的参数不用接收，直接使用this.props访问，只读
+
+##### setState特性
+
+- setState是批量执行的，因此对同一个状态执行多次只起一次作用，多个状态更新可以放在同一个 
+
+setState中进行：
+
+```js
+componentDidMount() { 
+    // 假如couter初始值为0，执行三次以后其结果是多少？ 
+    this.setState({counter: this.state.counter + 1}); 
+    this.setState({counter: this.state.counter + 1}); 
+    this.setState({counter: this.state.counter + 1}); 
+}
+```
+
+- setState通常是异步的，因此如果要获取到最新状态值有以下三种方式：
+
+1. 传递函数给setState方法，这个函数用上一个 state 作为第一个参数，将此次更新被应用时的 props 做为第二个参数
+
+```js
+this.setState((state, props) => ({ counter: state.counter + 1}));// 1 
+this.setState((state, props) => ({ counter: state.counter + 1}));// 2 
+this.setState((state, props) => ({ counter: state.counter + 1}));// 3
+```
+
+2. 使用定时器：
+
+```js
+setTimeout(() => { 
+    console.log(this.state.counter); 
+}, 0);
+```
+
+3. 原生事件中修改状态
+
+```js
+componentDidMount(){ 
+    document.body.addEventListener('click', this.changeValue, false)
+}
+changeValue = () => { 
+    this.setState({counter: this.state.counter+1}) console.log(this.state.counter) 
+}
+```
 
 ### 两种创建组件方式的对比
 
@@ -535,11 +679,27 @@ class Comments extends React.Component {
 }
 ```
 
-抽离组件
-
 ### 组件通信
 
-props
+#### props
+
+传递状态
+
+传递函数：可以把子组件信息传入父组件，这个常称为状态提升
+
+```react
+// StateMgt 
+<Clock change={this.onChange}/> 
+// Clock 
+this.timerID = setInterval(() => { 
+    this.setState({ date: new Date() }, ()=>{ 
+        // 每次状态更新就通知父组件 
+        this.props.change(this.state.date); 
+    }); 
+}, 1000);
+```
+
+传递this：
 
 ```jsx
 let root = document.getElementById("div")
@@ -592,12 +752,11 @@ ReactDOM.render(
 )
 ```
 
-ref
+#### ref
 
 ```jsx
 let root = document.getElementById("div")
 // 子组件向父组件传值，父组件可修改
-
 class Comp extends React.Component{
     constructor(...args){
         super(...args)
@@ -645,6 +804,173 @@ ReactDOM.render(
     root
 )
 ```
+
+#### context
+
+跨层级组件之间通信 
+
+```react
+// 为当前的 theme 创建一个 context（“light”为默认值）。每个 Context 对象都会返回一个 Provider React 组件，它允许消费组件订阅 context 的变化。
+const ThemeContext = React.createContext('light');
+class App extends React.Component {
+  render() {
+    // 使用一个 Provider 来将当前的 theme 传递给以下的组件树。
+    // 无论多深，任何组件都能读取这个值。
+    // 在这个例子中，我们将 “dark” 作为当前的值传递下去。
+    return (
+      <ThemeContext.Provider value="dark">
+        <Toolbar />
+      </ThemeContext.Provider>
+    );
+  }
+}
+
+function Toolbar() {
+  return (
+    <div>
+      <ThemedButton />
+    </div>
+  );
+}
+
+class ThemedButton extends React.Component {
+  // 挂载在 class 上的 contextType 属性会被重赋值为一个由 React.createContext() 创建的 Context 对象。这能让你使用 this.context 来消费最近 Context 上的那个值。你可以在任何生命周期中访问到它，包括 render 函数中。
+  // React 会往上找到最近的 theme Provider，然后使用它的值。
+  static contextType = ThemeContext;
+  render() {
+    return <Button theme={this.context} />;
+  }
+}
+```
+
+Context 主要应用场景在于*很多*不同层级的组件需要访问同样一些的数据。请谨慎使用，因为这会使得组件的复用性变差。
+
+**如果你只是想避免层层传递一些属性，组件组合（component composition）有时候是一个更好的解决方案**
+
+#### redux
+
+类似vuex，无明显关系的组件间通信
+
+## Render Props
+
+我们可以提供一个带有函数 prop 的 `<Mouse>` 组件，它能够动态决定什么需要渲染的，而不是将 `<Cat>` 硬编码到 `<Mouse>` 组件里，并有效地改变它的渲染结果。
+
+```react
+class Cat extends React.Component {
+  render() {
+    const mouse = this.props.mouse;
+    return (
+      <img src="/cat.jpg" style={{ position: 'absolute', left: mouse.x, top: mouse.y }} />
+    );
+  }
+}
+
+class Mouse extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.state = { x: 0, y: 0 };
+  }
+
+  handleMouseMove(event) {
+    this.setState({
+      x: event.clientX,
+      y: event.clientY
+    });
+  }
+
+  render() {
+    return (
+      <div style={{ height: '100vh' }} onMouseMove={this.handleMouseMove}>
+
+        {/*
+          Instead of providing a static representation of what <Mouse> renders,
+          use the `render` prop to dynamically determine what to render.
+        */}
+        {this.props.render(this.state)}
+      </div>
+    );
+  }
+}
+
+class MouseTracker extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>移动鼠标!</h1>
+        <Mouse render={mouse => (
+          <Cat mouse={mouse} />
+        )}/>
+      </div>
+    );
+  }
+}
+```
+
+## 组合
+
+### 包含关系
+
+```react
+function FancyBorder(props) {
+  return (
+    <div className={'FancyBorder FancyBorder-' + props.color}>
+      {/* 使用一个特殊的 children prop 来将他们的子组件传递到渲染结果 */}
+      {props.children}
+    </div>
+  );
+}
+
+function WelcomeDialog() {
+  return (
+    <FancyBorder color="blue">
+      <h1 className="Dialog-title">
+        Welcome
+      </h1>
+      <p className="Dialog-message">
+        Thank you for visiting our spacecraft!
+      </p>
+    </FancyBorder>
+  );
+}
+```
+
+`<FancyBorder>` JSX 标签中的所有内容都会作为一个 `children` prop 传递给 `FancyBorder` 组件。因为 `FancyBorder` 将 `{props.children}` 渲染在一个 `<div>` 中，被传递的这些子组件最终都会出现在输出结果中。
+
+少数情况下，你可能需要在一个组件中预留出几个“洞”。这种情况下，我们可以不使用 `children`，而是自行约定：将所需内容传入 props，并使用相应的 prop。
+
+```react
+function SplitPane(props) {
+  return (
+    <div className="SplitPane">
+      <div className="SplitPane-left">
+        {props.left}
+      </div>
+      <div className="SplitPane-right">
+        {props.right}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SplitPane
+      left={
+        <Contacts />
+      }
+      right={
+        <Chat />
+      } />
+  );
+}
+```
+
+### 特例关系
+
+有些时候，我们会把一些组件看作是其他组件的特殊实例，比如 `WelcomeDialog` 可以说是 `Dialog` 的特殊实例。
+
+在 React 中，我们也可以通过组合来实现这一点。“特殊”组件可以通过 props 定制并渲染“一般”组件，即对一般组件进行包装
 
 ## 设置样式
 
@@ -800,10 +1126,55 @@ ReactDOM.render(
 
 4. 在React中，如果想要修改 state 中的数据，推荐使用 `this.setState({ })`这个方法是异步的，要立即拿到更改完数据可以用回调函数`this.setState({ }, cb)`
 
+5. 在 React 中另一个不同点是你不能通过返回 `false` 的方式阻止默认行为。你必须显式的使用 `e.preventDefault();`这里的e 是一个合成事件,你不需要担心跨浏览器的兼容性问题。
+
+```react
+import React, { Component } from "react"; 
+export default class EventHandle extends Component { 
+    constructor(props) { 
+        super(props); 
+        this.state = { name: "" };
+        // // 为了在回调中使用 `this`，这个绑定是必不可少的
+        this.handleChange = this.handleChange.bind(this); 
+    }
+    handleChange(e) { 
+        this.setState({ name: e.target.value }); 
+    }
+    render() { 
+        return ( 
+            <div> 
+                {/* 使用箭头函数，不需要指定回调函数this，且便于传递参数 */} 
+                {/* <input 
+                    type="text" 
+                    value={this.state.name} 
+                    onChange={e => this.handleChange(e)} 
+                /> */} 
+                {/* 直接指定回调函数，需要指定其this指向，或者将回调设置为箭头函数属性 */} 
+                <input
+                    type="text" 
+                    value={this.state.name} 
+                    onChange={this.handleChange} 
+                />
+                <p>{this.state.name}</p> 
+            </div> 
+        ); 
+    } 
+}
+```
+
+**参数传递**
+
+```react
+<button onClick={(e) => this.deleteRow(id, e)}>Delete Row</button>
+<button onClick={this.deleteRow.bind(this, id)}>Delete Row</button>
+```
+
+在这两种情况下，React 的事件对象 `e` 会被作为第二个参数传递。如果通过箭头函数的方式，事件对象必须**显式**的进行传递，而通过 `bind` 的方式，事件对象以及更多的参数将会被**隐式**的进行传递。
+
 ## 绑定文本框与state中的值
 
-1. 在 Vue 中，默认提供了`v-model`指令，可以很方便的实现 `数据的双向绑定`；
-2. 但是，在 React 中，默认只是`单向数据流`，也就是 只能把 state 上的数据绑定到 页面，无法把 页面中数据的变化，自动同步回 state ； 如果需要把 页面上数据的变化，保存到 state，则需要程序员手动监听`onChange`事件，拿到最新的数据，手动调用`this.setState({  })` 更改回去；
+1. 在 Vue 中，默认提供了`v-model`指令，可以很方便的实现 数据的双向绑定，只是语法糖，实质上也是单向数据流
+2. 但是，在 React 中，只是单向数据流，没有这种语法糖，也就是 只能把 state 上的数据绑定到页面，无法把页面中数据的变化，自动同步回 state ； 如果需要把 页面上数据的变化，保存到 state，则需要程序员手动监听`onChange`事件，拿到最新的数据，手动调用`this.setState({  })` 更改回去；
 3. 如果文本框只是单项绑定了state状态，没有提供onChange事件，文本框是只读的并且会有警告，如果只想要一个只读的文本框，要添加readOnly属性
 
 ```jsx
@@ -858,64 +1229,154 @@ this.setState({
 
 ## 组件的生命周期
 
-- 概念：在组件创建、到加载到页面上运行、以及组件被销毁的过程中，总是伴随着各种各样的事件，这些在组件特定时期，触发的事件，统称为组件的生命周期；
+概念：在组件创建、到加载到页面上运行、以及组件被销毁的过程中，总是伴随着各种各样的事件，这些在组件特定时期，触发的事件，统称为组件的生命周期；
 
-- 组件生命周期分为三部分：
+### 16.0之前的生命周期
 
-  - 初始化props属性默认值`static defaultProps = {}`，防止组件中必须属性没传递时报错
+![react16之前的生命周期](E:\Jennifer\other\notes\media\react16之前的生命周期.png)
 
-  - **组件创建阶段**：组件创建阶段的生命周期函数，只执行一次；
+**第一个是组件初始化(initialization)阶段** 
 
-    先执行构造函数`this.state = {}`，new之后就调用
+也就是以下代码中类的构造方法( constructor() ),Test类继承了react Component这个基类，也就继承这个react的 基类，才能有render(),生命周期等方法可以使用，这也说明为什么 函数组件不能使用这些方法 的原因。 
 
-  > componentWillMount: 组件将要被挂载，此时还没有开始渲染虚拟DOM
-  > render：第一次开始渲染真正的虚拟DOM，当render执行完，内存中就有了完整的虚拟DOM了
-  > componentDidMount: 组件完成了挂载，此时，组件已经显示到了页面上，当这个方法执行完，组件就进入都了运行中的状态
+super(props) 用来调用基类的构造方法( constructor() ), 也将父组件的props注入给子组件。 而 constructor() 用来做一些组件的初始化工作，如定义this.state的初始内 容。
 
-  - **组件运行阶段**：根据组件的state和props的改变，有选择性的触发0次或多次；
+```react
+import React, { Component } from 'react'; 
+class Test extends Component { 
+    constructor(props) { super(props); } 
+}
+```
 
-  > componentWillReceiveProps: 组件将要接收新属性，此时，只要这个方法被触发，就证明父组件为当前子组件传递了新的属性值；
-  > shouldComponentUpdate: 组件是否需要被更新，此时，组件尚未被更新，但是，state 和 props 肯定是最新的，返回false重新回到运行中，但是页面不是最新的
-  > componentWillUpdate: 组件将要被更新，此时，尚未开始更新，内存中的虚拟DOM树还是旧的
-  > render: 此时，又要重新根据最新的 state 和 props 重新渲染一棵内存中的 虚拟DOM树，当 render 调用完毕，内存中的旧DOM树，已经被新DOM树替换了！此时页面还是旧的
-  > componentDidUpdate: 此时，页面又被重新渲染了，state 和 虚拟DOM 和 页面已经完全保持同步
+**第二个是组件的挂载(Mounting)阶段**
 
-  - **组件销毁阶段**：只执行一次；
+此阶段分为componentWillMount，render，componentDidMount三个时期。
 
-  > componentWillUnmount: 组件将要被卸载，此时组件还可以正常使用；
-  >
+- componentWillMount: 
 
-[React Native 中组件的生命周期](http://www.race604.com/react-native-component-lifecycle/)
+在组件挂载到DOM前调用，且只会被**调用一次**，在这边调用this.setState不会引起组件重新渲染，也可以把写在这边的内容提前到constructor()中，所以项目中很少用。 
 
+- render: 
 
-![React中组件的生命周期](./images/LifeCycle.png)
+根据组件的props和state（两者的**重传递和重赋值**，无论值是否有变化，都可以引起组件重新render） ，return 一个React元素，不负责组件实际渲染工作，之后由React自身根据此元素去渲染出页面 DOM。render是纯函数（Pure function：函数的返回结果只依赖于它的参数；函数执行过程里面没有副作用）， 不能在里面执行this.setState，会有改变组件状态的副作用。 
 
-### defaultProps
+- componentDidMount:
 
-> 在组件创建之前，会先初始化默认的props属性，这是全局调用一次，严格地来说，这不是组件的生命周期的一部分。在组件被创建并加载候，首先调用 constructor 构造器中的 this.state = {}，来初始化组件的状态。
+组件挂载到DOM后调用，且只会被**调用一次**
 
-React生命周期的回调函数总结成表格如下：
-![React生命周期表格](E:/%E4%B8%B4%E6%97%B6/26%20React/%E7%AC%94%E8%AE%B0+%E6%BA%90%E4%BB%A3%E7%A0%81/%E7%AC%94%E8%AE%B0+%E6%BA%90%E4%BB%A3%E7%A0%81/React%E8%B5%84%E6%96%99/%E6%B7%B7%E5%90%88app%E8%B5%84%E6%96%99/code/day04/%E7%AC%94%E8%AE%B0/images/React%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E8%A1%A8%E6%A0%BC.png)
+**第三个是组件的更新(update)阶段**
+
+注意：setState引起的state更新或父组件重新render引起的props更 新，更新后的state和props相对之前无论是否有变化，都将引起子组件的重新render。
+
+**造成组件更新有两类（三种）情况：**
+
+1. 父组件重新render
+
+父组件重新render引起子组件重新render的情况有两种
+
+a. 每当父组件重新render导致的重传props，子组件将直接跟着重新渲染，无论props是否有变化。可通 过shouldComponentUpdate方法优化。 
+
+b.在componentWillReceiveProps方法中，将props转换成自己的state
+
+```react
+class Child extends Component { 
+    constructor(props) { 
+        super(props); 
+        this.state = { someThings: props.someThings }; 
+    }
+    componentWillReceiveProps(nextProps) { // 父组件重传props时就会调用这个方法 
+        this.setState({someThings: nextProps.someThings}); 
+    }
+    render() { 
+        return <div>{this.state.someThings}</div> 
+    } 
+}
+```
+
+根据官网的描述 
+
+> 在该函数(componentWillReceiveProps)中调用 this.setState() 将不会引起第二次渲染。 
+
+是因为componentWillReceiveProps中判断props是否变化了，若变化了，this.setState将引起state变化，从而引 起render，此时就没必要再做第二次因重传props引起的render了，不然重复做一样的渲染了。 
+
+2. 组件本身调用setState，无论state有没有变化。可通过shouldComponentUpdate方法优化。
+
+**此阶段分为componentWillReceiveProps，shouldComponentUpdate， componentWillUpdate，render，componentDidUpdate**
+
+- componentWillReceiveProps(nextProps) 
+
+此方法只调用于**props引起的组件更新**过程中，参数nextProps是父组件传给当前组件的新props。但父组件render 方法的调用不能保证重传给当前组件的props是有变化的，所以在此方法中根据nextProps和this.props来查明重传 的props是否改变，以及如果改变了要执行啥，比如根据新的props调用this.setState触发当前组件的重新render 
+
+- shouldComponentUpdate(nextProps, nextState) 
+
+此方法通过比较nextProps，nextState及当前组件的this.props，this.state，返回true时当前组件将继续执行更新 过程，返回false则当前组件更新停止，以此可用来减少组件的不必要渲染，优化组件性能。 
+
+ps：这边也可以看出，就算componentWillReceiveProps()中执行了this.setState，更新了state，但在render前 （如shouldComponentUpdate，componentWillUpdate），this.state依然指向更新前的state，不然nextState 及当前组件的this.state的对比就一直是true了。 
+
+- componentWillUpdate(nextProps, nextState) 
+
+此方法在调用render方法前执行，在这边可执行一些组件更新发生前的工作，一般较少用。 
+
+- render 
+
+- componentDidUpdate(prevProps, prevState)
+
+此方法在组件更新后被调用，可以**操作组件更新的DOM**，prevProps和prevState这两个参数指的是组件更新前的 props和state 
+
+**卸载阶段**
+
+- componentWillUnmount 
+
+此方法在组件被卸载前调用，可以在这里执行一些清理工作，比如清楚组件中使用的定时器，清除componentDidMount中手动创建的DOM元素等，以避免引起内存泄漏。
+
+**总结**
+
 组件生命周期的执行顺序：
 
 - Mounting：
-
   - constructor()
   - componentWillMount()
   - render()
   - componentDidMount()
-
 - Updating：
-
   - componentWillReceiveProps(nextProps)
   - shouldComponentUpdate(nextProps, nextState)
   - componentWillUpdate(nextProps, nextState)
   - render()
   - componentDidUpdate(prevProps, prevState)
-
 - Unmounting：
-
   - componentWillUnmount()
+
+**React v16.4** **的生命周期**
+
+![react16.4生命周期](E:\Jennifer\other\notes\media\react16.4生命周期.png)
+
+### 16.4的生命周期
+
+原来（React v16.0前）的生命周期在React v16推出的Fiber之后就不合适了，因为如果要开启async rendering， 在render函数之前的所有函数，都有可能被执行多次。
+
+如果开发者**开了async rendering，而且又在以上这些render前执行的生命周期方法做AJAX请求的话，那AJAX将被 无谓地多次调用**。。。明显不是我们期望的结果。而且在componentWillMount里发起AJAX，不管多快得到结果 也赶不上首次render，而且componentWillMount在服务器端渲染也会被调用到（当然，也许这是预期的结 果），这样的IO操作放在componentDidMount里更合适。 
+
+禁止不能用比劝导开发者不要这样用的效果更好，所以**除了shouldComponentUpdate，其他在render函数之前的 所有函数（componentWillMount，componentWillReceiveProps，componentWillUpdate）都被 getDerivedStateFromProps替代。** 
+
+也就是用一个静态函数getDerivedStateFromProps来取代被deprecate的几个生命周期函数，**就是强制开发者在 render之前只做无副作用的操作，而且能做的操作局限在根据props和state决定新的state** 
+
+React v16.0刚推出的时候，是增加了一个componentDidCatch生命周期函数，这只是一个增量式修改，完全不影 响原有生命周期函数；但是，到了React v16.3，大改动来了，引入了两个新的生命周期函数。 
+
+**getDerivedStateFromProps** 
+
+**static getDerivedStateFromProps(props, state)** 在组件创建时和更新时的render方法之前调用，它应该返回 一个对象来更新状态，或者返回null来不更新任何内容。 
+
+getDerivedStateFromProps 本来（React v16.3中）是只在创建和更新（由父组件引发部分），也就是不是由父 组件引发，那么getDerivedStateFromProps也不会被调用，如自身setState引发或者forceUpdate引发。 在React v16.4中改正了这一点，让getDerivedStateFromProps无论是Mounting还是 Updating，也无论是因为什么引起的Updating，全部都会被调用，具体可看React v16.4 的生命周期图。 
+
+**getSnapshotBeforeUpdate** 
+
+**getSnapshotBeforeUpdate()** 被调用于render之后，**可以读取但无法使用DOM**的时候。它使您的组件可以在可 能更改之前从DOM捕获一些信息（例如滚动位置）。此生命周期返回的任何值都将作为参数传递给 componentDidUpdate（）。 
+
+[React Native 中组件的生命周期](http://www.race604.com/react-native-component-lifecycle/)
+
+
+![React中组件的生命周期](./images/LifeCycle.png)
 
 ### Counter计数器的小案例
 
