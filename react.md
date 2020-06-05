@@ -638,6 +638,23 @@ changeValue = () => {
 2. 用**class关键字**创建出来的组件：叫做“有状态组件”【需要有自己的私有数据时使用】
 3. React官方说：无状态组件，由于没有自己的state和生命周期函数，所以运行效率会比有状态组件稍微高一些；
 
+### PropTypes检查属性类型
+
+```react
+import PropTypes from 'prop-typs'
+...
+PriceList.propTypes = {
+  items: PropTypes.array.isRequired,
+  onModifyItemL: PropTypes.func.isRequired,
+  onDeleteItemL: PropTypes.func.isRequired
+}
+
+// defaultProps:默认属性
+PriceList.defaultProps = {
+  onModifyItemL: () => {}
+}
+```
+
 ### 渲染评论列表
 
 ![效果](./media/cmtlist.png)
@@ -884,6 +901,126 @@ export default class ContextTest extends React.Component {
 #### redux
 
 类似vuex，无明显关系的组件间通信
+
+## ref
+
+### DOM
+
+```react
+class CustomTextInput extends React.Component {
+  constructor(props) {
+    super(props);
+    // 创建一个 ref 来存储 textInput 的 DOM 元素
+    this.textInput = React.createRef();
+    this.focusTextInput = this.focusTextInput.bind(this);
+  }
+
+  focusTextInput() {
+    // 直接使用原生 API 使 text 输入框获得焦点
+    // 注意：我们通过 "current" 来访问 DOM 节点
+    this.textInput.current.focus();
+  }
+
+  render() {
+    // 告诉 React 我们想把 <input> ref 关联到构造器里创建的 `textInput` 上
+    return (
+      <div>
+        <input
+          type="text"
+          ref={this.textInput} />
+        <input
+          type="button"
+          value="Focus the text input"
+          onClick={this.focusTextInput}
+        />
+      </div>
+    );
+  }
+}
+```
+
+### Class
+
+```react
+class AutoFocusTextInput extends React.Component {
+  constructor(props) {
+    super(props);
+    this.textInput = React.createRef();
+  }
+
+  componentDidMount() {
+    this.textInput.current.focusTextInput();
+  }
+
+  render() {
+    return (
+      <CustomTextInput ref={this.textInput} />
+    );
+  }
+}
+```
+
+默认情况下，**你不能在函数组件上使用 `ref` 属性**，因为它们没有实例
+
+如果要在函数组件中使用 `ref`，你可以使用 [`forwardRef`](https://react.docschina.org/docs/forwarding-refs.html)（可与 [`useImperativeHandle`](https://react.docschina.org/docs/hooks-reference.html#useimperativehandle) 结合使用），或者可以将该组件转化为 class 组件。
+
+**Ref 转发是一个可选特性，其允许某些组件接收 `ref`，并将其向下传递（换句话说，“转发”它）给子组件。**
+
+```react
+const FancyButton = React.forwardRef((props, ref) => (
+  <button ref={ref} className="FancyButton">
+    {props.children}
+  </button>
+));
+
+// 你可以直接获取 DOM button 的 ref：
+const ref = React.createRef();
+<FancyButton ref={ref}>Click me!</FancyButton>;
+```
+
+### 回调ref
+
+```react
+class CustomTextInput extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.textInput = null;
+
+    this.setTextInputRef = element => {
+      this.textInput = element;
+    };
+
+    this.focusTextInput = () => {
+      // 使用原生 DOM API 使 text 输入框获得焦点
+      if (this.textInput) this.textInput.focus();
+    };
+  }
+
+  componentDidMount() {
+    // 组件挂载后，让文本框自动获得焦点
+    this.focusTextInput();
+  }
+
+  render() {
+    // 使用 `ref` 的回调函数将 text 输入框 DOM 节点的引用存储到 React
+    // 实例上（比如 this.textInput）
+    return (
+      <div>
+        <input
+          type="text"
+          ref={this.setTextInputRef}
+        />
+        <input
+          type="button"
+          value="Focus the text input"
+          onClick={this.focusTextInput}
+        />
+      </div>
+    );
+  }
+}
+```
 
 ## HOC高阶组件
 
@@ -1390,7 +1527,7 @@ export default class EventHandle extends Component {
     constructor(props) { 
         super(props); 
         this.state = { name: "" };
-        // // 为了在回调中使用 `this`，这个绑定是必不可少的
+        // 为了在回调中使用 `this`，这个绑定是必不可少的
         this.handleChange = this.handleChange.bind(this); 
     }
     handleChange(e) { 
