@@ -1335,7 +1335,9 @@ function RadioGroup(props) {
     // }); 
     return ( 
         <div> {React.Children.map(props.children, child => { 
-                // 要修改child属性必须先克隆它 
+                // 要修改虚拟dom 只能克隆它
+                // 参数1是克隆对象
+                // 参数2是设置的属性
                 return React.cloneElement(child, { name: props.name });
                 })} 
         </div> 
@@ -1358,6 +1360,18 @@ export default function Composition() {
     ); 
 }
 ```
+
+#### React.Children
+
+`React.Children` 提供了用于处理 `this.props.children` 不透明数据结构的实用方法。
+
+**React.Children.map**
+
+```
+React.Children.map(children, function[(thisArg)])
+```
+
+在 `children` 里的每个直接子节点上调用一个函数，并将 `this` 设置为 `thisArg`。如果 `children` 是一个数组，它将被遍历并为数组中的每个子节点调用该函数。如果子节点为 `null` 或是 `undefined`，则此方法将返回 `null` 或是 `undefined`，而不会返回数组。
 
 ### 特例关系
 
@@ -1961,7 +1975,11 @@ useEffect(() => {
 
 ### useReducer
 
-useReducer是useState的可选项，常用于组件有复杂状态逻辑时，类似于redux中reducer概念。
+[`useState`](https://zh-hans.reactjs.org/docs/hooks-reference.html#usestate) 的替代方案。它接收一个形如 `(state, action) => newState` 的 reducer，并返回当前的 state 以及与其配套的 `dispatch` 方法。（如果你熟悉 Redux 的话，就已经知道它如何工作了。）
+
+在某些场景下，`useReducer` 会比 `useState` 更适用，例如 state 逻辑较复杂且包含多个子值，或者下一个 state 依赖于之前的 state 等。并且，使用 `useReducer` 还能给那些会触发深更新的组件做性能优化，因为[你可以向子组件传递 `dispatch` 而不是回调函数](https://zh-hans.reactjs.org/docs/hooks-faq.html#how-to-avoid-passing-callbacks-down) 。
+
+常用于组件有复杂状态逻辑时，类似于redux中reducer概念。
 
 ```react
 // 商品列表状态维护
@@ -1992,6 +2010,34 @@ export default function HooksTest() {
             <FruitAdd onAddFruit={pname => dispatch({type: 'add', payload: pname})} /> 
         </div>
     );
+}
+```
+
+计数器案例：
+
+```react
+const initialState = {count: 0};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return {count: state.count + 1};
+    case 'decrement':
+      return {count: state.count - 1};
+    default:
+      throw new Error();
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  return (
+    <>
+      Count: {state.count}
+      <button onClick={() => dispatch({type: 'decrement'})}>-</button>
+      <button onClick={() => dispatch({type: 'increment'})}>+</button>
+    </>
+  );
 }
 ```
 
