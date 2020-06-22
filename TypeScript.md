@@ -74,7 +74,38 @@ let user = new User('S', 'in')
 
 重载（使用参数或返回值区分函数）：需要先声明再 实现
 
-### 基础类型
+### 变量类型
+
+#### 基础类型
+
+基本类型，也就是可以被直接使用的单一类型。
+
+- 数字
+- 字符串
+- 布尔类型
+- `null`
+- `undefined`
+- `any`
+- `unknown`
+- `void`
+- `object`
+- 枚举
+- `never`
+
+#### 复合类型
+
+包含多个单一类型的类型。
+
+- 数组类型
+- 元组类型
+- 字面量类型
+- 接口类型
+
+#### 其他
+
+- 可空类型，默认任何类型都可以被赋值成 `null` 或 `undefined`。
+- 联合类型，不确定类型是哪个，但能提供几种选择，如：`type1 | type2`。
+- 交叉类型，必须满足多个类型的组合，如：``type1 & type2`。
 
 ```ts
 // 基本类型
@@ -182,8 +213,59 @@ interface，仅定义结构，不需要实现
 
 TypeScript 的核心原则之一是对值所具有的结构进行类型检查。它有时被称做“鸭式辨型法”或“结构性子类型化”。 在 TypeScript 里，接口的作用就是为这些类型命名和为你的代码或第三方代码定义契约。 
 
-```typescript
+接口中的高级用法主要有以下几点：
 
+- 继承
+- 可选属性
+- 只读属性
+- 索引类型：字符串和数字
+- 函数类型接口
+- 给类添加类型，构造函数类型
+
+接口中除了可以定义常规属性之外，还可以定义可选属性、索引类型等。
+
+```ts
+interface Ia {
+    a: string;
+    b?: string; // 可选属性
+    readonly c: number; // 只读属性
+    [key: number]: string; // 索引类型
+}
+// 接口继承
+interface Ib extends Ia {
+	age: number;
+}
+let test1: Ia = {
+    a: "",
+    c: 2,
+  	age: 1,
+};
+test1.c = 2; // 报错，只读属性
+const item0 = test1[0]; // 索引类型
+```
+
+接口中同时也支持定义函数类型、构造函数类型。
+
+```ts
+// 接口定义函数类型
+interface SearchFunc {
+  	(source: string, subString: string): boolean;
+}
+let mySearch: SearchFunc = function (x: string, y: string) {
+  	return false;
+};
+// 接口中编写类的构造函数类型检查
+interface IClass {
+ 	new (hour: number, minute: number);
+}
+let test2: IClass = class {
+  	constructor(x: number, y: number) {}
+};
+```
+
+范例补充：
+
+```typescript
 // 定义接口
 interface o {
 	prop: number,
@@ -193,12 +275,12 @@ interface o {
 declare function create(o: o | null): void
 create({prop: 0, num: 2})
 
-// 可选属性
 interface Square {
 	color: string
 	area: number
 }
 
+// 可选属性
 interface SquareConfig {
     // 为了解决导航时变量值为null时，页面运行时出错的问题
 	color?: string
@@ -377,6 +459,14 @@ class Button extends Control implements SelectableControl {
 
 ### 类
 
+在类中的高级用法主要有以下几点：
+
+- 继承
+- 存储器 `get set`
+- `readonly` 修饰符
+- 公有，私有，受保护的修饰符
+- 抽象类 `abstract`
+
 ```typescript
 class Greeter {
 	greeting: string
@@ -511,7 +601,22 @@ Person.prototype.say = function(){
 }
 ```
 
+#### 抽象类
 
+抽象类用于类的抽象，可以定义一些类的公共属性、公共方法，让继承的子类去实现，也可以自己实现。
+
+抽象类有以下两个特点。
+
+- 抽象类不能直接实例化
+- 抽象类中的抽象属性和方法，必须被子类实现
+
+> tip 经典问题：抽象类的接口的区别：
+>
+> - 抽象类要被子类继承，接口要被类实现。
+> - 在 ts 中使用 `extends` 去继承一个抽象类。
+> - 在 ts 中使用 `implements` 去实现一个接口。
+> - 接口只能做方法声明，抽象类中可以作方法声明，也可以做方法实现。
+> - 抽象类是有规律的，抽离的是一个类别的公共部分，而接口只是对相同属性和方法的抽象，属性和方法可以无任何关联。
 
 ### 访问修饰符
 
