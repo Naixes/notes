@@ -624,9 +624,69 @@ private，public，protected
 
 ### 函数
 
+#### 函数重载
+
 ```js
 // 参数只要声明就是必选，?表示可选参数
-// 函数重载，先声明，后统一实现
+// 函数重载指的是一个函数可以根据不同的入参匹配对应的类型。
+function doSomeThing(x: string, y: number): string;
+function doSomeThing(x: number): string;
+function doSomeThing(x): any {}
+
+let result = doSomeThing(0);
+let result1 = doSomeThing("", 2);
+```
+
+#### this类型
+
+我们都知道，Javascript 中的 this 只有在运行的时候，才能够判断，所以对于 Typescript 来说是很难做静态判断的，对此 Typescript 给我们提供了手动绑定 `this` 类型，让我们能够在明确`this` 的情况下，给到静态的类型提示。
+
+其实在 Javascript 中的 `this`，就只有这五种情况：
+
+- 对象调用，指向调用的对象
+- 全局函数调用，指向 `window` 对象
+- `call apply` 调用，指向绑定的对象
+- `dom.addEventListener` 调用，指向 `dom`
+- 箭头函数中的 `this` ，指向绑定时的上下文
+
+```ts
+// 全局函数调用 - window
+function doSomeThing() {
+  return this;
+}
+const result2 = doSomeThing();
+
+// 对象调用 - 对象
+interface IObj {
+  age: number;
+  // 手动指定 this 类型
+  doSomeThing(this: IObj): IObj;
+  doSomeThing2(): Function;
+}
+
+const obj: IObj = {
+  age: 12,
+  doSomeThing: function () {
+    return this;
+  },
+  doSomeThing2: () => {
+    console.log(this);
+  },
+};
+const result3 = obj.doSomeThing();
+let globalDoSomeThing = obj.doSomeThing;
+globalDoSomeThing(); // 这样会报错，因为我们只允许在对象中调用
+
+// call apply 绑定对应的对象
+function fn() {
+  console.log(this);
+}
+fn.bind(document)();
+
+// dom.addEventListener
+document.body.addEventListener("click", function () {
+  console.log(this); // body
+});
 ```
 
 ### 泛型
