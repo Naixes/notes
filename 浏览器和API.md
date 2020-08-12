@@ -538,7 +538,7 @@ Cache-control: max-age=30
 
 想必大家都听过操作 DOM 性能很差，但是这其中的原因是什么呢？
 
-因为 DOM 是属于渲染引擎中的东西，而 JS 又是 JS 引擎中的东西。当我们**通过 JS 操作 DOM 的时候，其实这个操作涉及到了两个线程之间的通信，那么势必会带来一些性能上的损耗。**操作 DOM 次数一多，也就等同于一直在进行线程之间的通信，并且操作 DOM 可能还会带来重绘回流的情况，所以也就导致了性能上的问题。
+因为 DOM 是属于渲染引擎中的东西，而 JS 又是 JS 引擎中的东西。当我们**通过 JS 操作 DOM 的时候，其实这个操作涉及到了两个线程之间的通信，操作系统在进行线程切换的时候需要保存上一个线程执行时的状态信息并读取下一个线程的状态信息，俗称上下文切换。而这个操作相对而言是比较耗时的。那么势必会带来一些性能上的损耗。**操作 DOM 次数一多，也就等同于一直在进行线程之间的通信，并且操作 DOM **可能还会带来重绘回流**的情况，所以也就导致了性能上的问题。
 
 > 经典面试题：插入几万个 DOM，如何实现页面不卡顿？
 
@@ -619,7 +619,22 @@ Cache-control: max-age=30
 
 - 使用 `visibility` 替换 `display: none` ，因为前者只会引起重绘，后者会引发回流（改变了布局）
 
-- 不要把节点的属性值放在一个循环里当成循环里的变量
+- 在循环外操作元素，当然即使在循环外也要尽量减少操作元素，因为不知道他人调用你的代码时是否处于循环中。
+
+  ```js
+  const times = 10000;
+  console.time('switch')
+  for (let i = 0; i < times; i++) {
+    document.body === 1 ? console.log(1) : void 0;
+  }
+  console.timeEnd('switch') // 1.873046875ms
+  var body = JSON.stringify(document.body)
+  console.time('batch')
+  for (let i = 0; i < times; i++) {
+    body === 1 ? console.log(1) : void 0;
+  }
+  console.timeEnd('batch') // 0.846923828125ms
+  ```
 
   ```js
   for(let i = 0; i < 1000; i++) {
@@ -628,11 +643,106 @@ Cache-control: max-age=30
   }
   ```
 
+- 批量操作元素
+
+  比如说要创建 1 万个 div 元素，在循环中直接创建再添加到父元素上耗时会非常多。如果采用字符串拼接的形式，先将 1 万个 div 元素的 html 字符串拼接成一个完整字符串，然后赋值给 body 元素的 innerHTML 属性就可以明显减少耗时。
+
+  ```js
+  const times = 10000;
+  console.time('createElement')
+  for (let i = 0; i < times; i++) {
+    const div = document.createElement('div')
+    document.body.appendChild(div)
+  }
+  console.timeEnd('createElement')// 54.964111328125ms
+  console.time('innerHTML')
+  let html=''
+  for (let i = 0; i < times; i++) {
+    html+='<div></div>'
+  }
+  document.body.innerHTML += html // 31.919921875ms
+  console.timeEnd('innerHTML')
+  ```
+
+  虽然通过修改 innerHTML 来实现批量操作的方式效率很高，但它并不是万能的。比如要在此基础上实现事件监听就会略微麻烦，只能通过事件代理或者重新选取元素再进行单独绑定。批量操作除了用在创建元素外也可以用于修改元素属性样式，比如下面的例子。
+
+  创建 2 万个 div 元素，以单节点树结构进行排布，每个元素有一个对应的序号作为文本内容。现在通过 style 属性对第 1 个 div 元素进行 2 万次样式调整。下面是直接操作 style 属性的代码：
+
+  ```js
+  const times = 20000;
+  let html = ''
+  for (let i = 0; i < times; i++) {
+    html = `<div>${i}${html}</div>`
+  }
+  document.body.innerHTML += html
+  const div = document.querySelector('div')
+  for (let i = 0; i < times; i++) {
+    div.style.fontSize = (i % 12) + 12 + 'px'
+    div.style.color = i % 2 ? 'red' : 'green'
+    div.style.margin = (i % 12) + 12 + 'px'
+  }
+  ```
+
+  如果将需要修改的样式属性放入 JavaScript 数组，然后对这些修改进行 reduce 操作，得到最终需要的样式之后再设置元素属性，那么性能会提升很多。代码如下：
+
+  ```js
+  const times = 20000;
+  let html = ''
+  for (let i = 0; i < times; i++) {
+    html = `<div>${i}${html}</div>`
+  }
+  document.body.innerHTML += html
+  
+  let queue = [] //  创建缓存样式的数组
+  let microTask // 执行修改样式的微任务
+  const st = () => {
+    const div = document.querySelector('div')
+    // 合并样式
+    const style = queue.reduce((acc, cur) => ({...acc, ...cur}), {})
+    for(let prop in style) {
+      div.style[prop] = style[prop]
+    }
+    queue = []
+    microTask = null
+  }
+  const setStyle = (style) => {
+    queue.push(style)
+    // 创建微任务
+    if(!microTask) microTask = Promise.resolve().then(st)
+  }
+  for (let i = 0; i < times; i++) {
+    const style = {
+      fontSize: (i % 12) + 12 + 'px',
+      color: i % 2 ? 'red' : 'green',
+      margin:  (i % 12) + 12 + 'px'
+    }
+    setStyle(style)
+  }
+  ```
+
+- 缓存元素集合
+
+  ```js
+  for (let i = 0; i < document.querySelectorAll('div').length; i++) {
+    document.querySelectorAll(`div`)[i].innerText = i
+  }
+  
+  // 优化后
+  const divs = document.querySelectorAll('div')
+  for (let i = 0; i < divs.length; i++) {
+    divs[i].innerText = i
+  }
+  ```
+
 - 不要使用 `table` 布局，可能很小的一个小改动会造成整个 `table` 的重新布局
 
 - 动画实现的速度的选择，动画速度越快，回流次数越多，也可以选择使用 `requestAnimationFrame`
 
-- CSS 选择符**从右往左**匹配查找，避免节点层级过多
+- CSS 选择符**从右往左**匹配查找，避免节点层级过多，尽量不要使用复杂的匹配规则和复杂的样式，从而减少渲染引擎计算样式规则生成 CSSOM 树的时间；
+
+- 尽量减少重排和重绘影响的区域；
+
+- 使用 CSS3 特性来实现动画效果。
 
 - 将频繁重绘或者回流的节点设置为图层，图层能够阻止该节点的渲染行为影响别的节点。比如对于 `video` 标签来说，浏览器会自动将该节点变为图层。
 
@@ -880,29 +990,63 @@ DNS 解析也是需要时间的，可以通过预解析的方式来预先获得�
 理解了节流的用途，我们就来实现下这个函数
 
 ```js
-// func是用户传入需要防抖的函数
-// wait是等待时间
-const throttle = (func, wait = 50) => {
-  // 上一次执行该函数的时间
-  let lastTime = 0
-  return function(...args) {
-    // 当前时间
-    let now = +new Date()
-    // 将当前时间和上一次执行函数时间对比
-    // 如果差值大于设置的等待时间就执行函数
-    if (now - lastTime > wait) {
-      lastTime = now
-      func.apply(this, args)
-    }
-  }
-}
+const throttle = (func, wait = 0, execFirstCall) => {
+  let timeout = null
+  let args
+  let firstCallTimestamp
 
-setInterval(
-  throttle(() => {
-    console.log(1)
-  }, 500),
-  1
-)
+
+  function throttled(...arg) {
+    if (!firstCallTimestamp) firstCallTimestamp = new Date().getTime()
+    if (!execFirstCall || !args) {
+      console.log('set args:', arg)
+      args = arg
+    }
+    if (timeout) {
+      clearTimeout(timeout)
+      timeout = null
+    }
+    // 以Promise的形式返回函数执行结果
+    return new Promise(async(res, rej) => {
+      if (new Date().getTime() - firstCallTimestamp >= wait) {
+        try {
+          const result = await func.apply(this, args)
+          res(result)
+        } catch (e) {
+          rej(e)
+        } finally {
+          cancel()
+        }
+      } else {
+        timeout = setTimeout(async () => {
+          try {
+            const result = await func.apply(this, args)
+            res(result)
+          } catch (e) {
+            rej(e)
+          } finally {
+            cancel()
+          }
+        }, firstCallTimestamp + wait - new Date().getTime())
+      }
+    })
+  }
+  // 允许取消
+  function cancel() {
+    clearTimeout(timeout)
+    args = null
+    timeout = null
+    firstCallTimestamp = null
+  }
+  // 允许立即执行
+  function flush() {
+    cancel()
+    return func.apply(this, args)
+  }
+  throttled.cancel = cancel
+  throttled.flush = flush
+  return throttled
+}
 ```
 
 ## 防抖
@@ -926,6 +1070,43 @@ const debounce = (func, wait = 50) => {
       func.apply(this, args)
     }, wait)
   }
+}
+
+// 优化：将原函数作为参数传入 debounce() 函数中，同时指定延迟等待时间，返回一个新的函数，这个函数包含 cancel 属性，用来取消原函数执行。flush 属性用来立即调用原函数，同时将原函数的执行结果以 Promise 的形式返回。
+const debounce = (func, wait = 0) => {
+  let timeout = null
+  let args
+  function debounced(...arg) {
+    args = arg
+    if(timeout) {
+      clearTimeout(timeout)
+      timeout = null
+    }
+    // 以Promise的形式返回函数执行结果
+    return new Promise((res, rej) => {
+      timeout = setTimeout(async () => {
+        try {
+          const result = await func.apply(this, args)
+          res(result)
+        } catch(e) {
+          rej(e)
+        }
+      }, wait)
+    })
+  }
+  // 允许取消
+  function cancel() {
+    clearTimeout(timeout)
+    timeout = null
+  }
+  // 允许立即执行
+  function flush() {
+    cancel()
+    return func.apply(this, args)
+  }
+  debounced.cancel = cancel
+  debounced.flush = flush
+  return debounced
 }
 ```
 
@@ -1606,7 +1787,7 @@ DOM又称为文档树模型
 ![1497154623955](media/1497154623955.png)
 
 - 文档：一个网页可以称为文档
-- 节点：网页中的所有内容都是节点（标签、属性、文本、注释等）
+- 节点：网页中的所有内容都是节点（元素/标签、属性、文本、注释等）
 - 元素：网页中的标签
 - 属性：标签的属性
 
@@ -1744,12 +1925,16 @@ Event接口表示在DOM中发生的任何事件，一些是用户生成的（例
 ### 注册/移除事件的三种方式
 
 ```javascript
+// 方式1
+<div id="box" onclick="click()"/>
+// 方式2
 var box = document.getElementById('box');
 // onclick方式只能绑定1个事件
 box.onclick = function () {
   console.log('点击后执行');
 };
 box.onclick = null;
+// 方式3
 // ie8不支持
 // 参数1：事件类型；2：事件处理函数；3：事件触发方式
 // this指当前对象
@@ -1765,6 +1950,10 @@ function eventCode() {
   console.log('点击后执行');
 }
 ```
+
+方式 1 和方式 2 同属于 DOM0 标准，通过这种方式进行事件监会覆盖之前的事件监听函数。
+
+方式 3 属于 DOM2 标准，推荐。同一元素上的事件监听函数互不影响，而且可以独立取消，调用顺序和监听顺序一致。
 
 通常我们使用 `addEventListener` 注册事件，该函数的第三个参数可以是布尔值，也可以是对象。对于布尔值 `useCapture` 参数来说，该参数默认值为 `false` 。对于对象参数来说，可以使用以下几个属性
 
@@ -1885,6 +2074,34 @@ window.onload = function(){
 适合用事件委托的事件：click，mousedown，mouseup，keydown，keyup，keypress，mouseover和mouseout虽然也有事件冒泡，但是处理它们的时候需要特别的注意，因为需要经常计算它们的位置，处理起来不太容易。
 
 不适合的：mousemove，每次都要计算它的位置，非常不好把控；focus，blur等，没用冒泡的特性，自然就不能用事件委托了。
+
+另一个例子：
+
+```html
+<ul class="list">
+  <li class="item" id="item1">项目1<span class="edit">编辑</span><span class="delete">删除</span></li>
+  <li class="item" id="item2">项目2<span class="edit">编辑</span><span class="delete" >删除</span></li>
+  <li class="item" id="item3">项目3<span class="edit">编辑</span><span class="delete">删除</span></li>
+  ...
+</ul>
+```
+
+```js
+const ul = document.querySelector('.list')
+ul.addEventListener('click', e => {
+  const t = e.target || e.srcElement
+  if (t.classList.contains('item')) {
+    getInfo(t.id)
+  } else {
+    id = t.parentElement.id
+    if (t.classList.contains('edit')) {
+      edit(id)
+    } else if (t.classList.contains('delete')) {
+      del(id)
+    }
+  }
+})
+```
 
 ### 事件对象的属性和方法
 
