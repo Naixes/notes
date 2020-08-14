@@ -2066,31 +2066,156 @@ html语言当中另外一个相当重要的概念----------标准流！或者普
 
 为了提高网页制作的效率，布局时通常需要遵守一定的布局流程，具体如下：
 
-1、确定页面的版心（可视区）。
+（1）为了保证主要布局容器优先级，应将主要布局容器写在次要布局容器之前。
 
-2、分析页面中的行模块，以及每个行模块中的列模块。
+（2）将布局容器进行水平排列；
 
-3、制作HTML结构 。
+（3）设置宽度，即次要容器宽度固定，主要容器撑满；
 
-4、CSS初始化，然后开始运用盒子模型的原理，通过DIV+CSS布局来控制网页的各个模块。
+（4）消除布局方式的副作用，如浮动造成的高度塌陷；
+
+（5）为了在窄屏下也能正常显示，可以通过媒体查询进行优化。
 
 ## 一列固定宽度且居中
 
-![1541727433019](C:\Users\ADMINI~1\AppData\Local\Temp\1541727433019.png)
-
-最普通的，最为常用的结构
+单列布局是最常用的一种布局，它的实现效果就是将一个元素作为布局容器，通常设置一个较小的（最大）宽度来保证不同像素宽度屏幕下显示一致。
 
 ## 两列左窄右宽型
 
-![1541727503478](C:\Users\ADMINI~1\AppData\Local\Temp\1541727503478.png)
+​    <a href="http://www.mi.com" target="_blank"> 小米官网 </a>
 
-比如小米    <a href="http://www.mi.com" target="_blank"> 小米官网 </a>
+```html
+<style>
+  .wrap {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+  }
+  .main {
+    flex: 1;
+  }
+  .aside {
+    width: 200px;
+  }
+  @media only screen and (max-width: 1000px) {
+    .wrap {
+      flex-direction: row;
+    }
+    .main {
+      flex: 100%;
+    }
+  }
+</style>
+<div class="wrap">
+  <main class="main">主要布局容器</main>
+  <aside class="aside">次要布局容器</aside>
+</div>
+```
 
-## 通栏平均分布型
+## 三列布局
 
-![1541727483113](C:\Users\ADMINI~1\AppData\Local\Temp\1541727483113.png)
+“圣杯布局”，标准的圣杯布局没有添加媒体查询。
 
-比如锤子    <a href="http://www.smartisan.com/" target="_blank"> 锤子官网 </a>
+```html
+<style>
+  .main, .left, .right {
+    float: left;
+  }
+  .wrap {
+    padding: 0 200px 0 300px;
+  }
+  .wrap::after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+  .main {
+    width: 100%;
+  }
+  .left {
+    width: 300px;
+    position: relative;
+    left: -300px;
+    margin-left: -100%;
+  }
+  .right {
+    position: relative;
+    width: 200px;
+    margin-left: -200px;
+    right: -200px;
+  }
+  @media only screen and (max-width: 1000px) {
+    .wrap {
+      padding: 0;
+    }
+    .left {
+      left: 0;
+      margin-left: 0;
+    }
+    .right {
+      margin-left: 0;
+      right: 0;
+    }
+  }
+</style>
+<div class="wrap">
+  <main class="main">main</main>
+  <aside class="left">left</aside>
+  <aside class="right">right</aside>
+</div>
+```
+
+## 垂直方向布局
+
+这种布局将页面分成上、中、下三个部分，上、下部分都为固定高度，中间部分高度不定。当页面高度小于浏览器高度时，下部分应固定在屏幕底部；当页面高度超出浏览器高度时，下部分应该随中间部分被撑开，显示在页面最底部。
+
+这种布局也称之为”sticky footer“，意思是下部分粘黏在屏幕底部。要实现这个功能，最简单的就是使用 flex 或 grid 进行布局。下面是使用 flex 的主要代码：
+
+```html
+<style>
+  .container {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+  }
+  header, footer {
+    min-height: 100px;
+  }
+  main {
+    flex: 1;
+  }
+</style>
+<div class="container">
+  <header></header>
+  <main>
+      <div>...</div>
+  </main>
+  <footer></footer>
+</div>
+```
+
+如果要考虑兼容性的话，其实现起来要复杂些，下面是主要代码：
+
+```html
+<style>
+  .container {
+    box-sizing: border-box;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+  header, footer {
+    height: 100px;
+  }
+  footer {
+    margin-top: -100px;
+  }
+</style>
+<div class="container">
+  <header></header>
+  <main></main>
+</div>
+<footer></footer>
+```
 
 # 清除浮动
 
@@ -2125,7 +2250,6 @@ html语言当中另外一个相当重要的概念----------标准流！或者普
 
 ```html
 是W3C推荐的做法是通过在浮动元素末尾添加一个空的标签例如 <div style=”clear:both”></div>，或则其他标签br等亦可。
-
 ```
 
 优点： 通俗易懂，书写方便
