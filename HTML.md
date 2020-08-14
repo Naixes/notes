@@ -864,6 +864,19 @@ rel=“search” 链接到本页面的搜索页面（一般是站内提供搜索
 
 **icon 型 link**
 
+```
+代码：  <link rel="shortcut icon" href="favicon.ico"  type="image/x-icon"/>     
+```
+
+注意： 
+
+1. 她(它)不是iconfont字体哦 也不是图片。
+2. 位置是放到 head 标签中间。
+3. 后面的type="image/x-icon"  属性可以省略
+4. 为了兼容性，请将favicon.ico 这个图标放到根目录下。
+
+我们可以自己做的图片，转换为 ico图标，以便放到我们站点里面。 http://www.bitbug.net/
+
 这类链接表示页面的 icon。多数浏览器会读取 icon 型 link，并且把页面的 icon 展示出来。icon 型 link 是**唯一一个外部资源类的元信息 link**，其它元信息类 link 都是超链接，这意味着，icon 型 link 中的图标地址**默认会被浏览器下载和使用**。如果没有指定这样的 link，多数浏览器会使用域名根目录下的 favicon.ico，即使它并不存在，所以从性能的角度考虑，建议一定要保证页面中有 icon 型的 link。**只有 icon 型 link 有有效的 sizes 属性**，HTML 标准允许一个页面出现多个 icon 型 link，并且用sizes 指定它适合的 icon 尺寸。
 
 **预处理类 link** 
