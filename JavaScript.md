@@ -152,7 +152,7 @@ Number、String、Boolean、Undefined、Null
 最小值：Number.MIN_VALUE，这个值为： 5e-324
 最大值：Number.MAX_VALUE，这个值为： 1.7976931348623157e+308
 两个可表示(representable)数之间的最小间隔：Number.EPSILON
-无穷大：Infinity
+无穷大：Infinity，在某些场景下比较有用，比如通过数值来表示权重或者优先级，Infinity 可以表示最高优先级或最大权重
 无穷小：-Infinity
 如果计算中超过数值范围会转换成Infinity/-Infinity，无法继续计算，isInfinity(xx)判断是否超过范围
 ```
@@ -185,11 +185,17 @@ Number、String、Boolean、Undefined、Null
     Number('-Infinity') //-Infinity
     ```
   
-  - parseInt()忽略空格找到第一个非空字符，如果不是数字或负号返回NaN，可以解析八进制和十六进制，ECMAScript5之后不能解析八进制，可以传入**第二个参数**表示`var num = parseInt("070", 8)`建议明确指定基数
+  - parseInt()忽略空格找到第一个非空字符，如果不是数字或负号返回NaN，可以解析八进制和十六进制，ECMAScript5之后不能解析八进制，可以传入**第二个参数**表示`var num = parseInt("070", 8)`建议明确指定基数，可以将其他进制的整数转换成十进制显示
+  
+    ```js
+    ['0', '1', '2'].map(parseInt) // [0, NaN, NaN]，如果在数组的 map 函数的回调函数中直接调用 parseInt，那么会将数组元素和索引值都作为参数传入。
+    ```
   
   - parseFloat()只能解析十进制，如果是可解析为整数的值则返回整数
   
   - 其他可以将字符串转换为数字的方法：`+str/-str/str-0`
+  
+  - 将十进制转换成其他进制时，可以通过 toString 函数来实现：`(10).toString(2) // "1010"`
   
 -  +0 和 -0
 
@@ -246,21 +252,21 @@ console.log(0.10000000000000001)
 console.log(0.100000000000000002) // 0.1
 ```
 
+- **解决方法：**
+
 所以实际上，这里错误的不是结论，而是比较的方法，正确的比较方法是使用 JavaScript提供的最小精度值：`console.log( Math.abs(0.1 + 0.2 - 0.3) <= Number.EPSILON);`
 
-其实解决的办法还有很多，原生提供的方式来解决问题
+其实解决的办法还有很多
+
+- 一种方式是先转换成整数进行计算，然后再转换回小数，这种方式适合在小数位不是很多的时候。比如一些程序的支付功能 API 以“分”为单位，从而避免使用小数进行计算。
+- 还有另一种方法就是舍弃末尾的小数位。比如对上面的加法就可以先调用 toPrecision 截取 12 位，然后调用 parseFloat 函数转换回浮点数。
 
 ```js
 // toFixed() 方法可把 Number 四舍五入为指定小数位数的数字。
 // 规定小数的位数，是 0 ~ 20 之间的值，包括 0 和 20，有些实现可以支持更大的数值范围。如果省略了该参数，将用 0 代替。
 parseFloat((0.1 + 0.2).toFixed(10)) === 0.3 // true
-```
-
-想办法规避掉这类小数计算时的精度问题，那么最常用的方法就是将**浮点数转化成整数计算**。因为整数都是可以精确表示的。
-
-```js
-对于0.1 + 0.02 我们需要转化成 ( 10 + 2 ) / 1e2
-对于0.1 * 0.02 我们则转化成 1 * 2 / 1e3
+// toPrecision() 以定点表示法或指数表示法表示的一个数值对象的字符串表示，四舍五入到 precision 参数指定的显示数字位数
+parseFloat((0.1 + 0.2).toPrecision(12)) // 0.3
 ```
 
 #### String类型
@@ -303,6 +309,27 @@ parseFloat((0.1 + 0.2).toFixed(10)) === 0.3 // true
   return 'cat'[1]; // returns "a" ES5
   ```
 
+- 实现千位分隔符
+
+  一种很容易想到的方法就是从右往左遍历数值每一位，每隔 3 位添加分隔符。为了操作方便，我们可以将数值转换成字符数组，而要实现从右往左遍历，一种实现方式是通过 for 循环的索引值找到对应的字符；而另一种方式是通过数组反转，从而变成从左到右操作。
+
+  ```js
+  function sep(n) {
+    let [i, c] = n.toString().split(/(\.\d+)/)
+    return i.split('').reverse().map((c, idx) => (idx+1) % 3 === 0 ? ',' + c: c).reverse().join('').replace(/^,/, '') + c
+  }
+  ```
+
+  第二种方式则是通过引用类型，即用正则表达式对字符进行替换来实现。
+
+  ```js
+  function sep2(n){
+    let str = n.toString()
+    str.indexOf('.') < 0 ? str+= '.' : void 0
+    return str.replace(/(\d)(?=(\d{3})+\.)/g, '$1,').replace(/\.$/, '')
+  }
+  ```
+
 #### Boolean类型
 
 - Boolean字面量：  true和false，区分大小写
@@ -311,14 +338,54 @@ parseFloat((0.1 + 0.2).toFixed(10)) === 0.3 // true
 
 #### Undefined和Null（空类型）
 
+##### undefined
+
 Undefined类型只有一个值即undefined，为了区分空对象指针和未初始化的变量，没有必要将一个变量显示得设置为undefined
 
-1. undefined表示一个**声明了没有赋值的变量**，变量只声明的时候值默认是undefined，对没有声明的变量使用`typeof`也返回undefined
+- 获得undefined
+
+1. undefined表示一个**声明了没有赋值的变量**，对没有声明的变量使用`typeof`也返回undefined
 2. 函数参数未传递时也是undefined
-3. 函数**没有明确返回值**，如果接收了，结果为undefined
-4. 和数值计算结果是NaN
+3. 执行无返回值函数；
+4. 执行 void 表达式；推荐**void 0**，同时它作为表达式还可以配合三目运算符使用，代表不执行任何操作。
+5. 引用未定义的对象属性；
+6. 全局常量 window.undefined 或 undefined。
+
+**用void 0 代替undefined：**
+
+任何变量在赋值前是 Undefined 类型、值为 undefined，一般我们可以用全局变量 undefined（就是名为undefined 的这个变量）来表达这个值，或者 void 运算来把任一一个表达式变成undefined 值。
+
+但是呢，因为 JavaScript 的代码 **undefined 是一个变量**，而并非是一个关键字，这是JavaScript 语言公认的设计失误之一，所以，我们为了避免无意中被篡改，建议使用void 0 来获取 undefined 值。
+
+undefined和数值计算结果是NaN
+
+```js
+var a; // undefined
+var o = {}
+o.b // undefined
+(() => {})() // undefined
+void 0 // undefined
+window.undefined // undefined
+```
+
+- 判断undefined
+
+```js
+// 方式1：虽然通过 “===” 和 undefined 值做比较是可行的，但如果 x 未定义则会抛出错误 “ReferenceError: x is not defined” 导致程序执行终止，这对于代码的健壮性显然是不利的
+if(x===undefined) {
+  ...
+}
+// 方式2：推荐
+if(typeof x === 'undefined') {
+  ...
+}
+```
+
+##### Null
 
 Null类型只有一个值即null，如果变量将用于保存对象，最好初始化为null
+
+Null 数据类型和 Undefined 类似，只有唯一的一个值 null，都可以表示空值，甚至我们通过 “==” 来比较它们是否相等的时候得到的结果都是 true，但 null 是 JavaScript 保留关键字，而 undefined 只是一个常量。
 
 1. null表示一个**空对象指针**，变量的值如果想为null，必须手动设置
 
@@ -332,19 +399,11 @@ Null类型只有一个值即null，如果变量将用于保存对象，最好初
 
    `undefined == null // true`
 
-**用void 0 代替undefined：**
-
-任何变量在赋值前是 Undefined 类型、值为 undefined，一般我们可以用全局变量 undefined（就是名为undefined 的这个变量）来表达这个值，或者 void 运算来把任一一个表达式变成undefined 值。
-
-但是呢，因为 JavaScript 的代码 **undefined 是一个变量**，而并非是一个关键字，这是JavaScript 语言公认的设计失误之一，所以，我们为了避免无意中被篡改，建议使用void 0 来获取 undefined 值。
-
-> Naixes：在ant-design-vue的select组件中将选择内容重置为空时用到过
-
 #### Symbol
 
 目的：保证属性的名字都是独一无二的，从根本上防止属性名的冲突。 
 
-Symbol 值**通过`Symbol`函数生成**。这就是说，对象的属性名现在可以有两种类型，一种是原来就有的字符串，另一种就是新增的 Symbol 类型。凡是属性名属于 Symbol 类型，就都是**独一无二**的，可以保证不会与其他属性名产生冲突。
+Symbol 值**通过`Symbol`函数生成**。这就是说，对象的属性名现在可以有两种类型，一种是原来就有的字符串，另一种就是新增的 Symbol 类型。凡是属性名属于 Symbol 类型，就都是**独一无二**的。
 
 ```js
 let s = Symbol();
@@ -359,9 +418,6 @@ typeof s
 ```js
 let s1 = Symbol('foo');
 let s2 = Symbol('bar');
-
-s1 // Symbol(foo)
-s2 // Symbol(bar)
 
 s1.toString() // "Symbol(foo)"
 s2.toString() // "Symbol(bar)"
@@ -382,13 +438,6 @@ sym // Symbol(abc)
 注意，`Symbol`函数的参数只是表示对当前 Symbol 值的描述，因此相同参数的`Symbol`函数的返回值是不相等的。
 
 ```js
-// 没有参数的情况
-let s1 = Symbol();
-let s2 = Symbol();
-
-s1 === s2 // false
-
-// 有参数的情况
 let s1 = Symbol('foo');
 let s2 = Symbol('foo');
 
@@ -401,8 +450,6 @@ Symbol 值**不能与其他类型的值进行运算**，会报错。
 let sym = Symbol('My symbol');
 
 "your symbol is " + sym
-// TypeError: can't convert symbol to string
-`your symbol is ${sym}`
 // TypeError: can't convert symbol to string
 ```
 
@@ -467,45 +514,9 @@ a['mySymbol'] // "Hello!"
 
 同理，在对象的内部，使用 Symbol 值定义属性时，Symbol 值必须放在方括号之中
 
-Symbol 类型还可以用于**定义一组常量**，保证这组常量的值都是不相等的。
-
-```js
-const log = {};
-
-log.levels = {
-  DEBUG: Symbol('debug'),
-  INFO: Symbol('info'),
-  WARN: Symbol('warn')
-};
-console.log(log.levels.DEBUG, 'debug message');
-console.log(log.levels.INFO, 'info message');
-```
-
-下面是另外一个例子。
-
-```js
-const COLOR_RED    = Symbol();
-const COLOR_GREEN  = Symbol();
-
-function getComplement(color) {
-  switch (color) {
-    case COLOR_RED:
-      return COLOR_GREEN;
-    case COLOR_GREEN:
-      return COLOR_RED;
-    default:
-      throw new Error('Undefined color');
-    }
-}
-```
-
-**常量使用 Symbol 值最大的好处，就是其他任何值都不可能有相同的值了，因此可以保证上面的`switch`语句会按设计的方式工作。**
-
 还有一点需要注意，Symbol 值作为属性名时，该属性还是公开属性，不是私有属性。
 
-应用：消除魔术字符串，魔术字符串指的是，在代码之中多次出现、与代码形成强耦合的某一个具体的字符串或者数值。风格良好的代码，应该尽量消除魔术字符串，改由含义清晰的变量代替。 
-
-##### 属性名遍历
+###### 属性名遍历
 
 Symbol 作为属性名，该属性**不会出现在`for...in`、`for...of`循环中，也不会被`Object.keys()`、`Object.getOwnPropertyNames()`、`JSON.stringify()`返回**。
 
@@ -539,6 +550,42 @@ Reflect.ownKeys(obj)
 ```
 
 由于以 Symbol 值作为名称的属性，不会被常规方法遍历得到。我们**可以利用这个特性，为对象定义一些非私有的、但又希望只用于内部的方法**。
+
+##### **定义一组常量**
+
+```js
+const log = {};
+
+log.levels = {
+  DEBUG: Symbol('debug'),
+  INFO: Symbol('info'),
+  WARN: Symbol('warn')
+};
+console.log(log.levels.DEBUG, 'debug message');
+console.log(log.levels.INFO, 'info message');
+```
+
+下面是另外一个例子。
+
+```js
+const COLOR_RED    = Symbol();
+const COLOR_GREEN  = Symbol();
+
+function getComplement(color) {
+  switch (color) {
+    case COLOR_RED:
+      return COLOR_GREEN;
+    case COLOR_GREEN:
+      return COLOR_RED;
+    default:
+      throw new Error('Undefined color');
+    }
+}
+```
+
+**常量使用 Symbol 值最大的好处，就是其他任何值都不可能有相同的值了，因此可以保证上面的`switch`语句会按设计的方式工作。**
+
+应用：消除魔术字符串，魔术字符串指的是，在代码之中多次出现、与代码形成强耦合的某一个具体的字符串或者数值。风格良好的代码，应该尽量消除魔术字符串，改由含义清晰的变量代替。 
 
 ##### Symbol.for()，Symbol.keyFor()
 
@@ -1810,6 +1857,10 @@ let a = { b: 1 }
 
 ### this详解
 
+什么是 this？this 是 JavaScript 的一个关键字，一般指向调用它的对象。
+
+这句话其实有两层意思，首先 this 指向的应该是一个对象，更具体地说是函数执行的“上下文对象”。其次这个对象指向的是“调用它”的对象，如果调用它的不是对象或对象不存在，则会指向全局对象（严格模式下为 undefined）。
+
 	1. 函数在定义的时候this是不确定的，只有在调用的时候才可以确定
 	2. 一般函数直接执行，内部this指向全局window，严格模式下为undefined
 	3. 函数作为一个对象的方法，被该对象所调用，那么this指向的是该对象
@@ -2666,6 +2717,16 @@ let [a,b,c,d=4] = [1,2,3]
 
 1. 简化函数
 2. 修复this
+
+箭头函数和普通函数相比，有以下几个区别，在开发中应特别注意：
+
+- 不绑定 arguments 对象，也就是说在箭头函数内访问 arguments 对象会报错；
+
+- 不能用作构造器，也就是说不能通过关键字 new 来创建实例；
+
+- 默认不会创建 prototype 原型属性；
+
+- 不能用作 Generator() 函数，不能使用 yeild 关键字。
 
 #### 展开运算符
 
@@ -3698,396 +3759,6 @@ function myInstanceof(left, right) {
 1. 不统一
 2. 类和构造函数不区分
 
-------
-
-### 面向对象游戏案例：贪吃蛇
-
-#### 案例介绍
-
-演示：[贪吃蛇](snake/index.html)
-
-#### 功能实现
-
-##### 搭建页面
-
-放一个容器盛放游戏场景 div#map，设置样式
-
-```css
-#map {
-  width: 800px;
-  height: 600px;
-  background-color: #ccc;
-  position: relative;
-}
-```
-
-##### 分析对象
-
-- 游戏对象
-- 蛇对象
-- 食物对象
-
-##### 创建食物对象
-
-- Food
-  - 属性
-    - x       
-    - y
-    - width
-    - height
-    - color       
-  - 方法
-    - render       随机创建一个食物对象，并输出到map上
-- 创建Food的构造函数，并设置属性
-
-```js
-var position = 'absolute';
-var elements = [];
-function Food(x, y, width, height, color) {
-  this.x = x || 0;
-  this.y = y || 0;
-  // 食物的宽度和高度(像素)
-  this.width = width || 20;
-  this.height = height || 20;
-  // 食物的颜色
-  this.color = color || 'green';
-}
-```
-
-- 通过原型设置render方法，实现随机产生食物对象，并渲染到map上
-
-```js
-Food.prototype.render = function (map) {
-  // 随机食物的位置，map.宽度/food.宽度，总共有多少分food的宽度，随机一下。然后再乘以food的宽度
-  this.x = parseInt(Math.random() * map.offsetWidth / this.width) * this.width;
-  this.y = parseInt(Math.random() * map.offsetHeight / this.height) * this.height;
-
-  // 动态创建食物对应的div
-  var div = document.createElement('div');
-  map.appendChild(div);
-  div.style.position = position;
-  div.style.left = this.x + 'px';
-  div.style.top = this.y + 'px';
-  div.style.width = this.width + 'px';
-  div.style.height = this.height + 'px';
-  div.style.backgroundColor = this.color;
-  elements.push(div);
-}
-```
-
-- 通过自调用函数，进行封装，通过window暴露Food对象
-
-```js
-window.Food = Food;
-```
-
-##### 创建蛇对象
-
-- Snake
-- 属性
-  - width    蛇节的宽度 默认20
-  - height   蛇节的高度 默认20
-  - body     数组，蛇的头部和身体，第一个位置是蛇头
-  - direction    蛇运动的方向  默认right  可以是 left  top bottom
-- 方法
-  - render  把蛇渲染到map上
-- Snake构造函数
-
-```js
-var position = 'absolute';
-var elements = [];
-function Snake(width, height, direction) {
-  // 设置每一个蛇节的宽度
-  this.width = width || 20;
-  this.height = height || 20;
-  // 蛇的每一部分, 第一部分是蛇头
-  this.body = [
-    {x: 3, y: 2, color: 'red'},
-    {x: 2, y: 2, color: 'red'},
-    {x: 1, y: 2, color: 'red'}
-  ];
-  this.direction = direction || 'right';
-}
-```
-
-- render方法
-
-```js
-Snake.prototype.render = function(map) {
-  for(var i = 0; i < this.body.length; i++) {
-    var obj = this.body[i];
-    var div = document.createElement('div');
-    map.appendChild(div);
-    div.style.left = obj.x * this.width + 'px';
-    div.style.top = obj.y * this.height + 'px';
-    div.style.position = position;
-    div.style.backgroundColor = obj.color;
-    div.style.width = this.width + 'px';
-    div.style.height = this.height + 'px';
-  }
-}
-```
-
-- 在自调用函数中暴露Snake对象
-
-```js
-window.Snake = Snake;
-```
-
-##### 创建游戏对象
-
-游戏对象，用来管理游戏中的所有对象和开始游戏
-
-- Game
-  - 属性
-    - food
-    - snake
-    - map
-  - 方法
-    - start            开始游戏（绘制所有游戏对象）
-
-
-
-- 构造函数
-
-```js
-function Game(map) {
-  this.food = new Food();
-  this.snake = new Snake();
-  this.map = map;
-}
-```
-
-- 开始游戏，渲染食物对象和蛇对象
-
-```js
-Game.prototype.start = function () {
-  this.food.render(this.map);
-  this.snake.render(this.map);
-}
-```
-
-#### 游戏的逻辑
-
-##### 写蛇的move方法
-
-- 在蛇对象(snake.js)中，在Snake的原型上新增move方法
-
-1. 让蛇移动起来，把蛇身体的每一部分往前移动一下
-2. 蛇头部分根据不同的方向决定 往哪里移动
-
-```js
-Snake.prototype.move = function (food, map) {
-  // 让蛇身体的每一部分往前移动一下
-  var i = this.body.length - 1;
-  for(; i > 0; i--) {
-    this.body[i].x = this.body[i - 1].x;
-    this.body[i].y = this.body[i - 1].y;
-  }
-  // 根据移动的方向，决定蛇头如何处理
-  switch(this.direction) {
-    case 'left': 
-      this.body[0].x -= 1;
-      break;
-    case 'right':
-      this.body[0].x += 1;
-      break;
-    case 'top':
-      this.body[0].y -= 1;
-      break;
-    case 'bottom':
-      this.body[0].y += 1;
-      break;
-  }
-}
-```
-
-- 在game中测试
-
-```js
-this.snake.move(this.food, this.map);
-this.snake.render(this.map);
-```
-
-##### 让蛇自己动起来
-
-- 私有方法
-
-  ```
-  什么是私有方法？
-    不能被外部访问的方法
-  如何创建私有方法？
-    使用自调用函数包裹
-  ```
-
-- 在game.js中 添加runSnake的私有方法，开启定时器调用蛇的move和render方法，让蛇动起来
-
-- 判断蛇是否撞墙
-
-```js
-function runSnake() {
-  var timerId = setInterval(function() {
-    this.snake.move(this.food, this.map);
-    // 在渲染前，删除之前的蛇
-    this.snake.render(this.map);
-
-    // 判断蛇是否撞墙
-    var maxX = this.map.offsetWidth / this.snake.width;
-    var maxY = this.map.offsetHeight / this.snake.height;
-    var headX = this.snake.body[0].x;
-    var headY = this.snake.body[0].y;
-    if (headX < 0 || headX >= maxX) {
-      clearInterval(timerId);
-      alert('Game Over');
-    }
-
-    if (headY < 0 || headY >= maxY) {
-      clearInterval(timerId);
-      alert('Game Over');
-    }
-
-  }.bind(that), 150);
-}
-```
-
-- 在snake中添加删除蛇的私有方法，在render中调用
-
-```js
-function remove() {
-  // 删除渲染的蛇
-  var i = elements.length - 1;
-  for(; i >= 0; i--) {
-    // 删除页面上渲染的蛇
-    elements[i].parentNode.removeChild(elements[i]);
-    // 删除elements数组中的元素
-    elements.splice(i, 1);
-  }
-}
-```
-
-- 在game中通过键盘控制蛇的移动方向
-
-```js
-function bindKey() {
-  document.addEventListener('keydown', function(e) {
-    switch (e.keyCode) {
-      case 37:
-        // left
-        this.snake.direction = 'left';
-        break;
-      case 38:
-        // top
-        this.snake.direction = 'top';
-        break;
-      case 39:
-        // right
-        this.snake.direction = 'right';
-        break;
-      case 40:
-        // bottom
-        this.snake.direction = 'bottom';
-        break;
-    }
-  }.bind(that), false);
-}
-```
-
-- 在start方法中调用
-
-```js
-bindKey();
-```
-
-##### 判断蛇是否吃到食物
-
-```js
-// 在Snake的move方法中
-
-// 在移动的过程中判断蛇是否吃到食物
-// 如果蛇头和食物的位置重合代表吃到食物
-// 食物的坐标是像素，蛇的坐标是几个宽度，进行转换
-var headX = this.body[0].x * this.width;
-var headY = this.body[0].y * this.height;
-if (headX === food.x && headY === food.y) {
-  // 吃到食物，往蛇节的最后加一节
-  var last = this.body[this.body.length - 1];
-  this.body.push({
-    x: last.x,
-    y: last.y,
-    color: last.color
-  })
-  // 把现在的食物对象删除，并重新随机渲染一个食物对象
-  food.render(map);
-}
-```
-
-#### 其它处理
-
-##### 把html中的js代码放到index.js中
-
-避免html中出现js代码
-
-##### 自调用函数的参数
-
-```js
-(function (window, undefined) {
-  var document = window.document;
-
-}(window, undefined))
-```
-
-- 传入window对象
-
-将来代码压缩的时候，可以吧 function (window)  压缩成 function (w)
-
-- 传入undefined
-
-在将来会看到别人写的代码中会把undefined作为函数的参数(当前案例没有使用)
-因为在有的老版本的浏览器中 undefined可以被重新赋值，防止undefined 被重新赋值
-
-##### 整理代码
-
-现在的代码结构清晰，谁出问题就找到对应的js文件即可。
-通过自调用函数，已经防止了变量命名污染的问题
-
-但是，由于js文件数较多，需要在页面上引用，会产生文件依赖的问题(先引入那个js，再引入哪个js)
-将来通过工具把js文件合并并压缩。现在手工合并js文件演示
-
-- 问题1
-
-```js
-// 如果存在多个自调用函数要用分号分割，否则语法错误
-// 下面代码会报错
-(function () {
-}())
-
-(function () {
-}())
-// 所以代码规范中会建议在自调用函数之前加上分号
-// 下面代码没有问题
-;(function () {
-}())
-
-;(function () {
-}())
-```
-
-- 问题2 
-
-```js
-// 当自调用函数 前面有函数声明时，会把自调用函数作为参数
-// 所以建议自调用函数前，加上;
-var a = function () {
-  alert('11');
-}
-    
-(function () {
-  alert('22');
-}())
-```
-
-------
-
 ## 继承
 
 继承是类与类之间的关系，js中没有类，通过构造函数模拟类，通过原型实现继承
@@ -5072,7 +4743,7 @@ function getFib(mon) {
 - 菜单树
 - 遍历 DOM 树
 
-![1542456723930](D:\note\前端\html\media\1542456723930.png)
+![1542456723930](.\media\1542456723930.png)
 
 ## 深浅拷贝
 
@@ -5112,7 +4783,7 @@ console.log(b.age) // 1
 
 ### 深拷贝
 
-![1542455765554](D:\note\前端\html\media\1542455765554.png)
+![1542455765554](.\media\1542455765554.png)
 
 这个问题通常也可以通过 `JSON.parse(JSON.stringify(object))` 来解决。
 
@@ -5209,22 +4880,26 @@ test()
 当然你可能想自己来实现一个深拷贝，但是其实实现一个深拷贝是很困难的，需要我们考虑好多种边界情况，比如原型链如何处理、DOM 如何处理等等，所以这里我们实现的深拷贝只是简易版，并且我其实更推荐使用 [lodash 的深拷贝函数](https://link.juejin.im/?target=https%3A%2F%2Flodash.com%2Fdocs%23cloneDeep)。
 
 ```js
-function deepClone(obj) {
-  function isObject(o) {
-    return (typeof o === 'object' || typeof o === 'function') && o !== null
-  }
-
-  if (!isObject(obj)) {
-    throw new Error('非对象')
-  }
-
-  let isArray = Array.isArray(obj)
-  let newObj = isArray ? [...obj] : { ...obj }
-  Reflect.ownKeys(newObj).forEach(key => {
-    newObj[key] = isObject(obj[key]) ? deepClone(obj[key]) : obj[key]
-  })
-
-  return newObj
+function clone(obj) {
+  let map = new WeakMap()
+  function deep(data) {
+    let result = {}
+    const keys = [...Object.getOwnPropertyNames(data), ...Object.getOwnPropertySymbols(data)]
+    if(!keys.length) return data
+    const exist = map.get(data)
+    if (exist) return exist
+    map.set(data, result)
+    keys.forEach(key => {
+      let item = data[key]
+      if (typeof item === 'object' && item) {
+        result[key] = deep(item)
+      } else {
+        result[key] = item
+      }
+    })
+    return result
+  }
+  return deep(obj)
 }
 
 let obj = {
@@ -5234,7 +4909,7 @@ let obj = {
     d: 3
   }
 }
-let newObj = deepClone(obj)
+let newObj = clone(obj)
 newObj.b.c = 1
 console.log(obj.b.c) // 2
 
