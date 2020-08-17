@@ -5359,6 +5359,33 @@ function getRuleByRuleName(rules, ruleName) {
 1. 循环
 2. 判断某个属性是否属于某个对象
 
+## 性能测试
+
+### Perfomance.now
+
+```js
+// 高性能API通过其函数 performance.now() 提供对 DOMHighResTimeStamp 的访问，该函数返回自页面加载时间（以毫秒为单位），精度最高为 5µs（以分数为单位）。
+const t0 = performance.now();
+for (let i = 0; i < array.length; i++) 
+{
+  // some code
+}
+const t1 = performance.now();
+console.log(t1 - t0, 'milliseconds');
+```
+
+Date.now的缺点：以毫秒为单位返回自 Unix 元年（1970-01-01T00:00:00Z）以来经过的时间，并取决于系统时钟。这不仅意味着它不够精确，而且还并非总是递增。
+
+### Console.time
+
+```js
+console.time('test');
+for (let i = 0; i < array.length; i++) {
+  // some code
+}
+console.timeEnd('test');
+```
+
 ## 函数式编程
 
 参考：<http://www.ruanyifeng.com/blog/2017/02/fp-tutorial.html>
@@ -6172,19 +6199,113 @@ ramda是一个非常优秀的js工具库，跟同类比更函数式主要体现�
 - 提供复用性
 - 提高代码可维护性
 
-### 立即执行函数
+JavaScript 中的所有主流模块系统、格式、库和工具，包括：
+
+- IIFE 模块：JavaScript 模块模式
+
+- - IIFE：立即调用的函数表达式
+  - 混合导入
+
+- Revealing 模块：JavaScript 显示模块模式
+
+- CJS 模块：CommonJS 模块或 Node.js 模块
+
+- AMD 模块：异步模块定义或 RequireJS 模块
+
+- - 动态加载
+  - 来自 CommonJS 模块的 AMD 模块
+
+- UMD 模块：通用模块定义或 UmdJS 模块
+
+- - 适用于AMD（RequireJS）和本机浏览器的 UMD
+  - 适用于AMD（RequireJS）和CommonJS（Node.js）的UMD
+
+- ES 模块：ECMAScript 2015 或 ES6 模块
+
+- ES 动态模块：ECMAScript 2020 或 ES11 动态模块
+
+- 系统模块：SystemJS 模块
+
+- - 动态模块加载
+
+- Webpack 模块：来自 CJS、AMD、ES 模块的捆绑软件
+
+- Babel 模块：从 ES 模块转换
+
+- - Babel with SystemJS
+
+- TypeScript 模块：转换为 CJS、AMD、ES、系统模块
+
+- - 内部模块和命名空间
+
+### IIFE：立即调用的函数表达式
 
 在早期，使用立即执行函数实现模块化是常见的手段，通过函数作用域解决了命名冲突、污染全局作用域的问题
 
 ```js
-(function(globalVariable){
-   globalVariable.test = function() {}
-   // ... 声明各种变量、函数都不会污染全局作用域
-})(globalVariable)
+// Define IIFE module.
+const iifeCounterModule = (() => {
+    let count = 0;
+    return {
+        increase: () => ++count,
+        reset: () => {
+            count = 0;
+            console.log("Count is reset.");
+        }
+    };
+})();
 
+// Use IIFE module.
+iifeCounterModule.increase();
+iifeCounterModule.reset();
 ```
 
-### AMD
+#### 混合导入
+
+使用 IIFE 模块模式，其他所有模块都是全局变量。它们可以在匿名函数内部直接访问，也可以通过匿名函数的参数进行传递
+
+```js
+// Define IIFE module with dependencies.
+const iifeCounterModule = ((dependencyModule1, dependencyModule2) => {
+    let count = 0;
+    return {
+        increase: () => ++count,
+        reset: () => {
+            count = 0;
+            console.log("Count is reset.");
+        }
+    };
+})(dependencyModule1, dependencyModule2);
+```
+
+一些流行库（如 jQuery）的早期版本遵循这种模式。
+
+### revealing module：揭示模块模式
+
+揭示模块模式由 Christian Heilmann 命名。此模式也是 IIFE，但它强调将所有 API 定义为匿名函数内的局部变量
+
+```js
+// Define revealing module.
+const revealingCounterModule = (() => {
+    let count = 0;
+    const increase = () => ++count;
+    const reset = () => {
+        count = 0;
+        console.log("Count is reset.");
+    };
+
+    return {
+        increase,
+        reset
+    };
+})();
+
+// Use revealing module.
+revealingCounterModule.increase();
+revealingCounterModule.reset();
+```
+
+### AMD：异步模块定义或 RequireJS 模块
 
 **AMD 是 RequireJS 在推广过程中对模块定义的规范化产出。** 
 
@@ -6199,6 +6320,25 @@ ramda是一个非常优秀的js工具库，跟同类比更函数式主要体现�
 - 多个js文件可能有依赖关系，被依赖的文件需要早于依赖它的文件加载到浏览器
 - js加载的时候浏览器会停止页面渲染，加载文件越多，页面失去响应时间越长
 
+AMD 提供了一个定义模块的定义函数，该函数接受模块名称、依赖模块的名称以及工厂函数：
+
+```js
+// Define AMD module.
+define("amdCounterModule", ["dependencyModule1", "dependencyModule2"], (dependencyModule1, dependencyModule2) => {
+    let count = 0;
+    const increase = () => ++count;
+    const reset = () => {
+        count = 0;
+        console.log("Count is reset.");
+    };
+
+    return {
+        increase,
+        reset
+    };
+});
+```
+
 AMD也采用require()语句加载模块，但是不同于CommonJS，它要求两个参数：
 
 `require([module], callback);`
@@ -6209,7 +6349,6 @@ AMD也采用require()语句加载模块，但是不同于CommonJS，它要求两
 　　require(['math'], function (math) {
 　　　　math.add(2, 3);
 　　});
-
 ```
 
 math.add()与math模块加载不是同步的，浏览器不会发生假死。
@@ -6230,7 +6369,6 @@ math.add()与math模块加载不是同步的，浏览器不会发生假死。
 　　　　　　"backbone": "backbone.min"
 　　　　}
 　　});
-
 ```
 
 require.js要求，每个模块是一个单独的js文件。这样的话，如果加载多个模块，就会发出多次HTTP请求，会影响网页的加载速度。因此，require.js提供了一个[优化工具](http://requirejs.org/docs/optimization.html)，当模块部署完毕以后，可以用这个工具将多个模块合并在一个文件中，减少HTTP请求数。 
@@ -6256,10 +6394,131 @@ define(['myLib'], function(myLib){
         foo : foo
     };
 });
-
 ```
 
 https://www.cnblogs.com/chenguangliang/p/5856701.html
+
+#### 动态加载
+
+AMD 的 `require` 函数还有另一个重载。它接受一个回调函数，并将类似 CommonJS 的`require` 函数传递给该回调。所以可以通过调用 `require` 来加载 AMD 模块：
+
+```js
+// Use dynamic AMD module.
+define(require => {
+    const dynamicDependencyModule1 = require("dependencyModule1");
+    const dynamicDependencyModule2 = require("dependencyModule2");
+
+    let count = 0;
+    const increase = () => ++count;
+    const reset = () => {
+        count = 0;
+        console.log("Count is reset.");
+    };
+
+    return {
+        increase,
+        reset
+    };
+});
+```
+
+#### 来自 CommonJS 模块的 AMD 模块
+
+上面的 `define` 函数有一个重载，它可以传递 `require` 函数，并将变量和模块变量导出到回调中，以便 CommonJS 代码可以在其内部工作：
+
+```js
+// Define AMD module with CommonJS code.
+define((require, exports, module) => {
+    // CommonJS code.
+    const dependencyModule1 = require("dependencyModule1");
+    const dependencyModule2 = require("dependencyModule2");
+
+    let count = 0;
+    const increase = () => ++count;
+    const reset = () => {
+        count = 0;
+        console.log("Count is reset.");
+    };
+
+    exports.increase = increase;
+    exports.reset = reset;
+});
+
+// Use AMD module with CommonJS code.
+define(require => {
+    // CommonJS code.
+    const counterModule = require("amdCounterModule");
+    counterModule.increase();
+    counterModule.reset();
+});
+```
+
+### UMD ：通用模块定义或 UmdJS 模块
+
+UMD（Universal Module Definition，https://github.com/umdjs/umd）是一组棘手的模式，可以使你的代码文件在多种环境中工作。
+
+#### 适用于 AMD和本机浏览器的 UMD
+
+```js
+// Define UMD module for both AMD and browser.
+((root, factory) => {
+    // Detects AMD/RequireJS"s define function.
+    if (typeof define === "function" && define.amd) {
+        // Is AMD/RequireJS. Call factory with AMD/RequireJS"s define function.
+        define("umdCounterModule", ["deependencyModule1", "dependencyModule2"], factory);
+    } else {
+        // Is Browser. Directly call factory.
+        // Imported dependencies are global variables(properties of window object).
+        // Exported module is also a global variable(property of window object)
+        root.umdCounterModule = factory(root.deependencyModule1, root.dependencyModule2);
+    }
+})(typeof self !== "undefined" ? self : this, (deependencyModule1, dependencyModule2) => {
+    // Module code goes here.
+    let count = 0;
+    const increase = () => ++count;
+    const reset = () => {
+        count = 0;
+        console.log("Count is reset.");
+    };
+
+    return {
+        increase,
+        reset
+    };
+});
+```
+
+它比较复杂，但仍然只是 IIFE。匿名函数会检测是否存在 AMD 的 `define` 函数，如果存在，请使用 AMD 的`define` 函数调用模块工厂。如果不是，它将直接调用模块工厂。目前，`root` 参数实际上是浏览器的 `window` 对象。它从全局变量（ `window` 对象的属性）获取依赖项模块。当 `factory` 返回模块时，返回的模块也被分配给一个全局变量（ `window` 对象的属性）。
+
+#### 适用于 AMD和 CommonJS的 UMD
+
+```js
+(define => define((require, exports, module) => {
+    // Module code goes here.
+    const dependencyModule1 = require("dependencyModule1");
+    const dependencyModule2 = require("dependencyModule2");
+
+    let count = 0;
+    const increase = () => ++count;
+    const reset = () => {
+        count = 0;
+        console.log("Count is reset.");
+    };
+
+    module.export = {
+        increase,
+        reset
+    };
+}))(// Detects module variable and exports variable of CommonJS/Node.js.
+    // Also detect the define function of AMD/RequireJS.
+    typeof module === "object" && module.exports && typeof define !== "function"
+        ? // Is CommonJS/Node.js. Manually create a define function.
+            factory => module.exports = factory(require, exports, module)
+        : // Is AMD/RequireJS. Directly use its define function.
+            define);
+```
+
+这只是一个IIFE。调用IIFE时，将评估其参数。参数评估检测环境（CommonJS / Node.js的模块变量和`exports` 变量，以及 AMD/RequireJS 的 `define` 函数）。如果环境是 CommonJS/Node.js，则匿名函数的参数是手动创建的 `define` 函数。如果环境是 AMD/RequireJS，则匿名函数的参数就是 AMD 的 `define` 函数。因此，当执行匿名函数时，可以确保它具有有效的 `define` 函数。在匿名函数内部，它仅调用 `define` 函数来创建模块。
 
 ### CMD
 
@@ -6343,7 +6602,7 @@ seajs.use(['myModule.js'], function(my){
 2. AMD 的 API 默认是**一个当多个用**，CMD 的 API 严格区分，推崇**职责单一**。比如 AMD 里，require 分全局 require 和局部 require，都叫 require。CMD 里，没有全局 require，而是根据模块系统的完备性，提供 seajs.use 来实现模块系统的加载启动。CMD 里，每个 API 都**简单纯粹**。
 3. 还有一些细节差异，具体看这个规范的定义。
 
-### CommonJS
+### CJS：CommonJS模块
 
 CommonJS 最早是 Node 在使用，目前也仍然广泛使用，比如在 Webpack 中你就能见到它，当然目前在 Node 中的模块管理已经和 CommonJS 有一些区别了。
 
@@ -6357,7 +6616,6 @@ exports.a = 1
 // b.js
 var module = require('./a.js')
 module.a // -> log 1
-
 ```
 
 先说 `require` 吧
@@ -6383,9 +6641,24 @@ var load = function (module) {
     module.exports = a
     return module.exports
 };
-// 然后当我 require 的时候去找到独特的
-// id，然后将要使用的东西用立即执行函数包装下，over
+// 然后当我 require 的时候去找到独特的id，然后将要使用的东西用立即执行函数包装下
 
+// ======================================================================
+
+// 在运行时，Node.js 通过将文件内的代码包装到一个函数中，然后通过参数传递 exports 变量、module 变量和 require 函数来实现这一目的。
+// Define CommonJS module: wrapped commonJSCounterModule.js.
+(function (exports, require, module, __filename, __dirname) {
+	  ...
+    module.exports = {...};
+
+    return module.exports;
+}).call(thisValue, exports, require, module, filename, dirname);
+
+// Use CommonJS module.
+(function (exports, require, module, __filename, __dirname) {
+    const commonJSCounterModule = require("./commonJSCounterModule");
+    commonJSCounterModule.increase();
+}).call(thisValue, exports, require, module, filename, dirname);
 ```
 
 另外虽然 `exports` 和 `module.exports` 用法相似，但是不能对 `exports` 直接赋值。因为 `var exports = module.exports` 这句代码表明了 `exports` 和 `module.exports` 享有相同地址，通过改变对象的属性值会对两者都起效，但是如果直接对 `exports` 赋值就会导致两者不再指向同一个内存地址，修改并不会对 `module.exports` 起效。
@@ -6406,22 +6679,20 @@ ES Module 是原生实现的模块化方案，与 CommonJS 有以下几个区别
 
   ```js
   // CommonJS模块
-  let { stat, exists, readFile } = require('fs');
+  let { stat, exists } = require('fs');
   // 等同于
   let _fs = require('fs');
   let stat = _fs.stat;
   let exists = _fs.exists;
-  let readfile = _fs.readfile;
-  
   ```
-
+  
   上面代码的实质是整体加载fs模块，生成一个对象（_fs），然后再从这个对象上面读取 3 个方法。这种加载称为“运行时加载”，因为只有运行时才能得到这个对象，导致完全没办法在编译时做“静态优化”。 
 
   ```js
-   // ES6模块
+ // ES6模块
   import { stat, exists, readFile } from 'fs';
   ```
-
+  
   上面代码的实质是从fs模块加载 3 个方法，其他方法不加载。这种加载称为**“编译时加载”或者静态加载**，即 ES6 可以在编译时就完成模块加载，效率要比 CommonJS 模块的加载方式高。export语句输出的接口，与其对应的值是动态绑定关系，即通过该接口，可以取到模块内部实时的值。 
 
 - ES Module 会编译成 `require/exports` 来执行的
@@ -6448,6 +6719,259 @@ export { xxx } from './a.js'
 export { default } from './a.js'
 
 ```
+
+要在浏览器中使用模块文件，请添加 `<script>` 标签并指定它为模块：`<script type="module" src="esCounterModule.js"></script>`。要在 Node.js 中使用此模块文件，请将其扩展名 `.js` 改为 `.mjs`。
+
+```js
+// Use ES module.
+// Browser: <script type="module" src="esCounterModule.js"></script> or inline.
+// Server: esCounterModule.mjs
+// Import from named export.
+import { increase, reset } from "./esCounterModule.mjs";
+increase();
+reset();
+// Or import from default export:
+import esCounterModule from "./esCounterModule.mjs";
+esCounterModule.increase();
+esCounterModule.reset();
+```
+
+对于浏览器，可以将 `<script>` 的 `nomodule` 属性用于后备：
+
+```html
+<script nomodule>
+    alert("Not supported.");
+</script>
+```
+
+### ECMAScript 2020 或 ES11 动态模块
+
+在 2020 年，最新的 JavaScript 规范第 11 版引入了内置函数 `import` 以动态使用 ES 模块。`import` 函数返回一个 `promise`，因此可以通过其 `then` 方法调用该模块：
+
+```js
+// Use dynamic ES module with promise APIs, import from named export:
+import("./esCounterModule.js").then(({ increase, reset }) => {
+    increase();
+    reset();
+});
+// Or import from default export:
+import("./esCounterModule.js").then(dynamicESCounterModule => {
+    dynamicESCounterModule.increase();
+    dynamicESCounterModule.reset();
+});
+```
+
+通过返回一个 `promise` ，显然 import 函数也可以与 `await` 关键字一起使用
+
+```js
+// Use dynamic ES module with async/await.
+(async () => {
+    // Import from named export:
+    const { increase, reset } = await import("./esCounterModule.js");
+    increase();
+    reset();
+
+    // Or import from default export:
+    const dynamicESCounterModule = await import("./esCounterModule.js");
+    dynamicESCounterModule.increase();
+    dynamicESCounterModule.reset();
+})();
+```
+
+### 系统模块：SystemJS 模块
+
+SystemJS 是一个库，可以为较旧的 ES5 启用 ES6 模块语法。如果当前运行时（例如旧的浏览器）不支持 ES6 语法，则以上代码将无法正常工作。SystemJS 可以将模块定义转换为对库 API 的调用——`System.register`：
+
+```js
+// Define SystemJS module.
+System.register(["./dependencyModule1.js", "./dependencyModule2.js"], function (exports_1, context_1) {
+    "use strict";
+    var dependencyModule1_js_1, dependencyModule2_js_1, count, increase, reset;
+    var __moduleName = context_1 && context_1.id;
+    return {
+        setters: [
+            function (dependencyModule1_js_1_1) {
+                dependencyModule1_js_1 = dependencyModule1_js_1_1;
+            },
+            function (dependencyModule2_js_1_1) {
+                dependencyModule2_js_1 = dependencyModule2_js_1_1;
+            }
+        ],
+        execute: function () {
+            dependencyModule1_js_1.default.api1();
+            dependencyModule2_js_1.default.api2();
+            count = 0;
+            // Named export:
+            exports_1("increase", increase = function () { return ++count };
+            exports_1("reset", reset = function () {
+                count = 0;
+                console.log("Count is reset.");
+            };);
+            // Or default export:
+            exports_1("default", {
+                increase,
+                reset
+            });
+        }
+    };
+});
+```
+
+#### 动态模块加载
+
+SystemJS 还提供了用于动态导入的 `import` 函数
+
+```js
+// Use SystemJS module with promise APIs.
+System.import("./esCounterModule.js").then(dynamicESCounterModule => {
+    dynamicESCounterModule.increase();
+    dynamicESCounterModule.reset();
+});
+```
+
+### Webpack 模块：来自 CJS，AMD，ES 模块的捆绑包
+
+Webpack 是模块的捆绑器。它使用将组合的 CommonJS 模块、AMD 模块和 ES 模块转换为和谐模块模式，并将所有代码捆绑到一个文件中。
+
+### Babel 模块：从 ES 模块转换
+
+Babel 是另一个为旧版环境（如旧版浏览器）把 ES6 + JavaScript 代码转换为旧版语法的编译器。
+
+Babel 还可以与其他工具一起使用。
+
+#### Babel 与 SystemJS
+
+SystemJS 可以用作 Babel 的插件`npm install --save-dev @babel/plugin-transform-modules-systemjs`
+
+```js
+{
+    "plugins": ["@babel/plugin-transform-modules-systemjs"],
+    "presets": [
+        [
+            "@babel/env",
+            {
+                "targets": {
+                    "ie": "11"
+                }
+            }
+        ]
+    ]
+}
+```
+
+所有 ADM、CommonJS 和 ES 模块语法都被转换为 SystemJS 语法
+
+### TypeScript模块：转换为CJS、AMD、ES、系统模块
+
+TypeScript 支持 ES 模块语法，根据 tsconfig.json 中指定的 transpiler 选项，可以将其保留为 ES6 或转换为其他格式，包括 CommonJS/Node.js、AMD/RequireJS、UMD/UmdJS 或 System/SystemJS：
+
+```js
+{
+    "compilerOptions": {
+        "module": "ES2020", // None, CommonJS, AMD, System, UMD, ES6, ES2015, ES2020, ESNext.
+    }
+}
+```
+
+这在 TypeScript 中称为外部模块。
+
+#### 内部模块和命名空间
+
+TypeScript还具有一个 `module` 关键字和一个 `namespace` 关键字。它们被称为内部模块
+
+```js
+module Counter {
+    let count = 0;
+    export const increase = () => ++count;
+    export const reset = () => {
+        count = 0;
+        console.log("Count is reset.");
+    };
+}
+
+namespace Counter {
+    let count = 0;
+    export const increase = () => ++count;
+    export const reset = () => {
+        count = 0;
+        console.log("Count is reset.");
+    };
+}
+```
+
+它们都被转换为 JavaScript 对象
+
+```js
+var Counter;
+(function (Counter) {
+    var count = 0;
+    Counter.increase = function () { return ++count; };
+    Counter.reset = function () {
+        count = 0;
+        console.log("Count is reset.");
+    };
+})(Counter || (Counter = {}));
+```
+
+通过支持 `.` 分隔符，TypeScript 模块和命名空间可以有多个级别：
+
+```js
+module Counter.Sub {
+    let count = 0;
+    export const increase = () => ++count;
+}
+
+namespace Counter.Sub {
+    let count = 0;
+    export const increase = () => ++count;
+}
+```
+
+它们被转换为对象的属性：
+
+```js
+var Counter;
+(function (Counter) {
+    var Sub;
+    (function (Sub) {
+        var count = 0;
+        Sub.increase = function () { return ++count; };
+    })(Sub = Counter.Sub || (Counter.Sub = {}));
+})(Counter|| (Counter = {}));
+```
+
+TypeScript 模块和命名空间也可以在 `export` 语句中使用：
+
+```js
+module Counter {
+    let count = 0;
+    export module Sub {
+        export const increase = () => ++count;
+    }
+}
+
+module Counter {
+    let count = 0;
+    export namespace Sub {
+        export const increase = () => ++count;
+    }
+}
+```
+
+编译后 sub 模块和 sub 命名空间相同：
+
+```js
+var Counter;
+(function (Counter) {
+    var count = 0;
+    var Sub;
+    (function (Sub) {
+        Sub.increase = function () { return ++count; };
+    })(Sub = Counter.Sub || (Counter.Sub = {}));
+})(Counter || (Counter = {}));
+```
+
+JavaScript仅用于模块化/命名空间的就有 10 多种系统和格式幸运的是，现在 JavaScript 有模块的标准内置语言功能，并且 Node.js 和所有最新的现代浏览器都支持它。对于较旧的环境，你仍然可以用新的 ES 模块语法进行编码，然后用 Webpack/Babel/SystemJS/TypeScript 转换为较旧或兼容的语法。
 
 ## Proxy
 

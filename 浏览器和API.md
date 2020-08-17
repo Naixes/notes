@@ -1706,21 +1706,34 @@ clearInterval(timerId);
 
 ### console对象
 
-console.log()：在控制台输出信息。
+`console.log()`：在控制台输出信息。
 
-console.dir()：可以显示一个对象所有的属性和方法。 
+`console.warn()`：将警告消息打印到控制台。
 
-console.trace()：用来追踪函数的调用轨迹。 
+`console.error()`：将错误消息打印到控制台。
 
-console.dirxml()：用来显示网页的某个节点(node)所包含的html/xml代码) 。
+`console.table()`：接受一些能够以表格形式展示的数据并输出。
 
-console.assert()：用来判断一个表达式或变量是否为真，只有表达式为false时，才输出一条相应作息，并且抛出一个异常 。
+`console.group` 和 `console.groupEnd` 是可以将许多 console.log 逻辑分组的方式。然后，你可以在需要时通过折叠组以将其隐藏。
 
-console.time()和console.timeEnd()：用来显示代码的运行时间，传入计时器标志
+`console.dir()`：可以显示一个对象所有的属性和方法。 
 
-性能分析：就是分析程序各个部分的运行时间，找出瓶颈所在，使用的方法是console.profile()和console.proileEnd(); 
+`console.trace()`：用来追踪函数的调用轨迹。 
 
-console.count()：统计代码被执行的次数 ，计数器
+`console.dirxml()`：用来显示网页的某个节点(node)所包含的html/xml代码) 。
+
+`console.assert()`：用来判断一个表达式或变量是否为真，只有表达式为false时，才输出一条相应作息，并且抛出一个异常 。
+
+```js
+const obj = { restaurantName: 'Pizza Planet' };
+console.assert(obj.restaurantName === 'Pizza Palace', 'The name of the restaurant is not "Pizza Palace"');
+```
+
+`console.time()`和`console.timeEnd()`：用来显示代码的运行时间，传入计时器标志
+
+性能分析：就是分析程序各个部分的运行时间，找出瓶颈所在，使用的方法是`console.profile()`和`console.proileEnd()`; 
+
+`console.count()`：统计代码被执行的次数 ，计数器
 
 ### location对象
 
