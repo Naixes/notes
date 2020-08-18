@@ -1216,8 +1216,26 @@ var num = 0;
 num += 5;	//相当于  num = num + 5;
 ```
 
+### 逗号运算符
+
+逗号运算符（ `,`）用来评估其每个操作数（从左到右）并返回最后一个操作数的值。
+
+```js
+let x = 1;
+
+x = (x++, x);
+
+console.log(x);
+// expected output: 2
+
+x = (2, 3);
+
+console.log(x);
+// expected output: 3
+```
 
 ### 运算符的优先级
+
 	优先级从高到底
 		1. ()  优先级最高
 		2. 一元运算符  ++   --   !
@@ -2151,7 +2169,7 @@ includes(要匹配的元素，起始位置)
 // 方式1 推荐 
 arr = [];
 // 方式2 
-arr.length = 0;
+arr.length = 0; // length可以调整数组大小或清空数组。
 // 方式3
 arr.splice(0, arr.length);
 ```
@@ -3266,6 +3284,116 @@ rest/spread
 promise.fanally()
 正则增强
 ```
+
+## ES11
+
+### 空值合并
+
+ES2020引入了一个新的运算符 `??`，仅在初始值为 `null` 或 `undefined` 时才赋值
+
+```js
+const initialVal = 0;
+// old way
+const myVar = initialVal || 10; // => 10
+// new way
+const myVar = initialVal ?? 10; // => 0
+```
+
+### 可选链
+
+新的  `optional chaining` 运算符用来在处理嵌套对象并检查可能的 `undefineds`时使代码更短。
+
+```js
+const user = { name: "John" };
+
+// Fails with `Uncaught TypeError: Cannot read property 'city' of undefined` 报错
+const city = user.address.city;
+
+// Works but verbose 繁琐
+let city = "Not Set";
+if (user.address !== undefined && user.address !== null) {
+  city = user.address.city;
+}
+
+// Works and concise but requires a 3rd party library 第三方库
+const city = _.get(user, "address.city", "Not Set");
+
+// 🤗
+const city = user?.address?.city ?? "Not Set";
+```
+
+### BigInt
+
+BigInt 是一个新对象，代表的数字大于`Number.MAX_SAFE_INTEGER`（即2 ^ 53-1）。对于普通人来说，这听起来可能绰绰有余，但对于某些数学应用程序和机器学习而言，新的 BigInt 类型就能够派上用场了。
+
+它带有自己的字面量表示法（只需在数字末尾添加 `n`）：
+
+```js
+const x = 9007199254740991n;
+
+// or it can be constructed from a string
+const y = BigInt("9007199254740991234");
+```
+
+`BigInts` 带有自己的代数方法，它不能转换为常规数字，因此我们不能把 number 与 BigInt 混淆。应该先将它们强制转换为任一类型。
+
+```js
+1 === 1n; // => false
+1n + 1; // throws Uncaught TypeError: Cannot mix BigInt and other types, use explicit conversions
+6n << 3; // nope
+6n << 3n; // that works
+```
+
+### String.matchAll
+
+这是一个例子。想象一下，你有一个很长的文本字符串，并且需要从中提取所有标签（即以 `#` 开头的单词）。用正则表达式可以解决！
+
+```js
+const tweet = "#JavaScript is full of #surprises. Both good and bad ones #TIL";
+
+for (h of tweet.matchAll(/(#\w+)/g)) {
+  console.log(h[0]);
+}
+
+// or
+
+const tags = [...tweet.matchAll(/(#\w+)/g)]
+```
+
+`matchAll` 返回一个迭代器。我们可以用  `for..of` 对其进行迭代，也可以将其转换为数组。
+
+### Promise.allSettled
+
+还记得 Promise.all 函数吗？它仅在所有的 Promise 均得到解决时才会被解决。假如其中有一项 Promise 被拒绝，此时可能还有其他 promise 没完成。
+
+新的 `allSettled` 的行为有所不同。只有当所有的 promise **全部都完成**时（即成功或被拒绝），它才会被解决。它被分解为一个数组，其中包含 promise 的状态及其所解决的内容（或错误）。
+
+因此， `allSettled` **永远不会被拒绝**。它要么是 `pending`，要么是 `resolved`。
+
+一个现实中的问题是删除加载指示器：
+
+```js
+// const urls = [...]
+try {
+  await Promise.all(urls.map(fetch))
+} catch (e) {
+  // at least one fetch is rejected here, but there may others still pending
+  // so it may be too early for removing the loading indicator
+  removeLoading()
+}
+
+// with allSettled
+await Promise.allSettled(urls.map(fetch))
+removeLoading()
+```
+
+### globalThis
+
+在 JavaScript 中，总是有一个包含所有内容的大型上下文对象。传统上，在浏览器中是 `window`。但是，如果尝试在 Node 程序中访问它，则会收到错误消息。Node 中没有 `window` 全局对象；而是有一个 `window` 对象。另外在 WebWorker 中，没有访问 `window` 的权限，但是有 `self` 的权限。
+
+新的 `globalThis` 属性可以消除差异。这意味着你可以自始至终去引用`globalThis`，而无需关心你现在所处的上下文是什么。
+
+如果你认为这命名有点尴尬，那么我完全同意你的看法，但是请注意，将其命名为`self` 或 `global` 可能会使某些旧代码不兼容。
 
 ## MDN
 
