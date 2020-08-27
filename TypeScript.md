@@ -212,7 +212,7 @@ let u: undefined = undefined;
 let n: null = null;
 ```
 
-与 `void` 的区别是，`undefined` 和 `null` 是所有类型的子类型。也就是说 `undefined` 类型的变量，可以赋值给 `number` 类型的变量：
+**与 `void` 的区别**是，`undefined` 和 `null` 是所有类型的子类型（可空类型）。也就是说 `undefined` 类型的变量，可以赋值给 `number` 类型的变量：
 
 ```ts
 // 这样不会报错
@@ -266,6 +266,21 @@ anyThing.myName.setFirstName('Cat');
 
 可以认为，**声明一个变量为任意值之后，对它的任何操作，返回的内容的类型都是任意值**。
 
+### never
+
+不能返回的，不能结束的，报错的，是任何类型的子类型
+
+```js
+function error(message: string): never {
+	throw new Error(message)
+}
+function infiniteLoop(): never {
+	while(true) {
+
+	}
+}
+```
+
 ### 类型推论
 
 如果没有明确的指定类型，那么 TypeScript 会依照类型推论（Type Inference）的规则推断出一个类型。
@@ -317,6 +332,10 @@ console.log(myFavoriteNumber.length); // 编译时报错
 // index.ts(5,30): error TS2339: Property 'length' does not exist on type 'number'.
 ```
 
+### 交叉类型
+
+必须满足多个类型的组合，如：``type1 & type2`
+
 ### 对象的类型——接口
 
 在 TypeScript 中，我们使用接口（Interfaces）来定义对象的类型。
@@ -356,7 +375,7 @@ let tom: Person = {
 
 可选属性的含义是该属性可以不存在。这时**仍然不允许添加未定义的属性**
 
-#### 任意属性
+#### 任意属性（索引签名）
 
 有时候我们希望一个接口允许有任意的属性，可以使用如下方式：
 
@@ -364,6 +383,7 @@ let tom: Person = {
 interface Person {
     name: string;
     age?: number;
+    // 索引签名，可以是数字和字符串，可以同时使用但是数字索引的返回值必须是字符串索引返回值的子类型 
     [propName: string]: any;
 }
 
@@ -465,6 +485,32 @@ tom.id = 89757;
 上例中，报错信息有两处，第一处是在对 `tom` 进行赋值的时候，没有给 `id` 赋值。
 
 第二处是在给 `tom.id` 赋值的时候，由于它是只读属性，所以报错了。
+
+#### 混合类型
+
+```js
+// 混合类型
+interface Counter {
+	// 作为函数
+	(start: number): string
+
+	// 作为对象
+	interval: number
+	reset(): void
+}
+function getCounter(): Counter {
+	let counter = (function (start: number) {
+
+	}) as Counter
+	counter.interval = 123
+	counter.reset = function() {}
+	return counter
+}
+
+let c = getCounter()
+c(10)
+c.reset()
+```
 
 ### 数组的类型
 
@@ -2158,6 +2204,8 @@ tom.push(true);
 // Argument of type 'true' is not assignable to parameter of type 'string | number'.
 ```
 
+3.1之后越界赋值会报错
+
 ### 枚举
 
 枚举（Enum）类型用于取值被限定在一定范围内的场景，比如一周只能有七天，颜色限定为红绿蓝等。
@@ -2552,7 +2600,7 @@ let a = new Animal('Jack');
 
 ##### readonly
 
-只读属性关键字，只允许出现在属性声明或索引签名或构造函数中。
+只读属性关键字，**只允许出现在属性声明或索引签名或构造函数中**。
 
 ```ts
 class Animal {
@@ -2578,6 +2626,14 @@ class Animal {
     // this.name = name;
   }
 }
+```
+
+其他使用
+
+```js
+// 泛型只读数组
+let a: number[] = [1, 2, 3]
+let ro: ReadonlyArray<number> = a
 ```
 
 ##### 抽象类
@@ -2679,8 +2735,6 @@ console.log(a.sayHi()); // My name is Jack
 ### 类与接口
 
 接口（Interfaces）可以用于对「对象的形状（Shape）」进行描述。
-
-这一章主要介绍接口的另一个用途，对类的一部分行为进行抽象。
 
 #### 类实现接口
 
@@ -2827,6 +2881,18 @@ let p2: PointInstanceType;
 上例中最后的类型 `Point` 和类型 `PointInstanceType` 是等价的。
 
 同样的，在接口继承类的时候，也只会继承它的实例属性和实例方法。
+
+#### 用接口表示构造函数
+
+```js
+// 接口中编写类的构造函数类型检查
+interface IClass {
+ 	new (hour: number, minute: number);
+}
+let test2: IClass = class {
+  	constructor(x: number, y: number) {}
+};
+```
 
 ### 泛型
 
@@ -3120,718 +3186,6 @@ interface Alarm {
 ### 类的合并
 
 类的合并与接口的合并规则一致。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### 变量类型
-
-#### 基础类型
-
-基本类型，也就是可以被直接使用的单一类型。
-
-- 数字
-- 字符串
-- 布尔类型
-- `null`
-- `undefined`
-- `any`
-- `unknown`
-- `void`
-- `object`
-- 枚举
-- `never`
-
-#### 复合类型
-
-包含多个单一类型的类型。
-
-- 数组类型
-- 元组类型
-- 字面量类型
-- 接口类型
-
-#### 其他
-
-- 可空类型，默认任何类型都可以被赋值成 `null` 或 `undefined`。
-- 联合类型，不确定类型是哪个，但能提供几种选择，如：`type1 | type2`。
-- 交叉类型，必须满足多个类型的组合，如：``type1 & type2`。
-
-```ts
-// 基本类型
-// 布尔值
-let isDone: boolean = false
-
-// 数值
-let decLiteral: number = 20
-let hexLiteral: number = 0x14
-let binaryLiteral: number = 0b10100
-let octalLiteral: number = 0o24
-
-// 字符串
-let str: string = 'aaa'
-
-// 数组
-let list: number[] = [1, 2, 3, 4]
-// 数组泛型
-// let list: Array<number> = [1, 2, 3, 4]
-
-// 元祖：指定类型和数量，越界赋值会报错（老版本3.1之前不会）
-let x: [string, number] = ['aaa', 1 ]
-
-// 枚举
-enum Color {
-		Red,
-		Green = 0,
-		Blue
-}
-
-let c: Color = Color.Green
-let cName: string = Color[1]
-console.log(cName)
-
-// any
-let notSure: any = 4
-notSure = 'aaa'
-// 用于数组
-let arr: any[] = [1, 'aaa', false]
-
-// void
-function handler(): void {
-	console.log('hello')
-}
-
-// null
-let n: null = null
-// 子类型可以赋值给父类型，--strictNullChecks  严格模式下编译不通过：
-// Type 'null' is not assignable to type 'undefined'.
-n = undefined
-
-// undefined
-let u: undefined = undefined
-u = null
-
-// never：不能返回的，不能结束的，报错的，是任何类型的子类型
-function error(message: string): never {
-	throw new Error(message)
-}
-function fail() {
-	return error('something failed')
-}
-
-function infiniteLoop(): never {
-	while(true) {
-
-	}
-}
-
-// object：非原始类型
-declare function create(o: object | null): void
-create({prop: 0})
-
-// 类型断言
-let some: any = 'string'
-// 强制转换
-// let strLength: number = (<string>some).length
-let strLength: number = (some as string).length
-
-```
-
-### 变量声明
-
-var
-
-let
-
-const
-
-解构
-
-```ts
-let a = {a: 'a', b: 'b'}
-// 在这里不能指定类型，：是变量名指定
-let {a: c, b: d} = a
-```
-
-展开
-
-### 接口
-
-interface，仅定义结构，不需要实现  
-
-面向接口编程
-
-TypeScript 的核心原则之一是对值所具有的结构进行类型检查。它有时被称做“鸭式辨型法”或“结构性子类型化”。 在 TypeScript 里，接口的作用就是为这些类型命名和为你的代码或第三方代码定义契约。 
-
-接口中的高级用法主要有以下几点：
-
-- 继承
-- 可选属性
-- 只读属性
-- 索引类型：字符串和数字
-- 函数类型接口
-- 给类添加类型，构造函数类型
-
-接口中除了可以定义常规属性之外，还可以定义可选属性、索引类型等。
-
-```ts
-interface Ia {
-    a: string;
-    b?: string; // 可选属性
-    readonly c: number; // 只读属性
-    [key: number]: string; // 索引类型
-}
-// 接口继承
-interface Ib extends Ia {
-	age: number;
-}
-let test1: Ia = {
-    a: "",
-    c: 2,
-  	age: 1,
-};
-test1.c = 2; // 报错，只读属性
-const item0 = test1[0]; // 索引类型
-```
-
-接口中同时也支持定义函数类型、构造函数类型。
-
-```ts
-// 接口定义函数类型
-interface SearchFunc {
-  	(source: string, subString: string): boolean;
-}
-let mySearch: SearchFunc = function (x: string, y: string) {
-  	return false;
-};
-// 接口中编写类的构造函数类型检查
-interface IClass {
- 	new (hour: number, minute: number);
-}
-let test2: IClass = class {
-  	constructor(x: number, y: number) {}
-};
-```
-
-范例补充：
-
-```typescript
-// 定义接口
-interface o {
-	prop: number,
-	num: number
-}
-
-declare function create(o: o | null): void
-create({prop: 0, num: 2})
-
-interface Square {
-	color: string
-	area: number
-}
-
-// 可选属性
-interface SquareConfig {
-    // 为了解决导航时变量值为null时，页面运行时出错的问题
-	color?: string
-	width?: number
-
-	// 索引签名：可能拥有特殊用途或者额外属性时使用，表示其他任意数量的属性
-	// 索引属性名（字符串），值（any）
-	[propName: string]: any
-} 
-
-function createSquare(config: SquareConfig): Square {
-	// 应用：对属性进行预定义
-	let newSquare = {color: 'white', area: 100}
-	// 可以防止拼写错误
-	if(config.color) {
-		newSquare.color = config.color
-	}
-	if(config.width) {
-		newSquare.area = config.width * config.width
-	}
-	return newSquare
-}
-
-// 额外属性检查：利用字面量传递属性有额外属性时会报错（现在又不报了，可能是版本的不同），可以不使用字面量或者属性断言，不推荐，可以使用索引签名
-let mySquare = createSquare({color: 'black', height: 200})
-// let mySquare = createSquare({color: 'black'})
-
-// 只读属性
-interface Point {
-	readonly x: number
-	readonly y: number
-}
-
-let p1: Point = {x: 10, y: 10}
-// p1.x = 0
-
-// 泛型只读数组
-let a: number[] = [1, 2, 3]
-let ro: ReadonlyArray<number> = a
-// ro[0] = 0
-
-// 函数类型
-interface SearchFunc {
-	(source: string, subString: string): boolean
-}
-// 参数名称可以改变，但是类型不能变
-// let mySearch: SearchFunc = function(src: string, sub: string): boolean {
-// 也可以省略类型
-let mySearch: SearchFunc = function(src, sub) {
-	let result = src.search(sub)
-	return result > -1
-}
-
-// 可索引类型
-interface StringArray {
-	// 索引签名，可以是数字和字符串，可以同时使用但是数字索引的返回值必须是字符串索引返回值的子类型 
-	[index: number]: string  
-}
-
-let myArray: StringArray = ['Bob', 'Fred']
-let str: string = myArray[0]
-
-// 可以同时使用但是数字索引的返回值必须是字符串索引返回值的子类型 
-// class Animal {
-// 	name: string
-// }
-// class Dog extends Animal {
-// 	breed: string
-// }
-// 报错
-// inter
-interface IsOkay {
-	[x: number]: Dog
-	[x: string]: Animal
-}
-
-// 只读索引类型
-interface ReadonlyStringArray {
-	readonly [index: number]: string
-}
-
-let myReadonlyStringArray: ReadonlyStringArray = ['Alice', 'Bob']
-// myReadonlyStringArray[2] = 'Mallory  '
-
-// 类类型
-// 1. 实例接口
-// interface ClockInterface {
-// 	currentTime: Date 
-// 	setTime(d: Date)
-// }
-
-class Clock implements ClockInterface {
-	currentTime: Date
-	constructor(h: number, m: number) {
-
-	}
-	setTime(d: Date) {
-		this.currentTime = d
-	}
-}
-
-// 2. 构造器接口
-// 实例部分
-interface ClockInterface {
-	tick()
-}
-// 静态部分
-interface ClockConstructor {
-	new(h: number, m: number): ClockInterface
-}
-
-function createClock(ctor: ClockConstructor, h: number, m: number): ClockInterface {
-	return new ctor(h, m)
-}
-
-class DigitalClock implements ClockInterface {
-	constructor(h: number, m: number) {
-	}
-	tick() {
-		console.log('tick')
-	}
-}
-
-let digital = createClock(DigitalClock, 12, 13)
-
-// 继承接口：可继承多个
-interface Shape {
-	color: string
-}
-interface Square extends Shape {
-	sideLength: number
-}
-let square = {} as Square
-square.color = 'blue'
-square.sideLength = 2
-
-// 混合类型
-interface Counter {
-	// 作为函数
-	(start: number): string
-
-	// 作为对象
-	interval: number
-	reset(): void
-}
-function getCounter(): Counter {
-	let counter = (function (start: number) {
-
-	}) as Counter
-	counter.interval = 123
-	counter.reset = function() {}
-	return counter
-}
-
-let counter = getCounter()
-c(10)
-c.reset()
-
-// 接口继承类
-class Control {
-	private state: any
-}
-// 接口继承类时会继承到类的成员（包括私有成员和受保护成员）但是不会继承实现，就是说这个接口只能被这个类或子类所实现
-interface SelectableControl extends Control {
-	select()
-}
-class Button extends Control implements SelectableControl {
-	select() {}
-}
-// SelectableControl只能被Control类或子类所实现
-// class ImageC implements SelectableControl {
-// 	select() {}
-// }
-
-```
-
-### 类
-
-在类中的高级用法主要有以下几点：
-
-- 继承
-- 存储器 `get set`
-- `readonly` 修饰符
-- 公有，私有，受保护的修饰符
-- 抽象类 `abstract`
-
-```typescript
-class Greeter {
-	greeting: string
-	constructor(msg: string) {
-		this.greeting = msg
-	}
-	greet() {
-		return `hello ${this.greeting}`
-	}
-}
-let greeter = new Greeter('word')
-greeter.greet()
-
-// 继承
-class Animal {
-	name: string
-	// 私有成员：不能在外部（实例）使用，包括子类
-	// private age: number
-	// 保护成员：不能在外部（实例）使用，不包括子类 
-	// protected age: number
-	// readonly：只读修饰符
-	// readonly age: number
-
-	// 构造函数也可以加protected
-	// protected constructor(name: string, age: number) {
-	// 参数属性（给构造函数参数前加访问限定符来声明），readonly也可以直接写到这里，创建和初始化
-    // 参数前加修饰符，能定义并初始化一个成员变量
-	constructor(name: string, readonly age: number) {
-		this.name = name 
-		// this.age = age 
-	}
-	move(dis: number = 0) {
-		console.log(`${this.name} moved ${dis}m`)
-	}
-}
-class Dog extends Animal{
-	bark() {
-		console.log('www')
-	}
-}
-let dog = new Dog('hh', 2)
-dog.bark()
-dog.move(10)
-
-class Snake extends Animal {
-	constructor(name: string, age: number) {
-		// 写在最前面
-		super(name, age)
-	}
-	move(dis: number = 5) { 
-		console.log('sss')
-		super.move(dis)
-	}
-}
-
-let snake = new Snake('ss', 3)
-snake.move(20)
-
-class Rhino extends Animal {
-	constructor() {
-		super('Rhino', 3)
-	}
-}
-
-class Employee {
-	name: string
-	private age: number
-	constructor(name: string, age: number) {
-		this.name = name
-		this.age = age
-	}
-}
-
-let animal = new Animal('aa', 4)
-let rhino = new Rhino()
-let employee = new Employee('ee', 6)
-
-animal = rhino
-// animal = employee
-
-// 存取器，vue中实现计算属性
-class Person {
-	private _fullNme: string
-	get fullName(): string {
-		return this._fullNme
-	}
-	set fullNmae(newName: string) {
-		this._fullNme = newName
-	}
-}
-// 编译不通过时 --target es5
-
-// 静态属性
-class Grid {
-	static origin = {x: 0, y: 0}
-	scale: number
-	constructor(scale: number) {
-		this.scale = scale
-	}
-	calculateDistanceFromOrigin(point: {x: number, y: number}) {
-		let xDist = point.x - Grid.origin.x
-		let yDist = point.y - Grid.origin.y
-		return Math.sqrt(xDist * xDist + yDist * yDist) * this.scale
-	}
-}
-
-let grid = new Grid(1)
-console.log(grid.calculateDistanceFromOrigin({x: 3, y: 4}))
-```
-
-语法糖
-
-```js
-class Person{ // 类指向构造函数
-    constructor(name, age){ // constructor是默认方法，new实例时自动调用
-    this.name = name; // 属性会声明在实例上，因为this指向实例
-    this.age = age;
-	} 
-    say(){ // 方法会声明在原型上
-		return "我的名字叫" + this.name + "今年" + this.age + "岁了";
-	}
-} 
-console.log(typeof Person); // function
-console.log(Person === Person.prototype.constructor); // true
-// 等效于
-function Person(name,age) {
-    this.name = name;
-    this.age = age;
-} 
-Person.prototype.say = function(){
-	return "我的名字叫" + this.name+"今年"+this.age+"岁了";
-}
-```
-
-#### 抽象类
-
-抽象类用于类的抽象，可以定义一些类的公共属性、公共方法，让继承的子类去实现，也可以自己实现。
-
-抽象类有以下两个特点。
-
-- 抽象类不能直接实例化
-- 抽象类中的抽象属性和方法，必须被子类实现
-
-> tip 经典问题：抽象类的接口的区别：
->
-> - 抽象类要被子类继承，接口要被类实现。
-> - 在 ts 中使用 `extends` 去继承一个抽象类。
-> - 在 ts 中使用 `implements` 去实现一个接口。
-> - 接口只能做方法声明，抽象类中可以作方法声明，也可以做方法实现。
-> - 抽象类是有规律的，抽离的是一个类别的公共部分，而接口只是对相同属性和方法的抽象，属性和方法可以无任何关联。
-
-### 访问修饰符
-
-private，public，protected
-
-### 函数
-
-#### 函数重载
-
-```js
-// 参数只要声明就是必选，?表示可选参数
-// 函数重载指的是一个函数可以根据不同的入参匹配对应的类型。
-function doSomeThing(x: string, y: number): string;
-function doSomeThing(x: number): string;
-function doSomeThing(x): any {}
-
-let result = doSomeThing(0);
-let result1 = doSomeThing("", 2);
-```
-
-#### this类型
-
-我们都知道，Javascript 中的 this 只有在运行的时候，才能够判断，所以对于 Typescript 来说是很难做静态判断的，对此 Typescript 给我们提供了手动绑定 `this` 类型，让我们能够在明确`this` 的情况下，给到静态的类型提示。
-
-其实在 Javascript 中的 `this`，就只有这五种情况：
-
-- 对象调用，指向调用的对象
-- 全局函数调用，指向 `window` 对象
-- `call apply` 调用，指向绑定的对象
-- `dom.addEventListener` 调用，指向 `dom`
-- 箭头函数中的 `this` ，指向绑定时的上下文
-
-```ts
-// 全局函数调用 - window
-function doSomeThing() {
-  return this;
-}
-const result2 = doSomeThing();
-
-// 对象调用 - 对象
-interface IObj {
-  age: number;
-  // 手动指定 this 类型
-  doSomeThing(this: IObj): IObj;
-  doSomeThing2(): Function;
-}
-
-const obj: IObj = {
-  age: 12,
-  doSomeThing: function () {
-    return this;
-  },
-  doSomeThing2: () => {
-    console.log(this);
-  },
-};
-const result3 = obj.doSomeThing();
-let globalDoSomeThing = obj.doSomeThing;
-globalDoSomeThing(); // 这样会报错，因为我们只允许在对象中调用
-
-// call apply 绑定对应的对象
-function fn() {
-  console.log(this);
-}
-fn.bind(document)();
-
-// dom.addEventListener
-document.body.addEventListener("click", function () {
-  console.log(this); // body
-});
-```
-
-### 泛型
-
-Generics是指在定义函数、接口或类的时候，不预先指定具体的类型，而在使用的时候再指定类型的一种特性。 增加代码的通用性
-
-可以理解为类型变量，使返回值的类型与传入参数的类型是相同的，不同于使用 `any`，它不会丢失信息
-
-```js
-// 定义函数
-function identity<T>(arg: T): T {
-    return arg;
-}
-// 使用
-// 方法1
-let output = identity<string>("myString"); 
-// 方法2：利用了类型推论 -- 即编译器会根据传入的参数自动地帮助我们确定T的类型
-let output = identity("myString");
-
-// 使用泛型变量
-// 报错
-function loggingIdentity<T>(arg: T): T {
-    console.log(arg.length);  // Error: T doesn't have .length
-    return arg;
-}
-// 这可以让我们把泛型变量T当做类型的一部分使用，而不是整个类型，增加了灵活性。
-function loggingIdentity<T>(arg: T[]): T[] {
-    console.log(arg.length);  // Array has a .length, so no more error
-    return arg;
-}
-
-// 泛型类型
-function identity<T>(arg: T): T {
-    return arg;
-}
-// =>后面表示函数的返回值类型
-let myIdentity: <T>(arg: T) => T = identity;
-```
-
-
-
-```js
-// 定义泛型接口
-interface Result<T> {
-    ok: 0 | 1;
-    data: T[];
-} 
-// 定义泛型函数
-function getData<T>(): Result<T> {
-    const data: any[] = [
-        { id: 1, name: "类型注解", version: "2.0" },
-        { id: 2, name: "编译型语言", version: "1.0" }
-    ];
-    return { ok: 1, data };
-} 
-// 使用泛型
-this.features = getData<Feature>().data;
-
-function getData<T>(): Promise<Result<T>> {
-    const data: any[] = [
-        { id: 1, name: "类型注解", version: "2.0" },
-        { id: 2, name: "编译型语言", version: "1.0" }
-    ];
-    return Promise.resolve<Result<T>>({ ok: 1, data });
-}
-async created() {
-    const result = await getData<Feature>();
-    this.features = result.data;
-}
-```
-
-
 
 ## 在Vue中使用
 
