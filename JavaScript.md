@@ -5583,7 +5583,9 @@ class Category {
 
 比如：Array.slice是纯函数，Array.splice不是
 
-优点：可缓存，降低系统复杂度
+- 优点：
+
+**可缓存，降低系统复杂度**
 
 ```js
 import _ from 'lodash'; 
@@ -5601,7 +5603,85 @@ var checkage = age => age > min;
 var checkage = age => age > 18;
 ```
 
-缺点：可能存在硬编码，降低了可扩展性，柯里化可以解决
+下面的代码是memorize的一个简单的实现，尽管它不太健壮。
+
+```js
+var memoize = function(f) {
+  var cache = {};
+
+  return function() {
+    var arg_str = JSON.stringify(arguments);
+    cache[arg_str] = cache[arg_str] || f.apply(f, arguments);
+    return cache[arg_str];
+  };
+};
+```
+
+可以通过延迟执行的方式把不纯的函数转换为纯函数：
+
+```js
+var pureHttpCall = memoize(function(url, params){
+  return function() { return $.getJSON(url, params); }
+});
+```
+
+这里有趣的地方在于我们并没有真正发送 http 请求——只是返回了一个函数，当调用它的时候才会发请求。这个函数之所以有资格成为纯函数，是因为它总是会根据相同的输入返回相同的输出
+
+**可移植性／自文档化（Portable / Self-Documenting）**
+
+纯函数的依赖很明确，因此更易于观察和理解它的目的
+
+```js
+// 不纯的
+var signUp = function(attrs) {
+  var user = saveUser(attrs);
+  welcomeUser(user);
+};
+
+var saveUser = function(attrs) {
+    var user = Db.save(attrs);
+    ...
+};
+
+var welcomeUser = function(user) {
+    Email(user, ...);
+    ...
+};
+
+// 纯的
+var signUp = function(Db, Email, attrs) {
+  return function() {
+    var user = saveUser(Db, attrs);
+    welcomeUser(Email, user);
+  };
+};
+
+var saveUser = function(Db, attrs) {
+    ...
+};
+
+var welcomeUser = function(Email, user) {
+    ...
+};
+```
+
+可移植性可以意味着把函数序列化（serializing）并通过 socket 发送。也可以意味着代码能够在 web workers 中运行。总之，可移植性是一个非常强大的特性。
+
+- 缺点：可能存在硬编码，降低了可扩展性，柯里化可以解决
+
+**可测试性（Testable）**
+
+第三点，纯函数让测试更加容易。我们不需要伪造一个“真实的”支付网关，或者每一次测试之前都要配置、之后都要断言状态（assert the state）。只需简单地给函数一个输入，然后断言输出就好了。
+
+事实上，我们发现函数式编程的社区正在开创一些新的测试工具，能够帮助我们自动生成输入并断言输出。比如 *Quickcheck*——一个为函数式环境量身定制的测试工具。
+
+**合理性（Reasonable）**
+
+很多人相信使用纯函数最大的好处是*引用透明性*（referential transparency）。如果一段代码可以替换成它执行所得的结果，而且是在不改变整个程序行为的前提下替换的，那么我们就说这段代码是引用透明的。
+
+由于纯函数总是能够根据相同的输入返回相同的输出，所以它们就能够保证总是返回同一个结果，这也就保证了引用透明性。
+
+我们可以使用一种叫做“等式推导”（equational reasoning）的技术来分析代码。所谓“等式推导”就是“一对一”替换，有点像在不考虑程序性执行的怪异行为（quirks of programmatic evaluation）的情况下，手动执行相关代码。等式推导带来的分析代码的能力对重构和理解代码非常重要。事实上，我们重构海鸥程序使用的正是这项技术：利用加和乘的特性。
 
 #### 偏应用函数
 
@@ -5645,6 +5725,56 @@ compose(compose(f, g), h)
 compose(f, g, h)
 ```
 
+组合的一个常见错误是，在没有局部调用之前，就组合类似 `map` 这样接受两个参数的函数。
+
+```js
+// 错误做法：我们传给了 `angry` 一个数组，根本不知道最后传给 `map` 的是什么东西。
+var latin = compose(map, angry, reverse);
+
+latin(["frog", "eyes"]);
+// error
+
+
+// 正确做法：每个函数都接受一个实际参数。
+var latin = compose(map(angry), reverse);
+
+latin(["frog", "eyes"]);
+// ["EYES!", "FROG!"])
+```
+
+如果在 debug 组合的时候遇到了困难，那么可以使用下面这个实用的，但是不纯的 `trace` 函数来追踪代码的执行情况。
+
+```js
+var trace = curry(function(tag, x){
+  console.log(tag, x);
+  return x;
+});
+
+var dasherize = compose(join('-'), toLower, split(' '), replace(/\s{2,}/ig, ' '));
+
+dasherize('The world is a vampire');
+// TypeError: Cannot read property 'apply' of undefined
+```
+
+这里报错了，来 `trace` 下：
+
+```js
+var dasherize = compose(join('-'), toLower, trace("after split"), split(' '), replace(/\s{2,}/ig, ' '));
+// after split [ 'The', 'world', 'is', 'a', 'vampire' ]
+```
+
+啊！`toLower` 的参数是一个数组，所以需要先用 `map` 调用一下它。
+
+```js
+var dasherize = compose(join('-'), map(toLower), split(' '), replace(/\s{2,}/ig, ' '));
+
+dasherize('The world is a vampire');
+
+// 'the-world-is-a-vampire'
+```
+
+`trace` 函数允许我们在某个特定的点观察数据以便 debug。像 haskell 和 purescript 之类的语言出于开发的方便，也都提供了类似的函数。
+
 ##### 函数柯里化
 
 `f(x)`和`g(x)`合成为`f(g(x))`，有一个隐藏的前提，就是`f`和`g`都只能接受一个参数。如果可以接受多个参数，比如`f(x, y)`和`g(a, b, c)`，函数合成就非常麻烦。
@@ -5681,7 +5811,7 @@ var bar = foo.bind(null, "p1");
 var baz = new bar("p2"); 
 console.log(baz.val);
 
-// 创建一个函数，该函数接收 func 的参数，要么调用func返回的结果，如果 func 所需参数已经提供，则直接返回 func 所执行的结果。或返回一个函数，接受余下的func 参数的函数，可以使用 func.length 强制需要累积的参数个数。
+// 创建一个函数，该函数接收 func 的参数，如果 func 所需参数已经提供，则直接返回 func 所执行的结果。或返回一个函数，接受余下的func 参数的函数，可以使用 func.length 强制需要累积的参数个数。
 import { curry } from 'lodash'; 
 var match = curry((reg, str) => str.match(reg)); 
 var filter = curry((f, arr) => arr.filter(f)); 
