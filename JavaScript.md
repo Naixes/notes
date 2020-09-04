@@ -5875,6 +5875,85 @@ for(var i = 0; i < companies.length; i++)
 let CEOs = companies.map(c => c.CEO);
 ```
 
+**一个声明式代码的实例**
+
+做 4 件事：
+
+1. 根据特定搜索关键字构造 url
+2. 向 flickr 发送 api 请求
+3. 把返回的 json 转为 html 图片
+4. 把图片放到屏幕上
+
+```js
+requirejs.config({
+  paths: {
+    ramda: 'https://cdnjs.cloudflare.com/ajax/libs/ramda/0.13.0/ramda.min',
+    jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min'
+  }
+});
+
+require([
+    'ramda',
+    'jquery'
+  ],
+  function (_, $) {
+    ////////////////////////////////////////////
+    // Utils
+	// 上面提到了两个不纯的动作，即从 flickr 的 api 获取数据和在屏幕上放置图片这两件事。我们先来定义这两个动作，这样就能隔离它们了。
+    var Impure = {
+      getJSON: _.curry(function(callback, url) {
+        $.getJSON(url, callback);
+      }),
+
+      setHtml: _.curry(function(sel, html) {
+        $(sel).html(html);
+      })
+    };
+
+    var img = function (url) {
+      return $('<img />', { src: url });
+    };
+
+    var trace = _.curry(function(tag, x) {
+      console.log(tag, x);
+      return x;
+    });
+
+    ////////////////////////////////////////////
+
+    var url = function (t) {
+      return 'https://api.flickr.com/services/feeds/photos_public.gne?tags=' + t + '&format=json&jsoncallback=?';
+    };
+
+    var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
+    var srcs = _.compose(_.map(mediaUrl), _.prop('items'));
+    var images = _.compose(_.map(img), srcs);
+    var renderImages = _.compose(Impure.setHtml("body"), images);
+    var app = _.compose(Impure.getJSON(renderImages), url);
+
+    app("cats");
+  });
+```
+
+**重构上面的代码**
+
+```js
+// 原有代码：我们获取 url map 了一次，把这些 url 变为 img 标签又 map 了一次
+var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
+var srcs = _.compose(_.map(mediaUrl), _.prop('items'));
+var images = _.compose(_.map(img), srcs);
+// 1：等式替换
+var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
+var images = _.compose(_.map(img), _.map(mediaUrl), _.prop('items'));
+// 2：结合律
+var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
+var images = _.compose(_.map(_.compose(img, mediaUrl)), _.prop('items'));
+// 重构
+var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
+var mediaToImg = _.compose(img, mediaUrl);
+var images = _.compose(_.map(mediaToImg), _.prop('items'));
+```
+
 #### 惰性求值、惰性函数??
 
 举例：ajax封装
