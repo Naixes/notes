@@ -1,6 +1,4 @@
-# TS
-
-## 为什么选择 TypeScript
+## 为什么选择 `TypeScript`
 
 1. **增加了代码的可读性和可维护性**
 
@@ -40,6 +38,8 @@
 安装完成后会有全局命令
 
 `tsc -v // 查看版本 tsc xxx // 编译ts文件 tsc xxx --strictNullChecks //严格模式检查空值`
+
+`ts-node`可以将两个步骤合二为一：`ts-node xxx`
 
 ## 语法
 
@@ -778,7 +778,7 @@ function reverse(x: number | string): number | string {
 <类型>值
 ```
 
-在 tsx 语法（React 的 jsx 语法的 ts 版）中必须使用前者，即 `值 as 类型`。形如 `<Foo>` 的语法在 tsx 中表示的是一个 `ReactNode`，在 ts 中除了表示类型断言之外，也可能是表示一个[泛型](https://ts.xcatliu.com/advanced/generics.html)。
+在 `tsx` 语法（React 的 `jsx` 语法的 ts 版）中必须使用前者，即 `值 as 类型`。形如 `<Foo>` 的语法在 `tsx` 中表示的是一个 `ReactNode`，在 ts 中除了表示类型断言之外，也可能是表示一个[泛型](https://ts.xcatliu.com/advanced/generics.html)。
 
 故建议大家在使用类型断言时，统一使用 `值 as 类型` 这样的语法
 
@@ -786,7 +786,7 @@ function reverse(x: number | string): number | string {
 
 ##### 将一个联合类型断言为其中一个类型
 
-当 TypeScript 不确定一个联合类型的变量到底是哪个类型的时候，我们**只能访问此联合类型的所有类型中共有的属性或方法，而有时候，我们确实需要在还不确定类型的时候就访问其中一个类型特有的属性或方法。
+当 `TypeScript` 不确定一个联合类型的变量到底是哪个类型的时候，我们**只能访问此联合类型的所有类型中共有的属性或方法，而有时候，我们确实需要在还不确定类型的时候就访问其中一个类型特有的属性或方法。
 
 此时可以使用类型断言，将 `animal` 断言成 `Fish`：
 
@@ -810,7 +810,7 @@ function isFish(animal: Cat | Fish) {
 
 这样就可以解决访问 `animal.swim` 时报错的问题了。
 
-需要注意的是，类型断言只能够「欺骗」TypeScript 编译器，无法避免运行时的错误，反而滥用类型断言可能会导致运行时错误：
+需要注意的是，类型断言只能够「欺骗」`TypeScript` 编译器，无法避免运行时的错误，反而滥用类型断言可能会导致运行时错误：
 
 ```ts
 interface Cat {
@@ -840,7 +840,7 @@ swim(tom);
 Uncaught TypeError: animal.swim is not a function`
 ```
 
-原因是 `(animal as Fish).swim()` 这段代码隐藏了 `animal` 可能为 `Cat` 的情况，将 `animal` 直接断言为 `Fish` 了，而 TypeScript 编译器信任了我们的断言，故在调用 `swim()` 时没有编译错误。
+原因是 `(animal as Fish).swim()` 这段代码隐藏了 `animal` 可能为 `Cat` 的情况，将 `animal` 直接断言为 `Fish` 了，而 `TypeScript` 编译器信任了我们的断言，故在调用 `swim()` 时没有编译错误。
 
 可是 `swim` 函数接受的参数是 `Cat | Fish`，一旦传入的参数是 `Cat` 类型的变量，由于 `Cat` 上没有 `swim` 方法，就会导致运行时错误了。
 
@@ -890,7 +890,7 @@ function isApiError(error: Error) {
 
 ##### 将任何一个类型断言为 `any`
 
-理想情况下，TypeScript 的类型系统运转良好，每个值的类型都具体而精确，但有的时候，我们非常确定这段代码不会出错，比如下面这个例子：
+理想情况下，`TypeScript` 的类型系统运转良好，每个值的类型都具体而精确，但有的时候，我们非常确定这段代码不会出错，比如下面这个例子：
 
 当我们引用一个在此类型上不存在的属性或方法时，就会报错：
 
@@ -913,7 +913,7 @@ window.foo = 1;
 // index.ts:1:8 - error TS2339: Property 'foo' does not exist on type 'Window & typeof globalThis'.
 ```
 
-上面的例子中，我们需要将 `window` 上添加一个属性 `foo`，但 TypeScript 编译时会报错，提示我们 `window` 上不存在 `foo` 属性。
+上面的例子中，我们需要将 `window` 上添加一个属性 `foo`，但 `TypeScript` 编译时会报错，提示我们 `window` 上不存在 `foo` 属性。
 
 此时我们可以使用 `as any` 临时将 `window` 断言为 `any` 类型：
 
@@ -923,13 +923,13 @@ window.foo = 1;
 
 在 `any` 类型的变量上，访问任何属性都是允许的。
 
-需要注意的是，将一个变量断言为 `any` 可以说是解决 TypeScript 中类型问题的最后一个手段。
+需要注意的是，将一个变量断言为 `any` 可以说是解决 `TypeScript` 中类型问题的最后一个手段。
 
 **它极有可能掩盖了真正的类型错误，所以如果不是非常确定，就不要使用 `as any`。**
 
-上面的例子中，我们也可以通过[扩展 window 的类型（TODO）][]解决这个错误，不过如果只是临时的增加 `foo` 属性，`as any` 会更加方便。
+上面的例子中，我们也可以通过[扩展 window 的类型（`TODO`）][]解决这个错误，不过如果只是临时的增加 `foo` 属性，`as any` 会更加方便。
 
-总之，**一方面不能滥用 `as any`，另一方面也不要完全否定它的作用，我们需要在类型的严格性和开发的便利性之间掌握平衡**（这也是 [TypeScript 的设计理念](https://github.com/Microsoft/TypeScript/wiki/TypeScript-Design-Goals)之一），才能发挥出 TypeScript 最大的价值。
+总之，**一方面不能滥用 `as any`，另一方面也不要完全否定它的作用，我们需要在类型的严格性和开发的便利性之间掌握平衡**（这也是 [TypeScript 的设计理念](https://github.com/Microsoft/TypeScript/wiki/TypeScript-Design-Goals)之一），才能发挥出 `TypeScript` 最大的价值。
 
 ##### 将 `any` 断言为一个具体的类型
 
@@ -963,7 +963,7 @@ tom.run();
 
 #### 类型断言的限制
 
-> 本小结的前置知识点：[结构类型系统（TODO）][]、[类型兼容性（TODO）][]
+> 本小结的前置知识点：[结构类型系统（`TODO`）][]、[类型兼容性（`TODO`）][]
 
 从上面的例子中，我们可以总结出：
 
@@ -994,9 +994,9 @@ let tom: Cat = {
 let animal: Animal = tom;
 ```
 
-我们知道，TypeScript 是**结构类型系统**，类型之间的对比只会比较它们最终的结构，而会忽略它们定义时的关系。
+我们知道，`TypeScript` 是**结构类型系统**，类型之间的对比只会比较它们最终的结构，而会忽略它们定义时的关系。
 
-在上面的例子中，`Cat` 包含了 `Animal` 中的所有属性，除此之外，它还有一个额外的方法 `run`。TypeScript 并不关心 `Cat` 和 `Animal` 之间定义时是什么关系，而只会看它们最终的结构有什么关系——所以它与 `Cat extends Animal` 是等价的：
+在上面的例子中，`Cat` 包含了 `Animal` 中的所有属性，除此之外，它还有一个额外的方法 `run`。`TypeScript` 并不关心 `Cat` 和 `Animal` 之间定义时是什么关系，而只会看它们最终的结构有什么关系——所以它与 `Cat extends Animal` 是等价的：
 
 ```ts
 interface Animal {
@@ -1033,7 +1033,7 @@ function testCat(cat: Cat) {
 - 允许 `animal as Cat` 是因为「父类可以被断言为子类」，这个前面已经学习过了
 - 允许 `cat as Animal` 是因为既然子类拥有父类的属性和方法，那么被断言为父类，获取父类的属性、调用父类的方法，就不会有任何问题，故「子类可以被断言为父类」
 
-需要注意的是，这里我们使用了简化的父类子类的关系来表达类型的兼容性，而实际上 TypeScript 在判断类型的兼容性时，比这种情况复杂很多，详细请参考[类型的兼容性（TODO)][]章节。
+需要注意的是，这里我们使用了简化的父类子类的关系来表达类型的兼容性，而实际上 `TypeScript` 在判断类型的兼容性时，比这种情况复杂很多，详细请参考[类型的兼容性（`TODO`)][]章节。
 
 总之，若 `A` 兼容 `B`，那么 `A` 能够被断言为 `B`，`B` 也能被断言为 `A`。
 
@@ -1075,7 +1075,7 @@ function testCat(cat: Cat) {
 
 #### 类型断言 vs 类型转换
 
-类型断言只会影响 TypeScript 编译时的类型，类型断言语句在编译结果中会被删除，所以类型断言不是类型转换，它不会真的影响到变量的类型，需要直接调用类型转换的方法：
+类型断言只会影响 `TypeScript` 编译时的类型，类型断言语句在编译结果中会被删除，所以类型断言不是类型转换，它不会真的影响到变量的类型，需要直接调用类型转换的方法：
 
 #### 类型断言 vs 类型声明
 
@@ -1168,7 +1168,7 @@ tom.run();
 
 #### 声明语句
 
-假如我们想使用第三方库 jQuery，一种常见的方式是在 html 中通过 `<script>` 标签引入 jQuery，然后就可以使用全局变量 `$` 或 `jQuery` 了。
+假如我们想使用第三方库 `jQuery`，一种常见的方式是在 `html` 中通过 `<script>` 标签引入 `jQuery`，然后就可以使用全局变量 `$` 或 `jQuery` 了。
 
 但是在 ts 中，编译器并不知道 `$` 或 `jQuery` 是什么东西：
 
@@ -1215,11 +1215,11 @@ jQuery('#foo');
 
 ##### 第三方声明文件
 
-当然，jQuery 的声明文件不需要我们定义了，社区已经帮我们定义好了：[jQuery in DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jquery/index.d.ts)。
+当然，`jQuery` 的声明文件不需要我们定义了，社区已经帮我们定义好了：[jQuery in DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jquery/index.d.ts)。
 
 我们可以直接下载下来使用，但是更推荐的是使用 `@types` 统一管理第三方库的声明文件。
 
-`@types` 的使用方式很简单，直接用 npm 安装对应的声明模块即可，以 jQuery 举例：
+`@types` 的使用方式很简单，直接用 `npm` 安装对应的声明模块即可，以 `jQuery` 举例：
 
 ```bash
 npm install @types/jquery --save-dev
@@ -2128,7 +2128,7 @@ function getName(n: NameOrResolver): Name {
 
 上例中，我们使用 `type` 创建类型别名。
 
-类型别名常用于联合类型。
+类型别名**常用于联合类型**。
 
 ### 字符串字面量类型
 
@@ -2173,7 +2173,7 @@ tom[0].slice(1);
 tom[1].toFixed(2);
 ```
 
-也可以只赋值其中一项：
+也可以只赋值其中一项，但是当直接对元组类型的变量进行初始化或者赋值的时候，需要提供所有元组类型中指定的项。
 
 ```ts
 let tom: [string, number];
@@ -2339,7 +2339,7 @@ enum Color {Red = "red".length, Green, Blue};
 
 #### 常数枚举
 
-常数枚举是使用 `const enum` 定义的枚举类型：
+常数枚举是使用 `const enum` 定义的枚举类型，可以提高性能：
 
 ```ts
 const enum Directions {
@@ -2364,7 +2364,7 @@ var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];
 
 #### 外部枚举
 
-外部枚举（Ambient Enums）是使用 `declare enum` 定义的枚举类型：
+外部枚举（`Ambient Enums`）是使用 `declare enum` 定义的枚举类型：
 
 ```ts
 declare enum Directions {
@@ -2976,7 +2976,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
 }
 ```
 
-上例中，我们使用了 `extends` 约束了泛型 `T` 必须符合接口 `Lengthwise` 的形状，也就是必须包含 `length` 属性。
+上例中，我们使用了 `extends` **约束了泛型 `T` 必须符合接口** `Lengthwise` 的形状，也就是必须包含 `length` 属性。
 
 此时如果调用 `loggingIdentity` 的时候，传入的 `arg` 不包含 `length`，那么在编译阶段就会报错了：
 
@@ -3030,6 +3030,7 @@ mySearch = function(source: string, subString: string) {
 当然也可以使用含有泛型的接口来定义函数的形状：
 
 ```ts
+// <T>也可以写在CreateArrayFunc后面
 interface CreateArrayFunc {
     <T>(length: number, value: T): Array<T>;
 }
@@ -3302,9 +3303,37 @@ onFeaturesChange(val: string, oldVal: any) {
 
 实际是一个工厂 函数
 
+## 在`react`中使用
 
+使用脚手架创建项目：`npx create-react-app ts-with-react --typescript`
 
+> `npx`：`npm`5.2以上
+>
+> 避免全局安装，会临时下载`create-react-app`，安装完成后会删除
+>
+> 可调用项目内部安装的模块，而不需要书写完整路径
 
+```tsx
+import React from 'react'
+
+interface IHelloProps {
+    message?: string
+}
+
+// FC：FunctionComponent
+const Hello: React.FC<IHelloProps> = (props) => {
+    console.log(props.children);
+    
+    return (
+        <h2>{props.message}</h2>
+    )
+}
+Hello.defaultProps = {
+    message: 'Hello'
+}
+
+export default Hello
+```
 
 
 
