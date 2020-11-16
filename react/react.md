@@ -1,5 +1,7 @@
 # React.js
 
+声明式，组件化，一次学习随处编写
+
 ## React简介
 
 - React 起源于 Facebook 的内部项目，因为该公司对市场上所有 JavaScript MVC 框架，都不满意，就决定自己写一套，用来架设 Instagram（照片交友） 的网站。做出来以后，发现这套东西很好用，**就在2013年5月开源了**。
@@ -148,7 +150,7 @@ const ul = {
 
 - **element diff:**在进行组件对比的时候，如果两个组件类型相同，则需要进行 元素级别的对比，这叫做 Element Diff；
 
-  ![Diff算法图](./media/Diff.png)
+  ![Diff算法图](../media/Diff.png)
 
 ## 初识React
 
@@ -263,6 +265,8 @@ jsx：创建元素方便，语法糖，会编译成js
    ```
 
 ### 使用脚手架-create-react-app
+
+特点：只有一个依赖，不需要配置，可自定义
 
 `npm i -g create-react-app`
 
