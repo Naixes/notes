@@ -3311,7 +3311,7 @@ onFeaturesChange(val: string, oldVal: any) {
 >
 > 避免全局安装，会临时下载`create-react-app`，安装完成后会删除
 >
-> 可调用项目内部安装的模块，而不需要书写完整路径
+> 可调用项目内部安装的模块，而不需要书写完整路径，比如`npx node-sass variables.scss var.css`
 
 ```tsx
 import React from 'react'
