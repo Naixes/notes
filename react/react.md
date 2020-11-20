@@ -620,6 +620,58 @@ export default class EventHandle extends Component {
 
 在这两种情况下，React 的事件对象 `e` 会被作为第二个参数传递。如果通过箭头函数的方式，事件对象必须**显式**的进行传递，而通过 `bind` 的方式，事件对象以及更多的参数将会被**隐式**的进行传递。
 
+### 原理
+
+react并不是将click事件绑定到真实dom上，而是在document监听所有支持的事件，当事件发生并冒泡到document时，react将事件内容封装并交由真正的处理函数运行
+
+这样的方式减少了内存消耗，还能再组件挂载销毁时统一订阅和移除事件。另外冒泡到document上的也不是浏览器原生事件，而是react自己实现的合成事件，所以如果不想事件冒泡的话`event.stopPropagation`是无效的，而应该调用`event.preventDefault`
+
+![react事件绑定原理](E:\Jennifer\other\notes\react\images\react事件绑定原理.png)
+
+总流程：
+
+![reat事件绑定流程](E:\Jennifer\other\notes\react\images\reat事件绑定流程.png)
+
+#### 事件注册
+
+- 组件挂载/更新
+- 通过lastProps、nextProps判断是否新增、删除事件，分别调用事件注册、卸载方法
+- 调用EventPluginHub的enqueuePutListener进行事件存储
+- 获取document对象
+- 根据事件名判断进行冒泡还是捕获
+- 判断是否存在addEvent Listener方法，否则使用attachEvent（兼容ie）
+- 给document注册原声事件回调为dispatchEvent（统一的事件分发机制）
+
+#### 事件存储
+
+- EventPluginHub负责管理react合成事件的callback，将callback存储在listenerBank中，另外还存储了负责合成事件的Plugin
+- EventPluginHub的putListener是向存储容器中增加一个listener
+- 获取绑定事件元素的唯一标识key
+- 将callback根据事件类型，元素唯一标识ley存储在listenerBank中
+- listenerBank的结构是：`listenerBank[registerationName][key]`
+
+#### 事件触发执行
+
+- 触发document注册原生事件的回调dispatchEvent
+- 获取触发事件最深一级的元素，这里的事件执行利用了react的批处理机制
+- 首先会获取到this.child
+- 遍历所有父元素，对每一级进行处理
+- 构造合成事件
+- 将每一级的合成事件存储在eventQueue队列中
+- 遍历队列
+- 通过isPropagationStopped判断是否执行了阻止冒泡
+- 阻止停止遍历否则通过executeDispatch执行合成事件
+- 释放处理完的事件
+
+#### 合成事件
+
+- 调用EventPluginHub的extractEvents方法
+- 循环所有类型的EventPlugin（用来处理不同事件的工具方法）
+- 在每个EventPlugin中根据不同的事件类型，返回不同的事件池
+- 在事件池中取出合成事件，如果是空的新建一个
+- 根据元素nodeId（唯一标识key）和事件类型从listenerBank中取出回调函数
+- 返回带有合成事件参数的回调函数
+
 ## 绑定文本框与state中的值
 
 1. 在 Vue 中，默认提供了`v-model`指令，可以很方便的实现 数据的双向绑定，只是语法糖，实质上也是单向数据流
@@ -675,6 +727,102 @@ this.setState({
 和 Vue 中差不多，vue 为页面上的元素提供了 `ref` 的属性，如果想要获取 元素引用，则需要使用`this.$refs.引用名称`
 
 在 React 中，也有 `ref`, 如果要获取元素的引用`this.refs.引用名称`
+
+## 原理
+
+### 挂载
+
+react挂载时有3个组件textComponent，composeComponent，domComponent
+
+react挂载时会进入一个mount函数，判断挂载vnode的类型，根据类型调用不同的函数，这些函数都接受两个参数，vnode和container
+
+#### textComponent
+
+纯文本类型的vnode的children属性存储与之相符的文本字符串，只需要调用document.createTextNode创建一个文本节点然后添加到container即可
+
+#### domComponent
+
+1. 引用真实的dom元素
+2. 将vnodeData应用到dom元素，style，class，事件等
+3. 递归挂载子节点
+
+#### composeComponent
+
+挂载组件有两种类型：函数组件和状态组件，他们的产出都是vnode
+
+##### 有状态组件
+
+1. 创建组件实例，vnode.tag就是组件类的引用，通过new创建组件实例
+2. 获取组件产出的vnode，通过render函数
+3. mount挂载，将vnode挂载到container上
+4. 让组件实例的$el属性和vnode.el属性的值引用组件的根dom元素
+
+##### 函数组件
+
+1. 获取vnode`const $vnode = vnode.tag()`
+2. 挂载`mount($vnode, container)`
+3. el元素引用该组件的根元素`vnode.el = $vnode.el`
+
+#### dom结构发生变化
+
+react只重新渲染新旧虚拟dom变化的部分（diff）
+
+策略：
+
+1. 不同类型元素会产生不同的树
+2. 同一层级的一组节点可以通过唯一的key进行区分
+
+##### 区分变化
+
+1. 同一层交换位置，react通过key判断，如果相同会复用节点
+2. 层级发生变化会重新渲染
+
+##### 更新，调度
+
+对比之后会产生一个差异对象，react对这个对象进行更新
+
+react16之后使用fiber实现调度：
+
+出现更新时，fiber会创建一个任务，放到任务队列，循环执行队列中的任务，完成之后react进入提交步骤更新dom
+
+**如果更新时还有其它任务时，判断优先级，执行优先级更高的任务**
+
+### react-fiber
+
+#### 背景
+
+- react渲染组件时从setState到完成整个过程是同步的，js占主线程时间过长时页面响应速度变差，使react在动画，手势等应用中效果变差
+- 页面卡顿：stack reconciler（堆栈调用器）的工作流程就是父组件调用子组件（类似函数递归），对于大的vdom树来说reconciliation过程很长。超过16ms，期间主线程都是被js占用，此时的交互，布局，渲染会停止感觉就是卡住了
+
+#### 原理
+
+旧版react使用递归的方式进行渲染，使用js自带的函数调用栈，会一直执行到空。fiber实现了自己的组件调用栈，以链表的形式遍历组件树，可以灵活的暂停，继续，丢弃执行的任务。实现方式是浏览器的**`requestIdleCallback`**。fiber其实是指一种数据结构，可以用一个纯js对象表示
+
+```js
+const fiber = {
+    stateNode,  // 节点实例
+    child,  // 子节点
+    sibling,  // 兄弟节点
+    return  // 父节点
+}
+```
+
+- react内部运转分三层
+  - vdom层，描述页面
+  - reconciler层，负责调用生命周期，进行diff运算
+  - renderer层，根据不同的平台，渲染相应的页面，如reactDom，reactNative
+- 为了不卡顿，需要有一个调度器（Scheduler）分配任务，优先级高的（键盘输入）可以打断优先级低的（diff）任务，从而更快的生效。优先级有6种
+  - synchronous，与stack reconciler一样，同步执行
+  - task，next tick之后执行
+  - animation，下一帧之前执行
+  - high，不久的将来
+  - low，迟一点也没关系
+  - offscreen。下一次render或scroll时才执行
+- fiber reconciler（react）执行阶段：
+  1. 生成fiber树，得出需要更新节点的信息，渐进过程，可以被打断
+  2. 批量更新节点，不可被打断
+- fiber树：在阶段一diff计算时基于vdom树生成的fiber树，本质是链表
+- 从stack reconciler到fiber reconciler源码层面就是干了一件递归改循环的事
 
 # 豆瓣电影案例
 
