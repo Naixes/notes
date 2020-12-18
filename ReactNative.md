@@ -207,6 +207,8 @@ ScrollView 会简单粗暴地把所有子元素一次性全部渲染出来。然
 
 支持水平布局，显示和隐藏回调，单独的头部/尾部组件，下拉刷新，上拉加载，分割线，跳转指定行，多列布局等
 
+本组件实质是基于[`VirtualizedList`](https://reactnative.cn/docs/virtualizedlist)组件的封装，继承了其所有 props（也包括所有[`ScrollView`](https://reactnative.cn/docs/scrollview))的 props）
+
 ```tsx
 import React from 'react';
 import { SafeAreaView, View, FlatList, StyleSheet, Text, StatusBar } from 'react-native';

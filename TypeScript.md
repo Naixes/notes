@@ -2130,6 +2130,58 @@ function getName(n: NameOrResolver): Name {
 
 类型别名**常用于联合类型**。
 
+与interface的区别
+
+1. type可以声明 基本类型，联合类型，元组 的别名，interface不行
+
+```js
+// 基本类型别名
+type Name = string
+
+// 联合类型
+interface Dog {
+    wong();
+}
+interface Cat {
+    miao();
+}
+
+type Pet = Dog | Cat
+
+// 具体定义数组每个位置的类型
+type PetList = [Dog, Pet]
+```
+
+2. type 语句中可以使用 `typeof` 获取类型实例
+
+```js
+// 当你想获取一个变量的类型时，使用 typeof
+let div = document.createElement('div');
+type B = typeof div
+```
+
+3. type 支持类型映射，interface不支持
+
+```js
+type Keys = "firstname" | "surname"
+
+type DudeType = {
+  [key in Keys]: string
+}
+
+const test: DudeType = {
+  firstname: "Pawel",
+  surname: "Grzybek"
+}
+
+// 报错
+//interface DudeType {
+//  [key in keys]: string
+//}
+```
+
+4. interface能够声明合并，type不能
+
 ### 字符串字面量类型
 
 字符串字面量类型用来约束取值只能是某几个字符串中的一个。
