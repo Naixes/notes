@@ -404,9 +404,23 @@ CSS3支持背景半透明的写法语法格式是:
 background: rgba(0,0,0,0.3);
 ```
 
- 最后一个参数是alpha 透明度  取值范围 0~1之间
+最后一个参数是alpha 透明度  取值范围 0~1之间
 
- 注意：  背景半透明是指盒子背景半透明， 盒子里面的内容不收影响。
+注意：  背景半透明是指盒子背景半透明， 盒子里面的内容不收影响。
+
+了解ie低版本浏览器 半透明
+
+`filter:Alpha(opacity=50) ；   // opacity值为0 到 100`
+
+但是 此属性是盒子半透明，不是背景半透明哦，因为里面的内容也一起半透明了
+
+因此，低版本的 ie6.7浏览器，我们不需要透明了，直接采用优雅降级的做法。
+
+`background: gary;`
+
+`background: rgba(0,0,0,.2);`
+
+写上两句背景， 低版本ie只执行gray， 其他浏览器执行 半透明下面这一句。
 
 ### 背景缩放-size CSS3
 
@@ -486,6 +500,22 @@ background-color:#aaa;
 background-image:url("1.jpg"),url("2.jpg"),url("3.jpg");
 background-repeat: no-repeat, no-repeat, no-repeat;  
 background-position: 0 0, 200px 0, 400px 201px;  
+```
+
+### 背景渐变
+
+在线性渐变过程中，颜色沿着一条直线过渡：从左侧到右侧、从右侧到左侧、从顶部到底部、从底部到顶部或着沿任何任意轴。
+
+兼容性问题很严重
+
+线性渐变语法格式： 
+
+```css
+background:-webkit-linear-gradient(渐变的起始位置， 起始颜色， 结束颜色)；
+```
+
+```css
+background:-webkit-linear-gradient(渐变的起始位置， 颜色 位置， 颜色位置....)；
 ```
 
 ## 用户界面样式
@@ -3182,13 +3212,13 @@ perspective 一般作为一个属性，设置给父元素，作用于所有3D转
 
 理解透视距离原理：
 
-![1498446715314](E:/Jennifer/other/notes/media/1498446715314.png)
+![1498446715314](./media/1498446715314.png)
 
 ## translateX(x)
 
 仅水平方向移动**（X轴移动）
 
-![1498459697576](E:/Jennifer/other/notes/media/1498459697576.png)
+![1498459697576](./media/1498459697576.png)
 
 主要目的实现移动效果
 
@@ -3196,7 +3226,7 @@ perspective 一般作为一个属性，设置给父元素，作用于所有3D转
 
 仅垂直方向移动（Y轴移动）
 
-![1498459770252](E:/Jennifer/other/notes/media/1498459770252.png)
+![1498459770252](./media/1498459770252.png)
 
 ## translateZ(z)
 
@@ -3210,33 +3240,44 @@ transformZ的直观表现形式就是大小变化，实质是XY平面相对于�
 
 backface-visibility：visible/hidden 属性定义当元素不面向屏幕时是否可见。
 
-## 其他
+# css3D
 
-720yun.com
+## 发展
 
-h5doo
+参考：
 
-### 陀螺仪
+https://720yun.com/
 
-角度：gamma（y90~-90），alpha（z0~360），beta（x180~-180）
+http://www.h5doo.com/cpp
+
+## 陀螺仪
+
+又叫角速度传感器，不同于加速度计
+
+手机正面朝上的坐标系xyz轴
+
+角度：沿y轴转gamma（90~-90），沿z轴转alpha（0~360），沿x轴转beta（180~-180）
 
 1. deviceorientation		
    设备的物理⽅向信息，表示为⼀系列本地坐标系的旋⻆。
-2. devicemotion	
+2. devicemotion
    提供设备的加速信息
 3. compassneedscalibration	
    用于通知Web站点使罗盘信息校准上述事件 
 
-获取旋转角
+**获取旋转角**
+
+![陀螺仪旋转角度](/Users/huangsiying/project/00 github/notes/images/陀螺仪旋转角度.png)
 
 ```js
 window.addEventListener('deviceorientation',	
 function(event)	{	
-	//	处理event.alpha、 event.beta及event.gamma	
+	// 处理event.alpha、 event.beta及event.gamma
+  // 在项目中需要控制这几个值，否则会剧烈晃动
 },	true);
 ```
 
-校准罗盘
+**校准罗盘**
 
 ```js
 window.addEventListener("compassneedscalibration", function(event)	{	
@@ -3245,21 +3286,30 @@ window.addEventListener("compassneedscalibration", function(event)	{
 },	true);	
 ```
 
-获取重力加速度
+**获取重力加速度**
 
 ```js
 window.addEventListener("devicemotion",	
 function(event)	{	
-    //处理event.acceleration	
-    //x(y,z):设备在x(y,z)方向上的移动加速度值
-    //event.accelerationIncludingGravity	
-    //考虑了重力加速度后设备在x(y,z)	
-    //event.rotationRate	
-    //alpha,beta,gamma:设备绕x,y,z轴旋转的⻆度
+    // 处理event.acceleration	
+    // x(y,z):设备在x(y,z)方向上的移动加速度值
+    // event.accelerationIncludingGravity	
+    // 考虑了重力加速度后设备在x(y,z)方向上的移动加速度值
+    // 在手机运动时获取alpha,beta,gamma，上面的方法是静止时获取
+    // event.rotationRate	
+    // alpha,beta,gamma:设备绕x,y,z轴旋转的⻆度
 },	true);
 ```
 
-摇一摇
+**重力加速度**
+
+重力加速度(Gravitational acceleration)是一个物体受 重力作用的情况下所具有的加速度。
+
+与质量有关，(G=mg) (其中g=9.80665 m/s^2，为标准重力加速度)
+
+GMm/r2=mg当忽略地球自身重力时可导出黄金代换方程：GM=gr2从而得出：g=GM/r2,这个公式是用来求重力加速的!
+
+**摇一摇**
 
 ```js
 var speed = 30;//speed
@@ -3277,25 +3327,91 @@ function deviceMotionHandler(eventData) {
 }
 ```
 
-### 3D模型
+## 3D模型
 
-#### 投影
+### 投影
 
-球形投影
+**球形投影**
 
-立方体投影
+在三维空间，每个 3D 模型都等同于一个多面体(即 3D 模型只能由不弯曲的平面组成)。你只能以一个正多边形表示圆:边越 多，圆就越“完美”。
 
-#### 原理
+![球面投影](/Users/huangsiying/project/00 github/notes/images/球面投影.png)
 
-### Touch事件
+**立方体投影**
 
-### 3D库
+![立方体投影](/Users/huangsiying/project/00 github/notes/images/立方体投影.png)
 
-css3d-engine
+![球形投影和立方体投影比较](/Users/huangsiying/project/00 github/notes/images/球形投影和立方体投影比较.png)
 
-案例：3D魔方，造物节
+### 原理
 
+球面投影：将图片切为n等分然后再进行旋转平移
 
+![球面投影原理](/Users/huangsiying/project/00 github/notes/images/球面投影原理.png)
+
+## Touch事件
+
+```js
+viewer.on('touchstart', function(e) {
+  x1 = e.targetTouches[0].pageX; //$(this).offset().left;
+  y1 = e.targetTouches[0].pageY; //$(this).offset().top; 
+});
+viewer.on('touchmove',function(){
+  var dist_x = x2 - x1,
+      dist_y = y2 - y1,
+      deg_x = Math.atan2(dist_y, perspective) / Math.PI * 180, deg_y = -Math.atan2(dist_x, perspective) / Math.PI * 180,
+      i,
+      c_x_deg += deg_x;
+  		c_y_deg += deg_y;
+  cube.css('transform', 'rotateX(' + deg_x + 'deg) rotateY(' + deg_y + 'deg)');
+})
+```
+
+## 3D库
+
+css3D库：css3d-engine
+
+```js
+// 创建舞台
+s = new C3D.Stage();
+  s.size(window.innerWidth, window.innerHeight).material({
+  color: "#cccccc"
+}).update();
+// 添加舞台到页面
+document.getElementById('main').appendChild(s.el);
+
+//创建1个立方体放入场景
+var c = new C3D.Skybox(); c.size(1024).position(0, 0, 0).material({
+  front: {image: "images/cube_FR.jpg"},
+  back: {image: "images/cube_BK.jpg"},
+  left: {image: "images/cube_LF.jpg"},
+  right: {image: "images/cube_RT.jpg"},
+  up: {image: "images/cube_UP.jpg"},
+  down: {image: "images/cube_DN.jpg"},
+}).update();
+s.addChild(c);
+```
+
+js3D库：做视觉差，parallax.js
+
+```jsx
+<ul id="scene">
+  <li class="layer" data-depth=“0.00">
+  <img src=“layer1.png"> </li>
+  <li class="layer" data-depth=“0.20">
+    <img src="layer2.png">
+  </li>
+  <li class="layer" data-depth=“0.40">
+    <img src=“layer3.png">
+  </li>
+</ul>
+
+var scene = document.getElementById('scene');
+var parallax = new Parallax(scene);
+ 
+```
+
+案例（见demo-collection中css部分的代码）：3D魔方，造物节
 
 # 动画(CSS3) animation
 
@@ -3510,49 +3626,13 @@ BEM 是 Block、Element、Modifier 三个单词的缩写，Block 代表独立的
 
 那会不会出现重复定义呢？这个问题很好解决，按照字母序升序定义样式类就可以了。
 
-## 背景半透明
-
-1.强烈推荐：  background: rgba(r,g,b,alpha);
-
-​     r,g,b 是红绿蓝的颜色，  alpha 是透明度的意思，取值范围是 0~1 之间。
-
-2.了解ie低版本浏览器 半透明
-
-`filter:Alpha(opacity=50) ；   // opacity值为0 到 100`
-
-但是 此属性是盒子半透明，不是背景半透明哦，因为里面的内容也一起半透明了
-
-因此，低版本的 ie6.7浏览器，我们不需要透明了，直接采用优雅降级的做法。
-
-`background: gary;`
-
-`background: rgba(0,0,0,.2);`
-
-写上两句 背景， 低版本ie只执行gray， 其他浏览器执行 半透明下面这一句。
-
-## 背景渐变
-
-在线性渐变过程中，颜色沿着一条直线过渡：从左侧到右侧、从右侧到左侧、从顶部到底部、从底部到顶部或着沿任何任意轴。
-
-兼容性问题很严重
-
-线性渐变语法格式： 
-
-```css
-background:-webkit-linear-gradient(渐变的起始位置， 起始颜色， 结束颜色)；
-```
-
-```css
-background:-webkit-linear-gradient(渐变的起始位置， 颜色 位置， 颜色位置....)；
-```
-
-## 矩阵
+# 矩阵
 
 性能高，应用：svg，canvas，webgl，css
 
-### css
+## css
 
-#### 2D
+### 2D
 
 transform，矩阵为3*3，无论是旋转还是位移，本质上都是由matrix()实现的
 
@@ -3563,11 +3643,11 @@ Math.cos(this.value * Math.PI / 180);
 Math.sin(this.value * Math.PI / 180); 
 ```
 
-#### 3D
+### 3D
 
 矩阵为4*4
 
-### 工具
+## 工具
 
 matrix3d
 http://ds-overdesign.com/transform/matrix3d.html 
@@ -3585,7 +3665,7 @@ css 3d
 
 tridiv.com
 
-
+# 其他
 
 ## CSS W3C 统一验证工具
 
