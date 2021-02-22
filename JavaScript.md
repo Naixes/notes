@@ -3579,7 +3579,6 @@ function Person (name, age) {
 
 var p1 = new Person('Tom', 18)
 var p2 = new Person('Jack', 16)
-
 ```
 
 在该示例中，从表面上好像没什么问题，但是实际上这样做，有一个很大的弊端。
@@ -3608,7 +3607,6 @@ var p1 = new Person('Top', 18)
 var p2 = new Person('Jack', 16)
 
 console.log(p1.sayHello === p2.sayHello) // => true
-
 ```
 
 这样确实可以了，但是如果有多个需要共享的函数的话就会造成全局命名空间冲突的问题。
@@ -3638,7 +3636,6 @@ var p2 = new Person('Jack', 16)
 
 console.log(p1.sayHello === p2.sayHello) // => true
 console.log(p1.sayAge === p2.sayAge) // => true
-
 ```
 
 至此，我们利用自己的方式基本上解决了构造函数的内存浪费问题。
@@ -3683,7 +3680,7 @@ console.log(p1.sayName === p2.sayName) // => true
 
 #### 构造函数、实例、原型三者之间的关系
 
-<img src="E:/Jennifer/other/notes/media/%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0-%E5%AE%9E%E4%BE%8B-%E5%8E%9F%E5%9E%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB.png" alt="">
+<img src="./media/%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0-%E5%AE%9E%E4%BE%8B-%E5%8E%9F%E5%9E%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB.png" alt="">
 
 构造函数具有一个 prototype 属性，该属性指向原型对象。
 
@@ -3713,11 +3710,7 @@ console.log(instance.__proto__ === F.prototype) // => true
 
 实例对象可以直接访问原型对象成员。
 
-```javascript
-instance.sayHi() // => hi!
-```
-
-**判断实例的原型对象：**`Person.prototype.isProtptypeOf(person1)`
+**判断实例的原型对象：**`Person.prototype.isPrototypeOf(person1)`
 
 **获取原型对象**
 
@@ -3750,7 +3743,7 @@ instance.sayHi() // => hi!
 
 #### 属性成员的搜索原则：原型链
 
-**原型链**：实例对象和原型对象通过原型（\__proto）联系，这个关系就是原型链。其实就是多个对象通过 `__proto__` 的方式连接了起来。 
+**原型链**：实例对象和原型对象通过原型（\__proto\_\_）联系，这个关系就是原型链。其实就是多个对象通过 `__proto__` 的方式连接了起来。 
 
 每当代码读取某个对象的某个属性时，都会执行一次搜索，目标是具有给定名字的属性
 
@@ -3767,8 +3760,6 @@ instance.sayHi() // => hi!
 - 自己身上找不到，则沿着原型链向上查找，找到即返回
 - 如果一直到原型链的末端还没有找到，则返回 `undefined`
 
-![img](https://user-gold-cdn.xitu.io/2018/11/16/1671d387e4189ec8?imageView2/0/w/1280/h/960/format/webp/ignore-error/1) 
-
 #### 实例对象读写原型对象成员
 
 读取：同上
@@ -3784,8 +3775,7 @@ instance.sayHi() // => hi!
 
 复杂类型修改（`实例对象.成员.xx = xx`）：
 
-- 同样会先在自己身上找该成员，如果自己身上找到则直接修改
-- 如果自己身上找不到，则沿着原型链继续查找，如果找到则修改
+- 同上
 - 如果一直到原型链的末端还没有找到该成员，则报错（`实例对象.undefined.xx = xx`）
 
 #### 更简单的原型语法
@@ -3805,7 +3795,6 @@ Person.prototype = {
     console.log('我叫' + this.name + '，我今年' + this.age + '岁了')
   }
 }
-
 ```
 
 在该示例中，我们将 `Person.prototype` 重置到了一个新的对象。但是也会带来一个问题，那就是原型对象丢失了 `constructor` 成员。即使`instanceof`还是可以返回正确的结果
@@ -3825,7 +3814,6 @@ Person.prototype = {
     console.log('我叫' + this.name + '，我今年' + this.age + '岁了')
   }
 }
-
 ```
 
 手动将 constructor 指向正确的构造函数 
@@ -3836,7 +3824,6 @@ Object.defineProperty(Person.prototype, 'constructor', {
     enumberable: false,
     value: Person
 })
-
 ```
 
 #### instanceof 的原理
@@ -3861,7 +3848,6 @@ function myInstanceof(left, right) {
     left = left.__proto__
   }
 }
-
 ```
 
 #### 原生对象的原型
@@ -3882,27 +3868,61 @@ function myInstanceof(left, right) {
 - 共享成员（一般就是函数）放到原型对象中
 - 如果重置了 `prototype` 记得修正 `constructor` 的指向
 
+#### 原型链
+
+虽然JavaScript中一切皆对象，但为了理解原型链系统，我们需要将JavaScript的对象分为对象和函数两大类。
+
+根据前面对原型的分析得出JavaScript**原型链遵循以下通用规则：**
+1：对象有`__proto__`属性，函数有prototype属性
+2：对象由函数生成
+3：生成对象时，对象的`__proto__`属性指向其构造函数的prototype属性
+
+一般对象是用Object函数来生成对象`o.__proto__ === Object.prototype`
+
+函数对象都是由Function函数生成的`fn.__proto__ === Function.prototype`
+
+**Function函数和Object函数是特殊的：**
+
+Function函数本身作为对象时，生成它的函数是他自身`Function.__proto__ === Function.prototype`
+
+Object函数也是一个函数对象`Object.__proto__ === Function.prototype`
+
+Object函数：
+
+`Object.prototype`多了一堆方法
+`Object.prototype.__proto__`为null
+
+` typeof Object.prototype === 'object'`，说明它是一个object对象，如果它由object函数生成，按照通用规则，就该是`Object.prototype.__proto__ === object.prototype`，这样`Object.prototype.__proto__`属性指向了它自身，这样原型链就再也没有终点了，所以为了让原型链有终点，规定`Object.prototype.__proto__ === null`
+
+Function函数：
+
+Function函数的prototype类型为function
+
+按照通用规则，一个Function类型的对象，应该是由Function函数生成，那么`Function.prototype.__proto__ === Function.prototype`，和object函数同样的问题出现了，所以JavaScript规定`Function.prototype.__proto__ === Object.prototype`，这样既不会出现循环引用，又让原型链指向了唯一的终点：`Object.prototype.__proto__ === null`
+
+![原型链](/Users/huangsiying/project/00 github/notes/images/原型链.jpg)
+
 #### ES5面向对象的缺点
 
 1. 不统一
 2. 类和构造函数不区分
 
-## 继承
+### 继承
 
 继承是类与类之间的关系，js中没有类，通过构造函数模拟类，通过原型实现继承
 
 继承为了数据共享
 
-### 什么是继承
+#### 什么是继承
 
 - 现实生活中的继承
 - 程序中的继承
 
-### 原型继承：改变原型指向
+#### 原型继承：改变原型指向
 
-![1542416932627](D:\note\前端\html\media\1542416932627.png)
+![1542416932627](.\media\1542416932627.png)
 
-![1542417471531](D:\note\前端\html\media\1542417471531.png)
+![1542417471531](.\media\1542417471531.png)
 
 问题1：
 
@@ -3914,7 +3934,7 @@ function myInstanceof(left, right) {
 
 解决：借用构造函数
 
-### 借用构造函数：构造函数的属性继承
+#### 借用构造函数：构造函数的属性继承
 
 ```javascript
 function Person (name, age) {
@@ -3936,7 +3956,7 @@ console.log(s1.type, s1.name, s1.age) // => human 张三 18
 
 实例获取不到父类中的方法，无法避免方法都在构造函数中定义
 
-### 组合继承（原型+借用）
+#### 组合继承（原型+借用）
 
 使用原型继承原型中的属性和方法，借用构造函数继承实例属性
 
@@ -3965,10 +3985,9 @@ Student.prototype = new Person()
 var s1 = Student('张三', 18)
 console.log(s1.type) // => human
 s1.sayName() // => hello 张三
-
 ```
 
-### 寄生组合继承
+#### 寄生组合继承
 
 这种继承方式对组合继承进行了优化，组合继承缺点在于继承父类函数时调用了构造函数，我们只需要优化掉这点就行了。
 
@@ -3987,7 +4006,6 @@ function inheeritPrototype(subType, superType) {
     prototype.constructor = subType
     subType.prorotype = prototype
 }
-
 ```
 
 Object.create()实现寄生组合继承
@@ -4020,16 +4038,13 @@ const child = new Child(1)
 
 child.getValue() // 1
 child instanceof Parent // true
-
 ```
 
 以上继承实现的核心就是将父类的原型赋值给了子类，并且将构造函数设置为子类，这样既解决了无用的父类属性问题，还能正确的找到子类的构造函数。
 
-![img](https://user-gold-cdn.xitu.io/2018/11/19/1672afb8dfa21361?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+#### Class 继承-ES6
 
-### Class 继承-ES6
-
-#### class 关键字的使用
+##### class 关键字的使用
 
 1. class 中 `constructor` 的基本使用
 2. 实例属性和实例方法
@@ -4056,7 +4071,7 @@ class Animal {
 
 ```
 
-#### Class实现继承
+##### Class实现继承
 
 以上两种继承方式都是通过原型去解决的，在 ES6 中，我们可以使用 `class` 去实现继承
 
@@ -4090,7 +4105,7 @@ child instanceof Parent // true
 
 当然了 JS 中并不存在类，`class` 的本质就是函数。
 
-### 构造函数的原型继承：拷贝继承（for-in）
+#### 构造函数的原型继承：拷贝继承（for-in）
 
 ```javascript
 function Person (name, age) {
@@ -4111,10 +4126,7 @@ for(var key in Person.prototype) {
 var s1 = Student('张三', 18)
 
 s1.sayName() // => hello 张三
-
 ```
-
-------
 
 ## 函数进阶
 
@@ -5567,7 +5579,7 @@ class Category {
 
 #### 特点
 
-1. 函数是一等公民。所谓”第一等公民”（first class），指的是函数与其他数据类型一样，处于平等地位，可以赋值给其他变量，也可以作为参数，传入另一个函数，或者作为别的函数的返回值。 
+1. 函数是一等公民。所谓”第一等公民”（first class），指的是函数与其他数据类型一样，处于平等地位，可以赋值给其他变量，也可以作为参数，传入另一个函数，或者作为别的函数的返回值。
 2. 不可改变量。在函数式编程中变量仅仅代表某个表达式。这里所说的’变量’是不能被修改的。所有的变量**只能被赋一次初值**
 3. map & reduce他们是最常用的函数式编程的方法。 
 4. **只用”表达式"，不用"语句"**
@@ -6009,7 +6021,7 @@ function factorial(n, total) {
 } //ES6强制使用尾递归
 ```
 
-1. 尾递归的判断标准是函数运行【最后一步】是否调用自身，而不是 是否在函数的【最后一行】调用自身,最后一行调用其他函数 并返回叫尾调用。  
+1. 尾递归的判断标准是函数运行【最后一步】是否调用自身，而不是 是否在函数的【最后一行】调用自身,最后一行调用其他函数 并返回叫尾调用。 
 
 2. 按道理尾递归调用调用栈永远都是更新当前的栈帧而已，这样就完全避免了爆栈的危险。但是现如今的浏览器并未完全支持
 
@@ -7725,7 +7737,7 @@ new Promise((resolve, reject) => {
 
 Node 中的 Event Loop 和浏览器中的是完全不相同的东西。
 
-![node eventloop](E:\Jennifer\other\notes\media\node eventloop.png)
+![node eventloop](.\media\node eventloop.png)
 
 根据上图，Node.js的运行机制如下：
 
