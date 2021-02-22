@@ -2,9 +2,11 @@
 
 ## PHP
 
-超文本预处理器，脚本语言。
+超文本预处理器，脚本语言，不需要编译。
 
-主要适用于web开发领域，PHP做出的动态网页，是将程序嵌入到HTML里去执行，效率比完全生成HTML标记的CGI要高很多，PHP还可以执行编译后代码，编译可以加密和优化代码执行，使代码运行更快。
+主要适用于web开发领域，PHP做出的动态网页，是**将程序嵌入到HTML里**去执行，效率比完全生成HTML标记的CGI要高很多，PHP还可以执行编译后代码，编译可以加密和优化代码执行，使代码运行更快。
+
+xampp：启动apache web服务，访问localhost，可访问php文件夹/htdocs中的内容
 
 ## 语法
 
@@ -16,45 +18,45 @@
 6. 处理表单数据
 
 ```php
-// index.php
 <?php
-    // session 会话机制
-    php session_start();
-	$_SESSION['view'] = 1
-?>
-
-
-<?php
-    // 引入
-    require_once("a.php");
+  // 引入
+  require_once("a.php");
 	// 出错也会继续执行 
 	// include_once("a.php");
     
+  // 变量
 	$a = "测试";
 	echo $a;
 	if(isset($a)) { // 判断是否被声明
-        $b = "块级作用域";
-        global $a; // global声明过后可以使用，文件内生效
-        $GLOBAL['a'] = "test"; // 全局变量，其他文件也可以使用，使用时也是$GLOBAL['a']
-        echo "已声明";
+    $b = "块级作用域";
+    echo "已声明";
+  }else {
+    echo "未声明";
+  }
+	function test() {
+    // global $a; // global声明过后可以使用，文件内生效
+    // $GLOBAL['a'] = "test"; // 全局变量，其他文件引入也可以使用，使用时也是$GLOBAL['a']
+    if(isset($a)) {
+      echo "已声明";
     }else {
-        echo "未声明"; // 外部变量内部不能使用
+      echo "未声明"; // 外部变量内部不能使用
     }
+  }
 	echo $b; // 内部变量外部不能使用
 
 	// 数组
-	$arrayTest = array("0"=>"xx", "1"=>"xx2")
-    echo $arrayTest[0]
+	$arrayTest = array("0"=>"xx", "1"=>"xx2");
+  echo json_encode($arrayTest);
+  echo $arrayTest[0];
     
-    // session
-
+  // session 会话机制
 	// 会话存储
-	session_start(); 
+	session_start(); // 启动一次即可
 	$_SESSION['views'] = 'home';
 	echo $_SESSION['views'];
-        
-    // 处理表单
 ?>
+  
+// 处理表单
 <form action="submit.php" method="get">
 	<p>
 		<label for="username">账号</label>
@@ -68,19 +70,18 @@
 </form>
             
 // submit.php
-            
 <?php
-// 设置报头
-// header("Content-type:text/html;charset=utf-8");
-header("Content-type:text/json;charset=utf-8");
-$username = $_REQUEST['username'];
-// $username = $_GET['username'];
-// $username = $_POST['username'];
-if($username === 'admin') {
-	echo json_encode(array('msg'=>'登陆成功','code'=>"200"));
-}else {
-	echo json_encode(array('msg'=>'登陆失败','code'=>"500"));
-}
+  // 设置报头
+  // header("Content-type:text/html;charset=utf-8");
+  header("Content-type:text/json;charset=utf-8");
+  $username = $_REQUEST['username'];
+  // $username = $_GET['username'];
+  // $username = $_POST['username'];
+  if($username === 'admin') {
+    echo json_encode(array('msg'=>'登陆成功','code'=>"200"));
+  }else {
+    echo json_encode(array('msg'=>'登陆失败','code'=>"500"));
+  }
 ?>
 ```
 
@@ -122,8 +123,9 @@ if($username === 'admin') {
 				data: {
 					username: $('#username').val()
 				},
+        dataType: "json",
 				success: function(data) {
-					console.log(data)
+					console.log(data.msg)
 				}
 			})
 		})
@@ -136,14 +138,21 @@ if($username === 'admin') {
 
 LAMP(linux, apache, mysql, php)开发环境
 
+参考：https://www.runoob.com/php/php-mysql-intro.html
+
 ### phpMyAdmin
 
 用来操作mysql
 
+php操作mysql：
+
+打开mysql服务，新建数据库，表和字段，自增：AI，索引：主键，唯一，索引INDEX，全文
+
 ```php
 <?php
+// header("Content-type:text/html;charset=utf-8");
 // Create connection
-$con=mysqli_connect("localhost","root","","php_test");
+$con=mysqli_connect("localhost","root","","phptest");
 
 // Check connection
 if (!$con)
@@ -151,20 +160,83 @@ if (!$con)
 	// .连接字符串
 	die("Failed to connect to MySQL: " . mysqli_connect_error());
 }else {
-	$title = $_REQUEST['newstitle'];
-	$img = $_REQUEST['newsimg'];
-	$content = $_REQUEST['newscontent'];
-	$addtime = $_REQUEST['newsdate'];
-	// $result = mysqli_query($con,"INSERT INTO news (title, img, content, addtime) VALUES ('tit', 'png', '内容', '2020-02-20')");
-	$result = mysqli_query($con,"INSERT INTO news (title, img, content, addtime) VALUES ('" . $title . "','" . $img . "','" . $content . "','" . $addtime . "')");
-	if(!$result) {
-		die('Error:' . mysqli_error($con));
-	}else {
-		echo 'ok';
-	}
+    // mysqli_query($con,"set names 'utf8'");
+
+    // // 添加数据
+	// $title = $_REQUEST['newstitle'];
+	// $img = $_REQUEST['newsimg'];
+	// $content = $_REQUEST['newscontent'];
+	// $addtime = $_REQUEST['newsdate'];
+	// // $result = mysqli_query($con,"INSERT INTO news (newstitle, newsimg, newscontent, newsdate) VALUES ('tit', 'png', '内容', '2020-02-20')");
+    // $sql = "INSERT INTO news (newstitle, newsimg, newscontent, newsdate) VALUES ('" . $title . "','" . $img . "','" . $content . "','" . $addtime . "')"
+	// $result = mysqli_query($con,$sql);
+	// if(!$result) {
+	// 	die('Error:' . mysqli_error($con));
+	// }else {
+	// 	echo 'ok';
+	// }
+
+    // 查询数据
+    $sql = "SELECT * FROM news";
+	$result = mysqli_query($con,$sql);
+    if ($result->num_rows > 0) {
+        $results = array();
+        // 输出数据
+        while($row = $result->fetch_assoc()) {
+            // echo $row["newstitle"]. " - newstitle: " . $row["newsimg"]. " " . $row["newscontent"] . $row["newsdate"] . "<br>";
+            array_push($results, array("newstitle"=>$row["newstitle"], "newsimg"=>$row["newsimg"], "newscontent"=>$row["newscontent"], "newsdate"=>$row["newsdate"]));
+        }
+        $result = array("errcode"=>0, "results"=>$results);
+        // JSON_UNESCAPED_UNICODE：json_encode不要unicode编码
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    } else {
+        echo "0 结果";
+    }
+
 	mysqli_close($con);
 }
 ?>
+```
+
+index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>新闻管理系统</title>
+</head>
+
+<body>
+	<form action="mysql.php">
+		<p>
+			<label for="newstitle">新闻标题</label>
+			<input type="text" name="newstitle" id="newstitle">
+		</p>
+		<p>
+			<label for="newscontent">新闻内容</label>
+			<textarea name="newscontent" id="newscontent"></textarea>
+		</p>
+		<p>
+			<label for="newsimg">新闻图片</label>
+			<input type="file" name="newsimg" id="newsimg">
+		</p>
+		<p>
+			<label for="newsdate">新闻时间</label>
+			<input type="date" name="newsdate" id="newsdate">
+		</p>
+		<p>
+			<input type="submit" value="提交" id="submit">
+			<input type="reset" value="重置" id="reset">
+		</p>
+	</form>
+</body>
+
+</html>
 ```
 
 ## PDO
@@ -179,9 +251,10 @@ PDO随PHP5.1发行，在PHP5.0的PECL扩展中也可以使用，无法运行于�
 
 ```php
 <?php
+header("Content-type:text/html;charset=utf-8");
 $dbms='mysql';     //数据库类型
 $host='localhost'; //数据库主机名
-$dbName='php_test';    //使用的数据库
+$dbName='phptest';    //使用的数据库
 $user='root';      //数据库连接用户名
 $pass='';          //对应的密码
 $dsn="$dbms:host=$host;dbname=$dbName";
@@ -189,34 +262,33 @@ $dsn="$dbms:host=$host;dbname=$dbName";
 try {
     $dbh = new PDO($dsn, $user, $pass); //初始化一个PDO对象
     echo "连接成功<br/>";
-    /*你还可以进行一次搜索操作
-    foreach ($dbh->query('SELECT * from FOO') as $row) {
+    // 你还可以进行一次搜索操作
+    foreach ($dbh->query('SELECT * from news') as $row) {
         print_r($row); //你可以用 echo($GLOBAL); 来看到这些值
     }
-		*/
-		// 插入一个值
-		$query= "INSERT INTO news (title, img, content, addtime) VALUES ('title', 'http://xxx', 'con', '2020-02-20')";
-		echo $query;
-		$res = $dbh->exec($query);
-		echo $res;
-		echo "受影响行数" . $res;
+
+    // 插入一个值
+    $query= "INSERT INTO news (newstitle, newsimg, newscontent, newsdate) VALUES ('title', 'http://xxx', 'con', '2020-02-20')";
+    // echo $query;
+    $res = $dbh->exec($query);
+    echo $res;
+    echo "<br/>受影响行数" . $res;
     $dbh = null;
 } catch (PDOException $e) {
     die ("Error!: " . $e->getMessage() . "<br/>");
 }
 //默认这个不是长连接，如果需要数据库长连接，需要最后加一个参数：array(PDO::ATTR_PERSISTENT => true) 变成这样：
 $db = new PDO($dsn, $user, $pass, array(PDO::ATTR_PERSISTENT => true));
-
 ?>
 ```
 
 ## 面向对象
 
-出现：软件危机
+出现：软件危机，落后的软件生产方式无法满足增长的软件需求，导致开发和维护时出现一系列严重问题的现象。
 
 软件工程学分为结构化方法（按周期分为分析，设计，编程）和面向对象
 
-OOP：使代码简洁，易维护，高重用
+OOP（面向对象编程）：使代码简洁，易维护，高重用
 
 目标：重用性，灵活性，扩展性
 
@@ -226,7 +298,7 @@ OOP：使代码简洁，易维护，高重用
 
 对象的特性：行为，状态，标识
 
-类包含声明，成员属性，成员方法
+类的声明包含成员属性，成员方法
 
 ```php
 // 简单
@@ -241,8 +313,10 @@ OOP：使代码简洁，易维护，高重用
     [成员方法/函数]
 }
 
+// 实例化对象
 $对象名称 = new 类名称();
 $对象名称 = new 类名称([参数列表]);
+// 操作成员
 $对象名称 -> 成员属性 = 赋值;
 echo $对象名称 -> 成员属性;
 $对象名称 -> 成员方法(参数);
@@ -264,6 +338,7 @@ $this;
 		// 析造函数：对象销毁时执行
 		public function __destruct() {
 			// 可以进行资源的释放，数据库关闭，读取文件关闭
+      // 对象被销毁时执行，即没有代码要执行时
 			echo "bye" . $this->age;
 			echo "bye {$this->age}";
 		}
@@ -280,9 +355,11 @@ $this;
 
 ### 封装性
 
+将成员加上修饰符，尽可能得隐藏内部细节，大刀队成员的访问控制
+
 #### 私有成员
 
-修饰符：public，private，protected（子类可访问）
+访问权限修饰符：public，private，protected（子类可访问）
 
 魔术方法：`__get, __set, __isset, __unset`
 
@@ -301,7 +378,6 @@ $this;
 		}
 
 		// 魔术方法：只适用于私有或保护
-		
 		public function __get($key) {
 			// if($key === 'age') {
 			// 	return $this->age;
@@ -347,11 +423,11 @@ $this;
 
 ### 继承
 
-php只允许单继承
+php只允许单继承，即一个子类只能直接继承一个父类，可以由多层继承
 
 ### 多态
 
-子类重载父类的方法时
+子类可以重写或重载父类的方法，即指父类中定义的属性或方法被继承之后，可以有不同的数据类型或表现出不同的行为。php的写法如下（只能重写和调用父类方法）
 
 ```php
 <?php
@@ -380,7 +456,7 @@ php只允许单继承
 			$this->sex = "man";
 		}
 
-		// php重写，5.4以后需要与父类参数个数一致否则会报警告
+		// php重如果写同样的名称就是重写，5.4以后需要与父类参数个数一致否则会报警告
 		public function getSex($name) {
 			// php实现重载
 			parent::getSex();
@@ -399,11 +475,15 @@ php只允许单继承
 
 #### 抽象方法和抽象类
 
-抽象方法：没有方法体和花括号直接分号结束，包含这种方法的类一定是抽象类
+抽象方法：没有方法体和花括号直接分号结束，以abstract声明，包含这种方法的类一定是抽象类
 
 抽象类：以abstract声明
 
-抽象类特点：不能实例化，要想使用抽象类，就必须定义一个类继承这个抽象类，并定义覆盖父类的抽象方法（实现抽象方法）
+抽象类特点：
+
+不能实例化，要想使用抽象类，就必须定义一个类继承这个抽象类，并必须实现父类的抽象方法（实现抽象方法）
+
+可以包含普通方法
 
 #### 接口
 
@@ -421,13 +501,13 @@ class 类名 implements 接口1, 接口2{...}
 
 ##### 与抽象类的区别
 
-接口是对动作的抽象，表示能做什么，对类的局部行为进行抽象
+接口是**对动作的抽象**，表示能做什么，对类的局部行为进行抽象
 
-抽象类是对根源的抽象，表示是什么，对整体进行抽象
+抽象类是**对根源的抽象**，表示是什么，对整体进行抽象
 
-所以类只能继承一个类，但可以实现多个接口
+所以类只能继承一个类，但可以实现多个接口，比如人不可以是生物又是非生物但是可以有多个行为
 
-对象的多态性：是指父类中定义的属性或方法被继承之后，可以有不同的数据类型或表现出不同的行为。
+接口中不能实现，抽象类可以实现部分方法，可以包含静态方法和静态代码块
 
 ```php
 <?php
@@ -461,7 +541,9 @@ class 类名 implements 接口1, 接口2{...}
 		public function study() {
 			echo "study";
 		}
-		public function getPI() {
+		// 静态方法
+		public static function getPI() {
+			// self指向当前类
 			echo self::PI;
 		}
 	}
@@ -470,8 +552,8 @@ class 类名 implements 接口1, 接口2{...}
 	$stu1->eat();
 	$stu1->run();
 	$stu1->study();
-	// 获取常量
-	$stu1->getPI();
+	// 获取常量，执行静态方法
+	Student::getPI();
 	echo Action::NAME;
 	echo Person::PI;
 	echo Student::PI;
@@ -498,7 +580,11 @@ class 类名 implements 接口1, 接口2{...}
 
 静态方法不能使用非静态的内容，即不能使用$this
 
+静态属性是共享的
+
 #### 单例设计模式
+
+保证一个类只能有一个实例对象存在
 
 #### const
 
@@ -510,66 +596,13 @@ define()可以定义常量，但是在类中常使用const定义常量
 
 ### 常用方法
 
-### 错误处理
+参考：http://php-note.com/250.html	https://www.php.net/manual/zh/langref.php
 
-#### 系统自带的异常处理
+__开头的方法都是php提供的在某一时刻不同情况下自动执行调用的
 
-```php
-<?php
-try{
-	$num = 2;
-	if($num === 1) {
-		echo "success";
-	}else{
-		throw new Exception("num应该等于1");
-	}
-}catch(Exception $e){
-	echo "错误文件为：";
-	echo $e->getFile();
-	echo "错误行数为：";
-	echo $e->getLine();
-	echo "错误代码为：";
-	echo $e->getCode();
-	echo "错误信息为：";
-	echo $e->getMessage();
-}
-?>
-```
+#### __toString
 
-
-
-#### 自定义的异常处理
-
-```php
-<?php
-class myException extends Exception{
-	public function getAllInfo() {
-		return "错误文件为：{$this->getFile()}，错误行数为：{$this->getLine()}，错误代码为：{$this->getCode()}，错误信息为：{$this->getMessage()}";
-	}
-}
-try{
-	$num = 3;
-	if($num === 1) {
-		echo "success";
-	}elseif($num === 3){
-		throw new myException("num不应该等于3");
-	}elseif($num === 4){
-		throw new Exception("num不应该等于4");
-	}
-	// 可捕获多个不同类型的异常，注意顺序
-}catch(myException $e){
-	echo $e->getAllInfo();
-}catch(Exception $e){
-	echo $e->getMessage();
-}
-?>
-```
-
-### 其他
-
-#### 魔术方法
-
-__toString：在直接输出引用对象时调用
+在直接输出引用对象时调用
 
 ```php
 <?php
@@ -595,7 +628,9 @@ echo $class;
 ?>
 ```
 
-__clone：根据一个对象完全克隆出一个一模一样的对象，而且克隆以后，两个对象互不干扰
+#### __clone
+
+根据一个对象完全克隆出一个一模一样的对象，而且克隆以后，两个对象互不干扰
 
 ```php
 <?php
@@ -660,7 +695,9 @@ $p2->say();
 ?>
 ```
 
-serialize()：有时候需要把一个对象在网络上传输，为了方便传输，可以把整个对象转化为二进制串，等到达另一端时，再还原为原来的对象，这个过程称之为**串行化(也叫序列化)**。我们使用**serialize()**函数来串行化一个对象，另一个是**反串行化**，就是把对象转化的二进制字符串再转化为对象， 我们使用**unserialize()**函数来反串行化一个对象。
+#### serialize()
+
+有时候需要把一个对象在网络上传输，为了方便传输，可以把整个对象转化为二进制串，等到达另一端时，再还原为原来的对象，这个过程称之为**串行化(也叫序列化)**。我们使用**serialize()**函数来串行化一个对象，另一个是**反串行化**，就是把对象转化的二进制字符串再转化为对象， 我们使用**unserialize()**函数来反串行化一个对象。
 
 两种情况：把一个对象在网络中传输的时候要将对象串行化；把对象写入文件或是数据库的时候用到串行化。
 
@@ -740,9 +777,96 @@ $p2->say();
 ?>
 ```
 
-##### 自动加载类
+#### 自动加载类
 
-php5中当new一个不存在的类时，会自动调用__autoload()，并将类名作为参数传入此函数。可以实现类的自动加载。
+php5中当new一个不存在的类时，会自动调用__autoload()，并将类名作为参数传入此函数。可以实现类的自动加载。通过调用此函数，脚本引擎在 PHP 出错失败前有了最后一个机会加载所需的类。
+
+注意: 在 __autoload 函数中抛出的异常不能被 catch 语句块捕获并导致致命错误。
+
+```php
+<?php
+function __autoload($classname) {
+    require_once $classname . '.php';
+}
+ 
+//MyClass1类不存在时，自动调用__autoload()函数，传入参数”MyClass1”
+$obj = new MyClass1();
+ 
+//MyClass2类不存在时，自动调用__autoload()函数，传入参数”MyClass2”
+$obj2 = new MyClass2();
+?>
+```
+
+#### 其他
+
+写一个比较完善的库的时候比较常用
+
+class_exists和get_class_methods
+
+get_class和get_object_vars
+
+get_parent_class和is_a（类似instanceof）
+
+method_exists和property_exists
+
+### 命名空间
+
+
+
+### 错误处理
+
+#### 系统自带的异常处理
+
+```php
+<?php
+try{
+	$num = 2;
+	if($num === 1) {
+		echo "success";
+	}else{
+		throw new Exception("num应该等于1");
+	}
+}catch(Exception $e){
+	echo "错误文件为：";
+	echo $e->getFile();
+	echo "错误行数为：";
+	echo $e->getLine();
+	echo "错误代码为：";
+	echo $e->getCode();
+	echo "错误信息为：";
+	echo $e->getMessage();
+}
+?>
+```
+
+#### 自定义的异常处理
+
+#### 捕捉多个异常处理
+
+```php
+<?php
+class myException extends Exception{
+	public function getAllInfo() {
+		return "错误文件为：{$this->getFile()}，错误行数为：{$this->getLine()}，错误代码为：{$this->getCode()}，错误信息为：{$this->getMessage()}";
+	}
+}
+try{
+	$num = 3;
+	if($num === 1) {
+		echo "success";
+	}elseif($num === 3){
+		throw new myException("num不应该等于3");
+	}elseif($num === 4){
+		throw new Exception("num不应该等于4");
+	}
+	// 可捕获多个不同类型的异常，注意顺序
+}catch(myException $e){
+	echo $e->getAllInfo();
+}catch(Exception $e){
+	echo $e->getMessage();
+}
+?>
+```
 
 ## 与js比较
 
