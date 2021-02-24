@@ -269,13 +269,229 @@ parseFloat((0.1 + 0.2).toFixed(10)) === 0.3 // true
 parseFloat((0.1 + 0.2).toPrecision(12)) // 0.3
 ```
 
+#### ES11 BigInt
+
+BigInt 只用来表示整数，没有位数的限制，任何位数的整数都可以精确表示。
+
+为了与 Number 类型区别，BigInt 类型的数据必须添加后缀`n`。
+
+```javascript
+1234 // 普通整数
+1234n // BigInt
+
+// BigInt 的运算
+1n + 2n // 3n
+```
+
+BigInt 同样可以使用各种进制表示，都要加上后缀`n`。
+
+```javascript
+0b1101n // 二进制
+0o777n // 八进制
+0xFFn // 十六进制
+```
+
+BigInt 与普通整数是两种值，它们之间并不相等。
+
+`typeof`运算符对于 BigInt 类型的数据返回`bigint`。
+
+BigInt 可以使用负号（`-`），但是不能使用正号（`+`），因为会与 asm.js 冲突。
+
+```javascript
+-42n // 正确
++42n // 报错
+```
+
+JavaScript 以前不能计算70的阶乘（即`70!`），因为超出了可以表示的精度。
+
+现在支持大整数了，就可以算了，浏览器的开发者工具运行下面代码，就OK。
+
+```javascript
+let p = 1n;
+for (let i = 1n; i <= 70n; i++) {
+  p *= i;
+}
+console.log(p); // 11978571...00000000n
+```
+
+##### BigInt 对象
+
+JavaScript 原生提供`BigInt`对象，可以用作构造函数生成 BigInt 类型的数值。转换规则基本与`Number()`一致，将其他类型的值转为 BigInt。
+
+```javascript
+BigInt(123) // 123n
+BigInt('123') // 123n
+BigInt(false) // 0n
+BigInt(true) // 1n
+```
+
+`BigInt()`构造函数必须有参数，而且参数必须可以正常转为数值，下面的用法都会报错。
+
+```javascript
+new BigInt() // TypeError
+BigInt(undefined) //TypeError
+BigInt(null) // TypeError
+BigInt('123n') // SyntaxError
+BigInt('abc') // SyntaxError
+```
+
+上面代码中，尤其值得注意字符串`123n`无法解析成 Number 类型，所以会报错。
+
+参数如果是小数，也会报错。
+
+BigInt 对象继承了 Object 对象的两个实例方法。
+
+- `BigInt.prototype.toString()`
+- `BigInt.prototype.valueOf()`
+
+它还继承了 Number 对象的一个实例方法。
+
+- `BigInt.prototype.toLocaleString()`
+
+此外，还提供了三个静态方法。
+
+- `BigInt.asUintN(width, BigInt)`： 给定的 BigInt 转为 0 到 2^(width - 1) 之间对应的值。
+- `BigInt.asIntN(width, BigInt)`：给定的 BigInt 转为 -2^(width - 1 )到 2^(width - 1) - 1 之间对应的值。
+- `BigInt.parseInt(string[, radix])`：近似于`Number.parseInt()`，将一个字符串转换成指定进制的 BigInt。
+
+```javascript
+const max = 2n ** (64n - 1n) - 1n;
+
+BigInt.asIntN(64, max)
+// 9223372036854775807n
+BigInt.asIntN(64, max + 1n)
+// -9223372036854775808n
+BigInt.asUintN(64, max + 1n)
+// 9223372036854775808n
+```
+
+上面代码中，`max`是64位带符号的 BigInt 所能表示的最大值。如果对这个值加`1n`，`BigInt.asIntN()`将会返回一个负值，因为这时新增的一位将被解释为符号位。而`BigInt.asUintN()`方法由于不存在符号位，所以可以正确返回结果。
+
+如果`BigInt.asIntN()`和`BigInt.asUintN()`指定的位数，小于数值本身的位数，那么头部的位将被舍弃。
+
+```javascript
+const max = 2n ** (64n - 1n) - 1n;
+
+BigInt.asIntN(32, max) // -1n
+BigInt.asUintN(32, max) // 4294967295n
+```
+
+上面代码中，`max`是一个64位的 BigInt，如果转为32位，前面的32位都会被舍弃。
+
+下面是`BigInt.parseInt()`的例子。
+
+```javascript
+// Number.parseInt() 与 BigInt.parseInt() 的对比
+Number.parseInt('9007199254740993', 10)
+// 9007199254740992
+BigInt.parseInt('9007199254740993', 10)
+// 9007199254740993n
+```
+
+上面代码中，由于有效数字超出了最大限度，`Number.parseInt`方法返回的结果是不精确的，而`BigInt.parseInt`方法正确返回了对应的 BigInt。
+
+对于二进制数组，BigInt 新增了两个类型`BigUint64Array`和`BigInt64Array`，这两种数据类型返回的都是64位 BigInt。`DataView`对象的实例方法`DataView.prototype.getBigInt64()`和`DataView.prototype.getBigUint64()`，返回的也是 BigInt。
+
+##### 转换规则
+
+可以使用`Boolean()`、`Number()`和`String()`这三个方法，将 BigInt 可以转为布尔值、数值和字符串类型。
+
+```javascript
+Boolean(0n) // false
+Boolean(1n) // true
+Number(1n)  // 1
+String(1n)  // "1"
+```
+
+上面代码中，注意最后一个例子，转为字符串时后缀`n`会消失。
+
+另外，取反运算符（`!`）也可以将 BigInt 转为布尔值。
+
+```javascript
+!0n // true
+!1n // false
+```
+
+##### 数学运算
+
+数学运算方面，BigInt 类型的`+`、`-`、`*`和`**`这四个二元运算符，与 Number 类型的行为一致。除法运算`/`会舍去小数部分，返回一个整数。
+
+```javascript
+9n / 5n
+// 1n
+```
+
+几乎所有的数值运算符都可以用在 BigInt，但是有两个例外。
+
+- 不带符号的右移位运算符`>>>`
+- 一元的求正运算符`+`
+
+上面两个运算符用在 BigInt 会报错。前者是因为`>>>`运算符是不带符号的，但是 BigInt 总是带有符号的，导致该运算无意义，完全等同于右移运算符`>>`。后者是因为一元运算符`+`在 asm.js 里面总是返回 Number 类型，为了不破坏 asm.js 就规定`+1n`会报错。
+
+BigInt 不能与普通数值进行混合运算。
+
+```javascript
+1n + 1.3 // 报错
+```
+
+上面代码报错是因为无论返回的是 BigInt 或 Number，都会导致丢失精度信息。比如`(2n**53n + 1n) + 0.5`这个表达式，如果返回 BigInt 类型，`0.5`这个小数部分会丢失；如果返回 Number 类型，有效精度只能保持 53 位，导致精度下降。
+
+同样的原因，如果一个标准库函数的参数预期是 Number 类型，但是得到的是一个 BigInt，就会报错。
+
+```javascript
+// 错误的写法
+Math.sqrt(4n) // 报错
+
+// 正确的写法
+Math.sqrt(Number(4n)) // 2
+```
+
+上面代码中，`Math.sqrt`的参数预期是 Number 类型，如果是 BigInt 就会报错，必须先用`Number`方法转一下类型，才能进行计算。
+
+asm.js 里面，`|0`跟在一个数值的后面会返回一个32位整数。根据不能与 Number 类型混合运算的规则，BigInt 如果与`|0`进行运算会报错。
+
+```javascript
+1n | 0 // 报错
+```
+
+##### 其他运算
+
+BigInt 对应的布尔值，与 Number 类型一致，即`0n`会转为`false`，其他值转为`true`。
+
+```javascript
+if (0n) {
+  console.log('if');
+} else {
+  console.log('else');
+}
+// else
+```
+
+上面代码中，`0n`对应`false`，所以会进入`else`子句。
+
+比较运算符（比如`>`）和相等运算符（`==`）允许 BigInt 与其他类型的值混合计算，因为这样做不会损失精度。
+
+```javascript
+0n < 1 // true
+0n < true // true
+0n == 0 // true
+0n == false // true
+0n === 0 // false
+```
+
+BigInt 与字符串混合运算时，会先转为字符串，再进行运算。
+
+```javascript
+'' + 123n // "123"
+```
+
 #### String类型
 
 - 字符串字面量:'abc'   "abc"
 
 - 转义符
 
-  ![1498289626813](E:/Jennifer/other/notes/media/1498289626813.png)
+  ![1498289626813](./media/1498289626813.png)
 
 - **字符串不可变**，改变变量保存的字符串时会创建新字符串，销毁旧字符串，然后再用新字符串填充变量，也是旧版本浏览器**字符拼接速度慢**的原因
 
@@ -399,7 +615,7 @@ Null 数据类型和 Undefined 类似，只有唯一的一个值 null，都可�
 
    `undefined == null // true`
 
-#### Symbol
+#### ES6 Symbol
 
 目的：保证属性的名字都是独一无二的，从根本上防止属性名的冲突。 
 
@@ -1958,7 +2174,90 @@ console.log(obj.name); // undefined
 
 - 静态方法
 
-  Object.assign(target, source)：把一个或多个源对象的可枚举、自有属性值复制到目标对象中，返回值为目标对象。 
+  `Object.assign(target, source)`：把一个或多个源对象的可枚举、自有属性值复制到目标对象中，返回值为目标对象。 
+  
+  [`Object.create()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/create)
+  
+  使用指定的原型对象和属性创建一个新对象。
+  
+  [`Object.defineProperty()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty)
+  
+  给对象添加一个属性并指定该属性的配置。
+  
+  [`Object.defineProperties()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperties)
+  
+  给对象添加多个属性并分别指定它们的配置。
+  
+  [`Object.entries()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/entries)
+  
+  返回给定对象自身可枚举属性的 `[key, value]` 数组。
+  
+  ```js
+  const object1 = {
+    a: 'somestring',
+    b: 42
+  };
+  
+  for (const [key, value] of Object.entries(object1)) {
+    console.log(`${key}: ${value}`);
+  }
+  ```
+  
+  [`Object.freeze()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze)
+  
+  冻结对象：其他代码不能删除或更改任何属性。
+  
+  [`Object.getOwnPropertyDescriptor()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor)
+  
+  返回对象指定的属性配置。
+  
+  [`Object.getOwnPropertyNames()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames)
+  
+  返回一个数组，它包含了指定对象所有的可枚举或不可枚举的属性名。
+  
+  [`Object.getOwnPropertySymbols()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertySymbols)
+  
+  返回一个数组，它包含了指定对象自身所有的符号属性。
+  
+  [`Object.getPrototypeOf()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf)
+  
+  返回指定对象的原型对象。
+  
+  [`Object.is()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/is)
+  
+  比较两个值是否相同。所有 NaN 值都相等（这与==和===不同）。
+  
+  [`Object.isExtensible()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/isExtensible)
+  
+  判断对象是否可扩展。
+  
+  [`Object.isFrozen()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/isFrozen)
+  
+  判断对象是否已经冻结。
+  
+  [`Object.isSealed()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/isSealed)
+  
+  判断对象是否已经密封。
+  
+  [`Object.keys()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/keys)
+  
+  返回一个包含所有给定对象**自身**可枚举属性名称的数组。
+  
+  [`Object.preventExtensions()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/preventExtensions)
+  
+  防止对象的任何扩展。
+  
+  [`Object.seal()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/seal)
+  
+  防止其他代码删除对象的属性。
+  
+  [`Object.setPrototypeOf()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf)
+  
+  设置对象的原型（即内部 `[[Prototype]]` 属性）。
+  
+  [`Object.values()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
+  
+  返回给定对象自身可枚举值的数组。
 
 ### Math对象
 
@@ -2676,7 +2975,76 @@ locateMaru();
 
 在这个例子中，我们将Maru对象的上下文应用在`location`函数中。因为`location`是个全局对象的属性，其`this`值就是全局对象(`window`)。在这种情况下，我们向上寻找cat, 并不是`Location`对象，因为我们可以通过绑定的总是`kitty`的`this`值创建一个新方法`locateMaru`.
 
-## ES6
+## ES6+
+
+参考：https://es6.ruanyifeng.com/#docs/intro
+
+### 环境
+
+#### babel
+
+安装`npm install --save-dev @babel/core`和命令行转码工具`npm install --save-dev @babel/cli`
+
+Babel 的配置文件是`.babelrc`，存放在项目的根目录下。使用 Babel 的第一步，就是配置这个文件。
+
+该文件用来设置转码规则和插件，基本格式如下。
+
+```javascript
+{
+  "presets": [],
+  "plugins": []
+}
+```
+
+`presets`字段设定转码规则，官方提供以下的规则集，你可以根据需要安装。
+
+```bash
+# 最新转码规则
+$ npm install --save-dev @babel/preset-env
+
+# react 转码规则
+$ npm install --save-dev @babel/preset-react
+```
+
+然后，将这些规则加入`.babelrc`。
+
+```javascript
+  {
+    "presets": [
+      "@babel/env",
+      "@babel/preset-react"
+    ],
+    "plugins": []
+  }
+```
+
+使用：
+
+```bash
+# 转码结果输出到标准输出
+$ npx babel example.js
+
+# 转码结果写入一个文件
+# --out-file 或 -o 参数指定输出文件
+$ npx babel example.js --out-file compiled.js
+# 或者
+$ npx babel example.js -o compiled.js
+
+# 整个目录转码
+# --out-dir 或 -d 参数指定输出目录
+$ npx babel src --out-dir lib
+# 或者
+$ npx babel src -d lib
+
+# -s 参数生成source map文件
+$ npx babel src -d lib -s
+```
+
+> shim是一个库，将一个新的API引入到旧的环境，靠已有的手段实现
+>
+> 一个polyfill就是一个浏览器API上的shim，通常我们会先检查浏览器是否支持，不支持就引用对应的polyfill
+
+traceur：在线/命令行（不常用）
 
 ### 面向对象
 
@@ -2707,7 +3075,7 @@ class Animal {
 
 ### 解构赋值
 
-数组的解构赋值
+#### 数组的解构赋值
 
 ```js
 // 右边必须是可遍历的结构,可指定默认值	
@@ -2716,40 +3084,62 @@ let [a,b,c,d=4] = [1,2,3]
 // 默认值可以是表达式，只有在用到时才会执行
 ```
 
-对象的解构赋值
+本质上，这种写法属于“模式匹配”，只要等号两边的模式相同或部分相同，左边的变量就会被赋予对应的值。下面是一些使用嵌套数组进行解构的例子。如果解构不成功，变量的值就等于`undefined`。
+
+```javascript
+let [foo, [[bar], baz]] = [1, [[2], 3]];
+foo // 1
+bar // 2
+baz // 3
+
+let [ , , third] = ["foo", "bar", "baz"];
+third // "baz"
+```
+
+#### 对象的解构赋值
 
 ```js
 // 与数组不同的是，数组变量的值与位置有关系，对象则是根据变量名
 // 冒号前是解构的变量名，后面是赋值的变量名，相同时可以简写
+function test() {
+  return {
+    a: 1,
+    b: 2
+  }
+}
+const {a: one, b: two} = test()
+console.log(one)
 ```
 
-字符串的解构赋值
+与数组一样，解构也可以用于嵌套结构的对象。
 
-注意：不要使用圆括号
+#### 字符串的解构赋值
 
-应用：交换，获取返回值（import按需导入），传递参数
+字符串也可以解构赋值。这是因为此时，字符串被转换成了一个类似数组的对象。
 
-### 函数
+```javascript
+const [a, b, c, d, e] = 'hello';
+a // "h"
+b // "e"
+c // "l"
+d // "l"
+e // "o"
+```
 
-#### 箭头函数
+类似数组的对象都有一个`length`属性，因此还可以对这个属性解构赋值。
 
-1. 简化函数
-2. 修复this
+```javascript
+let {length : len} = 'hello';
+len // 5
+```
 
-箭头函数和普通函数相比，有以下几个区别，在开发中应特别注意：
+#### 注意
 
-- 不绑定 arguments 对象，也就是说在箭头函数内访问 arguments 对象会报错；
+声明语句和赋值语句的模式不能使用圆括号
 
-- 不能用作构造器，也就是说不能通过关键字 new 来创建实例；
+#### 应用
 
-- 默认不会创建 prototype 原型属性；
-
-- 不能用作 Generator() 函数，不能使用 yeild 关键字。
-
-#### 展开运算符
-
-1. 剩余参数，必须是最后一个参数	
-2. 展开数组
+交换，获取返回值，函数参数或参数设置默认值，获取json数据，遍历map结构，按需加载模块
 
 ### let,const
 
@@ -2782,14 +3172,14 @@ function test(){
 test()
 ```
 
- ![img](https://user-gold-cdn.xitu.io/2018/11/18/1672730318cfa540?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
-
 报错的原因是存在暂时性死区 
 
 #### const
 
 - 定义常量，特点和let相同
-- 对于复合类型只保证指针不能改变，引用的值还是可以改变	
+- 对于复合类型只保证指针不能改变，引用的值还是可以改变
+- const比较符合函数式编程
+- 与let的本质区别是编译器内部的处理机制
 
 ### 作用域
 
@@ -2801,11 +3191,550 @@ test()
 
 #### Function
 
-```js
-const fn = function pp(args) {
-    // todo
+##### 参数默认值
+
+简洁，清晰，易于维护
+
+一个容易忽略的地方是，参数默认值不是传值的，而是每次都重新计算默认值表达式的值。也就是说，参数默认值是惰性求值的。
+
+```javascript
+let x = 99;
+function foo(p = x + 1) {
+  console.log(p);
 }
-console.log(fn.name) // pp
+
+foo() // 100
+
+x = 100;
+foo() // 101
+```
+
+参数默认值可以与解构赋值的默认值，结合起来使用。
+
+```javascript
+function foo({x, y = 5}) {
+  console.log(x, y);
+}
+
+foo({}) // undefined 5
+foo({x: 1}) // 1 5
+foo({x: 1, y: 2}) // 1 2
+foo() // TypeError: Cannot read property 'x' of undefined
+```
+
+如果函数`foo`调用时没提供参数，变量`x`和`y`就不会生成，从而报错。通过提供函数参数的默认值，就可以避免这种情况。
+
+```javascript
+function foo({x, y = 5} = {}) {
+  console.log(x, y);
+}
+
+foo() // undefined 5
+```
+
+通常情况下，**定义了默认值的参数，应该是函数的尾参数**。因为这样比较容易看出来，到底省略了哪些参数。如果非尾部的参数设置默认值，实际上这个参数是没法省略的。
+
+指定了默认值以后，**函数的`length`属性**，将返回没有指定默认值的参数个数。也就是说，指定了默认值后，`length`属性将失真。这是因为`length`属性的含义是，该函数预期传入的参数个数。某个参数指定默认值以后，预期传入的参数个数就不包括这个参数了。同理，后文的 rest 参数也不会计入`length`属性。
+
+如果设置了默认值的参数不是尾参数，那么`length`属性也不再计入后面的参数了。
+
+```javascript
+(function (a = 0, b, c) {}).length // 0
+(function (a, b = 1, c) {}).length // 1
+(function (a, b, c = 5) {}).length // 2
+```
+
+**作用域**
+
+一旦设置了参数的默认值，函数进行声明初始化时，参数会形成一个单独的作用域（context）。等到初始化结束，这个作用域就会消失。这种语法行为，在不设置参数默认值时，是不会出现的。
+
+```javascript
+let x = 1;
+
+function f(y = x) {
+  let x = 2;
+  console.log(y);
+}
+
+f() // 1
+```
+
+上面代码中，函数`f`调用时，参数`y = x`形成一个单独的作用域。这个作用域里面，变量`x`本身没有定义，所以指向外层的全局变量`x`。函数调用时，函数体内部的局部变量`x`影响不到默认值变量`x`。
+
+如果此时没有传入参数x，并且全局变量`x`不存在，就会报错。
+
+**应用：指定某一参数不可省略**
+
+```javascript
+function throwIfMissing() {
+  throw new Error('Missing parameter');
+}
+
+function foo(mustBeProvided = throwIfMissing()) {
+  return mustBeProvided;
+}
+
+foo()
+// Error: Missing parameter
+```
+
+##### rest
+
+ES6 引入 rest 参数（形式为`...变量名`），用于获取函数的多余参数，这样就不需要使用`arguments`对象了。rest 参数搭配的变量是一个数组，该变量将多余的参数放入数组中。
+
+下面是一个 rest 参数代替`arguments`变量的例子。
+
+```javascript
+// arguments变量的写法
+function sortNumbers() {
+  return Array.prototype.slice.call(arguments).sort();
+}
+
+// rest参数的写法
+const sortNumbers = (...numbers) => numbers.sort();
+```
+
+必须是最后一个参数，函数的`length`属性，不包括 rest 参数。
+
+##### 严格模式
+
+从 ES5 开始，函数内部可以设定为严格模式。
+
+ES2016 做了一点修改，规定只要函数参数使用了默认值、解构赋值、或者扩展运算符，那么函数内部就不能显式设定为严格模式，否则会报错。
+
+这样规定的原因是，函数内部的严格模式，同时适用于函数体和函数参数。但是，函数执行的时候，先执行函数参数，然后再执行函数体。这样就有一个不合理的地方，只有从函数体之中，才能知道参数是否应该以严格模式执行，但是参数却应该先于函数体执行。
+
+虽然可以先解析函数体代码，再执行参数代码，但是这样无疑就增加了复杂性。因此，标准索性禁止了这种用法，只要参数使用了默认值、解构赋值、或者扩展运算符，就不能显式指定严格模式。
+
+两种方法可以规避这种限制。第一种是设定全局性的严格模式，这是合法的。
+
+第二种是把函数包在一个无参数的立即执行函数里面。
+
+##### name属性
+
+函数的`name`属性，返回该函数的函数名。
+
+这个属性早就被浏览器广泛支持，但是直到 ES6，才将其写入了标准。
+
+需要注意的是，ES6 对这个属性的行为做出了一些修改。如果将一个匿名函数赋值给一个变量，ES5 的`name`属性，会返回空字符串，而 ES6 的`name`属性会返回实际的函数名。
+
+```javascript
+var f = function () {};
+
+// ES5
+f.name // ""
+
+// ES6
+f.name // "f"
+```
+
+如果将一个具名函数赋值给一个变量，则 ES5 和 ES6 的`name`属性都返回这个具名函数原本的名字。
+
+##### 箭头函数
+
+1. 简化函数
+2. 固定this
+
+箭头函数和普通函数相比，有以下几个区别，在开发中应特别注意：
+
+- 函数体内的`this`对象，就是定义时所在的对象，而不是使用时所在的对象。
+- 不绑定 arguments 对象，也就是说在箭头函数内对象不存在，可以用rest代替；
+- 不能用作构造器，也就是说不能通过关键字 new 来创建实例；
+- 默认不会创建 prototype 原型属性；
+- 不能用作 Generator() 函数，不能使用 yeild 关键字。
+
+`this`指向的固定化，并不是因为箭头函数内部有绑定`this`的机制，实际原因是箭头函数根本没有自己的`this`，导致内部的`this`就是外层代码块的`this`。正是因为它没有`this`，所以也就不能用作构造函数。
+
+所以，箭头函数转成 ES5 的代码如下。
+
+```javascript
+// ES6
+function foo() {
+  setTimeout(() => {
+    console.log('id:', this.id);
+  }, 100);
+}
+
+// ES5
+function foo() {
+  var _this = this;
+
+  setTimeout(function () {
+    console.log('id:', _this.id);
+  }, 100);
+}
+```
+
+除了`this`，以下三个变量在箭头函数之中也是不存在的，指向外层函数的对应变量：`arguments`、`super`、`new.target`。
+
+如果箭头函数只有一行语句，且不需要返回值，可以采用下面的写法，就不用写大括号了。
+
+```javascript
+let fn = () => void doesNotReturn();
+```
+
+**不适用的场合**
+
+第一个场合是定义对象的方法，且该方法内部包括`this`。
+
+```javascript
+const cat = {
+  lives: 9,
+  jumps: () => {
+    this.lives--;
+  }
+}
+```
+
+第二个场合是需要动态`this`的时候，也不应使用箭头函数。
+
+```javascript
+var button = document.getElementById('press');
+button.addEventListener('click', () => {
+  this.classList.toggle('on');
+});
+```
+
+上面代码运行时，点击按钮会报错，因为`button`的监听函数是一个箭头函数，导致里面的`this`就是全局对象。如果改成普通函数，`this`就会动态指向被点击的按钮对象。
+
+##### 尾调用优化
+
+尾调用（Tail Call）是函数式编程的一个重要概念，本身非常简单，一句话就能说清楚，就是指某个函数的最后一步是调用另一个函数。
+
+```javascript
+function f(x){
+  return g(x);
+}
+```
+
+上面代码中，函数`f`的最后一步是调用函数`g`，这就叫尾调用。
+
+以下三种情况，都不属于尾调用。
+
+```javascript
+// 情况一
+function f(x){
+  let y = g(x);
+  return y;
+}
+// 情况二
+function f(x){
+  return g(x) + 1;
+}
+// 情况三
+function f(x){
+  g(x);
+  // 相当于
+  // return undefined
+}
+```
+
+尾调用不一定出现在函数尾部，只要是最后一步操作即可。
+
+```javascript
+function f(x) {
+  if (x > 0) {
+    return m(x)
+  }
+  return n(x);
+}
+```
+
+上面代码中，函数`m`和`n`都属于尾调用，因为它们都是函数`f`的最后一步操作。
+
+尾调用之所以与其他调用不同，就在于它的特殊的调用位置。
+
+我们知道，函数调用会在内存形成一个“调用记录”，又称“调用帧”（call frame），保存调用位置和内部变量等信息。如果在函数`A`的内部调用函数`B`，那么在`A`的调用帧上方，还会形成一个`B`的调用帧。等到`B`运行结束，将结果返回到`A`，`B`的调用帧才会消失。如果函数`B`内部还调用函数`C`，那就还有一个`C`的调用帧，以此类推。所有的调用帧，就形成一个“调用栈”（call stack）。
+
+尾调用由于是函数的最后一步操作，所以不需要保留外层函数的调用帧，因为调用位置、内部变量等信息都不会再用到了，只要直接用内层函数的调用帧，取代外层函数的调用帧就可以了。
+
+```javascript
+function f() {
+  let m = 1;
+  let n = 2;
+  return g(m + n);
+}
+f();
+
+// 等同于
+function f() {
+  return g(3);
+}
+f();
+
+// 等同于
+g(3);
+```
+
+这就叫做“尾调用优化”（Tail call optimization），即只保留内层函数的调用帧。如果所有函数都是尾调用，那么完全可以做到每次执行时，调用帧只有一项，这将大大节省内存。这就是“尾调用优化”的意义。
+
+注意，只有不再用到外层函数的内部变量，内层函数的调用帧才会取代外层函数的调用帧，否则就无法进行“尾调用优化”。
+
+```javascript
+function addOne(a){
+  var one = 1;
+  function inner(b){
+    return b + one;
+  }
+  return inner(a);
+}
+```
+
+上面的函数不会进行尾调用优化，因为内层函数`inner`用到了外层函数`addOne`的内部变量`one`。
+
+注意，目前只有 Safari 浏览器支持尾调用优化，Chrome 和 Firefox 都不支持。
+
+###### 尾递归
+
+函数调用自身，称为递归。如果尾调用自身，就称为尾递归。
+
+递归非常耗费内存，因为需要同时保存成千上百个调用帧，很容易发生“栈溢出”错误（stack overflow）。但对于尾递归来说，由于只存在一个调用帧，所以永远不会发生“栈溢出”错误。
+
+```javascript
+function factorial(n) {
+  if (n === 1) return 1;
+  return n * factorial(n - 1);
+}
+
+factorial(5) // 120
+```
+
+上面代码是一个阶乘函数，计算`n`的阶乘，最多需要保存`n`个调用记录，复杂度 O(n) 。
+
+如果改写成尾递归，只保留一个调用记录，复杂度 O(1) 。
+
+```javascript
+function factorial(n, total) {
+  if (n === 1) return total;
+  return factorial(n - 1, n * total);
+}
+
+factorial(5, 1) // 120
+```
+
+还有一个比较著名的例子，就是计算 Fibonacci 数列，也能充分说明尾递归优化的重要性。
+
+非尾递归的 Fibonacci 数列实现如下。
+
+```javascript
+function Fibonacci (n) {
+  if ( n <= 1 ) {return 1};
+
+  return Fibonacci(n - 1) + Fibonacci(n - 2);
+}
+
+Fibonacci(10) // 89
+Fibonacci(100) // 超时
+Fibonacci(500) // 超时
+```
+
+尾递归优化过的 Fibonacci 数列实现如下。
+
+```javascript
+function Fibonacci2 (n , ac1 = 1 , ac2 = 1) {
+  if( n <= 1 ) {return ac2};
+
+  return Fibonacci2 (n - 1, ac2, ac1 + ac2);
+}
+
+Fibonacci2(100) // 573147844013817200000
+Fibonacci2(1000) // 7.0330367711422765e+208
+Fibonacci2(10000) // Infinity
+```
+
+由此可见，“尾调用优化”对递归操作意义重大，所以一些函数式编程语言将其写入了语言规格。ES6 亦是如此，第一次明确规定，所有 ECMAScript 的实现，都必须部署“尾调用优化”。这就是说，ES6 中只要使用尾递归，就不会发生栈溢出（或者层层递归造成的超时），相对节省内存。
+
+###### 递归函数的改写
+
+尾递归的实现，往往需要改写递归函数，确保最后一步只调用自身。做到这一点的方法，就是把所有用到的内部变量改写成函数的参数。这样做的缺点就是不太直观，第一眼很难看出来，为什么计算`5`的阶乘，需要传入两个参数`5`和`1`？
+
+两个方法可以解决这个问题。方法一是在尾递归函数之外，再提供一个正常形式的函数。
+
+```javascript
+function tailFactorial(n, total) {
+  if (n === 1) return total;
+  return tailFactorial(n - 1, n * total);
+}
+
+function factorial(n) {
+  return tailFactorial(n, 1);
+}
+
+factorial(5) // 120
+```
+
+函数式编程有一个概念，叫做柯里化（currying），意思是将多参数的函数转换成单参数的形式。这里也可以使用柯里化。
+
+```javascript
+function currying(fn, n) {
+  return function (m) {
+    return fn.call(this, m, n);
+  };
+}
+
+function tailFactorial(n, total) {
+  if (n === 1) return total;
+  return tailFactorial(n - 1, n * total);
+}
+
+const factorial = currying(tailFactorial, 1);
+
+factorial(5) // 120
+```
+
+第二种方法就简单多了，就是采用 ES6 的函数默认值。
+
+```javascript
+function factorial(n, total = 1) {
+  if (n === 1) return total;
+  return factorial(n - 1, n * total);
+}
+
+factorial(5) // 120
+```
+
+总结一下，递归本质上是一种循环操作。纯粹的函数式编程语言没有循环操作命令，所有的循环都用递归实现，这就是为什么尾递归对这些语言极其重要。对于其他支持“尾调用优化”的语言（比如 Lua，ES6），只需要知道循环可以用递归代替，而一旦使用递归，就最好使用尾递归。
+
+###### 严格模式
+
+ES6 的尾调用优化只在严格模式下开启，正常模式是无效的。
+
+这是因为在正常模式下，函数内部有两个变量，可以跟踪函数的调用栈。
+
+- `func.arguments`：返回调用时函数的参数。
+- `func.caller`：返回调用当前函数的那个函数。
+
+尾调用优化发生时，函数的调用栈会改写，因此上面两个变量就会失真。严格模式禁用这两个变量，所以尾调用模式仅在严格模式下生效。
+
+###### 尾递归优化的实现
+
+尾递归优化只在严格模式下生效，那么正常模式下，或者那些不支持该功能的环境中，就是自己实现尾递归优化。
+
+它的原理非常简单。尾递归之所以需要优化，原因是调用栈太多，造成溢出，那么只要减少调用栈，就不会溢出。怎么做可以减少调用栈呢？就是**采用“循环”换掉“递归”**。
+
+下面是一个正常的递归函数。
+
+```javascript
+function sum(x, y) {
+  if (y > 0) {
+    return sum(x + 1, y - 1);
+  } else {
+    return x;
+  }
+}
+
+sum(1, 100000)
+// Uncaught RangeError: Maximum call stack size exceeded(…)
+```
+
+蹦床函数（trampoline）可以将递归执行转为循环执行。
+
+```javascript
+function trampoline(f) {
+  while (f && f instanceof Function) {
+    f = f();
+  }
+  return f;
+}
+```
+
+上面就是蹦床函数的一个实现，它接受一个函数`f`作为参数。只要`f`执行后返回一个函数，就继续执行。注意，这里是返回一个函数，然后执行该函数，而不是函数里面调用函数，这样就避免了递归执行，从而就消除了调用栈过大的问题。
+
+然后，要做的就是将原来的递归函数，改写为每一步返回另一个函数。
+
+```javascript
+function sum(x, y) {
+  if (y > 0) {
+    return sum.bind(null, x + 1, y - 1);
+  } else {
+    return x;
+  }
+}
+```
+
+现在，使用蹦床函数执行`sum`，就不会发生调用栈溢出。
+
+```javascript
+trampoline(sum(1, 100000))
+// 100001
+```
+
+蹦床函数并不是真正的尾递归优化，下面的实现才是。
+
+```javascript
+function tco(f) {
+  var value;
+  var active = false;
+  var accumulated = [];
+
+  return function accumulator() {
+    // accumulated：[[1,10000]]->[[2,9999]]维持循环
+    accumulated.push(arguments);
+    // 保证只执行一次，其余返回undefined防止进入递归
+    if (!active) {
+      // 激活状态变量
+      active = true;
+      while (accumulated.length) {
+        // accumulated：[]
+        // f(1,10000)->sum(2,9999)->f(2,9999)->undefined终止递归
+        value = f.apply(this, accumulated.shift());
+      }
+      active = false;
+      return value;
+    }
+  };
+}
+
+var sum = tco(function(x, y) {
+  if (y > 0) {
+    return sum(x + 1, y - 1)
+  }
+  else {
+    return x
+  }
+});
+
+sum(1, 100000)
+// 100001
+```
+
+上面代码中，`tco`函数是尾递归优化的实现，它的奥妙就在于状态变量`active`。默认情况下，这个变量是不激活的。一旦进入尾递归优化的过程，这个变量就激活了。然后，每一轮递归`sum`返回的都是`undefined`，所以就避免了递归执行；而`accumulated`数组存放每一轮`sum`执行的参数，总是有值的，这就保证了`accumulator`函数内部的`while`循环总是会执行。这样就很巧妙地将“递归”改成了“循环”，而后一轮的参数会取代前一轮的参数，保证了调用栈只有一层。
+
+###### catch 命令的参数省略
+
+以前的`try...catch`结构，以前明确要求`catch`命令后面必须跟参数，接受`try`代码块抛出的错误对象。
+
+```javascript
+try {
+  // ...
+} catch (err) {
+  // 处理错误
+}
+```
+
+很多时候，`catch`代码块可能用不到这个参数。但是，为了保证语法正确，还是必须写。[ES2019](https://github.com/tc39/proposal-optional-catch-binding) 做出了改变，允许`catch`语句省略参数。
+
+```javascript
+try {
+  // ...
+} catch {
+  // ...
+}
+```
+
+###### ES10 实例toString()
+
+[ES2019](https://github.com/tc39/Function-prototype-toString-revision) 对函数实例的`toString()`方法做出了修改。
+
+`toString()`方法返回函数代码本身，以前会省略注释和空格
+
+修改后的`toString()`方法，明确要求返回一模一样的原始代码。
+
+```javascript
+function /* foo comment */ foo () {}
+
+foo.toString()
+// "function /* foo comment */ foo () {}"
 ```
 
 #### Object
@@ -2841,11 +3770,909 @@ let person = {
 person.__proto__ = eat
 ```
 
+##### 简洁表示法
+
+ES6 允许在大括号里面，直接写入变量和函数，作为对象的属性和方法。这样的书写更加简洁。
+
+##### 属性名表达式
+
+ES6 允许字面量定义对象时，用方法二（表达式）作为对象的属性名，即把表达式放在方括号内。
+
+##### 方法的name属性
+
+函数的`name`属性，返回函数名。对象方法也是函数，因此也有`name`属性。
+
+```javascript
+const person = {
+  sayName() {
+    console.log('hello!');
+  },
+};
+
+person.sayName.name   // "sayName"
+```
+
+如果对象的方法使用了取值函数（`getter`）和存值函数（`setter`），则`name`属性不是在该方法上面，而是该方法的属性的描述对象的`get`和`set`属性上面，返回值是方法名前加上`get`和`set`。
+
+```javascript
+const obj = {
+  get foo() {},
+  set foo(x) {}
+};
+
+obj.foo.name
+// TypeError: Cannot read property 'name' of undefined
+
+const descriptor = Object.getOwnPropertyDescriptor(obj, 'foo');
+
+descriptor.get.name // "get foo"
+descriptor.set.name // "set foo"
+```
+
+有两种特殊情况：`bind`方法创造的函数，`name`属性返回`bound`加上原函数的名字；`Function`构造函数创造的函数，`name`属性返回`anonymous`。
+
+```javascript
+(new Function()).name // "anonymous"
+
+var doSomething = function() {
+  // ...
+};
+doSomething.bind().name // "bound doSomething"
+```
+
+如果对象的方法是一个 Symbol 值，那么`name`属性返回的是这个 Symbol 值的描述。
+
+##### 对象的可枚举性和遍历
+
+**可枚举性**
+
+对象的每个属性都有一个描述对象（Descriptor），用来控制该属性的为。`Object.getOwnPropertyDescriptor`方法可以获取该属性的描述对象。
+
+```javascript
+let obj = { foo: 123 };
+Object.getOwnPropertyDescriptor(obj, 'foo')
+//  {
+//    value: 123,
+//    writable: true,
+//    enumerable: true,
+//    configurable: true
+//  }
+```
+
+描述对象的`enumerable`属性，称为“可枚举性”，如果该属性为`false`，就表示某些操作会忽略当前属性。
+
+目前，有四个操作会忽略`enumerable`为`false`的属性。
+
+- `for...in`循环：只遍历对象自身的和继承的可枚举的属性。
+- `Object.keys()`：返回对象自身的所有可枚举的属性的键名。
+- `JSON.stringify()`：只串行化对象自身的可枚举的属性。
+- `Object.assign()`： 忽略`enumerable`为`false`的属性，只拷贝对象自身的可枚举的属性。
+
+这四个操作之中，前三个是 ES5 就有的，最后一个`Object.assign()`是 ES6 新增的。实际上，引入“可枚举”（`enumerable`）这个概念的最初目的，就是让某些属性可以规避掉`for...in`操作，不然所有内部属性和方法都会被遍历到。比如，对象原型的`toString`方法，以及数组的`length`属性。
+
+另外，ES6 规定，所有 Class 的原型的方法都是不可枚举的。
+
+```javascript
+Object.getOwnPropertyDescriptor(class {foo() {}}.prototype, 'foo').enumerable
+// false
+```
+
+总的来说，操作中引入继承的属性会让问题复杂化，大多数时候，我们只关心对象自身的属性。所以，尽量不要用`for...in`循环，而用`Object.keys()`代替。
+
+**遍历**
+
+ES6 一共有 5 种方法可以遍历对象的属性。
+
+**（1）for...in**
+
+`for...in`循环遍历对象自身的和继承的可枚举属性（不含 Symbol 属性）。
+
+**（2）Object.keys(obj)**
+
+`Object.keys`返回一个数组，包括对象自身的（不含继承的）所有可枚举属性（不含 Symbol 属性）的键名。
+
+**（3）Object.getOwnPropertyNames(obj)**
+
+`Object.getOwnPropertyNames`返回一个数组，包含对象自身的所有属性（不含 Symbol 属性，但是包括不可枚举属性）的键名。
+
+**（4）Object.getOwnPropertySymbols(obj)**
+
+`Object.getOwnPropertySymbols`返回一个数组，包含对象自身的所有 Symbol 属性的键名。
+
+**（5）Reflect.ownKeys(obj)**
+
+`Reflect.ownKeys`返回一个数组，包含对象自身的（不含继承的）所有键名，不管键名是 Symbol 或字符串，也不管是否可枚举。
+
+以上的 5 种方法遍历对象的键名，都遵守同样的属性遍历的次序规则。
+
+- 首先遍历所有数值键，按照数值升序排列。
+- 其次遍历所有字符串键，按照加入时间升序排列。
+- 最后遍历所有 Symbol 键，按照加入时间升序排列。
+
+##### super关键字
+
+我们知道，`this`关键字总是指向函数所在的当前对象，ES6 又新增了另一个类似的关键字`super`，指向当前对象的原型对象。
+
+```javascript
+const proto = {
+  foo: 'hello'
+};
+
+const obj = {
+  foo: 'world',
+  find() {
+    return super.foo;
+  }
+};
+
+Object.setPrototypeOf(obj, proto);
+obj.find() // "hello"
+```
+
+上面代码中，对象`obj.find()`方法之中，通过`super.foo`引用了原型对象`proto`的`foo`属性。
+
+注意，`super`关键字表示原型对象时，只能用在对象的方法之中，用在其他地方都会报错。
+
+JavaScript 引擎内部，`super.foo`等同于`Object.getPrototypeOf(this).foo`（属性）或`Object.getPrototypeOf(this).foo.call(this)`（方法）。
+
+##### ES9 扩展运算符
+
+对象的扩展运算符（`...`）用于取出参数对象的所有可遍历属性，拷贝到当前对象之中。ES2018 将这个运算符[引入](https://github.com/sebmarkbage/ecmascript-rest-spread)了对象。
+
+由于数组是特殊的对象，所以对象的扩展运算符也可以用于数组。
+
+```javascript
+let foo = { ...['a', 'b', 'c'] };
+foo
+// {0: "a", 1: "b", 2: "c"}
+```
+
+如果扩展运算符后面是一个空对象，则没有任何效果。
+
+如果扩展运算符后面不是对象，则会自动将其转为对象。
+
+```javascript
+// 等同于 {...Object(1)}
+{...1} // {}
+```
+
+上面代码中，扩展运算符后面是整数`1`，会自动转为数值的包装对象`Number{1}`。由于该对象没有自身属性，所以返回一个空对象。
+
+```javascript
+// 等同于 {...Object(true)}
+{...true} // {}
+
+// 等同于 {...Object(undefined)}
+{...undefined} // {}
+
+// 等同于 {...Object(null)}
+{...null} // {}
+```
+
+但是，如果扩展运算符后面是字符串，它会自动转成一个类似数组的对象，因此返回的不是空对象。
+
+```javascript
+{...'hello'}
+// {0: "h", 1: "e", 2: "l", 3: "l", 4: "o"}
+```
+
+**应用：克隆对象**
+
+对象的扩展运算符等同于使用`Object.assign()`方法。
+
+```javascript
+let aClone = { ...a };
+// 等同于
+let aClone = Object.assign({}, a);
+```
+
+上面的例子只是拷贝了对象实例的属性，如果想完整克隆一个对象，还拷贝对象原型的属性，可以采用下面的写法。
+
+```javascript
+// 写法一
+const clone1 = {
+  __proto__: Object.getPrototypeOf(obj),
+  ...obj
+};
+
+// 写法二
+const clone2 = Object.assign(
+  Object.create(Object.getPrototypeOf(obj)),
+  obj
+);
+
+// 写法三
+const clone3 = Object.create(
+  Object.getPrototypeOf(obj),
+  Object.getOwnPropertyDescriptors(obj)
+)
+```
+
+上面代码中，写法一的`__proto__`属性在非浏览器的环境不一定部署，因此推荐使用写法二和写法三。
+
+**应用：合并对象或修改现有属性**
+
+```javascript
+let ab = { ...a, ...b };
+// 等同于
+let ab = Object.assign({}, a, b);
+```
+
+**解构赋值**
+
+解构赋值必须是最后一个参数，否则会报错。
+
+注意，解构赋值的拷贝是浅拷贝，即如果一个键的值是复合类型的值（数组、对象、函数）、那么解构赋值拷贝的是这个值的引用，而不是这个值的副本。
+
+```javascript
+let obj = { a: { b: 1 } };
+let { ...x } = obj;
+obj.a.b = 2;
+x.a.b // 2
+```
+
+上面代码中，`x`是解构赋值所在的对象，拷贝了对象`obj`的`a`属性。`a`属性引用了一个对象，修改这个对象的值，会影响到解构赋值对它的引用。
+
+另外，扩展运算符的解构赋值，不能复制继承自原型对象的属性。
+
+```javascript
+let o1 = { a: 1 };
+let o2 = { b: 2 };
+o2.__proto__ = o1;
+let { ...o3 } = o2;
+o3 // { b: 2 }
+o3.a // undefined
+```
+
+##### ES11 链判断运算符
+
+```javascript
+// 错误的写法
+const  firstName = message.body.user.firstName;
+
+// 正确的写法
+const firstName = (message
+  && message.body
+  && message.body.user
+  && message.body.user.firstName) || 'default';
+```
+
+三元运算符`?:`也常用于判断对象是否存在。
+
+```javascript
+const fooInput = myForm.querySelector('input[name=foo]')
+const fooValue = fooInput ? fooInput.value : undefined
+```
+
+这样的层层判断非常麻烦，因此 [ES2020](https://github.com/tc39/proposal-optional-chaining) 引入了“链判断运算符”（optional chaining operator）`?.`，简化上面的写法。
+
+```javascript
+const firstName = message?.body?.user?.firstName || 'default';
+const fooValue = myForm.querySelector('input[name=foo]')?.value
+```
+
+上面代码使用了`?.`运算符，直接在链式调用的时候判断，左侧的对象是否为`null`或`undefined`。如果是的，就不再往下运算，而是返回`undefined`。
+
+下面是判断对象方法是否存在，如果存在就立即执行的例子。
+
+```javascript
+iterator.return?.()
+```
+
+对于那些可能没有实现的方法，这个运算符尤其有用。
+
+```javascript
+if (myForm.checkValidity?.() === false) {
+  // 表单校验失败
+  return;
+}
+```
+
+上面代码中，老式浏览器的表单可能没有`checkValidity`这个方法，这时`?.`运算符就会返回`undefined`。
+
+链判断运算符有三种用法。
+
+- `obj?.prop` // 对象属性
+- `obj?.[expr]` // 同上
+- `func?.(...args)` // 函数或对象方法的调用
+
+下面是`obj?.[expr]`用法的一个例子。
+
+```bash
+let hex = "#C0FFEE".match(/#([A-Z]+)/i)?.[1];
+```
+
+**注意**
+
+（1）短路机制
+
+`?.`运算符相当于一种短路机制，只要不满足条件，就不再往下执行。
+
+```javascript
+a?.[++x]
+// 等同于
+a == null ? undefined : a[++x]
+```
+
+（2）delete 运算符
+
+```javascript
+delete a?.b
+// 等同于
+a == null ? undefined : delete a.b
+```
+
+上面代码中，如果`a`是`undefined`或`null`，会直接返回`undefined`，而不会进行`delete`运算。
+
+（3）括号的影响
+
+如果属性链有圆括号，链判断运算符对圆括号外部没有影响，只对圆括号内部有影响，圆括号后面总是会执行。
+
+一般来说，使用`?.`运算符的场合，不应该使用圆括号。
+
+（4）报错场合
+
+以下写法是禁止的，会报错。
+
+```javascript
+// 构造函数
+new a?.()
+new a?.b()
+
+// 链判断运算符的右侧有模板字符串
+a?.`{b}`
+a?.b`{c}`
+
+// 链判断运算符的左侧是 super
+super?.()
+super?.foo
+
+// 链运算符用于赋值运算符左侧
+a?.b = c
+```
+
+（5）右侧不得为十进制数值
+
+为了保证兼容以前的代码，允许`foo?.3:0`被解析成`foo ? .3 : 0`，因此规定如果`?.`后面紧跟一个十进制数字，那么`?.`不再被看成是一个完整的运算符，而会按照三元运算符进行处理，也就是说，那个小数点会归属于后面的十进制数字，形成一个小数。
+
+##### ES11 Null判断运算符
+
+读取对象属性的时候，如果某个属性的值是`null`或`undefined`，有时候需要为它们指定默认值。常见做法是通过`||`运算符指定默认值。但是这样写是错的。开发者的原意是，只要属性的值为`null`或`undefined`，默认值就会生效，但是属性的值如果为空字符串或`false`或`0`，默认值也会生效。
+
+为了避免这种情况，[ES2020](https://github.com/tc39/proposal-nullish-coalescing) 引入了一个新的 Null 判断运算符`??`。它的行为类似`||`，但是只有运算符左侧的值为`null`或`undefined`时，才会返回右侧的值。
+
+这个运算符的一个目的，就是跟链判断运算符`?.`配合使用，为`null`或`undefined`的值设置默认值。
+
+```javascript
+const animationDuration = response.settings?.animationDuration ?? 300;
+```
+
+`??`有一个运算优先级问题，它与`&&`和`||`的优先级孰高孰低。现在的规则是，如果多个逻辑运算符一起使用，必须用括号表明优先级，否则会报错。
+
+##### Object新增方法
+
+[Object.is()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/object-methods#Object.is())
+
+[Object.assign()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/object-methods#Object.assign())
+
+[Object.getOwnPropertyDescriptors()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/object-methods#Object.getOwnPropertyDescriptors())
+
+###### ES8 Object.getOwnPropertyDescriptors()
+
+ES5 的`Object.getOwnPropertyDescriptor()`方法会返回某个对象属性的描述对象（descriptor）。ES2017 引入了`Object.getOwnPropertyDescriptors()`方法，返回指定对象所有自身属性（非继承属性）的描述对象。
+
+```javascript
+const obj = {
+  foo: 123,
+  get bar() { return 'abc' }
+};
+
+Object.getOwnPropertyDescriptors(obj)
+// { foo:
+//    { value: 123,
+//      writable: true,
+//      enumerable: true,
+//      configurable: true },
+//   bar:
+//    { get: [Function: get bar],
+//      set: undefined,
+//      enumerable: true,
+//      configurable: true } }
+```
+
+该方法的引入目的，主要是为了解决`Object.assign()`无法正确拷贝`get`属性和`set`属性的问题。
+
+```javascript
+const source = {
+  set foo(value) {
+    console.log(value);
+  }
+};
+
+const target1 = {};
+Object.assign(target1, source);
+
+Object.getOwnPropertyDescriptor(target1, 'foo')
+// { value: undefined,
+//   writable: true,
+//   enumerable: true,
+//   configurable: true }
+```
+
+上面代码中，`source`对象的`foo`属性的值是一个赋值函数，`Object.assign`方法将这个属性拷贝给`target1`对象，结果该属性的值变成了`undefined`。这是因为`Object.assign`方法总是拷贝一个属性的值，而不会拷贝它背后的赋值方法或取值方法。
+
+这时，`Object.getOwnPropertyDescriptors()`方法配合`Object.defineProperties()`方法，就可以实现正确拷贝。
+
+```javascript
+const shallowMerge = (target, source) => Object.defineProperties(
+  target,
+  Object.getOwnPropertyDescriptors(source)
+);
+```
+
+`Object.getOwnPropertyDescriptors()`方法的另一个用处，是配合`Object.create()`方法，将对象属性克隆到一个新对象。这属于浅拷贝。
+
+```javascript
+const clone = Object.create(Object.getPrototypeOf(obj),
+  Object.getOwnPropertyDescriptors(obj));
+// 或者
+const shallowClone = (obj) => Object.create(
+  Object.getPrototypeOf(obj),
+  Object.getOwnPropertyDescriptors(obj)
+);
+```
+
+另外，`Object.getOwnPropertyDescriptors()`方法可以实现一个对象继承另一个对象。
+
+```javascript
+const obj = Object.create(
+  prot,
+  Object.getOwnPropertyDescriptors({
+    foo: 123,
+  })
+);
+```
+
+`Object.getOwnPropertyDescriptors()`也可以用来实现 Mixin（混入）模式。
+
+```javascript
+let mix = (object) => ({
+  with: (...mixins) => mixins.reduce(
+    (c, mixin) => Object.create(
+      c, Object.getOwnPropertyDescriptors(mixin)
+    ), object)
+});
+
+// multiple mixins example
+let a = {a: 'a'};
+let b = {b: 'b'};
+let c = {c: 'c'};
+let d = mix(c).with(a, b);
+
+d.c // "c"
+d.b // "b"
+d.a // "a"
+```
+
+[\_\_proto\_\_属性，Object.setPrototypeOf()，Object.getPrototypeOf()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/object-methods#__proto__属性，Object.setPrototypeOf()，Object.getPrototypeOf())
+
+[Object.keys()，Object.values()，Object.entries()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/object-methods#Object.keys()，Object.values()，Object.entries())
+
+###### ES8 Object.values和Object.entries
+
+ES5 引入了`Object.keys`方法，返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键名。
+
+```javascript
+var obj = { foo: 'bar', baz: 42 };
+Object.keys(obj)
+// ["foo", "baz"]
+```
+
+ES2017 [引入](https://github.com/tc39/proposal-object-values-entries)了跟`Object.keys`配套的`Object.values`和`Object.entries`，作为遍历一个对象的补充手段，供`for...of`循环使用。
+
+```javascript
+let {keys, values, entries} = Object;
+let obj = { a: 1, b: 2, c: 3 };
+
+for (let key of keys(obj)) {
+  console.log(key); // 'a', 'b', 'c'
+}
+
+for (let value of values(obj)) {
+  console.log(value); // 1, 2, 3
+}
+
+for (let [key, value] of entries(obj)) {
+  console.log([key, value]); // ['a', 1], ['b', 2], ['c', 3]
+}
+```
+
+[Object.fromEntries()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/object-methods#Object.fromEntries())
+
+###### ES10 Object.fromEntries()
+
+`Object.fromEntries()`方法是`Object.entries()`的逆操作，用于将一个键值对数组转为对象。
+
+```javascript
+Object.fromEntries([
+  ['foo', 'bar'],
+  ['baz', 42]
+])
+// { foo: "bar", baz: 42 }
+```
+
+该方法的主要目的，是将键值对的数据结构还原为对象，因此特别适合将 Map 结构转为对象。
+
+```javascript
+// 例一
+const entries = new Map([
+  ['foo', 'bar'],
+  ['baz', 42]
+]);
+
+Object.fromEntries(entries)
+// { foo: "bar", baz: 42 }
+
+// 例二
+const map = new Map().set('foo', true).set('bar', false);
+Object.fromEntries(map)
+// { foo: true, bar: false }
+```
+
+该方法的一个用处是配合`URLSearchParams`对象，将查询字符串转为对象。
+
+```javascript
+Object.fromEntries(new URLSearchParams('foo=bar&baz=qux'))
+// { foo: "bar", baz: "qux" }
+```
+
 #### Array
+
+##### 扩展运算符
+
+扩展运算符（spread）是三个点（`...`）。它好比 rest 参数的逆运算，将一个数组转为用逗号分隔的参数序列。主要用于函数调用。
+
+由于扩展运算符可以展开数组，所以不再需要`apply`方法，将数组转为函数的参数了。
+
+```javascript
+// ES5 的写法
+function f(x, y, z) {
+  // ...
+}
+var args = [0, 1, 2];
+f.apply(null, args);
+
+// ES6的写法
+function f(x, y, z) {
+  // ...
+}
+let args = [0, 1, 2];
+f(...args);
+```
 
 ##### Array.from
 
-##### map，filter和reduce
+`Array.from`方法用于将两类对象转为真正的数组：类似数组的对象（array-like object）和可遍历（iterable）的对象（包括 ES6 新增的数据结构 Set 和 Map）。
+
+值得提醒的是，扩展运算符（`...`）也可以将某些数据结构转为数组。扩展运算符背后调用的是遍历器接口（`Symbol.iterator`），如果一个对象没有部署这个接口，就无法转换。
+
+`Array.from`还可以接受第二个参数，作用类似于数组的`map`方法，用来对每个元素进行处理，将处理后的值放入返回的数组。
+
+```javascript
+Array.from(arrayLike, x => x * x);
+// 等同于
+Array.from(arrayLike).map(x => x * x);
+
+Array.from([1, 2, 3], (x) => x * x)
+// [1, 4, 9]
+```
+
+如果`map`函数里面用到了`this`关键字，还可以传入`Array.from`的第三个参数，用来绑定`this`。
+
+`Array.from()`可以将各种值转为真正的数组，并且还提供`map`功能。这实际上意味着，只要有一个原始的数据结构，你就可以先对它的值进行处理，然后转成规范的数组结构，进而就可以使用数量众多的数组方法。
+
+```javascript
+Array.from({ length: 2 }, () => 'jack')
+// ['jack', 'jack']
+```
+
+`Array.from()`的另一个应用是，将字符串转为数组，然后返回字符串的长度。因为它能正确处理各种 Unicode 字符，可以避免 JavaScript 将大于`\uFFFF`的 Unicode 字符，算作两个字符的 bug。
+
+```javascript
+function countSymbols(string) {
+  return Array.from(string).length;
+}
+```
+
+##### Array.of()
+
+`Array.of()`方法用于将一组值，转换为数组。
+
+```javascript
+Array.of(3, 11, 8) // [3,11,8]
+Array.of(3) // [3]
+Array.of(3).length // 1
+```
+
+这个方法的主要目的，是弥补数组构造函数`Array()`的不足。因为参数个数的不同，会导致`Array()`的行为有差异。
+
+```javascript
+Array() // []
+Array(3) // [, , ,]
+Array(3, 11, 8) // [3, 11, 8]
+```
+
+`Array.of()`基本上可以用来替代`Array()`或`new Array()`，并且不存在由于参数不同而导致的重载。它的行为非常统一。
+
+`Array.of()`总是返回参数值组成的数组。如果没有参数，就返回一个空数组。
+
+`Array.of()`方法可以用下面的代码模拟实现。
+
+```javascript
+function ArrayOf(){
+  return [].slice.call(arguments);
+}
+```
+
+##### 数组实例的 copyWithin()
+
+数组实例的`copyWithin()`方法，在当前数组内部，将指定位置的成员复制到其他位置（会覆盖原有成员），然后返回当前数组。也就是说，使用这个方法，会修改当前数组。
+
+它接受三个参数。
+
+- target（必需）：从该位置开始替换数据。如果为负值，表示倒数。
+- start（可选）：从该位置开始读取数据，默认为 0。如果为负值，表示从末尾开始计算。
+- end（可选）：到该位置前停止读取数据，默认等于数组长度。如果为负值，表示从末尾开始计算。
+
+这三个参数都应该是数值，如果不是，会自动转为数值。
+
+```javascript
+// 将3号位复制到0号位
+[1, 2, 3, 4, 5].copyWithin(0, 3, 4)
+// [4, 2, 3, 4, 5]
+
+// -2相当于3号位，-1相当于4号位
+[1, 2, 3, 4, 5].copyWithin(0, -2, -1)
+// [4, 2, 3, 4, 5]
+
+// 将3号位复制到0号位
+[].copyWithin.call({length: 5, 3: 1}, 0, 3)
+// {0: 1, 3: 1, length: 5}
+
+// 将2号位到数组结束，复制到0号位
+let i32a = new Int32Array([1, 2, 3, 4, 5]);
+i32a.copyWithin(0, 2);
+// Int32Array [3, 4, 5, 4, 5]
+
+// 对于没有部署 TypedArray 的 copyWithin 方法的平台
+// 需要采用下面的写法
+[].copyWithin.call(new Int32Array([1, 2, 3, 4, 5]), 0, 3, 4);
+// Int32Array [4, 2, 3, 4, 5]
+```
+
+##### 数组实例的 find() 和 findIndex()
+
+数组实例的`find`方法，所有数组成员依次执行该回调函数，直到找出第一个返回值为`true`的成员，然后返回该成员。如果没有符合条件的成员，则返回`undefined`。
+
+```javascript
+[1, 5, 10, 15].find(function(value, index, arr) {
+  return value > 9;
+}) // 10
+```
+
+数组实例的`findIndex`方法的用法与`find`方法非常类似，返回第一个符合条件的数组成员的位置，如果所有成员都不符合条件，则返回`-1`。
+
+```javascript
+[1, 5, 10, 15].findIndex(function(value, index, arr) {
+  return value > 9;
+}) // 2
+```
+
+这两个方法都可以接受第二个参数，用来绑定回调函数的`this`对象。
+
+```javascript
+function f(v){
+  return v > this.age;
+}
+let person = {name: 'John', age: 20};
+[10, 12, 26, 15].find(f, person);    // 26
+```
+
+上面的代码中，`find`函数接收了第二个参数`person`对象，回调函数中的`this`对象指向`person`对象。
+
+另外，这两个方法都可以发现`NaN`，弥补了数组的`indexOf`方法的不足。
+
+```javascript
+[NaN].indexOf(NaN)
+// -1
+
+[NaN].findIndex(y => Object.is(NaN, y))
+// 0
+```
+
+##### 数组实例的 fill()
+
+`fill`方法使用给定值，填充一个数组。
+
+```javascript
+['a', 'b', 'c'].fill(7)
+// [7, 7, 7]
+
+new Array(3).fill(7)
+// [7, 7, 7]
+```
+
+上面代码表明，`fill`方法用于空数组的初始化非常方便。数组中已有的元素，会被全部抹去。
+
+`fill`方法还可以接受第二个和第三个参数，用于指定填充的起始位置和结束位置。
+
+```javascript
+['a', 'b', 'c'].fill(7, 1, 2)
+// ['a', 7, 'c']
+```
+
+注意，如果填充的类型为对象，那么被赋值的是同一个内存地址的对象，而不是深拷贝对象。
+
+```javascript
+let arr = new Array(3).fill({name: "Mike"});
+arr[0].name = "Ben";
+arr
+// [{name: "Ben"}, {name: "Ben"}, {name: "Ben"}]
+
+let arr = new Array(3).fill([]);
+arr[0].push(5);
+arr
+// [[5], [5], [5]]
+```
+
+##### ES7 数组实例的 includes()
+
+`Array.prototype.includes`方法返回一个布尔值，表示某个数组是否包含给定的值，与字符串的`includes`方法类似。ES2016 引入了该方法。
+
+```javascript
+[1, 2, 3].includes(2)     // true
+[1, 2, 3].includes(4)     // false
+[1, 2, NaN].includes(NaN) // true
+```
+
+该方法的第二个参数表示搜索的起始位置，默认为`0`。如果第二个参数为负数，则表示倒数的位置，如果这时它大于数组长度（比如第二个参数为`-4`，但数组长度为`3`），则会重置为从`0`开始。
+
+```javascript
+[1, 2, 3].includes(3, 3);  // false
+[1, 2, 3].includes(3, -1); // true
+```
+
+没有该方法之前，我们通常使用数组的`indexOf`方法，检查是否包含某个值。
+
+```javascript
+if (arr.indexOf(el) !== -1) {
+  // ...
+}
+```
+
+`indexOf`方法有两个缺点，一是不够语义化，它的含义是找到参数值的第一个出现位置，所以要去比较是否不等于`-1`，表达起来不够直观。二是，它内部使用严格相等运算符（`===`）进行判断，这会导致对`NaN`的误判。
+
+`includes`使用的是不一样的判断算法，就没有这个问题。
+
+下面代码用来检查当前环境是否支持该方法，如果不支持，部署一个简易的替代版本。
+
+```javascript
+const contains = (() =>
+  Array.prototype.includes
+    ? (arr, value) => arr.includes(value)
+    : (arr, value) => arr.some(el => el === value)
+)();
+contains(['foo', 'bar'], 'baz'); // => false
+```
+
+另外，Map 和 Set 数据结构有一个`has`方法，需要注意与`includes`区分。
+
+- Map 结构的`has`方法，是用来查找键名的，比如`Map.prototype.has(key)`、`WeakMap.prototype.has(key)`、`Reflect.has(target, propertyKey)`。
+- Set 结构的`has`方法，是用来查找值的，比如`Set.prototype.has(value)`、`WeakSet.prototype.has(value)`。
+
+##### ES10 实例的 flat()，flatMap()
+
+数组的成员有时还是数组，`Array.prototype.flat()`用于将嵌套的数组“拉平”，变成一维的数组。该方法返回一个新数组，对原数据没有影响。
+
+```javascript
+[1, 2, [3, 4]].flat()
+// [1, 2, 3, 4]
+```
+
+`flat()`默认只会“拉平”一层，如果想要“拉平”多层的嵌套数组，可以将`flat()`方法的参数写成一个整数，表示想要拉平的层数，默认为1。
+
+```javascript
+[1, 2, [3, [4, 5]]].flat()
+// [1, 2, 3, [4, 5]]
+
+[1, 2, [3, [4, 5]]].flat(2)
+// [1, 2, 3, 4, 5]
+```
+
+如果不管有多少层嵌套，都要转成一维数组，可以用`Infinity`关键字作为参数。
+
+```javascript
+[1, [2, [3]]].flat(Infinity)
+// [1, 2, 3]
+```
+
+如果原数组有空位，`flat()`方法会跳过空位。
+
+```javascript
+[1, 2, , 4, 5].flat()
+// [1, 2, 4, 5]
+```
+
+`flatMap()`方法对原数组的每个成员执行一个函数（相当于执行`Array.prototype.map()`），然后对返回值组成的数组执行`flat()`方法。该方法返回一个新数组，不改变原数组。
+
+```javascript
+// 相当于 [[2, 4], [3, 6], [4, 8]].flat()
+[2, 3, 4].flatMap((x) => [x, x * 2])
+// [2, 4, 3, 6, 4, 8]
+```
+
+`flatMap()`只能展开一层数组。
+
+```javascript
+// 相当于 [[[2]], [[4]], [[6]], [[8]]].flat()
+[1, 2, 3, 4].flatMap(x => [[x * 2]])
+// [[2], [4], [6], [8]]
+```
+
+上面代码中，遍历函数返回的是一个双层的数组，但是默认只能展开一层，因此`flatMap()`返回的还是一个嵌套数组。
+
+`flatMap()`方法的参数是一个遍历函数，该函数可以接受三个参数，分别是当前数组成员、当前数组成员的位置（从零开始）、原数组。
+
+```javascript
+arr.flatMap(function callback(currentValue[, index[, array]]) {
+  // ...
+}[, thisArg])
+```
+
+`flatMap()`方法还可以有第二个参数，用来绑定遍历函数里面的`this`。
+
+##### 数组的空位
+
+数组的空位指，数组的某一个位置没有任何值。比如，`Array`构造函数返回的数组都是空位。
+
+```javascript
+Array(3) // [, , ,]
+```
+
+注意，空位不是`undefined`，一个位置的值等于`undefined`，依然是有值的。空位是没有任何值，`in`运算符可以说明这一点。
+
+```javascript
+0 in [undefined, undefined, undefined] // true
+0 in [, , ,] // false
+```
+
+ES5 对空位的处理，已经很不一致了，大多数情况下会忽略空位。
+
+- `forEach()`, `filter()`, `reduce()`, `every()` 和`some()`都会跳过空位。
+- `map()`会跳过空位，但会保留这个值
+- `join()`和`toString()`会将空位视为`undefined`，而`undefined`和`null`会被处理成空字符串。
+
+ES6 则是明确将空位转为`undefined`。
+
+`Array.from`方法会将数组的空位，转为`undefined`，也就是说，这个方法不会忽略空位。
+
+扩展运算符（`...`）也会将空位转为`undefined`。
+
+`copyWithin()`会连空位一起拷贝。
+
+`fill()`会将空位视为正常的数组位置。
+
+`for...of`循环也会遍历空位。如果改成`map`方法遍历，空位是会跳过的。
+
+`entries()`、`keys()`、`values()`、`find()`和`findIndex()`会将空位处理成`undefined`。
+
+由于空位的处理规则非常不统一，所以建议避免出现空位。
+
+##### Array.prototype.sort() 的排序稳定性
+
+排序稳定性（stable sorting）是排序算法的重要属性，指的是排序关键字相同的项目，排序前后的顺序不变。早先的 ECMAScript 没有规定，`Array.prototype.sort()`的默认排序算法是否稳定，留给浏览器自己决定，这导致某些实现是不稳定的。[ES2019](https://github.com/tc39/ecma262/pull/1340) 明确规定，`Array.prototype.sort()`的默认排序算法必须稳定。这个规定已经做到了，现在 JavaScript 各个主要实现的默认排序算法都是稳定的。
+
+##### ES5 map，filter和reduce
 
 `map` 作用是生成一个新数组，遍历原数组，将每个元素拿出来做一些变换然后放入到新的数组中。
 
@@ -2930,11 +4757,294 @@ arr.reduce((tmp, i, index)=>{
 })
 ```
 
+##### entries()，keys() 和 values()
+
+ES6 提供三个新的方法——`entries()`，`keys()`和`values()`——用于遍历数组。它们都返回一个遍历器对象，可以用`for...of`循环进行遍历，唯一的区别是`keys()`是对键名的遍历、`values()`是对键值的遍历，`entries()`是对键值对的遍历。
+
+```javascript
+for (let index of ['a', 'b'].keys()) {
+  console.log(index);
+}
+// 0
+// 1
+
+for (let elem of ['a', 'b'].values()) {
+  console.log(elem);
+}
+// 'a'
+// 'b'
+
+for (let [index, elem] of ['a', 'b'].entries()) {
+  console.log(index, elem);
+}
+// 0 "a"
+// 1 "b"
+```
+
+如果不使用`for...of`循环，可以手动调用遍历器对象的`next`方法，进行遍历。
+
+```javascript
+let letter = ['a', 'b', 'c'];
+let entries = letter.entries();
+console.log(entries.next().value); // [0, 'a']
+console.log(entries.next().value); // [1, 'b']
+console.log(entries.next().value); // [2, 'c']
+```
+
 #### String
 
-- 模板字符串
+##### 模板字符串
+
+模板字符串（template string）是增强版的字符串，用反引号（`）标识。它可以当作普通字符串使用，也可以用来定义多行字符串，或者在字符串中嵌入变量。如果使用模板字符串表示多行字符串，所有的空格和缩进都会被保留在输出之中。大括号内部可以放入任意的 JavaScript 表达式，甚至还能嵌套。
+
+##### 标签模版
+
+模板字符串可以紧跟在一个函数名后面，该函数将被调用来处理这个模板字符串。这被称为“标签模板”功能（tagged template）。标签模板其实不是模板，而是函数调用的一种特殊形式。“标签”指的就是函数，紧跟在后面的模板字符串就是它的参数。
+
+```javascript
+let a = 5;
+let b = 10;
+
+tag`Hello ${ a + b } world ${ a * b }`;
+// 等同于
+tag(['Hello ', ' world ', ''], 15, 50);
+
+function tag(stringArr, value1, value2){
+  // ...
+}
+
+// 等同于
+
+function tag(stringArr, ...values){
+  // ...
+}
+```
+
+“标签模板”的一个重要应用，就是过滤 HTML 字符串，防止用户输入恶意内容。
+
+```javascript
+let message =
+  SaferHTML`<p>${sender} has sent you a message.</p>`;
+
+function SaferHTML(templateData) {
+  let s = templateData[0];
+  for (let i = 1; i < arguments.length; i++) {
+    let arg = String(arguments[i]);
+
+    // Escape special characters in the substitution.
+    s += arg.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+    // Don't escape special characters in the template.
+    s += templateData[i];
+  }
+  return s;
+}
+```
+
+上面代码中，`sender`变量往往是用户提供的，经过`SaferHTML`函数处理，里面的特殊字符都会被转义。
+
+```javascript
+let sender = '<script>alert("abc")</script>'; // 恶意代码
+let message = SaferHTML`<p>${sender} has sent you a message.</p>`;
+
+message
+// <p>&lt;script&gt;alert("abc")&lt;/script&gt; has sent you a message.</p>
+```
+
+标签模板的另一个应用，就是多语言转换（国际化处理）。
+
+```javascript
+i18n`Welcome to ${siteName}, you are visitor number ${visitorNumber}!`
+// "欢迎访问xxx，您是第xxxx位访问者！"
+```
+
+模板字符串本身并不能取代 Mustache 之类的模板库，因为没有条件判断和循环处理功能，但是通过标签函数，你可以自己添加这些功能。
+
 - `str.startWith('')/endWith('')`
+
 - `str.includes('xx')`
+
+##### 字符串的新增方法
+
+[String.fromCodePoint()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#String.fromCodePoint())
+
+[String.raw()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#String.raw())
+
+[实例方法：codePointAt()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#实例方法：codePointAt())
+
+[实例方法：normalize()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#实例方法：normalize())
+
+[实例方法：includes(), startsWith(), endsWith()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#实例方法：includes(), startsWith(), endsWith())
+
+[实例方法：repeat()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#实例方法：repeat())
+
+[实例方法：padStart()，padEnd()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#实例方法：padStart()，padEnd())
+
+[实例方法：trimStart()，trimEnd()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#实例方法：trimStart()，trimEnd())
+
+###### ES10 实例trimStart()，trimEnd()
+
+[ES2019](https://github.com/tc39/proposal-string-left-right-trim) 对字符串实例新增了`trimStart()`和`trimEnd()`这两个方法。它们的行为与`trim()`一致，`trimStart()`消除字符串头部的空格，`trimEnd()`消除尾部的空格。它们返回的都是新字符串，不会修改原始字符串。
+
+```javascript
+const s = '  abc  ';
+
+s.trim() // "abc"
+s.trimStart() // "abc  "
+s.trimEnd() // "  abc"
+```
+
+除了空格键，这两个方法对字符串头部（或尾部）的 tab 键、换行符等不可见的空白符号也有效。
+
+浏览器还部署了额外的两个方法，`trimLeft()`是`trimStart()`的别名，`trimRight()`是`trimEnd()`的别名。
+
+[实例方法：matchAll()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#实例方法：matchAll())
+
+###### ES11 实例matchAll()
+
+如果一个正则表达式在字符串里面有多个匹配，现在一般使用`g`修饰符或`y`修饰符，在循环里面逐一取出。
+
+```javascript
+var regex = /t(e)(st(\d?))/g;
+var string = 'test1test2test3';
+
+var matches = [];
+var match;
+while (match = regex.exec(string)) {
+  matches.push(match);
+}
+
+matches
+// [
+//   ["test1", "e", "st1", "1", index: 0, input: "test1test2test3"],
+//   ["test2", "e", "st2", "2", index: 5, input: "test1test2test3"],
+//   ["test3", "e", "st3", "3", index: 10, input: "test1test2test3"]
+// ]
+```
+
+[ES2020](https://github.com/tc39/proposal-string-matchall) 增加了`String.prototype.matchAll()`方法，可以一次性取出所有匹配。不过，它返回的是一个遍历器（Iterator），而不是数组。
+
+```javascript
+const string = 'test1test2test3';
+const regex = /t(e)(st(\d?))/g;
+
+for (const match of string.matchAll(regex)) {
+  console.log(match);
+}
+// ["test1", "e", "st1", "1", index: 0, input: "test1test2test3"]
+// ["test2", "e", "st2", "2", index: 5, input: "test1test2test3"]
+// ["test3", "e", "st3", "3", index: 10, input: "test1test2test3"]
+```
+
+上面代码中，由于`string.matchAll(regex)`返回的是遍历器，所以可以用`for...of`循环取出。相对于返回数组，返回遍历器的好处在于，如果匹配结果是一个很大的数组，那么遍历器比较节省资源。
+
+遍历器转为数组是非常简单的，使用`...`运算符和`Array.from()`方法就可以了。
+
+```javascript
+// 转为数组的方法一
+[...string.matchAll(regex)]
+
+// 转为数组的方法二
+Array.from(string.matchAll(regex))
+```
+
+###### ES12 实例replaceAll()
+
+历史上，字符串的实例方法`replace()`只能替换第一个匹配。
+
+```javascript
+'aabbcc'.replace('b', '_')
+// 'aa_bcc'
+```
+
+如果要替换所有的匹配，不得不使用正则表达式的`g`修饰符。
+
+```javascript
+'aabbcc'.replace(/b/g, '_')
+// 'aa__cc'
+```
+
+正则表达式毕竟不是那么方便和直观，[ES2021](https://github.com/tc39/proposal-string-replaceall) 引入了`replaceAll()`方法，可以一次性替换所有匹配。
+
+```javascript
+'aabbcc'.replaceAll('b', '_')
+// 'aa__cc'
+```
+
+它的用法与`replace()`相同，返回一个新字符串，不会改变原字符串。
+
+```javascript
+String.prototype.replaceAll(searchValue, replacement)
+```
+
+上面代码中，`searchValue`是搜索模式，可以是一个字符串，也可以是一个全局的正则表达式（带有`g`修饰符）。
+
+`replaceAll()`的第二个参数`replacement`是一个字符串，表示替换的文本，其中可以使用一些特殊字符串。
+
+- `$&`：匹配的子字符串。
+- `$` `：匹配结果前面的文本。
+- `$'`：匹配结果后面的文本。
+- `$n`：匹配成功的第`n`组内容，`n`是从1开始的自然数。这个参数生效的前提是，第一个参数必须是正则表达式。
+- `$$`：指代美元符号`$`。
+
+下面是一些例子。
+
+```javascript
+// $& 表示匹配的字符串，即`b`本身
+// 所以返回结果与原字符串一致
+'abbc'.replaceAll('b', '$&')
+// 'abbc'
+
+// $` 表示匹配结果之前的字符串
+// 对于第一个`b`，$` 指代`a`
+// 对于第二个`b`，$` 指代`ab`
+'abbc'.replaceAll('b', '$`')
+// 'aaabc'
+
+// $' 表示匹配结果之后的字符串
+// 对于第一个`b`，$' 指代`bc`
+// 对于第二个`b`，$' 指代`c`
+'abbc'.replaceAll('b', `$'`)
+// 'abccc'
+
+// $1 表示正则表达式的第一个组匹配，指代`ab`
+// $2 表示正则表达式的第二个组匹配，指代`bc`
+'abbc'.replaceAll(/(ab)(bc)/g, '$2$1')
+// 'bcab'
+
+// $$ 指代 $
+'abc'.replaceAll('b', '$$')
+// 'a$c'
+```
+
+`replaceAll()`的第二个参数`replacement`除了为字符串，也可以是一个函数，该函数的返回值将替换掉第一个参数`searchValue`匹配的文本。
+
+```javascript
+'aabbcc'.replaceAll('b', () => '_')
+// 'aa__cc'
+```
+
+上面例子中，`replaceAll()`的第二个参数是一个函数，该函数的返回值会替换掉所有`b`的匹配。
+
+这个替换函数可以接受多个参数。第一个参数是捕捉到的匹配内容，第二个参数捕捉到是组匹配（有多少个组匹配，就有多少个对应的参数）。此外，最后还可以添加两个参数，倒数第二个参数是捕捉到的内容在整个字符串中的位置，最后一个参数是原字符串。
+
+```javascript
+const str = '123abc456';
+const regex = /(\d+)([a-z]+)(\d+)/g;
+
+function replacer(match, p1, p2, p3, offset, string) {
+  return [p1, p2, p3].join(' - ');
+}
+
+str.replaceAll(regex, replacer)
+// 123 - abc - 456
+```
+
+上面例子中，正则表达式有三个组匹配，所以`replacer()`函数的第一个参数`match`是捕捉到的匹配内容（即字符串`123abc456`），后面三个参数`p1`、`p2`、`p3`则依次为三个组匹配。
+
+[实例方法：replaceAll()](https://es6.ruanyifeng.com/?search=Math&x=0&y=0#docs/string-methods#实例方法：replaceAll())
 
 #### Set
 
@@ -2942,15 +5052,17 @@ arr.reduce((tmp, i, index)=>{
 
 ```js
 // 创建
-const s = new Set([1,2,3])
-const a = new Set('123')
+const s = new Set([1,2,3]) // {0: 1, 1: 2, 2: 3}
+const a = new Set('123') // {0: "1", 1: "2", 2: "3"}
 // 属性
 console.log(s.size)
 // 方法
+// 操作
 set.add(val) // 返回Set本身
 set.delete(val) // 返回布尔
 set.has(val) // 返回布尔
 set.clear() // 清空
+// 遍历
 set.keys() // 返回键遍历器
 set.values() // 返回值遍历器
 set.entries() // 返回键值遍历器
@@ -2958,9 +5070,102 @@ set.forEach(fn(val, key, set)) // 返回键值遍历器
 // 可以用for-of遍历
 ```
 
-数组去重
+##### 遍历的应用
 
-### Map
+扩展运算符（`...`）内部使用`for...of`循环，所以也可以用于 Set 结构。
+
+```javascript
+let set = new Set(['red', 'green', 'blue']);
+let arr = [...set];
+// ['red', 'green', 'blue']
+```
+
+扩展运算符和 Set 结构相结合，就可以去除数组的重复成员。
+
+```javascript
+let arr = [3, 5, 2, 2, 5, 5];
+let unique = [...new Set(arr)];
+// [3, 5, 2]
+```
+
+而且，数组的`map`和`filter`方法也可以间接用于 Set 了。
+
+```javascript
+let set = new Set([1, 2, 3]);
+set = new Set([...set].map(x => x * 2));
+// 返回Set结构：{2, 4, 6}
+
+let set = new Set([1, 2, 3, 4, 5]);
+set = new Set([...set].filter(x => (x % 2) == 0));
+// 返回Set结构：{2, 4}
+```
+
+因此使用 Set 可以很容易地实现并集（Union）、交集（Intersect）和差集（Difference）。
+
+```javascript
+let a = new Set([1, 2, 3]);
+let b = new Set([4, 3, 2]);
+
+// 并集
+let union = new Set([...a, ...b]);
+// Set {1, 2, 3, 4}
+
+// 交集
+let intersect = new Set([...a].filter(x => b.has(x)));
+// set {2, 3}
+
+// （a 相对于 b 的）差集
+let difference = new Set([...a].filter(x => !b.has(x)));
+// Set {1}
+```
+
+如果想在遍历操作中，同步改变原来的 Set 结构，目前没有直接的方法，但有两种变通方法。一种是利用原 Set 结构映射出一个新的结构，然后赋值给原来的 Set 结构；另一种是利用`Array.from`方法。
+
+```javascript
+// 方法一
+let set = new Set([1, 2, 3]);
+set = new Set([...set].map(val => val * 2));
+// set的值是2, 4, 6
+
+// 方法二
+let set = new Set([1, 2, 3]);
+set = new Set(Array.from(set, val => val * 2));
+// set的值是2, 4, 6
+```
+
+##### WeakSet
+
+WeakSet 结构与 Set 类似，也是不重复的值的集合。但是，它与 Set 有两个区别。
+
+首先，WeakSet 的成员只能是对象，而不能是其他类型的值。
+
+```javascript
+const ws = new WeakSet();
+ws.add(1)
+// TypeError: Invalid value used in weak set
+ws.add(Symbol())
+// TypeError: invalid value used in weak set
+```
+
+其次，WeakSet 中的对象都是弱引用，即垃圾回收机制不考虑 WeakSet 对该对象的引用，也就是说，如果其他对象都不再引用该对象，那么垃圾回收机制会自动回收该对象所占用的内存，不考虑该对象还存在于 WeakSet 之中。
+
+这是因为垃圾回收机制依赖引用计数，如果一个值的引用次数不为`0`，垃圾回收机制就不会释放这块内存。结束使用该值之后，有时会忘记取消引用，导致内存无法释放，进而可能会引发内存泄漏。WeakSet 里面的引用，都不计入垃圾回收机制，所以就不存在这个问题。因此，WeakSet 适合临时存放一组对象，以及存放跟对象绑定的信息。只要这些对象在外部消失，它在 WeakSet 里面的引用就会自动消失。WeakSet 的一个用处，是储存 DOM 节点，而不用担心这些节点从文档移除时，会引发内存泄漏。
+
+由于上面这个特点，WeakSet 的成员是不适合引用的，因为它会随时消失。另外，由于 WeakSet 内部有多少个成员，取决于垃圾回收机制有没有运行，运行前后很可能成员个数是不一样的，而垃圾回收机制何时运行是不可预测的，因此 ES6 规定 WeakSet 不可遍历。
+
+这些特点同样适用WeakMap 结构。
+
+WeakSet 结构有以下三个方法。
+
+- **WeakSet.prototype.add(value)**：向 WeakSet 实例添加一个新成员。
+- **WeakSet.prototype.delete(value)**：清除 WeakSet 实例的指定成员。
+- **WeakSet.prototype.has(value)**：返回一个布尔值，表示某个值是否在 WeakSet 实例之中。
+
+WeakSet 没有`size`属性，没有办法遍历它的成员。
+
+#### Map
+
+ES6 提供了 Map 数据结构。它类似于对象，也是键值对的集合，但是“键”的范围不限于字符串，各种类型的值（包括对象）都可以当作键。也就是说，Object 结构提供了“字符串—值”的对应，Map 结构提供了“值—值”的对应，是一种更完善的 Hash 结构实现。
 
 ```js
 let food = new Map()
@@ -2969,9 +5174,285 @@ let cook = function() {}
 food.set(fruit, 'haha')
 food.set(cook, 'heihei')
 food.get(fruit)
+food.has(fruit)
 food.size
 food.delete(fruit)
 food.clear()
+```
+
+作为构造函数，Map 也可以接受一个数组作为参数。该数组的成员是一个个表示键值对的数组。
+
+```javascript
+const map = new Map([
+  ['name', '张三'],
+  ['title', 'Author']
+]);
+
+map.size // 2
+map.has('name') // true
+map.get('name') // "张三"
+map.has('title') // true
+map.get('title') // "Author"
+```
+
+事实上，不仅仅是数组，任何具有 Iterator 接口、且每个成员都是一个双元素的数组的数据结构都可以当作`Map`构造函数的参数。这就是说，`Set`和`Map`都可以用来生成新的 Map。
+
+```javascript
+const set = new Set([
+  ['foo', 1],
+  ['bar', 2]
+]);
+const m1 = new Map(set);
+m1.get('foo') // 1
+
+const m2 = new Map([['baz', 3]]);
+const m3 = new Map(m2);
+m3.get('baz') // 3
+```
+
+Map 的键实际上是跟内存地址绑定的，只要内存地址不一样，就视为两个键。这就解决了同名属性碰撞（clash）的问题，我们扩展别人的库的时候，如果使用对象作为键名，就不用担心自己的属性与原作者的属性同名。
+
+##### 遍历方法
+
+Map 结构原生提供三个遍历器生成函数和一个遍历方法。
+
+- `Map.prototype.keys()`：返回键名的遍历器。
+- `Map.prototype.values()`：返回键值的遍历器。
+- `Map.prototype.entries()`：返回所有成员的遍历器。
+- `Map.prototype.forEach()`：遍历 Map 的所有成员。
+
+需要特别注意的是，Map 的遍历顺序就是插入顺序。
+
+```javascript
+const map = new Map([
+  ['F', 'no'],
+  ['T',  'yes'],
+]);
+
+for (let key of map.keys()) {
+  console.log(key);
+}
+// "F"
+// "T"
+
+for (let value of map.values()) {
+  console.log(value);
+}
+// "no"
+// "yes"
+
+for (let item of map.entries()) {
+  console.log(item[0], item[1]);
+}
+// "F" "no"
+// "T" "yes"
+
+// 或者
+for (let [key, value] of map.entries()) {
+  console.log(key, value);
+}
+// "F" "no"
+// "T" "yes"
+
+// 等同于使用map.entries()
+for (let [key, value] of map) {
+  console.log(key, value);
+}
+// "F" "no"
+// "T" "yes"
+```
+
+##### 与其他数据结构的互相转换
+
+**（1）Map 转为数组**
+
+前面已经提过，Map 转为数组最方便的方法，就是使用扩展运算符（`...`）。
+
+```javascript
+const myMap = new Map()
+  .set(true, 7)
+  .set({foo: 3}, ['abc']);
+[...myMap]
+// [ [ true, 7 ], [ { foo: 3 }, [ 'abc' ] ] ]
+```
+
+**（2）数组 转为 Map**
+
+将数组传入 Map 构造函数，就可以转为 Map。
+
+```javascript
+new Map([
+  [true, 7],
+  [{foo: 3}, ['abc']]
+])
+// Map {
+//   true => 7,
+//   Object {foo: 3} => ['abc']
+// }
+```
+
+**（3）Map 转为对象**
+
+如果所有 Map 的键都是字符串，它可以无损地转为对象。
+
+```javascript
+function strMapToObj(strMap) {
+  let obj = Object.create(null);
+  for (let [k,v] of strMap) {
+    obj[k] = v;
+  }
+  return obj;
+}
+
+const myMap = new Map()
+  .set('yes', true)
+  .set('no', false);
+strMapToObj(myMap)
+// { yes: true, no: false }
+```
+
+如果有非字符串的键名，那么这个键名会被转成字符串，再作为对象的键名。
+
+**（4）对象转为 Map**
+
+对象转为 Map 可以通过`Object.entries()`。
+
+```javascript
+let obj = {"a":1, "b":2};
+let map = new Map(Object.entries(obj));
+```
+
+此外，也可以自己实现一个转换函数。
+
+```javascript
+function objToStrMap(obj) {
+  let strMap = new Map();
+  for (let k of Object.keys(obj)) {
+    strMap.set(k, obj[k]);
+  }
+  return strMap;
+}
+
+objToStrMap({yes: true, no: false})
+// Map {"yes" => true, "no" => false}
+```
+
+**（5）Map 转为 JSON**
+
+Map 转为 JSON 要区分两种情况。一种情况是，Map 的键名都是字符串，这时可以选择转为对象 JSON。
+
+```javascript
+function strMapToJson(strMap) {
+  return JSON.stringify(strMapToObj(strMap));
+}
+
+let myMap = new Map().set('yes', true).set('no', false);
+strMapToJson(myMap)
+// '{"yes":true,"no":false}'
+```
+
+另一种情况是，Map 的键名有非字符串，这时可以选择转为数组 JSON。
+
+```javascript
+function mapToArrayJson(map) {
+  return JSON.stringify([...map]);
+}
+
+let myMap = new Map().set(true, 7).set({foo: 3}, ['abc']);
+mapToArrayJson(myMap)
+// '[[true,7],[{"foo":3},["abc"]]]'
+```
+
+**（6）JSON 转为 Map**
+
+JSON 转为 Map，正常情况下，所有键名都是字符串。
+
+```javascript
+function jsonToStrMap(jsonStr) {
+  return objToStrMap(JSON.parse(jsonStr));
+}
+
+jsonToStrMap('{"yes": true, "no": false}')
+// Map {'yes' => true, 'no' => false}
+```
+
+但是，有一种特殊情况，整个 JSON 就是一个数组，且每个数组成员本身，又是一个有两个成员的数组。这时，它可以一一对应地转为 Map。这往往是 Map 转为数组 JSON 的逆操作。
+
+```javascript
+function jsonToMap(jsonStr) {
+  return new Map(JSON.parse(jsonStr));
+}
+
+jsonToMap('[[true,7],[{"foo":3},["abc"]]]')
+// Map {true => 7, Object {foo: 3} => ['abc']}
+```
+
+##### WeakMap
+
+`WeakMap`结构与`Map`结构类似，也是用于生成键值对的集合。
+
+```javascript
+// WeakMap 可以使用 set 方法添加成员
+const wm1 = new WeakMap();
+const key = {foo: 1};
+wm1.set(key, 2);
+wm1.get(key) // 2
+
+// WeakMap 也可以接受一个数组，
+// 作为构造函数的参数
+const k1 = [1, 2, 3];
+const k2 = [4, 5, 6];
+const wm2 = new WeakMap([[k1, 'foo'], [k2, 'bar']]);
+wm2.get(k2) // "bar"
+```
+
+`WeakMap`与`Map`的区别有两点。
+
+首先，`WeakMap`只接受对象作为键名（`null`除外），不接受其他类型的值作为键名。
+
+```javascript
+const map = new WeakMap();
+map.set(1, 2)
+// TypeError: 1 is not an object!
+map.set(Symbol(), 2)
+// TypeError: Invalid value used as weak map key
+map.set(null, 2)
+// TypeError: Invalid value used as weak map key
+```
+
+其次，`WeakMap`的键名所指向的对象，不计入垃圾回收机制。
+
+WeakMap 与 Map 在 API 上的区别主要是两个，一是没有遍历操作（即没有`keys()`、`values()`和`entries()`方法），也没有`size`属性。因为没有办法列出所有键名，某个键名是否存在完全不可预测，跟垃圾回收机制是否运行相关。这一刻可以取到键名，下一刻垃圾回收机制突然运行了，这个键名就没了，为了防止出现不确定性，就统一规定不能取到键名。二是无法清空，即不支持`clear`方法。因此，`WeakMap`只有四个方法可用：`get()`、`set()`、`has()`、`delete()`。
+
+#### Symbol
+
+见上数据结构
+
+##### ES10 实例description
+
+创建 Symbol 的时候，可以添加一个描述。
+
+```javascript
+const sym = Symbol('foo');
+```
+
+上面代码中，`sym`的描述就是字符串`foo`。
+
+但是，读取这个描述需要将 Symbol 显式转为字符串，即下面的写法。
+
+```javascript
+const sym = Symbol('foo');
+
+String(sym) // "Symbol(foo)"
+sym.toString() // "Symbol(foo)"
+```
+
+上面的用法不是很方便。[ES2019](https://github.com/tc39/proposal-Symbol-description) 提供了一个实例属性`description`，直接返回 Symbol 的描述。
+
+```javascript
+const sym = Symbol('foo');
+
+sym.description // "foo"
 ```
 
 ### Module
@@ -2998,75 +5479,1651 @@ import yy from 'xx.js'
 
 ### Class
 
-```js
-class Person {
-    constructor(age) {
-        this.age = age
-    }
-    tell() {
-        console.log(`年龄是${this.age}`)
-    }
-}
-class Man {
-    constructor(age) {
-        super(age)
-        this.arr = []
-    }
-    set menu(data) {
-        this.arr.push(data)
-    }
-    get menu() {
-        return this.arr 
-    }
-    tell() {
-        super.tell()
-        console.log("hello")
-    }
-    static init() {
-        console.log("static")
-    }
-}
-const sin = new Person(18)
-const sartine = new Man(30)
-// get,set
-sartine.menu = 'aaa'
-console.log(sartine.menu)
+基本上，ES6 的`class`可以看作只是一个语法糖，它的绝大部分功能，ES5 都可以做到，新的`class`写法只是让对象原型的写法更加清晰、更像面向对象编程的语法而已。
 
-Man.init()
+类的方法都定义在`prototype`对象上面，所以类的新方法可以添加在`prototype`对象上面。`Object.assign()`方法可以很方便地一次向类添加多个方法。
+
+```javascript
+class Point {
+  constructor(){
+    // ...
+  }
+}
+
+Object.assign(Point.prototype, {
+  toString(){},
+  toValue(){}
+});
 ```
+
+`prototype`对象的`constructor()`属性，直接指向“类”的本身，这与 ES5 的行为是一致的。
+
+```javascript
+Point.prototype.constructor === Point // true
+```
+
+另外，类的内部所有定义的方法，都是不可枚举的（non-enumerable）。
+
+```javascript
+class Point {
+  constructor(x, y) {
+    // ...
+  }
+
+  toString() {
+    // ...
+  }
+}
+
+Object.keys(Point.prototype)
+// []
+Object.getOwnPropertyNames(Point.prototype)
+// ["constructor","toString"]
+```
+
+上面代码中，`toString()`方法是`Point`类内部定义的方法，它是不可枚举的。这一点与 ES5 的行为不一致。
+
+#### constructor 方法
+
+`constructor()`方法是类的默认方法，通过`new`命令生成对象实例时，自动调用该方法。一个类必须有`constructor()`方法，如果没有显式定义，一个空的`constructor()`方法会被默认添加。
+
+```javascript
+class Point {
+}
+
+// 等同于
+class Point {
+  constructor() {}
+}
+```
+
+`constructor()`方法默认返回实例对象（即`this`），完全可以指定返回另外一个对象。
+
+```javascript
+class Foo {
+  constructor() {
+    return Object.create(null);
+  }
+}
+
+new Foo() instanceof Foo
+// false
+```
+
+上面代码中，`constructor()`函数返回一个全新的对象，结果导致实例对象不是`Foo`类的实例。
+
+类必须使用`new`调用，否则会报错。这是它跟普通构造函数的一个主要区别，后者不用`new`也可以执行。
+
+#### 类的实例
+
+生成类的实例的写法，与 ES5 完全一样，也是使用`new`命令。前面说过，如果忘记加上`new`，像函数那样调用`Class`，将会报错。
+
+与 ES5 一样，实例的属性除非显式定义在其本身（即定义在`this`对象上），否则都是定义在原型上（即定义在`class`上）。
+
+```javascript
+//定义类
+class Point {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  toString() {
+    return '(' + this.x + ', ' + this.y + ')';
+  }
+}
+
+var point = new Point(2, 3);
+
+point.toString() // (2, 3)
+
+point.hasOwnProperty('x') // true
+point.hasOwnProperty('y') // true
+point.hasOwnProperty('toString') // false
+point.__proto__.hasOwnProperty('toString') // true
+```
+
+上面代码中，`x`和`y`都是实例对象`point`自身的属性（因为定义在`this`变量上），所以`hasOwnProperty()`方法返回`true`，而`toString()`是原型对象的属性（因为定义在`Point`类上），所以`hasOwnProperty()`方法返回`false`。这些都与 ES5 的行为保持一致。
+
+与 ES5 一样，类的所有实例共享一个原型对象。
+
+这也意味着，可以通过实例的`__proto__`属性为“类”添加方法。这意味着，使用实例的`__proto__`属性改写原型，必须相当谨慎，不推荐使用，因为这会改变“类”的原始定义，影响到所有实例。
+
+> `__proto__` 并不是语言本身的特性，这是各大厂商具体实现时添加的私有属性，虽然目前很多现代浏览器的 JS 引擎中都提供了这个私有属性，但依旧不建议在生产中使用该属性，避免对环境产生依赖。生产环境中，我们可以使用 `Object.getPrototypeOf` 方法来获取实例对象的原型，然后再来为原型添加方法/属性。
+
+#### 取值函数（getter）和存值函数（setter）
+
+与 ES5 一样，在“类”的内部可以使用`get`和`set`关键字，对某个属性设置存值函数和取值函数，拦截该属性的存取行为。
+
+存值函数和取值函数是设置在属性的 Descriptor 对象上的。这与 ES5 完全一致。
+
+```javascript
+class CustomHTMLElement {
+  constructor(element) {
+    this.element = element;
+  }
+
+  get html() {
+    return this.element.innerHTML;
+  }
+
+  set html(value) {
+    this.element.innerHTML = value;
+  }
+}
+
+var descriptor = Object.getOwnPropertyDescriptor(
+  CustomHTMLElement.prototype, "html"
+);
+
+"get" in descriptor  // true
+"set" in descriptor  // true
+```
+
+#### 属性表达式
+
+类的属性名，可以采用表达式。
+
+```javascript
+let methodName = 'getArea';
+
+class Square {
+  constructor(length) {
+    // ...
+  }
+
+  [methodName]() {
+    // ...
+  }
+}
+```
+
+上面代码中，`Square`类的方法名`getArea`，是从表达式得到的。
+
+#### Class 表达式
+
+与函数一样，类也可以使用表达式的形式定义。
+
+```javascript
+const MyClass = class Me {
+  getClassName() {
+    return Me.name;
+  }
+};
+```
+
+上面代码使用表达式定义了一个类。需要注意的是，这个类的名字是`Me`，但是`Me`只在 Class 的内部可用，指代当前类。在 Class 外部，这个类只能用`MyClass`引用。
+
+如果类的内部没用到的话，可以省略`Me`，也就是可以写成下面的形式。
+
+```javascript
+const MyClass = class { /* ... */ };
+```
+
+采用 Class 表达式，可以写出立即执行的 Class。
+
+```javascript
+let person = new class {
+  constructor(name) {
+    this.name = name;
+  }
+
+  sayName() {
+    console.log(this.name);
+  }
+}('张三');
+
+person.sayName(); // "张三"
+```
+
+#### 注意点
+
+**（1）严格模式**
+
+类和模块的内部，默认就是严格模式，所以不需要使用`use strict`指定运行模式。只要你的代码写在类或模块之中，就只有严格模式可用。考虑到未来所有的代码，其实都是运行在模块之中，所以 ES6 实际上把整个语言升级到了严格模式。
+
+**（2）不存在提升**
+
+类不存在变量提升（hoist），这一点与 ES5 完全不同。
+
+```javascript
+new Foo(); // ReferenceError
+class Foo {}
+```
+
+这种规定的原因与继承有关，必须保证子类在父类之后定义。
+
+```javascript
+{
+  let Foo = class {};
+  class Bar extends Foo {
+  }
+}
+```
+
+上面的代码不会报错，因为`Bar`继承`Foo`的时候，`Foo`已经有定义了。但是，如果存在`class`的提升，上面代码就会报错，因为`class`会被提升到代码头部，而`let`命令是不提升的，所以导致`Bar`继承`Foo`的时候，`Foo`还没有定义。
+
+**（3）name 属性**
+
+由于本质上，ES6 的类只是 ES5 的构造函数的一层包装，所以函数的许多特性都被`Class`继承，包括`name`属性。
+
+```javascript
+class Point {}
+Point.name // "Point"
+```
+
+`name`属性总是返回紧跟在`class`关键字后面的类名。
+
+**（4）Generator 方法**
+
+如果某个方法之前加上星号（`*`），就表示该方法是一个 Generator 函数。
+
+```javascript
+class Foo {
+  constructor(...args) {
+    this.args = args;
+  }
+  * [Symbol.iterator]() {
+    for (let arg of this.args) {
+      yield arg;
+    }
+  }
+}
+
+for (let x of new Foo('hello', 'world')) {
+  console.log(x);
+}
+// hello
+// world
+```
+
+**（5）this 的指向**
+
+类的方法内部如果含有`this`，它默认指向类的实例。但是，必须非常小心，一旦单独使用该方法，很可能报错。
+
+```javascript
+class Logger {
+  printName(name = 'there') {
+    this.print(`Hello ${name}`);
+  }
+
+  print(text) {
+    console.log(text);
+  }
+}
+
+const logger = new Logger();
+const { printName } = logger;
+printName(); // TypeError: Cannot read property 'print' of undefined
+```
+
+上面代码中，`printName`方法中的`this`，默认指向`Logger`类的实例。但是，如果将这个方法提取出来单独使用，`this`会指向该方法运行时所在的环境（由于 class 内部是严格模式，所以 this 实际指向的是`undefined`），从而导致找不到`print`方法而报错。
+
+一个比较简单的解决方法是，在构造方法中绑定`this`，这样就不会找不到`print`方法了。
+
+```javascript
+class Logger {
+  constructor() {
+    this.printName = this.printName.bind(this);
+  }
+
+  // ...
+}
+```
+
+另一种解决方法是使用箭头函数。
+
+```javascript
+class Obj {
+  constructor() {
+    this.getThis = () => this;
+  }
+}
+
+const myObj = new Obj();
+myObj.getThis() === myObj // true
+```
+
+箭头函数内部的`this`总是指向定义时所在的对象。上面代码中，箭头函数位于构造函数内部，它的定义生效的时候，是在构造函数执行的时候。这时，箭头函数所在的运行环境，肯定是实例对象，所以`this`会总是指向实例对象。
+
+还有一种解决方法是使用`Proxy`，获取方法的时候，自动绑定`this`。
+
+```javascript
+function selfish (target) {
+  const cache = new WeakMap();
+  const handler = {
+    get (target, key) {
+      const value = Reflect.get(target, key);
+      if (typeof value !== 'function') {
+        return value;
+      }
+      if (!cache.has(value)) {
+        cache.set(value, value.bind(target));
+      }
+      return cache.get(value);
+    }
+  };
+  const proxy = new Proxy(target, handler);
+  return proxy;
+}
+
+const logger = selfish(new Logger());
+```
+
+#### 静态方法
+
+类相当于实例的原型，所有在类中定义的方法，都会被实例继承。如果在一个方法前，加上`static`关键字，就表示该方法不会被实例继承，而是直接通过类来调用，这就称为“静态方法”。
+
+```javascript
+class Foo {
+  static classMethod() {
+    return 'hello';
+  }
+}
+
+Foo.classMethod() // 'hello'
+
+var foo = new Foo();
+foo.classMethod()
+// TypeError: foo.classMethod is not a function
+```
+
+注意，如果静态方法包含`this`关键字，这个`this`指的是类，而不是实例。
+
+```javascript
+class Foo {
+  static bar() {
+    this.baz();
+  }
+  static baz() {
+    console.log('hello');
+  }
+  baz() {
+    console.log('world');
+  }
+}
+
+Foo.bar() // hello
+```
+
+上面代码中，静态方法`bar`调用了`this.baz`，这里的`this`指的是`Foo`类，而不是`Foo`的实例，等同于调用`Foo.baz`。另外，从这个例子还可以看出，静态方法可以与非静态方法重名。
+
+父类的静态方法，可以被子类继承。
+
+```javascript
+class Foo {
+  static classMethod() {
+    return 'hello';
+  }
+}
+
+class Bar extends Foo {
+}
+
+Bar.classMethod() // 'hello'
+```
+
+静态方法也是可以从`super`对象上调用的。
+
+```javascript
+class Foo {
+  static classMethod() {
+    return 'hello';
+  }
+}
+
+class Bar extends Foo {
+  static classMethod() {
+    return super.classMethod() + ', too';
+  }
+}
+
+Bar.classMethod() // "hello, too"
+```
+
+#### 实例属性的新写法
+
+实例属性除了定义在`constructor()`方法里面的`this`上面，也可以定义在类的最顶层，其他都不变。
+
+```javascript
+class IncreasingCounter {
+  constructor() {
+    this._count = 0;
+  }
+  get value() {
+    console.log('Getting the current value!');
+    return this._count;
+  }
+  increment() {
+    this._count++;
+  }
+}
+```
+
+上面代码中，实例属性`this._count`定义在`constructor()`方法里面。另一种写法是，这个属性也可以定义在类的最顶层，其他都不变。
+
+```javascript
+class IncreasingCounter {
+  _count = 0;
+  get value() {
+    console.log('Getting the current value!');
+    return this._count;
+  }
+  increment() {
+    this._count++;
+  }
+}
+```
+
+上面代码中，实例属性`_count`与取值函数`value()`和`increment()`方法，处于同一个层级。这时，不需要在实例属性前面加上`this`。
+
+这种新写法的好处是，所有实例对象自身的属性都定义在类的头部，看上去比较整齐，一眼就能看出这个类有哪些实例属性。
+
+#### 静态属性
+
+静态属性指的是 Class 本身的属性，即`Class.propName`，而不是定义在实例对象（`this`）上的属性。
+
+```javascript
+class Foo {
+}
+
+Foo.prop = 1;
+Foo.prop // 1
+```
+
+上面的写法为`Foo`类定义了一个静态属性`prop`。
+
+目前，只有这种写法可行，因为 ES6 明确规定，Class 内部只有静态方法，没有静态属性。现在有一个[提案](https://github.com/tc39/proposal-class-fields)提供了类的静态属性，写法是在实例属性的前面，加上`static`关键字。
+
+```javascript
+class MyClass {
+  static myStaticProp = 42;
+
+  constructor() {
+    console.log(MyClass.myStaticProp); // 42
+  }
+}
+```
+
+#### 私有方法和私有属性
+
+##### 现有的解决方案
+
+私有方法和私有属性，是只能在类的内部访问的方法和属性，外部不能访问。这是常见需求，有利于代码的封装，但 ES6 不提供，只能通过变通方法模拟实现。
+
+一种做法是在命名上加以区别。
+
+```javascript
+class Widget {
+
+  // 公有方法
+  foo (baz) {
+    this._bar(baz);
+  }
+
+  // 私有方法
+  _bar(baz) {
+    return this.snaf = baz;
+  }
+
+  // ...
+}
+```
+
+另一种方法就是索性将私有方法移出类，因为类内部的所有方法都是对外可见的。
+
+```javascript
+class Widget {
+  foo (baz) {
+    bar.call(this, baz);
+  }
+
+  // ...
+}
+
+function bar(baz) {
+  return this.snaf = baz;
+}
+```
+
+上面代码中，`foo`是公开方法，内部调用了`bar.call(this, baz)`。这使得`bar()`实际上成为了当前类的私有方法。
+
+还有一种方法是利用`Symbol`值的唯一性，将私有方法的名字命名为一个`Symbol`值。
+
+```javascript
+const bar = Symbol('bar');
+const snaf = Symbol('snaf');
+
+export default class myClass{
+
+  // 公有方法
+  foo(baz) {
+    this[bar](baz);
+  }
+
+  // 私有方法
+  [bar](baz) {
+    return this[snaf] = baz;
+  }
+
+  // ...
+};
+```
+
+上面代码中，`bar`和`snaf`都是`Symbol`值，一般情况下无法获取到它们，因此达到了私有方法和私有属性的效果。但是也不是绝对不行，`Reflect.ownKeys()`依然可以拿到它们。
+
+```javascript
+const inst = new myClass();
+
+Reflect.ownKeys(myClass.prototype)
+// [ 'constructor', 'foo', Symbol(bar) ]
+```
+
+##### 私有属性的提案
+
+目前，有一个[提案](https://github.com/tc39/proposal-private-methods)，为`class`加了私有属性。方法是在属性名之前，使用`#`表示。
+
+```javascript
+class IncreasingCounter {
+  #count = 0;
+  get value() {
+    console.log('Getting the current value!');
+    return this.#count;
+  }
+  increment() {
+    this.#count++;
+  }
+}
+```
+
+#### new.target 属性
+
+`new`是从构造函数生成实例对象的命令。ES6 为`new`命令引入了一个`new.target`属性，该属性一般用在构造函数之中，返回`new`命令作用于的那个构造函数。如果构造函数不是通过`new`命令或`Reflect.construct()`调用的，`new.target`会返回`undefined`，因此这个属性可以用来确定构造函数是怎么调用的。
+
+```javascript
+function Person(name) {
+  if (new.target !== undefined) {
+    this.name = name;
+  } else {
+    throw new Error('必须使用 new 命令生成实例');
+  }
+}
+
+// 另一种写法
+function Person(name) {
+  if (new.target === Person) {
+    this.name = name;
+  } else {
+    throw new Error('必须使用 new 命令生成实例');
+  }
+}
+
+var person = new Person('张三'); // 正确
+var notAPerson = Person.call(person, '张三');  // 报错
+```
+
+上面代码确保构造函数只能通过`new`命令调用。
+
+Class 内部调用`new.target`，返回当前 Class。
+
+```javascript
+class Rectangle {
+  constructor(length, width) {
+    console.log(new.target === Rectangle);
+    this.length = length;
+    this.width = width;
+  }
+}
+
+var obj = new Rectangle(3, 4); // 输出 true
+```
+
+需要注意的是，子类继承父类时，`new.target`会返回子类。
+
+```javascript
+class Rectangle {
+  constructor(length, width) {
+    console.log(new.target === Rectangle);
+    // ...
+  }
+}
+
+class Square extends Rectangle {
+  constructor(length, width) {
+    super(length, width);
+  }
+}
+
+var obj = new Square(3); // 输出 false
+```
+
+上面代码中，`new.target`会返回子类。
+
+利用这个特点，可以写出不能独立使用、必须继承后才能使用的类。
+
+```javascript
+class Shape {
+  constructor() {
+    if (new.target === Shape) {
+      throw new Error('本类不能实例化');
+    }
+  }
+}
+
+class Rectangle extends Shape {
+  constructor(length, width) {
+    super();
+    // ...
+  }
+}
+
+var x = new Shape();  // 报错
+var y = new Rectangle(3, 4);  // 正确
+```
+
+上面代码中，`Shape`类不能被实例化，只能用于继承。
+
+注意，在函数外部，使用`new.target`会报错。
+
+#### 继承
+
+Class 可以通过`extends`关键字实现继承，这比 ES5 的通过修改原型链实现继承，要清晰和方便很多。
+
+如果没有部署任何代码，这两个类完全一样，等于复制了一个`Point`类。
+
+```javascript
+class Point { /* ... */ }
+class ColorPoint extends Point {
+  constructor(x, y, color) {
+    super(x, y); // 调用父类的constructor(x, y)
+    this.color = color;
+  }
+
+  toString() {
+    return this.color + ' ' + super.toString(); // 调用父类的toString()
+  }
+}
+```
+
+`super`关键字在这里表示父类的构造函数，用来新建父类的`this`对象。
+
+子类必须在`constructor`方法中调用`super`方法，否则新建实例时会报错。这是因为子类自己的`this`对象，必须先通过父类的构造函数完成塑造，得到与父类同样的实例属性和方法，然后再对其进行加工，加上子类自己的实例属性和方法。如果不调用`super`方法，子类就得不到`this`对象。这是因为子类实例的构建，基于父类实例，只有`super`方法才能调用父类实例。
+
+ES5 的继承，实质是先创造子类的实例对象`this`，然后再将父类的方法添加到`this`上面（`Parent.apply(this)`）。ES6 的继承机制完全不同，实质是先将父类实例对象的属性和方法，加到`this`上面（所以必须先调用`super`方法），然后再用子类的构造函数修改`this`。
+
+在子类的构造函数中，只有调用`super`之后，才可以使用`this`关键字，否则会报错。
+
+```javascript
+let cp = new ColorPoint(25, 8, 'green');
+
+cp instanceof ColorPoint // true
+cp instanceof Point // true
+```
+
+上面代码中，实例对象`cp`同时是`ColorPoint`和`Point`两个类的实例，这与 ES5 的行为完全一致。
+
+最后，父类的静态方法，也会被子类继承。
+
+```javascript
+class A {
+  static hello() {
+    console.log('hello world');
+  }
+}
+
+class B extends A {
+}
+
+B.hello()  // hello world
+```
+
+上面代码中，`hello()`是`A`类的静态方法，`B`继承`A`，也继承了`A`的静态方法。
+
+##### Object.getPrototypeOf()
+
+`Object.getPrototypeOf`方法可以用来从子类上获取父类。
+
+```javascript
+Object.getPrototypeOf(ColorPoint) === Point
+// true
+```
+
+因此，可以使用这个方法判断，一个类是否继承了另一个类。
+
+##### super 关键字
+
+`super`这个关键字，既可以当作函数使用，也可以当作对象使用。在这两种情况下，它的用法完全不同。
+
+第一种情况，`super`作为函数调用时，代表父类的构造函数。
+
+注意，`super`虽然代表了父类`A`的构造函数，但是返回的是子类`B`的实例，即`super`内部的`this`指的是`B`的实例，因此`super()`在这里相当于`A.prototype.constructor.call(this)`。
+
+```javascript
+class A {
+  constructor() {
+    console.log(new.target.name);
+  }
+}
+class B extends A {
+  constructor() {
+    super();
+  }
+}
+new A() // A
+new B() // B
+```
+
+作为函数时，`super()`只能用在子类的构造函数之中，用在其他地方就会报错。
+
+第二种情况，`super`作为对象时，在普通方法中，指向父类的原型对象；在静态方法中，指向父类。
+
+这里需要注意，由于`super`指向父类的原型对象，所以定义在父类实例上的方法或属性，是无法通过`super`调用的。
+
+```javascript
+class A {
+  constructor() {
+    this.p = 2;
+  }
+}
+
+class B extends A {
+  get m() {
+    return super.p;
+  }
+}
+
+let b = new B();
+b.m // undefined
+```
+
+如果属性定义在父类的原型对象上，`super`就可以取到。
+
+```javascript
+class A {}
+A.prototype.x = 2;
+
+class B extends A {
+  constructor() {
+    super();
+    console.log(super.x) // 2
+  }
+}
+
+let b = new B();
+```
+
+ES6 规定，在子类普通方法中通过`super`调用父类的方法时，方法内部的`this`指向当前的子类实例。
+
+由于`this`指向子类实例，所以如果通过`super`对某个属性赋值，这时`super`就是`this`，赋值的属性会变成子类实例的属性。
+
+```javascript
+class A {
+  constructor() {
+    this.x = 1;
+  }
+}
+
+class B extends A {
+  constructor() {
+    super();
+    this.x = 2;
+    super.x = 3;
+    console.log(super.x); // undefined
+    console.log(this.x); // 3
+  }
+}
+
+let b = new B();
+```
+
+另外，在子类的静态方法中通过`super`调用父类的方法时，方法内部的`this`指向当前的子类，而不是子类的实例。
+
+```javascript
+class A {
+  constructor() {
+    this.x = 1;
+  }
+  static print() {
+    console.log(this.x);
+  }
+}
+
+class B extends A {
+  constructor() {
+    super();
+    this.x = 2;
+  }
+  static m() {
+    super.print();
+  }
+}
+
+B.x = 3;
+B.m() // 3
+```
+
+上面代码中，静态方法`B.m`里面，`super.print`指向父类的静态方法。这个方法里面的`this`指向的是`B`，而不是`B`的实例。
+
+注意，使用`super`的时候，必须显式指定是作为函数、还是作为对象使用，否则会报错。
+
+```javascript
+class A {}
+
+class B extends A {
+  constructor() {
+    super();
+    console.log(super); // 报错
+  }
+}
+```
+
+这时，如果能清晰地表明`super`的数据类型，就不会报错。
+
+```javascript
+class A {}
+
+class B extends A {
+  constructor() {
+    super();
+    console.log(super.valueOf() instanceof B); // true
+  }
+}
+
+let b = new B();
+```
+
+最后，由于对象总是继承其他对象的，所以可以在任意一个对象中，使用`super`关键字。
+
+```javascript
+var obj = {
+  toString() {
+    return "MyObject: " + super.toString();
+  }
+};
+
+obj.toString(); // MyObject: [object Object]
+```
+
+##### 类的 prototype 属性和__proto__属性
+
+大多数浏览器的 ES5 实现之中，每一个对象都有`__proto__`属性，指向对应的构造函数的`prototype`属性。Class 作为构造函数的语法糖，同时有`prototype`属性和`__proto__`属性，因此同时存在两条继承链。
+
+（1）子类的`__proto__`属性，表示构造函数的继承，总是指向父类。
+
+（2）子类`prototype`属性的`__proto__`属性，表示方法的继承，总是指向父类的`prototype`属性。
+
+```javascript
+class A {
+}
+
+class B extends A {
+}
+
+B.__proto__ === A // true
+B.prototype.__proto__ === A.prototype // true
+```
+
+上面代码中，子类`B`的`__proto__`属性指向父类`A`，子类`B`的`prototype`属性的`__proto__`属性指向父类`A`的`prototype`属性。
+
+这样的结果是因为，类的继承是按照下面的模式实现的。
+
+```javascript
+class A {
+}
+
+class B {
+}
+
+// B 的实例继承 A 的实例
+Object.setPrototypeOf(B.prototype, A.prototype);
+
+// B 继承 A 的静态属性
+Object.setPrototypeOf(B, A);
+
+const b = new B();
+```
+
+`Object.setPrototypeOf`方法的实现。
+
+```javascript
+Object.setPrototypeOf = function (obj, proto) {
+  obj.__proto__ = proto;
+  return obj;
+}
+```
+
+因此，就得到了上面的结果。
+
+```javascript
+Object.setPrototypeOf(B.prototype, A.prototype);
+// 等同于
+B.prototype.__proto__ = A.prototype;
+
+Object.setPrototypeOf(B, A);
+// 等同于
+B.__proto__ = A;
+```
+
+这两条继承链，可以这样理解：作为一个对象，子类（`B`）的原型（`__proto__`属性）是父类（`A`）；作为一个构造函数，子类（`B`）的原型对象（`prototype`属性）是父类的原型对象（`prototype`属性）的实例。
+
+```javascript
+B.prototype = Object.create(A.prototype);
+// 等同于
+B.prototype.__proto__ = A.prototype;
+```
+
+`extends`关键字后面可以跟多种类型的值。
+
+```javascript
+class B extends A {
+}
+```
+
+上面代码的`A`，只要是一个有`prototype`属性的函数，就能被`B`继承。由于函数都有`prototype`属性（除了`Function.prototype`函数），因此`A`可以是任意函数。
+
+下面，讨论两种情况。第一种，子类继承`Object`类。
+
+```javascript
+class A extends Object {
+}
+
+A.__proto__ === Object // true
+A.prototype.__proto__ === Object.prototype // true
+```
+
+这种情况下，`A`其实就是构造函数`Object`的复制，`A`的实例就是`Object`的实例。
+
+第二种情况，不存在任何继承。
+
+```javascript
+class A {
+}
+
+A.__proto__ === Function.prototype // true
+A.prototype.__proto__ === Object.prototype // true
+```
+
+这种情况下，`A`作为一个基类（即不存在任何继承），就是一个普通函数，所以直接继承`Function.prototype`。但是，`A`调用后返回一个空对象（即`Object`实例），所以`A.prototype.__proto__`指向构造函数（`Object`）的`prototype`属性。
+
+### 实例的 __proto__ 属性
+
+子类实例的`__proto__`属性的`__proto__`属性，指向父类实例的`__proto__`属性。也就是说，子类的原型的原型，是父类的原型。
+
+```javascript
+var p1 = new Point(2, 3);
+var p2 = new ColorPoint(2, 3, 'red');
+
+p2.__proto__ === p1.__proto__ // false
+p2.__proto__.__proto__ === p1.__proto__ // true
+```
+
+上面代码中，`ColorPoint`继承了`Point`，导致前者原型的原型是后者的原型。
+
+因此，通过子类实例的`__proto__.__proto__`属性，可以修改父类实例的行为。
+
+```javascript
+p2.__proto__.__proto__.printName = function () {
+  console.log('Ha');
+};
+
+p1.printName() // "Ha"
+```
+
+上面代码在`ColorPoint`的实例`p2`上向`Point`类添加方法，结果影响到了`Point`的实例`p1`。
 
 ### Iterator
 
-```js
-let sin = function*() {
-    yield "xxx"
-    yield "yyy"
-}
-let result = sin()
-console.log(result.next()) // {value: 'xxx', done: false}
+JavaScript 原有的表示“集合”的数据结构，主要是数组（`Array`）和对象（`Object`），ES6 又添加了`Map`和`Set`。这样就有了四种数据集合，用户还可以组合使用它们。这样就需要一种统一的接口机制，来处理所有不同的数据结构。
+
+遍历器（Iterator）就是这样一种机制。它是一种接口，为各种不同的数据结构提供统一的访问机制。任何数据结构只要部署 Iterator 接口，就可以完成遍历操作。
+
+Iterator 的作用有三个：一是为各种数据结构，提供一个统一的、简便的访问接口；二是使得数据结构的成员能够按某种次序排列；三是 ES6 创造了一种新的遍历命令`for...of`循环，Iterator 接口主要供`for...of`消费。
+
+Iterator 的遍历过程是这样的。
+
+（1）创建一个指针对象，指向当前数据结构的起始位置。也就是说，遍历器对象本质上，就是一个指针对象。
+
+（2）第一次调用指针对象的`next`方法，可以将指针指向数据结构的第一个成员。
+
+（3）第二次调用指针对象的`next`方法，指针就指向数据结构的第二个成员。
+
+（4）不断调用指针对象的`next`方法，直到它指向数据结构的结束位置。
+
+每一次调用`next`方法，都会返回数据结构的当前成员的信息。具体来说，就是返回一个包含`value`和`done`两个属性的对象。其中，`value`属性是当前成员的值，`done`属性是一个布尔值，表示遍历是否结束。
+
+由于 Iterator 只是把接口规格加到数据结构之上，所以，遍历器与它所遍历的那个数据结构，实际上是分开的，完全可以写出没有对应数据结构的遍历器对象，或者说用遍历器对象模拟出数据结构。下面是一个无限运行的遍历器对象的例子。
+
+```javascript
+var it = idMaker();
+
+it.next().value // 0
+it.next().value // 1
+it.next().value // 2
 // ...
 
-const arr = [1, 2, 3] 
-const obj = {
-    a: 1,
-    b: 2
-}
-for(let v of arr) {
-    console.log(v) // 1,2,3 值
-}
-for(let v in arr) {
-    console.log(v) // 0,1,2 索引
-}
-for(let v of obj) {
-    console.log(v) // 报错
+function idMaker() {
+  var index = 0;
+
+  return {
+    next: function() {
+      return {value: index++, done: false};
+    }
+  };
 }
 ```
 
+上面的例子中，遍历器生成函数`idMaker`，返回一个遍历器对象（即指针对象）。但是并没有对应的数据结构，或者说，遍历器对象自己描述了一个数据结构出来。
 
+如果使用 TypeScript 的写法，遍历器接口（Iterable）、指针对象（Iterator）和`next`方法返回值的规格可以描述如下。
+
+```javascript
+interface Iterable {
+  [Symbol.iterator]() : Iterator,
+}
+
+interface Iterator {
+  next(value?: any) : IterationResult,
+}
+
+interface IterationResult {
+  value: any,
+  done: boolean,
+}
+```
+
+#### 默认 Iterator 接口
+
+Iterator 接口的目的，就是为所有数据结构，提供了一种统一的访问机制，即`for...of`循环。当使用`for...of`循环遍历某种数据结构时，该循环会自动去寻找 Iterator 接口。
+
+一种数据结构只要部署了 Iterator 接口，我们就称这种数据结构是“可遍历的”（iterable）。
+
+ES6 规定，默认的 Iterator 接口部署在数据结构的`Symbol.iterator`属性，或者说，一个数据结构只要具有`Symbol.iterator`属性，就可以认为是“可遍历的”（iterable）。`Symbol.iterator`属性本身是一个函数，就是当前数据结构默认的遍历器生成函数。执行这个函数，就会返回一个遍历器。至于属性名`Symbol.iterator`，它是一个表达式，返回`Symbol`对象的`iterator`属性，这是一个预定义好的、类型为 Symbol 的特殊值，所以要放在方括号内。
+
+```javascript
+const obj = {
+  [Symbol.iterator] : function () {
+    return {
+      next: function () {
+        return {
+          value: 1,
+          done: true
+        };
+      }
+    };
+  }
+};
+```
+
+上面代码中，对象`obj`是可遍历的（iterable），因为具有`Symbol.iterator`属性。执行这个属性，会返回一个遍历器对象。该对象的根本特征就是具有`next`方法。每次调用`next`方法，都会返回一个代表当前成员的信息对象，具有`value`和`done`两个属性。
+
+ES6 的有些数据结构原生具备 Iterator 接口（比如数组），即不用任何处理，就可以被`for...of`循环遍历。原因在于，这些数据结构原生部署了`Symbol.iterator`属性，另外一些数据结构没有（比如对象）。凡是部署了`Symbol.iterator`属性的数据结构，就称为部署了遍历器接口。调用这个接口，就会返回一个遍历器对象。
+
+原生具备 Iterator 接口的数据结构如下。
+
+- Array
+- Map
+- Set
+- String
+- TypedArray
+- 函数的 arguments 对象
+- NodeList 对象
+
+下面的例子是数组的`Symbol.iterator`属性。
+
+```javascript
+let arr = ['a', 'b', 'c'];
+let iter = arr[Symbol.iterator]();
+
+iter.next() // { value: 'a', done: false }
+iter.next() // { value: 'b', done: false }
+iter.next() // { value: 'c', done: false }
+iter.next() // { value: undefined, done: true }
+```
+
+对象（Object）之所以没有默认部署 Iterator 接口，是因为对象的哪个属性先遍历，哪个属性后遍历是不确定的，需要开发者手动指定。本质上，遍历器是一种线性处理，对于任何非线性的数据结构，部署遍历器接口，就等于部署一种线性转换。不过，严格地说，对象部署遍历器接口并不是很必要，因为这时对象实际上被当作 Map 结构使用，ES5 没有 Map 结构，而 ES6 原生提供了。
+
+```javascript
+class RangeIterator {
+  constructor(start, stop) {
+    this.value = start;
+    this.stop = stop;
+  }
+
+  [Symbol.iterator]() { return this; }
+
+  next() {
+    var value = this.value;
+    if (value < this.stop) {
+      this.value++;
+      return {done: false, value: value};
+    }
+    return {done: true, value: undefined};
+  }
+}
+
+function range(start, stop) {
+  return new RangeIterator(start, stop);
+}
+
+for (var value of range(0, 3)) {
+  console.log(value); // 0, 1, 2
+}
+```
+
+上面代码是一个类部署 Iterator 接口的写法。`Symbol.iterator`属性对应一个函数，执行后返回当前对象的遍历器对象。
+
+下面是通过遍历器实现指针结构的例子。
+
+```javascript
+function Obj(value) {
+  this.value = value;
+  this.next = null;
+}
+
+Obj.prototype[Symbol.iterator] = function() {
+  var iterator = { next: next };
+
+  var current = this;
+
+  function next() {
+    if (current) {
+      var value = current.value;
+      current = current.next;
+      return { done: false, value: value };
+    } else {
+      return { done: true };
+    }
+  }
+  return iterator;
+}
+
+var one = new Obj(1);
+var two = new Obj(2);
+var three = new Obj(3);
+
+one.next = two;
+two.next = three;
+
+for (var i of one){
+  console.log(i); // 1, 2, 3
+}
+```
+
+上面代码首先在构造函数的原型链上部署`Symbol.iterator`方法，调用该方法会返回遍历器对象`iterator`，调用该对象的`next`方法，在返回一个值的同时，自动将内部指针移到下一个实例。
+
+下面是另一个为对象添加 Iterator 接口的例子。
+
+```javascript
+let obj = {
+  data: [ 'hello', 'world' ],
+  [Symbol.iterator]() {
+    const self = this;
+    let index = 0;
+    return {
+      next() {
+        if (index < self.data.length) {
+          return {
+            value: self.data[index++],
+            done: false
+          };
+        } else {
+          return { value: undefined, done: true };
+        }
+      }
+    };
+  }
+};
+```
+
+对于类似数组的对象（存在数值键名和`length`属性），部署 Iterator 接口，有一个简便方法，就是`Symbol.iterator`方法直接引用数组的 Iterator 接口。
+
+```javascript
+NodeList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
+// 或者
+NodeList.prototype[Symbol.iterator] = [][Symbol.iterator];
+
+[...document.querySelectorAll('div')] // 可以执行了
+```
+
+NodeList 对象是类似数组的对象，本来就具有遍历接口，可以直接遍历。
+
+下面是另一个类似数组的对象调用数组的`Symbol.iterator`方法的例子。
+
+```javascript
+let iterable = {
+  0: 'a',
+  1: 'b',
+  2: 'c',
+  length: 3,
+  [Symbol.iterator]: Array.prototype[Symbol.iterator]
+};
+for (let item of iterable) {
+  console.log(item); // 'a', 'b', 'c'
+}
+```
+
+注意，普通对象部署数组的`Symbol.iterator`方法，并无效果。
+
+```javascript
+let iterable = {
+  a: 'a',
+  b: 'b',
+  c: 'c',
+  length: 3,
+  [Symbol.iterator]: Array.prototype[Symbol.iterator]
+};
+for (let item of iterable) {
+  console.log(item); // undefined, undefined, undefined
+}
+```
+
+如果`Symbol.iterator`方法对应的不是遍历器生成函数（即会返回一个遍历器对象），解释引擎将会报错。
+
+有了遍历器接口，数据结构就可以用`for...of`循环遍历，也可以使用`while`循环遍历。
+
+```javascript
+var $iterator = ITERABLE[Symbol.iterator]();
+var $result = $iterator.next();
+while (!$result.done) {
+  var x = $result.value;
+  // ...
+  $result = $iterator.next();
+}
+```
+
+#### 调用 Iterator 接口的场合
+
+除了`for...of`循环，还有几个别的场合会默认调用 Iterator 接口（即`Symbol.iterator`方法）。
+
+**（1）解构赋值**
+
+对数组和 Set 结构进行解构赋值时，会默认调用`Symbol.iterator`方法。
+
+```javascript
+let set = new Set().add('a').add('b').add('c');
+
+let [x,y] = set;
+// x='a'; y='b'
+
+let [first, ...rest] = set;
+// first='a'; rest=['b','c'];
+```
+
+**（2）扩展运算符**
+
+扩展运算符（...）也会调用默认的 Iterator 接口。
+
+```javascript
+// 例一
+var str = 'hello';
+[...str] //  ['h','e','l','l','o']
+
+// 例二
+let arr = ['b', 'c'];
+['a', ...arr, 'd']
+// ['a', 'b', 'c', 'd']
+```
+
+实际上，这提供了一种简便机制，可以将任何部署了 Iterator 接口的数据结构，转为数组。也就是说，只要某个数据结构部署了 Iterator 接口，就可以对它使用扩展运算符，将其转为数组。
+
+```javascript
+let arr = [...iterable];
+```
+
+**（3）yield\***
+
+`yield*`后面跟的是一个可遍历的结构，它会调用该结构的遍历器接口。
+
+```javascript
+let generator = function* () {
+  yield 1;
+  yield* [2,3,4];
+  yield 5;
+};
+
+var iterator = generator();
+
+iterator.next() // { value: 1, done: false }
+iterator.next() // { value: 2, done: false }
+iterator.next() // { value: 3, done: false }
+iterator.next() // { value: 4, done: false }
+iterator.next() // { value: 5, done: false }
+iterator.next() // { value: undefined, done: true }
+```
+
+**（4）其他场合**
+
+由于数组的遍历会调用遍历器接口，所以任何接受数组作为参数的场合，其实都调用了遍历器接口。下面是一些例子。
+
+- for...of
+- Array.from()
+- Map(), Set(), WeakMap(), WeakSet()（比如`new Map([['a',1],['b',2]])`）
+- Promise.all()
+- Promise.race()
+
+#### Iterator 接口与 Generator 函数
+
+`Symbol.iterator()`方法的最简单实现，还是使用 Generator 函数。
+
+```javascript
+let myIterable = {
+  [Symbol.iterator]: function* () {
+    yield 1;
+    yield 2;
+    yield 3;
+  }
+};
+[...myIterable] // [1, 2, 3]
+
+// 或者采用下面的简洁写法
+
+let obj = {
+  * [Symbol.iterator]() {
+    yield 'hello';
+    yield 'world';
+  }
+};
+
+for (let x of obj) {
+  console.log(x);
+}
+// "hello"
+// "world"
+```
+
+#### 遍历器对象的 return()，throw()
+
+遍历器对象除了具有`next()`方法，还可以具有`return()`方法和`throw()`方法。如果你自己写遍历器对象生成函数，那么`next()`方法是必须部署的，`return()`方法和`throw()`方法是否部署是可选的。
+
+`return()`方法的使用场合是，如果`for...of`循环提前退出（通常是因为出错，或者有`break`语句），就会调用`return()`方法。如果一个对象在完成遍历前，需要清理或释放资源，就可以部署`return()`方法。
+
+```javascript
+function readLinesSync(file) {
+  return {
+    [Symbol.iterator]() {
+      return {
+        next() {
+          return { done: false };
+        },
+        return() {
+          file.close();
+          return { done: true };
+        }
+      };
+    },
+  };
+}
+```
+
+上面代码中，函数`readLinesSync`接受一个文件对象作为参数，返回一个遍历器对象，其中除了`next()`方法，还部署了`return()`方法。下面的两种情况，都会触发执行`return()`方法。
+
+```javascript
+// 情况一
+for (let line of readLinesSync(fileName)) {
+  console.log(line);
+  break;
+}
+
+// 情况二
+for (let line of readLinesSync(fileName)) {
+  console.log(line);
+  throw new Error();
+}
+```
+
+上面代码中，情况一输出文件的第一行以后，就会执行`return()`方法，关闭这个文件；情况二会在执行`return()`方法关闭文件之后，再抛出错误。
+
+注意，`return()`方法必须返回一个对象，这是 Generator 语法决定的。
+
+`throw()`方法主要是配合 Generator 函数使用，一般的遍历器对象用不到这个方法。
+
+#### for of循环
+
+`for...of`循环内部调用的是数据结构的`Symbol.iterator`方法。
+
+`for...of`循环可以使用的范围包括数组、Set 和 Map 结构、某些类似数组的对象（比如`arguments`对象、DOM NodeList 对象）、 Generator 对象，以及字符串。
+
+`for...of`循环可以代替数组实例的`forEach`方法。
+
+JavaScript 原有的`for...in`循环，只能获得对象的键名，不能直接获取键值。ES6 提供`for...of`循环，允许遍历获得键值。而`for ... in`是为遍历对象属性而构建的，不建议与数组一起使用。`for...of`循环调用遍历器接口，数组的遍历器接口只返回具有数字索引的属性。这一点跟`for...in`循环也不一样。
+
+```javascript
+var arr = ['a', 'b', 'c', 'd'];
+
+for (let a in arr) {
+  console.log(a); // 0 1 2 3
+}
+
+for (let a of arr) {
+  console.log(a); // a b c d
+}
+
+let arr = [3, 5, 7];
+arr.foo = 'hello';
+
+for (let i in arr) {
+  console.log(i); // "0", "1", "2", "foo"
+}
+
+for (let i of arr) {
+  console.log(i); //  "3", "5", "7"
+}
+```
+
+#### Set 和 Map 结构
+
+Set 和 Map 结构也原生具有 Iterator 接口，可以直接使用`for...of`循环。
+
+```javascript
+var engines = new Set(["Gecko", "Trident", "Webkit", "Webkit"]);
+for (var e of engines) {
+  console.log(e);
+}
+// Gecko
+// Trident
+// Webkit
+
+var es6 = new Map();
+es6.set("edition", 6);
+es6.set("committee", "TC39");
+es6.set("standard", "ECMA-262");
+for (var [name, value] of es6) {
+  console.log(name + ": " + value);
+}
+// edition: 6
+// committee: TC39
+// standard: ECMA-262
+```
+
+首先，遍历的顺序是按照各个成员被添加进数据结构的顺序。其次，Set 结构遍历时，返回的是一个值，而 Map 结构遍历时，返回的是一个数组，该数组的两个成员分别为当前 Map 成员的键名和键值。
+
+#### 计算生成的数据结构
+
+有些数据结构是在现有数据结构的基础上，计算生成的。比如，ES6 的数组、Set、Map 都部署了以下三个方法，调用后都返回遍历器对象。
+
+- `entries()` 返回一个遍历器对象，用来遍历`[键名, 键值]`组成的数组。对于数组，键名就是索引值；对于 Set，键名与键值相同。Map 结构的 Iterator 接口，默认就是调用`entries`方法。
+- `keys()` 返回一个遍历器对象，用来遍历所有的键名。
+- `values()` 返回一个遍历器对象，用来遍历所有的键值。
+
+这三个方法调用后生成的遍历器对象，所遍历的都是计算生成的数据结构。
+
+```javascript
+let arr = ['a', 'b', 'c'];
+for (let pair of arr.entries()) {
+  console.log(pair);
+}
+// [0, 'a']
+// [1, 'b']
+// [2, 'c']
+```
+
+#### 类似数组的对象
+
+类似数组的对象包括好几类。下面是`for...of`循环用于字符串、DOM NodeList 对象、`arguments`对象的例子。
+
+```javascript
+// 字符串
+let str = "hello";
+
+for (let s of str) {
+  console.log(s); // h e l l o
+}
+
+// DOM NodeList对象
+let paras = document.querySelectorAll("p");
+
+for (let p of paras) {
+  p.classList.add("test");
+}
+
+// arguments对象
+function printArgs() {
+  for (let x of arguments) {
+    console.log(x);
+  }
+}
+printArgs('a', 'b');
+// 'a'
+// 'b'
+```
+
+对于字符串来说，`for...of`循环还有一个特点，就是会正确识别 32 位 UTF-16 字符。
+
+```javascript
+for (let x of 'a\uD83D\uDC0A') {
+  console.log(x);
+}
+// 'a'
+// '\uD83D\uDC0A'
+```
+
+并不是所有类似数组的对象都具有 Iterator 接口，一个简便的解决方法，就是使用`Array.from`方法将其转为数组。
+
+```javascript
+let arrayLike = { length: 2, 0: 'a', 1: 'b' };
+
+// 报错
+for (let x of arrayLike) {
+  console.log(x);
+}
+
+// 正确
+for (let x of Array.from(arrayLike)) {
+  console.log(x);
+}
+```
+
+#### 对象
+
+对于普通的对象，`for...of`结构不能直接使用，会报错，必须部署了 Iterator 接口后才能使用。但是，这样情况下，`for...in`循环依然可以用来遍历键名。
+
+```javascript
+let es6 = {
+  edition: 6,
+  committee: "TC39",
+  standard: "ECMA-262"
+};
+
+for (let e in es6) {
+  console.log(e);
+}
+// edition
+// committee
+// standard
+
+for (let e of es6) {
+  console.log(e);
+}
+// TypeError: es6[Symbol.iterator] is not a function
+```
+
+一种解决方法是，使用`Object.keys`方法将对象的键名生成一个数组，然后遍历这个数组。
+
+```javascript
+for (var key of Object.keys(someObject)) {
+  console.log(key + ': ' + someObject[key]);
+}
+```
+
+另一个方法是使用 Generator 函数将对象重新包装一下。
+
+```javascript
+function* entries(obj) {
+  for (let key of Object.keys(obj)) {
+    yield [key, obj[key]];
+  }
+}
+
+for (let [key, value] of entries(obj)) {
+  console.log(key, '->', value);
+}
+// a -> 1
+// b -> 2
+// c -> 3
+```
+
+#### 与其他遍历语法的比较
+
+以数组为例，JavaScript 提供多种遍历语法。最原始的写法就是`for`循环。
+
+```javascript
+for (var index = 0; index < myArray.length; index++) {
+  console.log(myArray[index]);
+}
+```
+
+这种写法比较麻烦，因此数组提供内置的`forEach`方法。
+
+```javascript
+myArray.forEach(function (value) {
+  console.log(value);
+});
+```
+
+这种写法的问题在于，无法中途跳出`forEach`循环，`break`命令或`return`命令都不能奏效。
+
+`for...in`循环可以遍历数组的键名。
+
+```javascript
+for (var index in myArray) {
+  console.log(myArray[index]);
+}
+```
+
+`for...in`循环有几个缺点。
+
+- 数组的键名是数字，但是`for...in`循环是以字符串作为键名“0”、“1”、“2”等等。
+- `for...in`循环不仅遍历数字键名，还会遍历手动添加的其他键，甚至包括原型链上的键。
+- 某些情况下，`for...in`循环会以任意顺序遍历键名。
+
+总之，`for...in`循环主要是为遍历对象而设计的，不适用于遍历数组。
+
+`for...of`循环相比上面几种做法，有一些显著的优点。
+
+```javascript
+for (let value of myArray) {
+  console.log(value);
+}
+```
+
+- 有着同`for...in`一样的简洁语法，但是没有`for...in`那些缺点。
+- 不同于`forEach`方法，它可以与`break`、`continue`和`return`配合使用。
+- 提供了遍历所有数据结构的统一操作接口。
+
+下面是一个使用 break 语句，跳出`for...of`循环的例子。
+
+```javascript
+for (var n of fibonacci) {
+  if (n > 1000)
+    break;
+  console.log(n);
+}
+```
+
+上面的例子，会输出斐波纳契数列小于等于 1000 的项。如果当前项大于 1000，就会使用`break`语句跳出`for...of`循环。
 
 ### 异步处理
 
-- Promise
+#### Promise
 
 Promise是一个构造函数，简单来说就是对异步操作进行统一的封装
 
@@ -3142,23 +7199,63 @@ pReadFile.('aa.js')
 
 promise也是存在一些缺点的，比如无法取消 `Promise`，错误需要通过回调函数捕获， 代码冗余 ，原来的任务被 Promise 包装了一下，不管什么操作，一眼看去都是一堆then，原来的语义变得很不清楚。 
 
-- async/await(ES6+)
+#### ES8 async/await
 
 async 写在包含异步操作的函数前面， await 后面是一个Promise
 
-### 兼容性
+### Proxy
 
-babel
+在 Vue3.0 中将会通过 `Proxy` 来替换原本的 `Object.defineProperty` 来实现数据响应式。
 
-- 在线：下载，引入，修改script的type="text/babel"
+Proxy 是 ES6 中新增的功能，它可以用来自定义对象中的操作。 
 
-- 编译
+1. Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。
+2. Proxy 可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。Proxy 这个词的原意是代理，用在这里表示由它来“代理”某些操作，可以译为“代理器”。
 
-  npm @babel/core @babel/cli @babel/preset-env
+```js
+let p = new Proxy(target, handler)
 
-  添加脚本命令：配置scripts：babel xx -d xx
+```
 
-  配置.babelrc：{"preset":["@babel/predet-env"]}
+3. `target` 代表需要添加代理的对象，`handler` 用来自定义对象中的操作定制拦截行为。比如可以用来自定义 `set` 或者 `get` 函数。`trap`用来规定对于指定什么方法进行拦截处理，如果你想拦截get方法的调用，那么你要定义一个get trap。 
+
+接下来我们通过 `Proxy` 来实现一个数据响应式
+
+```js
+let onWatch = (obj, setBind, getLogger) => {
+  let handler = {
+    get(target, property, receiver) { //get的trap 拦截get方法
+      getLogger(target, property)
+      // Reflect 是一个内置的对象，它提供拦截 JavaScript 操作的方法。这些方法与处理器对象的方法相同。Reflect不是一个函数对象，因此它是不可构造的。
+      // receiver：如果遇到 getter，此值将提供给目标调用。
+      return Reflect.get(target, property, receiver) //拦截get方法
+    },
+    set(target, property, value, receiver) {
+      setBind(value, property)
+      return Reflect.set(target, property, value)
+    }
+  }
+  return new Proxy(obj, handler)
+}
+
+let obj = { a: 1 }
+let p = onWatch(
+  obj,
+  (v, property) => {
+    console.log(`监听到属性${property}改变为${v}`)
+  },
+  (target, property) => {
+    console.log(`'${property}' = ${target[property]}`)
+  }
+)
+p.a = 2 // 监听到属性a改变
+p.a // 'a' = 2
+
+```
+
+在上述代码中，我们通过自定义 `set` 和 `get` 函数的方式，在原本的逻辑中插入了我们的函数逻辑，实现了在对对象任何属性进行读写时发出通知。
+
+当然这是简单版的响应式实现，如果需要实现一个 Vue 中的响应式，需要我们在 `get` 中收集依赖，在 `set` 派发更新，之所以 Vue3.0 要使用 `Proxy` 替换原本的 API 原因在于 `Proxy` 无需一层层递归为每个属性添加代理，一次即可完成以上操作，性能上更好，并且原本的实现有一些数据更新（数组）不能监听到，但是 `Proxy` 可以完美监听到任何方式的数据改变，唯一缺陷可能就是浏览器的兼容性不好了。
 
 ### 装饰器
 
@@ -3257,72 +7354,487 @@ class Child extends Parent {
 }
 ```
 
-### Symbol
+### 正则表达式
 
-见上数据结构
+#### u 修饰符
 
-### ES6+
+ES6 对正则表达式添加了`u`修饰符，含义为“Unicode 模式”，用来正确处理大于`\uFFFF`的 Unicode 字符。也就是说，会正确处理四个字节的 UTF-16 编码。
 
-**ES7**
+```javascript
+/^\uD83D/u.test('\uD83D\uDC2A') // false
+/^\uD83D/.test('\uD83D\uDC2A') // true
+```
+
+上面代码中，`\uD83D\uDC2A`是一个四个字节的 UTF-16 编码，代表一个字符。但是，ES5 不支持四个字节的 UTF-16 编码，会将其识别为两个字符。
+
+一旦加上`u`修饰符号，就会修改下面这些正则表达式的行为。
+
+**（1）点字符**
+
+点（`.`）字符在正则表达式中，含义是除了换行符以外的任意单个字符。对于码点大于`0xFFFF`的 Unicode 字符，点字符不能识别，必须加上`u`修饰符。
+
+```javascript
+var s = '𠮷';
+
+/^.$/.test(s) // false
+/^.$/u.test(s) // true
+```
+
+**（2）Unicode 字符表示法**
+
+ES6 新增了使用大括号表示 Unicode 字符，这种表示法在正则表达式中必须加上`u`修饰符，才能识别当中的大括号，否则会被解读为量词。
+
+```javascript
+/\u{61}/.test('a') // false
+/\u{61}/u.test('a') // true
+/\u{20BB7}/u.test('𠮷') // true
+```
+
+上面代码表示，如果不加`u`修饰符，正则表达式无法识别`\u{61}`这种表示法，只会认为这匹配 61 个连续的`u`。
+
+**（3）量词**
+
+使用`u`修饰符后，所有量词都会正确识别码点大于`0xFFFF`的 Unicode 字符。
+
+```javascript
+/a{2}/.test('aa') // true
+/a{2}/u.test('aa') // true
+/𠮷{2}/.test('𠮷𠮷') // false
+/𠮷{2}/u.test('𠮷𠮷') // true
+```
+
+**（4）预定义模式**
+
+`u`修饰符也影响到预定义模式，能否正确识别码点大于`0xFFFF`的 Unicode 字符。
+
+```javascript
+/^\S$/.test('𠮷') // false
+/^\S$/u.test('𠮷') // true
+```
+
+上面代码的`\S`是预定义模式，匹配所有非空白字符。只有加了`u`修饰符，它才能正确匹配码点大于`0xFFFF`的 Unicode 字符。
+
+利用这一点，可以写出一个正确返回字符串长度的函数。
+
+```javascript
+function codePointLength(text) {
+  var result = text.match(/[\s\S]/gu);
+  return result ? result.length : 0;
+}
+
+var s = '𠮷𠮷';
+
+s.length // 4
+codePointLength(s) // 2
+```
+
+**（5）i 修饰符**
+
+有些 Unicode 字符的编码不同，但是字型很相近，比如，`\u004B`与`\u212A`都是大写的`K`。
+
+```javascript
+/[a-z]/i.test('\u212A') // false
+/[a-z]/iu.test('\u212A') // true
+```
+
+上面代码中，不加`u`修饰符，就无法识别非规范的`K`字符。
+
+**（6）转义**
+
+没有`u`修饰符的情况下，正则中没有定义的转义（如逗号的转义`\,`）无效，而在`u`模式会报错。
+
+```javascript
+/\,/ // /\,/
+/\,/u // 报错
+```
+
+上面代码中，没有`u`修饰符时，逗号前面的反斜杠是无效的，加了`u`修饰符就报错。
+
+### ES7
 
 ```js
 ** // 求幂
+3 ** 2  //9
+// 效果同
+Math.pow(3, 2) //9
+var b = 3;
+b **= 2;
+console.log(b); //9
+
+// 数组增强
 Array.includes()
 ```
 
-**ES8**
+### ES8
 
 ```js
 async/await
 ```
 
-**ES9**
+Object增强，Array增强
+
+#### SharedArrayBuffer和Atomics
+
+共享内存：将多线程引入js，优化web worker发送数据效率低下，SharedArrayBuffer可以直接发送地址
+
+SharedArrayBuffer是一个全局对象，用来表示一个通用的，固定长度的原始二进制数据缓冲区，类似于 [`ArrayBuffer`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer) 对象，它们都可以用来在共享内存（shared memory）上创建视图。与 `ArrayBuffer` 不同的是，`SharedArrayBuffer` 不能被分离。
+
+```js
+// main.js
+// 创建一个worker进程
+const worker = new Worker('./worker.js')
+
+// // 向worker进程发送数据
+// worker.postMessage('this is main')
+
+// 使用ShareArrayBuffer共享数据
+// 新建1kb内存
+const shareBuffer = new SharedArrayBuffer(1024)
+
+// 读写数据需要建立视图
+const intArrayBuffer = new Int32Array(shareBuffer)
+for(let i = 0; i < intArrayBuffer.length; i++) {
+    intArrayBuffer[i] = i
+}
+
+// 传送的是地址
+worker.postMessage(intArrayBuffer)
+
+// 接受worker进程postMessage的数据
+worker.onmessage = function(e) {
+    console.log('接收到的数据', e.data);
+    console.log('修改的的数据', intArrayBuffer[20]);
+}
+
+// worker.js
+onmessage = function(e) {
+    // 接受主线程数据
+    const arrBuffer = e.data
+    console.log('arrBuffer', arrBuffer[20]);
+    arrBuffer[20] = 2222
+    // 向主线程发送数据
+    postMessage('this is worker')
+}
+```
+
+Atomics原子操作，避免进程冲突
+
+```js
+// main.js
+// 创建一个worker进程
+const worker = new Worker('./worker.js')
+
+// // 向worker进程发送数据
+// worker.postMessage('this is main')
+
+// 使用ShareArrayBuffer共享数据
+// 新建1kb内存
+const shareBuffer = new SharedArrayBuffer(1024)
+
+// 读写数据需要建立视图
+const intArrayBuffer = new Int32Array(shareBuffer)
+for(let i = 0; i < intArrayBuffer.length; i++) {
+    intArrayBuffer[i] = i
+}
+
+// 传送的是地址
+worker.postMessage(intArrayBuffer)
+
+// 唤醒worker进程，一般主线程不应该进入休眠
+setTimeout(() => {
+    // 视图 位置，必须对应 唤醒的进程数，默认Infinity
+    Atomics.notify(intArrayBuffer, 19, 1)
+}, 3000)
+
+// Atomics提供的运算
+// Atomics.add(intArrayBuffer, index, value)
+//         sub(intArrayBuffer, index, value)
+//         and/or/xor //位运算
+//         compareExchange(intArrayBuffer, index, oldValue, newValue) // value等于old时赋值为new
+
+// 接受worker进程postMessage的数据
+worker.onmessage = function(e) {
+    console.log('接收到的数据', e.data);
+    console.log('修改的的数据', Atomics.load(intArrayBuffer, 20));
+}
+
+// worker.js
+onmessage = function(e) {
+    // 接受主线程数据
+    const arrBuffer = e.data
+    console.log('arrBuffer', Atomics.load(arrBuffer, 20));
+
+    // 这样操作是不安全的，要使用Atomics进行操作
+    // arrBuffer[20] = 2222
+    // 返回写入的值2222
+    Atomics.store(arrBuffer, 20, 2222)
+    // 返回被替换的值2222
+    Atomics.exchange(arrBuffer, 20, 3333)
+
+    // 进程休眠
+    // 满足arrBuffer[19]===19时进入休眠
+    Atomics.wait(arrBuffer, 19, 19)
+    // 满足arrBuffer[19]===19时进入休眠，两秒后唤醒，也可在主线程中进行唤醒
+    // Atomics.wait(arrBuffer, 19, 19, 2000)
+    console.log('arrBuffer[19]!=19，或被唤醒时执行');
+
+    // 向主线程发送数据
+    postMessage('this is worker')
+}
+```
+
+### ES9
 
 ```js
 rest/spread
-异步迭代
-promise.fanally()
+异步迭代 Iterator，异步执行语句 for await...of，异步生成器 Generator 返回迭代器
+promise.finally()
 正则增强
 ```
 
-## ES11
+#### 异步迭代器
 
-### 空值合并
+和同步迭代器的区别
 
-ES2020引入了一个新的运算符 `??`，仅在初始值为 `null` 或 `undefined` 时才赋值
+同步：next方法返回{value, done}，使用for...of遍历
 
-```js
-const initialVal = 0;
-// old way
-const myVar = initialVal || 10; // => 10
-// new way
-const myVar = initialVal ?? 10; // => 0
-```
-
-### 可选链
-
-新的  `optional chaining` 运算符用来在处理嵌套对象并检查可能的 `undefineds`时使代码更短。
+异步：next方法返回promise，使用for await ...of遍历
 
 ```js
-const user = { name: "John" };
-
-// Fails with `Uncaught TypeError: Cannot read property 'city' of undefined` 报错
-const city = user.address.city;
-
-// Works but verbose 繁琐
-let city = "Not Set";
-if (user.address !== undefined && user.address !== null) {
-  city = user.address.city;
+// 手动创建一个异步迭代器
+const createAsyncIterator = items => {
+  const keys = Object.keys(items)
+  const len = keys.length
+  let pointer = 0
+  
+  return {
+    next() {
+      const done = pointer >= len
+      const value = !done ? items[keys[pointer++]] : undefined
+      return Promise.resolve({
+        done,
+        value,
+      })
+    }
+  }
 }
+const iterator = createAsyncIterator([1,2,3])
+iterator.next().then(res => console.log(res))
 
-// Works and concise but requires a 3rd party library 第三方库
-const city = _.get(user, "address.city", "Not Set");
-
-// 🤗
-const city = user?.address?.city ?? "Not Set";
+// 遍历
+const obj = {
+  name: 'naixes',
+  age: 18,
+  [Symbol.asyncIterator]() {
+  const me = this
+  const keys = Object.keys(me)
+  const len = keys.length
+  let pointer = 0
+  
+  return {
+    next() {
+      const done = pointer >= len
+      const value = !done ? me[keys[pointer++]] : undefined
+      return new Promise(resolve =>{
+        setTimeout(() => {
+          resolve({done,value})
+        }, 1000)
+      })
+    }
+  }
+}
+}
+async function fn() {
+  for await(const val of obj) {
+  	console.log(val)
+	}
+}
+fn()
 ```
 
-### BigInt
+#### 异步生成器
+
+```js
+async function* fn() {
+  yield await Promise.resolve(1)
+  yield await Promise.resolve(2)
+  yield await Promise.resolve(3)
+}
+const asyncIterator = fn()
+asyncIterator.next().then(res => console.log(res))
+async function fn1() {
+  for await(const val of asyncIterator) {
+  	console.log(val)
+	}
+}
+```
+
+#### Promise.finally
+
+无论成功或失败都会执行的内容，释放资源，关闭数据库连接等
+
+#### 正则表达式的增强
+
+##### 具名组匹配
+
+ES2018 引入了[具名组匹配](https://github.com/tc39/proposal-regexp-named-groups)（Named Capture Groups），允许为每一个组匹配指定一个名字，既便于阅读代码，又便于引用。
+
+```javascript
+const RE_DATE = /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/;
+
+const matchObj = RE_DATE.exec('1999-12-31');
+const year = matchObj.groups.year; // "1999"
+const month = matchObj.groups.month; // "12"
+const day = matchObj.groups.day; // "31"
+```
+
+有了具名组匹配以后，可以使用解构赋值直接从匹配结果上为变量赋值。
+
+```javascript
+let {groups: {one, two}} = /^(?<one>.*):(?<two>.*)$/u.exec('foo:bar');
+one  // foo
+two  // bar
+```
+
+字符串替换时，使用`$<组名>`引用具名组。
+
+```javascript
+let re = /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/u;
+
+'2015-01-02'.replace(re, '$<day>/$<month>/$<year>')
+// '02/01/2015'
+```
+
+上面代码中，`replace`方法的第二个参数是一个字符串，而不是正则表达式。
+
+`replace`方法的第二个参数也可以是函数，该函数的参数序列如下。
+
+```javascript
+'2015-01-02'.replace(re, (
+   matched, // 整个匹配结果 2015-01-02
+   capture1, // 第一个组匹配 2015
+   capture2, // 第二个组匹配 01
+   capture3, // 第三个组匹配 02
+   position, // 匹配开始的位置 0
+   S, // 原字符串 2015-01-02
+   groups // 具名组构成的一个对象 {year, month, day}
+ ) => {
+ let {day, month, year} = groups;
+ return `${day}/${month}/${year}`;
+});
+```
+
+具名组匹配在原来的基础上，新增了最后一个函数参数：具名组构成的一个对象。函数内部可以直接对这个对象进行解构赋值。
+
+##### 反向断言
+
+见正则表达式断言部分
+
+##### dotAll模式
+
+正则表达式中，点（`.`）是一个特殊字符，代表任意的单个字符，但是有两个例外。一个是四个字节的 UTF-16 字符，这个可以用`u`修饰符解决；另一个是行终止符（line terminator character）。
+
+所谓行终止符，就是该字符表示一行的终结。以下四个字符属于“行终止符”。
+
+- U+000A 换行符（`\n`）
+- U+000D 回车符（`\r`）
+- U+2028 行分隔符（line separator）
+- U+2029 段分隔符（paragraph separator）
+
+但是，很多时候我们希望匹配的是任意单个字符，这时有一种变通的写法。
+
+```javascript
+/foo[^]bar/.test('foo\nbar')
+// true
+```
+
+这种解决方案毕竟不太符合直觉，ES2018 [引入](https://github.com/tc39/proposal-regexp-dotall-flag)`s`修饰符，使得`.`可以匹配任意单个字符。
+
+```javascript
+/foo.bar/s.test('foo\nbar') // true
+```
+
+这被称为`dotAll`模式，即点（dot）代表一切字符。所以，正则表达式还引入了一个`dotAll`属性，返回一个布尔值，表示该正则表达式是否处在`dotAll`模式。
+
+```javascript
+const re = /foo.bar/s;
+// 另一种写法
+// const re = new RegExp('foo.bar', 's');
+
+re.test('foo\nbar') // true
+re.dotAll // true
+re.flags // 's'
+```
+
+`/s`修饰符和多行修饰符`/m`不冲突，两者一起使用的情况下，`.`匹配所有字符，而`^`和`$`匹配每一行的行首和行尾。
+
+##### Unicode 属性类
+
+ES2018 [引入](https://github.com/tc39/proposal-regexp-unicode-property-escapes)了一种新的类的写法`\p{...}`和`\P{...}`，允许正则表达式匹配符合 Unicode 某种属性的所有字符。
+
+```javascript
+const regexGreekSymbol = /\p{Script=Greek}/u; //匹配希腊文字母，Han则表示汉字
+regexGreekSymbol.test('π') // true
+```
+
+Unicode 属性类要指定属性名和属性值。对于某些属性，可以只写属性名，或者只写属性值。
+
+`\P{…}`是`\p{…}`的反向匹配，即匹配不满足条件的字符。
+
+注意，这两种类只对 Unicode 有效，所以使用的时候一定要加上`u`修饰符。如果不加`u`修饰符，正则表达式使用`\p`和`\P`会报错。
+
+```javascript
+const regex = /^\p{Decimal_Number}+$/u;
+regex.test('𝟏𝟐𝟑𝟜𝟝𝟞𝟩𝟪𝟫𝟬𝟭𝟮𝟯𝟺𝟻𝟼') // true
+```
+
+上面代码中，属性类指定匹配所有十进制字符，可以看到各种字型的十进制字符都会匹配成功。
+
+`\p{Number}`甚至能匹配罗马数字。
+
+```javascript
+// 匹配所有数字
+const regex = /^\p{Number}+$/u;
+regex.test('²³¹¼½¾') // true
+regex.test('㉛㉜㉝') // true
+regex.test('ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫ') // true
+```
+
+下面是其他一些例子。
+
+```javascript
+// 匹配所有空格
+\p{White_Space}
+
+// 匹配各种文字的所有字母，等同于 Unicode 版的 \w
+[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]
+
+// 匹配各种文字的所有非字母的字符，等同于 Unicode 版的 \W
+[^\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]
+
+// 匹配 Emoji
+/\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu
+
+// 匹配所有的箭头字符
+const regexArrows = /^\p{Block=Arrows}+$/u;
+regexArrows.test('←↑→↓↔↕↖↗↘↙⇏⇐⇑⇒⇓⇔⇕⇖⇗⇘⇙⇧⇩') // true
+```
+
+### ES10
+
+字符串增强
+
+symbol增强
+
+修复JSON的一些方法对unicode处理的问题
+
+修复数组的sort方法不稳定的问题
+
+修复函数的toString方法
+
+### ES11
+
+#### BigInt
 
 BigInt 是一个新对象，代表的数字大于`Number.MAX_SAFE_INTEGER`（即2 ^ 53-1）。对于普通人来说，这听起来可能绰绰有余，但对于某些数学应用程序和机器学习而言，新的 BigInt 类型就能够派上用场了。
 
@@ -3344,7 +7856,7 @@ const y = BigInt("9007199254740991234");
 6n << 3n; // that works
 ```
 
-### String.matchAll
+#### String.matchAll
 
 这是一个例子。想象一下，你有一个很长的文本字符串，并且需要从中提取所有标签（即以 `#` 开头的单词）。用正则表达式可以解决！
 
@@ -3362,7 +7874,7 @@ const tags = [...tweet.matchAll(/(#\w+)/g)]
 
 `matchAll` 返回一个迭代器。我们可以用  `for..of` 对其进行迭代，也可以将其转换为数组。
 
-### Promise.allSettled
+#### Promise.allSettled
 
 还记得 Promise.all 函数吗？它仅在所有的 Promise 均得到解决时才会被解决。假如其中有一项 Promise 被拒绝，此时可能还有其他 promise 没完成。
 
@@ -3387,7 +7899,7 @@ await Promise.allSettled(urls.map(fetch))
 removeLoading()
 ```
 
-### globalThis
+#### globalThis
 
 在 JavaScript 中，总是有一个包含所有内容的大型上下文对象。传统上，在浏览器中是 `window`。但是，如果尝试在 Node 程序中访问它，则会收到错误消息。Node 中没有 `window` 全局对象；而是有一个 `window` 对象。另外在 WebWorker 中，没有访问 `window` 的权限，但是有 `self` 的权限。
 
@@ -5129,6 +9641,14 @@ console.log(obj.b.c) // 2
 
 除了 \b、\B、^、$ 外，还有一种断言位置。比如 **(?=p)**，表示模式 p 前面的位置。**(?!p)**是其反义，表示模式 p 前面的位置以外的所有位置。还有反向的断言，例如 **(?<=p)**，表示模式 p 后面的位置。或者说该位置的后面是 p。它也有反义的形式 **(?<!p)**。
 
+```js
+// 匹配货币符号
+const money = '$120'
+const reg = /\D?=\d+/ // ?=表示匹配其前面的位置即非数字的部分，?<=则相反，ES9引入
+const result = reg.exec(money)
+consolr.log(result[0]) // $
+```
+
 (?!^) 其实就是 ^ 的反义。需要注意的位置不同于字符，是不占地方的，如果说是字符也可以，它则是空字符，没有实际宽度的。
 
 #### 引用
@@ -5141,7 +9661,7 @@ street 里有两个 e，而 all 里有连个 l。此时我想找到所有这样�
 
 括号捕获的数据，不仅可以在正则里反向引用。也可以配合宿主 API 来使用，外部引用。比如实现滤重：
 
-![正则-引用](E:\Jennifer\other\notes\media\正则-引用.jpg)
+![正则-引用](\media\正则-引用.jpg)
 
 上面使用了替换，工具内部必然要用到宿主语言相关 API。$1 表示外部引用第一个分组捕获的内容。
 
@@ -7321,60 +11841,6 @@ var Counter;
 ```
 
 JavaScript仅用于模块化/命名空间的就有 10 多种系统和格式幸运的是，现在 JavaScript 有模块的标准内置语言功能，并且 Node.js 和所有最新的现代浏览器都支持它。对于较旧的环境，你仍然可以用新的 ES 模块语法进行编码，然后用 Webpack/Babel/SystemJS/TypeScript 转换为较旧或兼容的语法。
-
-## Proxy
-
-在 Vue3.0 中将会通过 `Proxy` 来替换原本的 `Object.defineProperty` 来实现数据响应式。
-
-Proxy 是 ES6 中新增的功能，它可以用来自定义对象中的操作。 
-
-1. Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。
-2. Proxy 可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。Proxy 这个词的原意是代理，用在这里表示由它来“代理”某些操作，可以译为“代理器”。
-
-```js
-let p = new Proxy(target, handler)
-
-```
-
-3. `target` 代表需要添加代理的对象，`handler` 用来自定义对象中的操作定制拦截行为。比如可以用来自定义 `set` 或者 `get` 函数。`trap`用来规定对于指定什么方法进行拦截处理，如果你想拦截get方法的调用，那么你要定义一个get trap。 
-
-接下来我们通过 `Proxy` 来实现一个数据响应式
-
-```js
-let onWatch = (obj, setBind, getLogger) => {
-  let handler = {
-    get(target, property, receiver) { //get的trap 拦截get方法
-      getLogger(target, property)
-      // Reflect 是一个内置的对象，它提供拦截 JavaScript 操作的方法。这些方法与处理器对象的方法相同。Reflect不是一个函数对象，因此它是不可构造的。
-      // receiver：如果遇到 getter，此值将提供给目标调用。
-      return Reflect.get(target, property, receiver) //拦截get方法
-    },
-    set(target, property, value, receiver) {
-      setBind(value, property)
-      return Reflect.set(target, property, value)
-    }
-  }
-  return new Proxy(obj, handler)
-}
-
-let obj = { a: 1 }
-let p = onWatch(
-  obj,
-  (v, property) => {
-    console.log(`监听到属性${property}改变为${v}`)
-  },
-  (target, property) => {
-    console.log(`'${property}' = ${target[property]}`)
-  }
-)
-p.a = 2 // 监听到属性a改变
-p.a // 'a' = 2
-
-```
-
-在上述代码中，我们通过自定义 `set` 和 `get` 函数的方式，在原本的逻辑中插入了我们的函数逻辑，实现了在对对象任何属性进行读写时发出通知。
-
-当然这是简单版的响应式实现，如果需要实现一个 Vue 中的响应式，需要我们在 `get` 中收集依赖，在 `set` 派发更新，之所以 Vue3.0 要使用 `Proxy` 替换原本的 API 原因在于 `Proxy` 无需一层层递归为每个属性添加代理，一次即可完成以上操作，性能上更好，并且原本的实现有一些数据更新（数组）不能监听到，但是 `Proxy` 可以完美监听到任何方式的数据改变，唯一缺陷可能就是浏览器的兼容性不好了。
 
 ## 常用定时器
 
