@@ -12080,21 +12080,23 @@ bar()
 ### 浏览器中的 Event Loop
 
 - JS 分为同步任务和异步任务
-- 同步任务都在JS引擎线程上执行，形成一个 `执行栈`
-- 事件触发线程管理一个 `任务队列`，当遇到异步的代码时，会被挂起并在需要执行的时候将回调事件放到 `任务队列`中
+- 同步任务都在**JS引擎线程**上执行，形成一个 `执行栈`
+- **事件触发线程**管理一个 `任务队列`，当遇到异步的代码时，会被挂起并在需要执行的时候将回调事件放到 `任务队列`中
 - `执行栈`中所有同步任务执行完毕，此时JS引擎线程空闲，系统会读取 `任务队列`，将可运行的异步任务回调事件添加到 `执行栈`中，开始执行
 
 所以本质上来说 JS 中的异步还是同步行为。
 
-![img](https://user-gold-cdn.xitu.io/2018/11/23/16740fa4cd9c6937?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)事件循环
+![事件循环](/Users/huangsiying/project/00 github/notes/images/事件循环.png)
 
 前端开发中我们会通过 `setTimeout/setInterval`来指定定时任务，会通过 `XHR/fetch`发送网络请求。
 
-不管是 `setTimeout/setInterval`和 `XHR/fetch`代码，在这些代码执行时， 本身是同步任务，而其中的回调函数才是异步任务。当代码执行到 `setTimeout/setInterval`时，实际上是 `JS引擎线程`**通知** `定时触发器线程`，间隔一个时间后，会触发一个回调事件， 而 `定时触发器线程`在接收到这个消息后，会在等待的时间后，将回调事件放入到由 `事件触发线程`所管理的 `事件队列`中。
+不管是 `setTimeout/setInterval`和 `XHR/fetch`代码，在这些代码执行时， 本身是同步任务，而其中的回调函数才是异步任务。
 
-当代码执行到 `XHR/fetch`时，实际上是 `JS引擎线程`通知 `异步http请求线程`，发送一个网络请求，并制定请求完成后的回调事件， 而 `异步http请求线程`在接收到这个消息后，会在请求成功后，将回调事件放入到由 `事件触发线程`所管理的 `事件队列`中。
+当代码执行到 `setTimeout/setInterval`时，实际上是 JS引擎线程通知**定时触发器线程**，间隔一个时间后，会触发一个回调事件， 而定时触发器线程在接收到这个消息后，会在等待的时间后，将回调事件放入到由**事件触发线程所管理的事件队列**中。
 
-当我们的同步任务执行完， `JS引擎线程`会询问 `事件触发线程`，在 `事件队列`中是否有待执行的回调函数，如果有就会加入到执行栈中交给 `JS引擎线程`执行
+当代码执行到 `XHR/fetch`时，实际上是JS引擎线程通知**异步http请求线程**，发送一个网络请求，并制定请求完成后的回调事件， 而异步http请求线程在接收到这个消息后，会在请求成功后，将回调事件放入到由**事件触发线程所管理的事件队列**中。
+
+当我们的同步任务执行完，JS引擎线程会询问事件触发线程，在事件队列中是否有待执行的回调函数，如果有就会加入到执行栈中交给JS引擎线程执行
 
 **总结：**
 
@@ -12105,21 +12107,23 @@ bar()
 
 #### 微任务和宏任务
 
+异步队列又分为宏任务队列和微任务队列
+
 ##### 宏任务
 
 不同的任务源会被分配到不同的 Task 队列中，浏览器环境的事件循环依赖两个事件队列，一个是**宏任务的事件队列（由事件触发线程维护）**，一个是**微任务的事件队列（由js引擎线程维护）**。 任务源可以分为 **微任务**（microtask） 和 **宏任务**（macrotask）。在 ES6 规范中，microtask 称为 `jobs`，macrotask 称为 `task`。
 
 我们可以将每次执行栈执行的代码当做是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行）， 每一个宏任务会从头到尾执行完毕，不会执行其他。
 
- `JS引擎线程`和 `GUI渲染线程`是互斥的关系，浏览器为了能够使 `宏任务`和 `DOM任务`有序的进行，会在一个 `宏任务`执行结果后，在下一个 `宏任务`执行前， `GUI渲染线程`开始工作，对页面进行渲染。
+ JS引擎线程和GUI渲染线程是互斥的关系，浏览器为了能够使宏任务和DOM任务有序的进行，会在一个宏任务执行结果后，在下一个宏任务执行前，GUI渲染线程开始工作，对页面进行渲染。
 
-包括 `script` ， `setTimeout` ，`setInterval` ，`setImmediate` ，`I/O` ，`UI rendering`。
+包括 `script` ， `setTimeout` ，`setInterval` ，`setImmediate` ，`I/O` ，`UI rendering`，`requestAnimationFrame`。
 
 ##### 微任务
 
- `宏任务`结束后，会执行渲染，然后执行下一个 `宏任务`， 而微任务可以理解成在当前 `宏任务`执行后立即执行的任务。也就是说，当 `宏任务`执行完，会在渲染前，将执行期间所产生的所有 `微任务`都执行完。
+ 宏任务结束后，会执行渲染，然后执行下一个宏任务， 而微任务可以理解成在当前宏任务执行后立即执行的任务。也就是说，当宏任务执行完，会在渲染前，将执行期间所产生的所有微任务都执行完。
 
-包括 `process.nextTick` ，`promise` ，`MutationObserver`，其中 `process.nextTick` 为 Node 独有。
+包括 `process.nextTick` ，`promise(async/await)` ，`MutationObserver`，其中 `process.nextTick` 为 Node 独有。
 
 ##### 总结
 
@@ -12134,10 +12138,12 @@ bar()
 下面来看以下代码的执行顺序：
 
 ```js
-console.log('script start')1
+// 这类题目类型有：宏任务微任务顺序执行，宏任务微任务交替执行，async/await嵌套
+// 注意：promise没有resolve时then后面的不会执行！！！
+// resolve处理thenable时会包一层promise，async返回promise
 
 async function async1() {
-  await async2() // 执行后让出线程，await相当于promise，后面的代码相当于then
+  await async2() // 执行后让出线程，await相当于promise中resolve的内容，后面的代码相当于then
   console.log('async1 end')5 // 加入微任务1
 }
 async function async2() {
@@ -12187,12 +12193,6 @@ new Promise((resolve, reject) => {
 - 当执行完所有微任务后，如有必要会渲染页面
 - 然后开始下一轮 Event Loop，执行宏任务中的异步代码，也就是 `setTimeout` 中的回调函数
 
-所以以上代码虽然 `setTimeout` 写在 `Promise` 之前，但是因为 `Promise` 属于微任务而 `setTimeout`属于宏任务，所以会有以上的打印。
-
-微任务包括 `process.nextTick` ，`promise` ，`MutationObserver`。
-
-宏任务包括 `script` ， `setTimeout` ，`setInterval` ，`setImmediate` ，`I/O` ，`UI rendering`。
-
 这里很多人会有个误区，认为微任务快于宏任务，其实是错误的。因为宏任务中包括了 `script` ，浏览器会**先执行一个宏任务**，接下来有异步代码的话才会先执行微任务。
 
 ### Node 中的 Event Loop
@@ -12209,16 +12209,14 @@ Node 中的 Event Loop 和浏览器中的是完全不相同的东西。
 
 1. 写的JavaScript脚本会交给V8引擎解析
 2. 解析后的代码，调用Node API，Node会交给 [Libuv库](https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Fjoyent%2Flibuv) 处理
-3. [Libuv库](https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Fjoyent%2Flibuv) 将不同的任务分配给不同的线程，形成一个Event Loop（事件循环），以异步的方式将任务的执行结果返回给V8引擎
+3. [Libuv库](https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Fjoyent%2Flibuv) 将不同的任务分配给工作线程，每完成一个任务会执行一个回调，形成一个Event Loop（事件循环），以异步的方式将任务的执行结果返回给V8引擎
 4. V8引擎再将结果返回给用户
 
-除了 `setTimeout` 和 `setInterval` 这两个方法，Node.js还提供了另外两个与"任务队列"有关的方法：process.nextTick和 [setImmediate](https://link.juejin.im/?target=http%3A%2F%2Fnodejs.org%2Fdocs%2Flatest%2Fapi%2Ftimers.html%23timers_setimmediate_callback_arg) 。
-
-`process.nextTick` 方法可以在当前"执行栈"的尾部----下一次Event Loop（主线程读取"任务队列"）之前----触发回调函数。也就是说，它指定的任务总是发生在所有异步任务之前。 `setImmediate` 方法则是在当前"任务队列"的尾部添加事件，也就是说，它指定的任务总是在下一次Event Loop时执行，这与 `setTimeout(fn, 0)` 很像。即setImmediate();比process.nextTick()优先级低
+除了 `setTimeout` 和 `setInterval` 这两个方法，Node.js还提供了另外两个与"任务队列"有关的方法：`process.nextTick`和[setImmediate](https://link.juejin.im/?target=http%3A%2F%2Fnodejs.org%2Fdocs%2Flatest%2Fapi%2Ftimers.html%23timers_setimmediate_callback_arg) 。
 
 当Node.js启动时会初始化event loop, 每一个event loop都会包含按如下顺序六个循环阶段，它们会按照**顺序**反复运行。每当进入某一个阶段的时候，都会从对应的回调队列中取出函数去执行。当队列为空或者执行的回调函数数量到达系统设定的阈值，就会进入下一阶段。
 
-![img](https://user-gold-cdn.xitu.io/2018/6/1/163b9278853a7eec?imageView2/0/w/1280/h/960/format/webp/ignore-error/1) 
+![node中的eventloop](/Users/huangsiying/project/00 github/notes/images/node中的eventloop.png)
 
 #### timer
 
@@ -12258,9 +12256,11 @@ check 阶段执行 `setImmediate`
 
 close callbacks 阶段执行 close 事件
 
-- 由于node event中微任务不在event loop的任何阶段执行，而是在各个阶段切换的中间执行,即从一个阶段切换到下个阶段前执行。所以当times阶段的callback执行完毕，准备切换到下一个阶段时，执行微任务 
+**setTimeout和setImmediate**
 
-接下来通过代码的方式来深入理解这块内容。
+宏任务：setTimeout，setInterval，setImmediate，IO
+
+微任务：Promise（async），process.nextTick（优先级高于Promise）
 
 首先在有些情况下，定时器的执行顺序其实是**随机**的
 
@@ -12296,9 +12296,11 @@ fs.readFile(__filename, () => {
 
 在上述代码中，`setImmediate` 永远**先执行**。因为两个代码写在 IO 回调中，IO 回调是在 poll 阶段执行，当回调执行完毕后队列为空，发现存在 `setImmediate` 回调，所以就直接跳转到 check 阶段去执行回调了。
 
+**微任务**
+
 上面介绍的都是 macrotask 的执行情况，对于 microtask 来说，它会在以上每个阶段完成前**清空** microtask 队列，下图中的 Tick 就代表了 microtask
 
-![img](https://user-gold-cdn.xitu.io/2018/11/14/16710fb80dd42d27?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![node中的eventloop2](/Users/huangsiying/project/00 github/notes/images/node中的eventloop2.png)
 
 ```js
 setTimeout(() => {
@@ -12336,7 +12338,6 @@ process.nextTick(() => {
    })
  })
 })
-
 ```
 
 对于以上代码，大家可以发现无论如何，永远都是先把 nextTick 全部打印出来。
@@ -12407,6 +12408,35 @@ new Promise((resolve) => {
 })
 // 1 4 5 11 12 2 6 7 3 9 10 8
 // 1 4 5 11 12 2 6 3 9 7 10 8
+```
+
+#### node版本的差异
+
+11版本之前：
+
+一旦执行一个阶段，会将这个阶段里所有的任务执行完成之后才会执行该阶段的微任务
+
+11版本之后：
+
+一旦执行一个阶段里的宏任务，就立刻执行对应的微任务队列
+
+```js
+setTimeout(() => {
+  console.log('timer1')
+  Promise.resolve().then(res => {
+    console.log('promise1')
+  })
+})
+setTimeout(() => {
+  console.log('timer2')
+  Promise.resolve().then(res => {
+    console.log('promise2')
+  })
+})
+// 11前 timer1 timer2 promise1 promise2
+// 11后 timer1 promise1 timer2 promise2
+// check阶段的setImmediate和nextTick也是类似的
+// 也就是说node环境和浏览器的行为保持了一致
 ```
 
 ## 垃圾回收机制
