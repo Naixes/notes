@@ -1183,6 +1183,10 @@ CSS自定义属非常适合用来实现**主题的切换**
 
 # 布局
 
+## 双飞翼布局
+
+见代码
+
 ## 正常流
 
 正常流的盒子属于**格式化上下文(FC)**，在**CSS2.2**中可以是**表格**、**块**或**内联**。 在**CSS3**中引入了**flex**跟**grid**，当然以后会引入得更多。
@@ -1199,7 +1203,7 @@ BFC(Block formatting context)：直译为"块级格式化上下文"。
 
 创建了 BFC的元素就是一个独立的盒子，它是一个独立的渲染区域，只有Block-level box参与， 它规定了内部的Block-level Box如何布局，并且与这个区域外部毫不相干。
 
-Box是CSS布局的对象和基本单位， 直观点来说，就是一个页面是由很多个Box(即boxes)组成的。元素的类型和display属性，决定了这个Box的类型。 不同类型的Box， 会参与不同的Formatting context(一个决定如何渲染文档的容器)，因此Box内的元素会以不同的方式渲染。
+> Box是CSS布局的对象和基本单位，就是一个页面是由很多个Box(即boxes)组成的。**元素的类型和display属性，决定了这个Box的类型。** 不同类型的Box， 会参与不同的Formatting context(一个决定如何渲染文档的容器)，因此Box内的元素会以不同的方式渲染。
 
 常见的盒子类型：
 
@@ -1222,7 +1226,7 @@ Formatting context是W3C CSS2.1规范中的一个概念。它是页面中的一�
 
 素的显示模式 display，分为 块级元素行内元素行内块元素，其实，它还有很多其他显示模式。
 
-<img src="E:/Jennifer/other/notes/media/dis.png"  style="border: 1px dashed #ccc; padding: 5px;" />
+![dis](./media/dis.png)
 
 #### 参与BFC的条件
 
@@ -1233,11 +1237,11 @@ Formatting context是W3C CSS2.1规范中的一个概念。它是页面中的一�
 要给这些元素添加如下属性就可以触发BFC。
 
 ```
+-根元素
 -float属性不为none
 -position为absolute或fixed
 -display为inline-block, table-cell, table-caption, flex, inline-flex
 -overflow不为visible。
-
 ```
 
 #### BFC元素所具有的特性
@@ -1262,7 +1266,7 @@ BFC布局规则特性：
 计算BFC的高度时，自然也会检测浮动或者定位的盒子高度。
 ```
 
-<img src="E:/Jennifer/other/notes/media/fu.jpg" />
+<img src="./media/fu.jpg" />
 (2) 解决外边距合并问题
 
 外边距合并的问题。
@@ -1276,18 +1280,11 @@ BFC布局规则特性：
 
 属于同一个BFC的两个相邻盒子的margin会发生重叠，那么我们创建不属于同一个BFC，就不会发生margin重叠了。
 
-<img src="E:/Jennifer/other/notes/media/ma.png" />
+<img src="./media/ma.png" />
 
 (3) 制作右侧自适应的盒子问题
 
-主要用到 
-
-```
-普通流体元素BFC后，为了和浮动元素不产生任何交集，顺着浮动边缘形成自己的封闭上下文
-
-```
-
-<img src="E:/Jennifer/other/notes/media/you.png" />
+<img src="./media/you.png" />
 
 (4) 多列布局中防止最后一列因为浏览器四舍五入了列宽使总宽度会超出容器而掉下来，我们在多列布局中的最后一列里创建一个新的BFC，它将总是占据其他列先占位完毕后剩下的空间。 
 
@@ -1317,6 +1314,8 @@ BFC布局规则特性：
 
 ### IFC
 
+IFC(Inline Formatting Contexts)直译为"内联格式化上下文"，IFC的line box(线框)高度由其包含行内元素中最高的实际高度计算而来(不受到竖直方向的padding/margin影响)
+
 跟**BFC**不一样，**IFC**内的盒子会从**包含块**的顶部一个接着一个地水平排列。这些盒子会考虑水平 `margin`， `border`跟 `padding`。垂直对齐的方式也略有复杂。然后，包含形成一条线的框的矩形区域称为**线盒（line box）**。 
 
 **线盒（line box）的宽度**：由浮动情况跟它所在的包含块决定。
@@ -1331,13 +1330,17 @@ BFC布局规则特性：
 
 `vertical-align`的默认值就是基线。
 
-![img](https://mmbiz.qpic.cn/mmbiz_jpg/y0rsINPrlZy47EnPpnuzxFOjUlBytKfD4GPZTqnt4gj0mWhW1fxB0seiagCqHlDxTZ7yl8zpISZN8ls2LGDhRKg/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![字体对齐](./images/字体对齐.png)
 
 如上图所示，我们看到小写字母**x**的位置，它的上下边缘就是我们的**基线（baseline）**，但下边缘才是我们日常使用的属性值。顺便一提，CSS单位 `ex`便是指的这个**字母x**的高度。
 
-## 层叠上下文与层叠顺序
+### FFC和GFC
 
-其他参考：[http://verymuch.site/2019/01/18/CSS%E7%9A%84%E2%80%9C%E5%B1%82%E2%80%9D%E5%B3%A6%E2%80%9C%E5%8F%A0%E2%80%9D%E7%BF%A0/#more](http://verymuch.site/2019/01/18/CSS的"层"峦"叠"翠/#more)
+FFC(Flex Formatting Contexts)直译为"自适应格式化上下文"，display值 为flex或者inline-flex的元素将会生成自适应容器(flex container)，
+
+GFC(GridLayout Formatting Contexts)直译为"网格布局格式化上下文"， 当为一个元素设置display值为grid的时候，此元素将会获得一个独立 的渲染区域，我们可以通过在网格容器(grid container)上定义网格 定义行(grid definition rows)和网格定义列(grid definition columns) 属性各在网格项目(grid item)上定义网格行(grid row)和网格列 (grid columns)为每一个网格项目(grid item)定义位置和空间。
+
+## 层叠上下文与层叠顺序
 
 ![img](https://mmbiz.qpic.cn/mmbiz_png/y0rsINPrlZy47EnPpnuzxFOjUlBytKfD8PibeV0wAgc8rZLrbic8d8CMSXEDgFr0bzgUQ7lqnJewia0icgsx5L9WHg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
 
@@ -1372,7 +1375,7 @@ BFC布局规则特性：
 
 主轴和侧轴并不是固定不变的，通过flex-direction可以互换。
 
-![1498441839910](E:/Jennifer/other/notes/media/1498441839910.png)
+![1498441839910](./media/1498441839910.png)
 
 - flex子项目在主轴的缩放比例，不指定flex属性，则不参与伸缩分配
 
@@ -2763,6 +2766,18 @@ woff字体是Web字体中最佳格式，他是一个开放的TrueType/OpenType�
 
 图片是有诸多优点的，但是缺点很明显，比如图片不但增加了总文件的大小，还增加了很多额外的"http请求"，这都会大大降低网页的性能的。更重要的是图片不能很好的进行“缩放”，因为图片放大和缩小会失真。 
 
+no-image时代 不超过纯色为2的图像
+
+## 字体排版
+
+宋体非宋体 黑体非黑体 WIndows下的宋体叫中易宋体 SimSun，Mac是华文宋体STSong。WIndows下的黑体叫中易黑 体SimHei，Mac是华文黑体STHeiti。
+
+不要只写中文字体名，保证西文字体在中文字体前面。Mac- >Linux->Windows
+
+切忌不要直接使用设计师PSD的设计font-family，关键时刻再 去启动font-face(typo.css 、 Entry.css 、Type.css )
+
+`font-family: sans-serif;`系统默认，字体多个单词组成加引号。
+
 ## 字体图标优点
 
 ```
@@ -2869,6 +2884,12 @@ http://www.iconfont.cn/
    如果工作中，原来的字体图标不够用了，我们需要添加新的字体图标，但是原来的不能删除，继续使用，此时我们需要这样做
 
    把压缩包里面的selection.json 从新上传，然后，选中自己想要新的图标，从新下载压缩包，替换原来文件即可。
+
+# CSS ICON
+
+比svg还快
+
+http://cssicon.space/#/
 
 # 滑动门
 
@@ -3530,9 +3551,130 @@ img {
 
 ```
 
-# 伸缩布局(CSS3)
-
 # CSS管理
+
+## CSS模块化
+
+https://blog.csdn.net/Jsoning/article/details/103787035/
+
+### OOCSS
+
+Object Oriented CSS 面向对象的CSS
+
+OOCSS主要提倡两种规范
+
+- 结构和样式分开（定义一个元素的时候，将本身的结构和对元素外观的样式分开，增强css的复用性）
+
+```css
+<div class="header bg"></div>
+.header{
+  width: 500px;
+  height: 100px;
+}
+.bg{
+  background: #f00;
+}
+```
+
+- 容器和内容分开（最好不要直接使用标签名定义样式，减少对html的依赖）
+
+### AMCSS
+
+Attribute Modules for CSS CSS的属性模块
+AM是一种使用HTML 属性及其值而非样式元素的类的技术。这样，每个属性都可以有效地声明一个单独的命名空间来封装样式信息，从而使HTML和CSS更具可读性和可维护性。
+
+简单来说就是通过css属性选择器来模块化CSS
+
+```css
+<div am-blockName>
+  <div am-blockname-chilElement></div>
+  <p am-tritName="one two">hello</p>
+</div>
+[am-blockName] {
+  width: 500px;
+}
+
+[am-blockname-chilElement] {
+  height: 50px;
+}
+
+[am-tritName~="one"] {
+  font-size: 30px;
+}
+```
+
+### SMACSS
+
+http://smacss.com
+
+Scalable and Modular Architecture for CSS 可扩展的模块化架构的CSS，像OOCSS一样以减少重复样式为基础。划分为5个层次来划分css
+
+Base-标签元素的预设值
+
+Layout-整个网站**大架构**的外观
+
+Module-不同页面的公共模块
+
+State-元素的不同状态
+
+Theme-画面上所有**主视觉**的定义
+
+修饰符使用--子模块使用__
+
+### BEM
+
+http://en.bem.info/
+
+主要用来给项目命名，案例：elementUI
+
+block-代表更高级别的抽象或组件，比如选项卡导航
+
+block__element-代表其后代，比如选项卡其中一个标签
+
+block--modifier-代表其不同状态或版本，比如当前选项卡
+
+只使用BEM，还不能够完全表达出class的所有含义，因此可以使用部分命名空间来增强class的表达
+
+.l-: 布局(layouts)
+.o-: 对象(objects)
+.c-: 组件(components)
+.js: js的钩子(JavaScript hooks)
+.is-|.has-: 状态类(state classes)
+.t1|.s1: 排版大小(typography sizes)
+.u-: 实用类(utility classes)
+
+### SUIT
+
+http://suitcss.github.io/
+
+起源于BEM
+
+### ACSS
+
+http://patternlab.io
+
+原子css
+
+### ITCSS
+
+**nverted Triangle CSS 倒三角CSS**
+可扩展和可维护的CSS架构
+
+**ITCSS的主要原则之一是将CSS代码库分为几个部分（称为layer），这些部分采用倒三角形的形式：**
+
+Settings –与预处理器一起使用，并包含字体，颜色定义等。
+
+Tools–全局使用的mixin和功能。重要的是不要在前2层中输出任何CSS。
+
+Generic –重置或规范化样式，框大小定义等。这是生成实际CSS的第一层。
+
+Elements –HTML元素（例如H1，A等）的样式。这些带有浏览器的默认样式，因此我们可以在此处重新定义它们
+
+Objects –定义未装饰设计模式的基于类的选择器，例如OOCSS已知的媒体对象
+
+Components –特定的UI组件。这是我们大部分工作的地方，我们的UI组件通常由对象和组件组成
+
+Utilities –工具程序类能够覆盖三角形中之前发生的样式
 
 ## 推荐目录结构
 
@@ -3572,6 +3714,21 @@ src/
 
 这只是推荐的一种目录结构，具体使用可以根据实际情况进行调整。比如我在项目的 src 目录下创建了模块目录，按照模块来拆分路由以及页面、组件，所以每个模块目录下都会有 pages/ 目录和 components/ 目录。
 
+### reset的选择
+
+Reset.css重制，Normaliza.css修复，Neat.css融合
+
+移动端
+
+```css
+html {
+  box-sizing: border-box;
+}
+*,*:before,*:after {
+  box-sizing: inherit;
+}
+```
+
 ## 避免样式冲突
 
 由于 CSS 的规则是全局的，任何一个样式规则，都对整个页面有效，所以如果不对选择器的命名加以管控会很容易产生冲突。
@@ -3600,6 +3757,38 @@ BEM 是 Block、Element、Modifier 三个单词的缩写，Block 代表独立的
 ```
 
 但这种命名方式带来了一个问题，那就是如果想在引用组件的同时，覆盖它的样式会变得困难，因为编译后的样式名是随机。例如，在上面的示例代码中，如果想在另一个组件中覆盖 className 样式就很困难，而在手动命名情况下则可以直接重新定义 className 样式进行覆盖。
+
+## CSS代码规范
+
+### CSS HINT
+
+csshint包，在线：csslint.net
+
+1. 不要使用多个class选择元素，如a.foo.boo，这在ie6及以下不能正确解析
+
+2. 移除空的css规则，如a{}
+
+3. 正确的使用显示属性，如display:inline不要和width，height，float，margin,padding同时使用，display:inline-block不要和float 同时使用等
+
+4. 避免过多的浮动，当浮动次数超过十次时，会显示警告
+
+5. 避免使用过多的字号，当字号声明超过十种时，显示警告
+
+6. 避免使用过多web字体，当使用超过五次时，显示警告
+
+7. 避免使用id作为样式选择器
+
+8. 标题元素只定义一次
+
+9. 使用width:100%时要小心
+
+10. 属性值为0时不要写单位
+
+11. 各浏览器专属的css属性要有规范， 例如.foo{-moz-border-radius:5px;border-radius:5px}
+
+12. 避免使用看起来像正则表达式的css3选择器
+
+13. 遵守盒模型规则
 
 ## 高效复用样式
 
