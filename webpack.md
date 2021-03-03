@@ -36,19 +36,23 @@
 
 ### webpack
 
-webpack 是前端的一个项目构建工具，它是基于 Node.js 开发出来的一个前端工具；
+webpack 是前端的一个项目构建工具，它是基于 Node.js 开发出来的一个前端工具，本质上是一个JavaScript应用程序的静态模块打包器(Static Module bundle)；
 
-可以代码转换，文件优化，代码分割，模块合并，自动刷新，代码校验，自动发布
+可以代码转换，文件优化，代码分割，模块合并，自动刷新，代码校验，自动发布，处理css兼容，处理图片等
 
-#### 安装的两种方式
+#### 安装的几种方式
 
-1. 运行`npm i webpack -g`全局安装webpack，这样就能在全局使用webpack的命令
+1. 运行`npm i webpack -g`全局安装webpack，这样就能在全局使用webpack的命令，不推荐
+
 2. 在项目根目录中运行`npm i webpack webpack-cli --save-dev`安装到项目开发依赖中
+
 3. `npx webpack`运行，5.2支持，默认找node_module中bin中的webpack.cmd文件执行，执行过程中用到webpack-cli，cli会查找配置文件
 
-#### 0配置
-
-打包：支持js的模块化（require）
+   ```js
+   webpack -v //全局版本
+   npx webpack -v // 当前版本
+   npx info webpack // 查看各个版本信息
+   ```
 
 ## 使用webpack打包构建
 
@@ -97,7 +101,10 @@ module.exports = {
     entry: path.resolve(__dirname, 'src/js/main.js'), // 项目入口文件，默认./src/index.js
     output: { // 配置输出选项
         path: path.resolve(__dirname, 'dist'), // 配置输出的路径
-        filename: 'bundle.js' // 配置输出的文件名，默认main.js
+        filename: 'bundle.js', // 配置输出的文件名
+        // 公共路径：会在每个html引用的资源前添加，资源不在本地时使用
+        // 如果不是所有的都需要可以单独配置
+        // publicPath: 'http://www.sinnote.cn'
     }
 }
 ```
@@ -228,7 +235,7 @@ modile.exports = function(env, argv) {
 
 在命令行传参：`npm run build -- --config webpack.config.my.js // --后面会当做字符串`
 
-**多入口**  ：
+##### **多入口配置**  
 
 ```js
 var path = require('path');
@@ -260,9 +267,9 @@ module.exports = {
 
 #### mode
 
- none|development|production：优化级别的区别
+ none|development|production（默认，压缩等优化）：优化级别的区别
 
-### loader
+### loader-文件预处理
 
 预处理js以外的文件
 
@@ -318,6 +325,8 @@ module: { // 用来配置第三方loader模块的
 
 加载任何类型文件，并形成一个文件模块
 
+一般用来处理图片，字体等
+
 ```js
 { test: /\.(png|jpg|gif|jpeg|bmp)$/i, use: {
     loader: 'file-loader',
@@ -326,6 +335,10 @@ module: { // 用来配置第三方loader模块的
 		outputPath: 'images/'
     }
 }},
+// 处理步骤
+// 发现符合要求的模块
+// 打包到dist目录下，改一个名字可以自定义
+// 返回图片名称给引入的变量
 ```
 
 #### 处理图片
@@ -365,7 +378,7 @@ module: { // 用来配置第三方loader模块的
         outputPath: 'images/',
         // 小于这个大小会进行base64编码直接写到css文件，否则使用file-loader产生真实文件
         limit: 43960,
-	    name: '[hash:8]-[name].[ext]'
+	      name: '[hash:8]-[name].[ext]'
     }
 },
 ```
@@ -436,7 +449,7 @@ module.exports = {
 }, exclude: /node_modules/ }
 ```
 
-1. presets的配置也可以在项目根目录中添加`.babelrc`文件，并修改这个配置文件如下：
+presets的配置也可以在项目根目录中添加`.babelrc`文件，并修改这个配置文件如下，命令中添加配置如`"dev": webpack --mode development --module-bind js=babel-loader`：
 
 ```
 {
@@ -545,9 +558,58 @@ module.exports = {
 
 在代码中引入：`require('@babel/polyfill')`
 
+As of Babel 7.4.0, this package has been deprecated in favor of directly including `core-js/stable` (to polyfill ECMAScript features) and `regenerator-runtime/runtime` (needed to use transpiled generator functions):
+
+```js
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+```
+
 **！！已弃用↑**
 
 <https://babeljs.io/docs/en/babel-plugin-transform-runtime#docsNav>
+
+```js
+// 注意：以全局变量的方式注入，污染全局变量，推荐使用@babel/plugin-transform-runtime，以闭包方式注入
+{
+  test: /\.js$/,
+    use: {
+      loader: 'babel-loader',
+      options: {
+        presets: [
+          '@babel/preset-env',
+          // 可以按需自动引入用到的polyfills
+          // 必须同时设置corejs:3 默认使用corejs:2
+          // 需安装core-js@3
+          {"useBuiltIns": "usage", corejs: 3},
+          '@babel/preset-react'
+        ],
+      }
+    },
+    // 包含
+    include: path.resolve(__dirname, 'src'),
+    // 排除
+    exclude: /node_modules/
+},
+// 方法2，推荐在babelrc中配置
+{
+  test: /\.js$/,
+  use: {
+    loader: 'babel-loader',
+    options: {
+      plugins: [
+        // @babel/plugin-transform-runtime需要配合@babel/runtime-corejs3
+        [
+          '@babel/plugin-transform-runtime', 
+          {
+            corejs: 3
+          }
+        ],
+      ]
+    }
+  }
+},
+```
 
 ### 代码质量-eslint
 
@@ -616,7 +678,7 @@ module: {
 rules: [
     {
         test: require.resolve('jquery'),
-    	use: 'expose-loader?$'
+    		use: 'expose-loader?$'
     }
 ]
 ```
@@ -645,8 +707,6 @@ externals: {
 }
 ```
 
-   
-
 ### 测试
 
 #### 单元测试
@@ -673,8 +733,6 @@ test('testName', () => {
     expect(mod.fab(7)).toBe(13)
 })
  ```
-
-
 
 ## 相关文章
 
@@ -723,7 +781,7 @@ test('testName', () => {
 "pub": "webpack --config webpack.publish.config.js"
 ```
 
-## 插件
+## plugins-插件
 
 ### `webpack-dev-server`实时构建
 
@@ -752,9 +810,9 @@ module.exports = {
 		// 显示进度条
 		progress: true,
 		// 从dist目录开始执行
-		contentBase: "./dist"
-        // 压缩
-        compress: true
+		contentBase: "./dist",
+    // 压缩
+    compress: true
 	},
 	...
 }
@@ -787,7 +845,20 @@ devServer:{
 }
 ```
 
-#### 启用热更新
+#### HMR启用热更新
+
+HMR：hot module replacement
+
+增加devServer配置
+
+```js
+devServer: {
+    port: 3000,
+    ...
+    // 热更新
+    hot: true
+},
+```
 
 在`plugins`节点下新增：
 
@@ -810,9 +881,7 @@ if(module.hot) {
 }
 ```
 
-
-
-### html-webpack-plugin`配置index页面
+### html-webpack-plugin配置index页面
 
 由于使用`--contentBase`指令的过程比较繁琐，需要指定启动的目录，同时还需要修改index.html中script标签的src属性，所以推荐大家使用`html-webpack-plugin`插件配置启动页面.
 
@@ -1128,8 +1197,7 @@ watchOptions: {
 ```js
 devServer: {
     proxy: {
-        // 1
-        // 将前端服务器请求代理到3000
+        // 1将前端服务器请求代理到3000
         // '/api': 'http://localhost:3000'
         '/api': {
             target: 'http://localhost:3000',
@@ -1174,18 +1242,35 @@ resolve: { // 解析 第三方包 common
 }
 ```
 
-#### 定义环境变量
+#### 区分不同环境配置
 
-内置插件：
+区分不同的环境执行不同的配置，比如生产环境不需要devServer，开发环境不需要css等优化
 
-```js
-plugins: [
-    new webpack.DefinePlugin({
-        // DEV: "'dev'" // 定义了一个DEV = 'dev'的环境变量可以判断当前环境
-        DEV: JSON.stringify('dev')
-    })
-]
-```
+**开发环境：**
+
+devServer
+
+sourceMap
+
+接口代理，proxy
+
+...
+
+**生产环境：**
+
+treeShaking
+
+代码压缩
+
+提取公共代码
+
+**共通：**
+
+入口
+
+部分相同的代码处理
+
+**方案：**
 
 区分不同的环境：三个配置文件（webpack.base.js/webpack.dev.js/webpack.prod.js）
 
@@ -1212,10 +1297,50 @@ module.exports = smart(base, {
 // 执行npm run build -- --config webpack.dev.js
 ```
 
+#### 定义环境变量
+
+内置插件：定义全局常量
+
+```js
+plugins: [
+    new webpack.DefinePlugin({
+        // DEV: "'dev'" // 定义了一个DEV = 'dev'的环境变量可以判断当前环境
+        DEV: JSON.stringify('dev')
+    })
+]
+```
+
+方式二：插件yargs：`npm i yargs`
+
+```js
+// scripts
+"scripts": {
+	"test": "echo \"Error: no test specified\" && exit 1",
+	"build:dev": "webpack --config ./config/webpack.dev.js",
+	"build:prod": "webpack --config ./config/webpack.prod.js --env production",
+	"build": "webpack --config ./webpack.config.js",
+	"dev:server": "webpack-dev-server"
+},
+
+// webpack.config.js
+// 获取环境变量
+const argv = require('yargs').argv
+// 可以用于判断
+console.log(argv.env);
+```
+
 ### Webpack 性能优化
 
 - 有哪些方式可以减少 Webpack 的打包时间
 - 有哪些方式可以让 Webpack 打出来的包更小
+
+一般引入第三方库的优化的三种方式：
+
+配置多入口，配合全局变量引入（webpack.ProvidePlugin）
+
+抽取公共代码（推荐）
+
+动态加载即懒加载
 
 #### 减少 Webpack 打包时间
 
@@ -1449,7 +1574,24 @@ module.exports = {
 }
 ```
 
+或者在.babelrc中配置
+
+```
+{
+	"presets": [
+		[
+			...,
+			"modules": false
+		]
+	]
+}
+```
+
+
+
 ##### Tree Shaking删除未被引用的代码
+
+依赖ES6模块语法，所以注意使用使用ES6模块化的库比如 lodash-es
 
 **Tree Shaking 可以实现删除项目中未被引用的代码（import引入，require不支持，require会把引用到的结果放到default中）**，比如
 
@@ -1463,7 +1605,7 @@ import { a } from './test.js'
 
 对于以上情况，`test` 文件中的变量 `b` 如果没有在项目中使用到的话，就不会被打包到文件中。
 
-如果使用 Webpack 4 的话，开启生产环境就会自动启动这个优化功能。
+如果使用 Webpack 4 的话，开启生产环境就会自动启动这个优化功能。3需要插件uglifyjsWebpackPlugin
 
 ##### 提取公共代码
 
@@ -1508,7 +1650,7 @@ module.exports = {
   optimization: {
     splitChunks: {
       // 动态引入的模块
-      chunks: 'async',
+      chunks: 'async', // all initial
       minSize: 30000,
       minChunks: 1,
       // 用来限制异步模块内部的并行最大请求数的，可以理解为是每个import()它里面的最大并行请求数量
@@ -1517,15 +1659,19 @@ module.exports = {
       // 如果同时又两个模块满足cacheGroup的规则要进行拆分，但是maxInitialRequests的值只能允许再拆分一个模块，那尺寸更大的模块会被拆分出来
       maxInitialRequests: 3,
       automaticNameDelimiter: '~',
+      // 自动命名
       name: true,
       cacheGroups: {
         vendors: {
+          // name: false时使用的自定义命名
+          filename: 'xxx',
           test: /[\\/]node_modules[\\/]/,
           priority: -10
         },
         default: {
           minChunks: 2,
           priority: -20,
+          // 不重复打包，复用打包过的
           reuseExistingChunk: true
         }
       }
@@ -1539,12 +1685,41 @@ module.exports = {
 ```js
 // es6草案语法，jsonp实现动态加载文件
 // vue，react的懒加载也是同样的方式
-import('./source.js').then(data => {
+import(/*webpackChunkName:'jquery'*/ './source.js').then(data => {
     console.log(data)
 })
 ```
 
 插件：@babel/plugin-syntax-dynamic-import，在js的rules中的plugins中声明
+
+#### 代码包分析工具
+
+`webpack-bundle-analyzer`
+
+配置
+
+```js
+// 包分析工具
+const WebpackBundleAnalyzer = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+...
+	plugins: [
+		// css抽取
+		new MiniCssExtractPlugin({
+			// 打包后的名字
+			filename: 'css/main.css'
+		}),
+		// 定义环境变量，内置插件
+		new webpack.DefinePlugin({
+			// 在这里'prod'指的是变量需要转化成字符串
+			DEV: JSON.stringify('prod')
+		}),
+		// 包分析工具
+		new WebpackBundleAnalyzer()
+	],
+...
+```
+
+
 
 #### 相关文章
 
@@ -1563,6 +1738,5 @@ compile.js核心模块引用了tapable
 
 
 安装tapable：
-
 
 
