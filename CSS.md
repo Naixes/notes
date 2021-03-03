@@ -3817,13 +3817,17 @@ csshint包，在线：csslint.net
 
 # 矩阵
 
+在数学中，矩阵(Matrix)是一个 按照长方阵列排列的复数或实数集合， 由 m × n 个数amn排成的m行n列 的数表称为m行n列的矩阵，简称m × n矩阵。这m×n 个数称为矩阵A的元素，简称为元
+
 性能高，应用：svg，canvas，webgl，css
 
 ## css
 
 ### 2D
 
-transform，矩阵为3*3，无论是旋转还是位移，本质上都是由matrix()实现的
+`transform: matrix(a,b,c,d,e,f)`，矩阵为3*3，无论是旋转还是位移，本质上都是由matrix()实现的
+
+![transform矩阵计算](./images/transform矩阵计算.png)
 
 ```js
 matrix(sx,tan(θy),tan(θx),sy,n,m) // n:水平偏移，m:垂直偏移，sx:缩放x，sy:缩放y
@@ -3832,11 +3836,17 @@ Math.cos(this.value * Math.PI / 180);
 Math.sin(this.value * Math.PI / 180); 
 ```
 
+http://www.css88.com/tool/css3Preview/Transform-Matrix.html
+
 ### 3D
 
 矩阵为4*4
 
 ## 工具
+
+参考：
+
+http://wow.techbrood.com/fiddle/25741
 
 matrix3d
 http://ds-overdesign.com/transform/matrix3d.html 

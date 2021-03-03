@@ -101,7 +101,6 @@ DOM对象转换成jQuery对象：
 ```javascript
 var $obj = $(domObj);
 // $(document).ready(function(){});就是典型的DOM对象转jQuery对象
-
 ```
 
 jQuery对象转换成DOM对象：
@@ -112,7 +111,6 @@ var $li = $("li");
 $li[0]
 //第二种方法
 $li.get(0)
-
 ```
 
 # 选择器
@@ -136,8 +134,6 @@ jQuery选择器虽然很多，但是选择器之间可以相互替代。所以�
 | 交集选择器 | $(“div.redClass”); | 获取class为redClass的div元素 |
 
 > 总结：跟css的选择器用法一模一样。
-
-
 
 ## 层级选择器
 
@@ -659,3 +655,23 @@ $.fn.pluginName = function() {};
 ```
 
 制作手风琴插件
+
+# 原理
+
+```js
+(function(w, u) {
+  var jQuery = function(selector, context) {
+    // new $('.test')和$('.test')基本相等
+    return new jQuery.fn.init(selector, context)
+    
+  }
+  jQuery.fn = jQuery.prototype = {
+    init: function(selector, context) {
+      
+    }
+  }
+  jQuery.fn.init.prototype = jQuery.fn
+  // jQuery.fn.init.prototype = jQuery.fn = jQuery.protoype // 为了让fn上面有所有的方法
+})(window) // 保护全局变量，加快查找速度
+```
+
