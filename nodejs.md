@@ -1832,7 +1832,7 @@ module.exports = {
 
 express：基于回调，自带路由
 
-koa：基于promise，不带路由
+koa：基于promise，更轻量，不带路由，增强错误处理，无任何预置中间件，核心就是实现了http协议的处理
 
 版本：1：generator
 
@@ -1860,19 +1860,43 @@ server.use(router.routes())
 
 ```
 
+### 核心概念
+
+![koa核心概念](/Users/huangsiying/project/00 github/notes/images/koa核心概念.png)
+
+#### koa application
+
+主程序
+
+#### context
+
+ctx：上下文，类似于管道流水线
+
+#### req res
+
+请求响应
+
+#### 工作原理
+
+洋葱模型：顺序执行，先进后出
+
 ### koa-router
 
 ```js
 const Koa = require('Koa')
 const Router = require('koa-router')
 
-let server = new Koa
+let server = new Koa()
 server.listen(8080)
 
-let router = new Router
+let router = new Router()
+
+// 路径前缀设置
+router.prefix = '/api'
+
 // router.get('/a', (ctx, next) => {
-// 	ctx.req
-// 	ctx.res
+// 	ctx.request
+// 	ctx.response
 // })
 router.get('/a', async ctx => {
 	ctx.body = 'aa'
@@ -1895,8 +1919,8 @@ server.listen(8080)
 
 let router = new Router()
 // router.get('/a', (ctx, next) => {
-// 	ctx.req
-// 	ctx.res
+// 	ctx.request
+// 	ctx.response
 // })
 router.get('/a', async ctx => {
 	ctx.body = 'aa'
@@ -1943,6 +1967,7 @@ router.get('/a', ctx => {
 router.use('/user', require('./routers/user'))
 
 server.use(router.routes())
+
 // routers/user/index.js
 const Router = require('koa-router')
 
@@ -1954,6 +1979,7 @@ router.use('/admin', require('./admin'))
 router.use('/comp', require('./comp'))
 
 module.exports = router.routes()
+
 // routers/user/admin.js
 const Router = require('koa-router')
 
@@ -2053,6 +2079,53 @@ server.use(router.routes())
 // ctx.attachment()       
 ```
 
+#### 路由压缩
+
+路由合并：koa-combine-routers
+
+将路由模块化，推荐目录：api各个路由的处理逻辑，router/routes.js...合并所有路由，index.js使用路由
+
+### 安全header处理
+
+koa-helmet：加入一些安全的header
+
+```
+// This...
+app.use(helmet());
+ 
+// ...is equivalent to this:
+app.use(helmet.contentSecurityPolicy());
+app.use(helmet.dnsPrefetchControl());
+app.use(helmet.expectCt());
+app.use(helmet.frameguard());
+app.use(helmet.hidePoweredBy());
+app.use(helmet.hsts());
+app.use(helmet.ieNoOpen());
+app.use(helmet.noSniff());
+app.use(helmet.permittedCrossDomainPolicies());
+app.use(helmet.referrerPolicy());
+app.use(helmet.xssFilter());
+```
+
+### koa-json
+
+格式化
+
+```
+var Koa = require('koa');
+var app = new Koa();
+ 
+// 只在参数传递的时候启用
+app.use(json({ pretty: false, param: 'pretty' }));
+ 
+app.use((ctx) => {
+  ctx.body = { foo: 'bar' };
+});
+
+// 方法二
+JSON.stringify("{...}", null, 2)
+```
+
 ### koa-static
 
 可缓存
@@ -2096,6 +2169,8 @@ server.use(staticRouter.routes())
 
 ### koa-better-body
 
+类似的，koa-body
+
 可以处理二进制数据
 
 ctx.request.fields
@@ -2122,6 +2197,18 @@ router.post('/upload', ctx => {
 })
 
 server.use(router.routes())
+```
+
+### @koa/cors
+
+跨域处理
+
+```
+const Koa = require('koa');
+const cors = require('@koa/cors');
+ 
+const app = new Koa();
+app.use(cors());
 ```
 
 ### cookie
@@ -2435,6 +2522,56 @@ server.use(async ctx => {
     })
 })
 ```
+
+### 开发热加载
+
+nodemon
+
+### 配置webpack
+
+见webpack笔记
+
+clean-webpack-plugin，webpack-node-externals，@babel/core，@babel/node，@babel/preset-env，babel-loader，cross-env
+
+执行使用了babel的node`npx babel-node src/index.js`
+
+监控使用了babel的node`npx nodemon --exec babel-node src/index.js`
+
+#### webpack调试
+
+`npx node --inspect-brk ./node_modules/.bin/webpack --inline --progress`
+
+#### 优化
+
+##### npm-check-updates
+
+检查更新npm-check-updates，全局安装
+
+`ncu `检查`ncu -u`更新，更新完成后要重新安装依赖
+
+##### koa-compose
+
+整合中间件
+
+##### Koa-compress
+
+##### 根据环境变量区分不同的配置
+
+DefinePlugin：定义常量
+
+```
+new webpack.DefinePlugin({
+	// ...
+})
+```
+
+**webpack-merge**
+
+**terser-webpack-plugin**
+
+### vscode调试
+
+配置：launch.js，修改路径和参数
 
 ### 案例
 
@@ -3617,7 +3754,7 @@ test()
 
 ##### 函数式编程在Node中的应用 
 
-1.高阶函数：可以将函数作为输入或者返回值，形成一种后续传递风格的结果接受方式，而非单一的返回值形式。后续传递风格的程序将函数业务重点从返回值传递到回调函数中。 
+1.高阶函数：可以将函数作为输入或者返回值，形成一种后续传递风格的结果接受方式，而非单一的返回值形式。后续传递风格的程序将函数业务重点从返回值传递到回调函数中。
 
 ```js
 app.use(function(){//todo})
