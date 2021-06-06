@@ -626,11 +626,11 @@ react并不是将click事件绑定到真实dom上，而是在document监听所�
 
 这样的方式减少了内存消耗，还能再组件挂载销毁时统一订阅和移除事件。另外冒泡到document上的也不是浏览器原生事件，而是react自己实现的合成事件，所以如果不想事件冒泡的话`event.stopPropagation`是无效的，而应该调用`event.preventDefault`
 
-![react事件绑定原理](E:\Jennifer\other\notes\react\images\react事件绑定原理.png)
+![react事件绑定原理](.\images\react事件绑定原理.png)
 
 总流程：
 
-![reat事件绑定流程](E:\Jennifer\other\notes\react\images\reat事件绑定流程.png)
+![reat事件绑定流程](.\images\reat事件绑定流程.png)
 
 #### 事件注册
 
@@ -824,6 +824,45 @@ const fiber = {
 - fiber树：在阶段一diff计算时基于vdom树生成的fiber树，本质是链表
 - 从stack reconciler到fiber reconciler源码层面就是干了一件递归改循环的事
 
+# React16新特性
+
+## 三大新特性
+
+此外还提供了一个componentDidCatch内置函数，错误发生时可以友好的展示callback组件，可以捕捉到子元素异常，可以复用错误组件
+
+### TimeSlicing
+
+解决cpu速度问题，在执行任务期间可以随时暂停，干别的事情，让在性能极差的机器上也能保持性能
+
+### suspense
+
+解决网络IO问题，配合lazy使用，实现异步加载组件，能暂停当前渲染，完成某件事之后再继续渲染，解决react的异步副作用问题
+
+### hooks
+
+让函数式组件更加灵活
+
+解决问题：
+
+组件复用状态逻辑困难 - useState返回状态值和函数
+
+复杂组件难以理解，高阶组件和函数式组件嵌套过深
+
+class组件的this指向问题
+
+生命周期
+
+- useState返回状态值和函数
+- useEffect接受命令式，可能有副作用代码
+- useContext接受上下文对象，返回当前上下文
+- useReducer，useState的替代方案
+- useCallback
+- useMemo
+- useRef
+- useImperativeMethods自定义使用ref时公开给父组件的实例值
+- useMutationEffect更新兄弟组件之前，react执行dom改变的同一阶段触发
+- useLayoutEffect，dom改变后同步触发，从dom读取布局同步重新渲染
+
 # 豆瓣电影案例
 
 ## Node.js设置跨域
@@ -897,26 +936,3 @@ fetchJSONP('')
     import {Route, Link, Redirect} from 'react-router-dom'
     <Redirect to="/movie/in_theaters"></Redirect>
 ```
-
-## 相关文章
-
-- [ANT DESIGN 一个 UI 设计语言](https://ant.design/index-cn)
-- [react-router-dom](https://reacttraining.com/react-router/web/guides/quick-start)
-- [豆瓣电影API地址](https://developers.douban.com/wiki/?title=api_v2)
-
-- [正在热映 - in_theaters](https://api.douban.com/v2/movie/in_theaters)
-- [即将上映 - coming_soon](https://api.douban.com/v2/movie/coming_soon)
-- [top250](https://api.douban.com/v2/movie/top250)
-- [电影详细信息 - subject](https://api.douban.com/v2/movie/subject/26309788)
-
-- [跨域资源共享 CORS 详解 - 阮一峰](http://www.ruanyifeng.com/blog/2016/04/cors.html)
-- [Request - Simplified HTTP client](https://github.com/request/request)
-- [CSS3 transform 属性](http://www.w3school.com.cn/cssref/pr_transform.asp)
-- [ES6 - Promise规范 - 阮一峰](http://es6.ruanyifeng.com/#docs/promise)
-- [刘龙彬 - 博客园 - Javascript中Promise的简单使用](http://www.cnblogs.com/liulongbinblogs/p/6731288.html)
-- [Javascript 中的神器——Promise](http://www.jianshu.com/p/063f7e490e9a)
-- [MDN - Fetch API](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API)
-- [MDN - Response](https://developer.mozilla.org/zh-CN/docs/Web/API/Response)
-- [fetch-jsonp - 支持JSONP的Fetch实现](https://www.npmjs.com/package/fetch-jsonp)
-
-- http://blog.csdn.net/u013531824/article/details/51003775)

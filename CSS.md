@@ -3827,20 +3827,38 @@ csshint包，在线：csslint.net
 
 `transform: matrix(a,b,c,d,e,f)`，矩阵为3*3，无论是旋转还是位移，本质上都是由matrix()实现的
 
+偏移
+
 ![transform矩阵计算](./images/transform矩阵计算.png)
 
 ```js
 matrix(sx,tan(θy),tan(θx),sy,n,m) // n:水平偏移，m:垂直偏移，sx:缩放x，sy:缩放y
+// 缩放
+x' = ax+cy+e = s*x+0*y+0 = s*x; 
+y' = bx+dy+f = 0*x+s*y+0 = s*y;
+matrix(sx, 0, 0, sy, 0, 0); 
+等同于scale(sx, sy);
 // 旋转
 Math.cos(this.value * Math.PI / 180);
 Math.sin(this.value * Math.PI / 180); 
+transform: matrix(0.866025,0.500000,-0.500000,0.866025,0,0); transform:rotate(30deg);
+//拉伸(skew)
+matrix(1,tan(θy),tan(θx),1,0,0)
+x' = x+y*tan(θx)+0 = x+y*tan(θx) 
+y' = x*tan(θy)+y+0 = x*tan(θy)+y
 ```
+
+旋转
+
+<img src="CSS.assets/截屏2021-05-25 下午4.03.49.png" alt="截屏2021-05-25 下午4.03.49" style="zoom:50%;" />
 
 http://www.css88.com/tool/css3Preview/Transform-Matrix.html
 
 ### 3D
 
 矩阵为4*4
+
+<img src="CSS.assets/截屏2021-05-25 下午3.57.27.png" alt="截屏2021-05-25 下午3.57.27" style="zoom:50%;" />
 
 ## 工具
 

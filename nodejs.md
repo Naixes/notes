@@ -640,12 +640,6 @@ fs.createReadStream(path).pipe(fs.createWriteStream(path))
 
 应用：压缩，加密
 
-```js
-
-```
-
- 
-
 ### 文件操作扩展包
 
 fs-extra
