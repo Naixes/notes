@@ -1,8 +1,34 @@
 ## 概览
 
+### 历史
+
+过渡阶段的底层还是vue2
+
+<img src="Vue3.assets/截屏2021-06-08 下午11.03.19.png" alt="截屏2021-06-08 下午11.03.19" style="zoom:30%;" />
+
 vuejs/rfsc：可以看到一些api在3和2的区别
 
 https://github.com/vuejs/rfcs
+
+### vite
+
+官方，esbuild构建，esmodule，速度快，核心原理把module临时替换
+
+不考虑兼容可以直接使用，否则使用webpack
+
+#### 原理
+
+1. 内置服务器拦截HTTP请求
+
+   ```js
+   import {createApp} from 'vue'
+   // node_modules路径转移
+   import {createApp} from '/@modules/vue'
+   ```
+
+2. import ts, *.vue替换，使用es-module-lexer分析import，返回js
+3. 核心编译Esbuild+Esmodule+按需加载
+4. 热更新websocket
 
 ### slot
 

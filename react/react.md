@@ -2,6 +2,8 @@
 
 声明式，组件化，一次学习随处编写
 
+特点：虚拟dom，组件化，声明式，灵活（配合redux，mobx库等），高效，面向对象（封装组件内部的资源和数据流动）
+
 ## React简介
 
 - React 起源于 Facebook 的内部项目，因为该公司对市场上所有 JavaScript MVC 框架，都不满意，就决定自己写一套，用来架设 Instagram（照片交友） 的网站。做出来以后，发现这套东西很好用，**就在2013年5月开源了**。
@@ -11,6 +13,8 @@
   - Framework（框架）：大而全的是框架；框架提供了一整套的解决方案；所以，如果在项目中间，想切换到另外的框架，是比较困难的；
 
 ### 前端三大主流框架
+
+react是构建用户界面js库，整个react生态可以理解为一个框架
 
 ### React与vue的对比
 
@@ -45,7 +49,7 @@ React 需要**使用 JSX**，有一定的上手成本，并且需要一整套的
 
 #### 移动APP开发体验方面
 
-- Vue，结合 Weex 这门技术，提供了 迁移到 移动端App开发的体验（Weex，目前只是一个 小的玩具， 并没有很成功的 大案例；）
+- Vue，结合 Weex 这门技术，提供了 迁移到 移动端App开发的体验（Weex，目前只是一个 小的玩具， 并没有很成功的 大案例；现在已经不维护了）
 - React，结合 ReactNative，也提供了无缝迁移到 移动App的开发体验（RN用的最多，也是最火最流行的）；
 
 ### React的优点
@@ -58,7 +62,9 @@ React 需要**使用 JSX**，有一定的上手成本，并且需要一整套的
 
 ## 几个核心的概念
 
-### 虚拟DOM（Virtual Document Object Model）
+### 虚拟DOM
+
+Virtual Document Object Model
 
 - **DOM的本质是什么**：浏览器中的概念，浏览器中用JS对象来表示页面上的元素，并提供了操作DOM 对象的API；
 
@@ -104,6 +110,8 @@ const ul = {
   <li>1</li>
 </ul>
 ```
+
+优点：批处理优化，diff算法
 
 ### Diff算法
 
@@ -336,7 +344,9 @@ entry: [
 
 ## JSX语法
 
-> 什么是JSX语法：就是符合 xml 规范的 JS 语法；（语法格式相对来说，要比HTML严谨很多），可以理解成虚拟dom
+all in js
+
+> 什么是JSX语法：就是符合 xml 规范的 JS 语法；（语法格式相对来说，要比HTML严谨很多），可以理解成虚拟dom，可拓展的标记性语言，js的扩展
 >
 > JSX是一种JavaScript的语法扩展，其格式比较像模版语言，但事实上完全是在JavaScript内部实现的。 
 >
@@ -372,7 +382,7 @@ entry: [
      }
      ```
 
-2. **jsx 语法的本质：**并不是直接把 jsx 渲染到页面上，而是内部先转换成了 createElement 形式，再渲染的；
+2. **jsx 语法的本质：**并不是直接把 jsx 渲染到页面上，而是内部先转换成了 React.createElement 形式，再渲染的；
 
 3. **在 jsx 中混合写入 js 表达式**：在 jsx 语法中，要把 JS代码写到 `{ }` 中
 
@@ -392,14 +402,14 @@ ReactDOM.render({arr.map(item => <h3>{item}</h3>)}, document.getElementById('app
 ```
 
 1. **在 jsx 中 写注释**：推荐使用`{ /* 这是注释 */ }`
-
 2. **为 jsx 中的元素添加class类名**：需要使用`className` 来替代 `class`；`htmlFor`替换label的`for`属性
-
 3. 在JSX创建DOM的时候，所有的节点，必须有唯一的根元素进行包裹；
+4. 在 jsx 语法中，标签必须成对出现，如果是单标签，则必须自闭和！
+5. <Fragment>占位符，或<></>
+6. 标签：dom标签和自定义组件，组件首字母大写，属性驼峰
+7. 通过扩展运算符传递给子组件参数
 
-4. 在 jsx 语法中，标签必须 成对出现，如果是单标签，则必须自闭和！
-
-> 当 编译引擎，在编译JSX代码的时候，如果遇到了`<`那么就把它当作 HTML代码去编译，如果遇到了 `{}` 就把 花括号内部的代码当作 普通JS代码去编译；
+> 当编译引擎，在编译JSX代码的时候，如果遇到了`<`那么就把它当作 HTML代码去编译，如果遇到了 `{}` 就把 花括号内部的代码当作 普通JS代码去编译；
 
 ## 相关文章
 
@@ -420,6 +430,26 @@ ReactDOM.render({arr.map(item => <h3>{item}</h3>)}, document.getElementById('app
 ##  安装 React Developer Tools 调试工具
 
 [React Developer Tools - Chrome 扩展下载安装地址](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=zh-CN)
+
+## 属性
+
+### dom属性
+
+### 非dom属性
+
+**dangerouslySetInnerHTML**，相当于innerHTML，xss攻击（跨站脚本攻击），只是名称提醒没有其他操作，需要自己进行转译
+
+`dangerouslySetInnerHTML={{_html: '<p>xx</p>'}}`
+
+**ref**，不能在函数组件上使用，current指当前dom，可以在函数式组件内部使用
+
+`const refv = React.createRef()`
+
+`ref={refv}`
+
+**key**，提高渲染性能，渲染数组时使用
+
+
 
 ## 设置样式
 
@@ -553,7 +583,7 @@ ReactDOM.render({arr.map(item => <h3>{item}</h3>)}, document.getElementById('app
 
 ### React 中的绑定事件
 
-1. 事件的名称都是React的提供的，因此名称的首字母必须大写`onClick`、`onMouseOver`
+1. 事件的名称都是React的提供的，因此名称的首字母必须大写`onClick`、`onMouseOver`，只能绑定在原生标签上
 
 2. 为事件提供的处理函数，必须是如下格式
 
@@ -575,7 +605,7 @@ ReactDOM.render({arr.map(item => <h3>{item}</h3>)}, document.getElementById('app
 
 4. 在React中，如果想要修改 state 中的数据，推荐使用 `this.setState({ })`这个方法是异步的，要立即拿到更改完数据可以用回调函数`this.setState({ }, cb)`
 
-5. 在 React 中另一个不同点是你不能通过返回 `false` 的方式阻止默认行为。你必须显式的使用 `e.preventDefault();`这里的e 是一个合成事件,你不需要担心跨浏览器的兼容性问题。
+5. 在 React 中另一个不同点是你不能通过返回 `false` 的方式阻止默认行为。你必须显式的使用 `e.preventDefault();`这里的e是一个合成事件,你不需要担心跨浏览器的兼容性问题。
 
 ```react
 import React, { Component } from "react"; 
@@ -611,14 +641,22 @@ export default class EventHandle extends Component {
 }
 ```
 
-**参数传递**
+6. **参数传递**
 
 ```react
 <button onClick={(e) => this.deleteRow(id, e)}>Delete Row</button>
 <button onClick={this.deleteRow.bind(this, id)}>Delete Row</button>
 ```
 
-在这两种情况下，React 的事件对象 `e` 会被作为第二个参数传递。如果通过箭头函数的方式，事件对象必须**显式**的进行传递，而通过 `bind` 的方式，事件对象以及更多的参数将会被**隐式**的进行传递。
+如果通过箭头函数的方式，事件对象必须**显式**的进行传递，React 的事件对象 `e` 会被作为第二个参数传递。而通过 `bind` 的方式，事件对象以及更多的参数将会被**隐式**的进行传递，e默认是第一个参数。
+
+7. this绑定的四种方式
+
+- constructor + bind
+
+- 箭头函数
+- 在jsx，bind绑定，重复绑定创建新函数，造成额外渲染
+- 在jsx使用箭头函数，不推荐，可能造成额外渲染
 
 ### 原理
 
@@ -672,10 +710,22 @@ react并不是将click事件绑定到真实dom上，而是在document监听所�
 - 根据元素nodeId（唯一标识key）和事件类型从listenerBank中取出回调函数
 - 返回带有合成事件参数的回调函数
 
-## 绑定文本框与state中的值
+## props
+
+对外的接口，只读
+
+设置默认props
+
+父子数据通信
+
+## state
+
+内部状态，通过setState修改，可以传对象或者函数
+
+### 绑定文本框与state中的值
 
 1. 在 Vue 中，默认提供了`v-model`指令，可以很方便的实现 数据的双向绑定，只是语法糖，实质上也是单向数据流
-2. 但是，在 React 中，只是单向数据流，没有这种语法糖，也就是 只能把 state 上的数据绑定到页面，无法把页面中数据的变化，自动同步回 state ； 如果需要把 页面上数据的变化，保存到 state，则需要程序员手动监听`onChange`事件，拿到最新的数据，手动调用`this.setState({  })` 更改回去；
+2. 但是，在 React 中，只是单向数据流，没有这种语法糖，也就是 只能把 state 上的数据绑定到页面，无法把页面中数据的变化，自动同步回 state ；如果需要把页面上数据的变化，保存到 state，则需要手动监听`onChange`事件，拿到最新的数据，手动调用`this.setState({  })` 更改回去；
 3. 如果文本框只是单项绑定了state状态，没有提供onChange事件，文本框是只读的并且会有警告，如果只想要一个只读的文本框，要添加readOnly属性
 
 ```jsx

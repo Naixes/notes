@@ -1,3 +1,5 @@
+文档：typescriptlang.org/zh/
+
 ## 为什么选择 `TypeScript`
 
 1. **增加了代码的可读性和可维护性**
@@ -59,6 +61,28 @@ parse词法分析语法分析 - 解释器 - 字节码 - turbofan编译器，jit�
 `tsc -v // 查看版本 tsc xxx // 编译ts文件 tsc xxx --strictNullChecks //严格模式检查空值`
 
 `ts-node`可以将两个步骤合二为一：`ts-node xxx`
+
+## 应用
+
+node：ts-node
+
+前端：原生，vue2（尽量不要和ts结合）/3（ts+vite，使用esbuild，esmodule，摆脱了commonjs）
+
+写sdk，rollup + parcel/snowpack + rome（ts合集，不好用）
+
+> 学习ts熟悉：
+>
+> lib.d.dom.ts
+>
+> lib.d.es5.ts
+>
+> 
+>
+> swc，esbuild
+>
+> 
+>
+> webpack： v8-compile-cache + sparkplug + commonjs + 插件
 
 ## 语法
 
@@ -696,7 +720,7 @@ tom.push(true);
 function useFetch() {
   const res: string = 'a'
   const age:number = 2
-  // 保证结构出来的类型是对的，否则是string|number
+  // as const转成常量保证结构出来的类型是对的，否则是string|number
   return [res, age] as const
 }
 
@@ -710,7 +734,7 @@ function useFetch() {
   return tuplify(res, age)
 }
 
-// 利用类型推断，推断出T的类型返回
+// 强行转成数组，利用类型推断，推断出T的类型返回
 function tuplify<T extends unknow[]>(...ele:T): T {
   return ele
 }
@@ -891,6 +915,8 @@ function reverse(x: number | string): number | string {
 故建议大家在使用类型断言时，统一使用 `值 as 类型` 这样的语法
 
 #### 类型断言的用途
+
+`xxx as string / <string> xxx`
 
 ##### 将一个联合类型断言为其中一个类型
 
@@ -2219,7 +2245,9 @@ Node.js 不是内置对象的一部分，如果想用 TypeScript 写 Node.js，�
 npm install @types/node --save-dev
 ```
 
-### 类型别名type
+### **类型别名type**
+
+代表类型的集合
 
 ```ts
 type Name = string;
@@ -2234,9 +2262,7 @@ function getName(n: NameOrResolver): Name {
 }
 ```
 
-上例中，我们使用 `type` 创建类型别名。
-
-类型别名**常用于联合类型**。
+类型别名**常用于联合类型**
 
 业务中常用
 
@@ -2300,13 +2326,19 @@ const test: DudeType = {
 
 使用建议：
 
+不能推断数据类型时使用interface
+
 后台接口多使用interface
 
 第三方SDK多使用，比如vue，多使用interface
 
 前端库，多使用interface
 
-平时的业务，多使用type
+**平时的业务，多使用type**
+
+class类型，node使用多
+
+> 快速生成类型：**quicktype**（写一个cli，自动生成model），json2ts（老）
 
 ### 字符串字面量类型
 
@@ -2866,10 +2898,6 @@ class Animal {
 let a: Animal = new Animal('Jack');
 console.log(a.sayHi()); // My name is Jack
 ```
-
-### type
-
-代表类型的集合
 
 ### 接口
 
@@ -3665,6 +3693,145 @@ queryForUser(UserID('xx'))
 
 库：fp-ts
 
+### 享元模式
+
+数据库连接池是一种享元模式
+
+节省js内存用的
+
+一百件衣服，两个模特就够了
+
+SOLID先写接口
+
+实现接口的基类
+
+创建工厂类，生成基于给定信息的实体类的对象。
+
+```ts
+//享元模式 SOLID
+interface Shape {
+  draw(): void;
+}
+//创建实现接口的实体类
+class Circle implements Shape {
+  private color: string;
+  private x: number = 0;
+  private y: number = 0;
+  private radius: number = 0;
+
+  constructor(color: string) {
+    this.color = color;
+  }
+
+  public setX(x: number): void {
+    this.x = x;
+  }
+
+  public setY(y: number): void {
+    this.y = y;
+  }
+
+  public setRadius(radius: number): void {
+    this.radius = radius;
+  }
+
+  public draw(): void {
+    console.log(
+      'Circle: Draw() [Color : ' +
+        this.color +
+        ', x : ' +
+        this.x +
+        ', y :' +
+        this.y +
+        ', radius :' +
+        this.radius
+    );
+  }
+}
+
+//创建一个工厂，生成基于给定信息的实体类的对象，类似于柯里化
+class ShapeFactory {
+  private static circleMap = new Map<string, Shape>();
+
+  public static getCircle(color: string): Shape {
+    let circle: Circle = <Circle>this.circleMap.get(color);
+
+    if (circle == null) {
+      circle = new Circle(color);
+      this.circleMap.set(color, circle);
+      console.log('创建了圆🐻🐻🐻🐻🐻 : ' + color);
+    }
+    return circle;
+  }
+}
+
+//使用该工厂，通过传递颜色信息来获取实体类的对象。
+// 圆的类 -> 黑圆、蓝色圆
+// const x = curry("color)
+// x(x,y)
+// x(x1,y1)
+
+class FlyweightPatternDemo {
+  private static colors: string[] = ['Red', 'Green', 'Blue', 'White', 'Black'];
+  constructor() {
+    for (let i = 0; i < 20; ++i) {
+      const circle: Circle = <Circle>(
+        ShapeFactory.getCircle(FlyweightPatternDemo.getRandomColor())
+      );
+      circle.setX(FlyweightPatternDemo.getRandomX());
+      circle.setY(FlyweightPatternDemo.getRandomY());
+      circle.setRadius(100);
+      circle.draw();
+    }
+  }
+  private static getRandomColor(): string {
+    return this.colors[Math.ceil(Math.random() * (this.colors.length - 1))];
+  }
+  private static getRandomX(): number {
+    return Math.random() * 100;
+  }
+  private static getRandomY(): number {
+    return Math.random() * 100;
+  }
+}
+
+new FlyweightPatternDemo();
+
+```
+
+## 关键字
+
+### infer
+
+表示待推断的类型变量
+
+```ts
+// 推断返回类型
+interface User {
+  id: number
+  name: string
+  form?: string
+}
+type Foo = () => User
+type ReturnType4<T> = T extends (...args: any[]) => infer P ? P : any;
+type R5 = ReturnType4<Foo> // User
+
+// ============
+
+class TestClass {
+  constructor(public name: string, public age: number) { }
+}
+type ConstructorParameters5<T extends new (...args: any[]) => any> = T extends new (...args: infer P) => any
+  ? P
+  : never;
+type R4 = ConstructorParameters5<typeof TestClass> // [string, number]
+
+//new (...args: any[]) => any指构造函数, 因为构造函数是可以被实例化的.
+//infer P代表待推断的构造函数参数, 如果接受的类型T是一个构造函数, 那么返回构造函数的参数类型P, 否则什么也不返回, 即never类型
+```
+
+
+
 ## 在Vue中使用
 
 新建一个基于ts的vue项目`vue create vue-ts`
@@ -3778,7 +3945,7 @@ onFeaturesChange(val: string, oldVal: any) {
 
 #### 原理
 
-实际是一个工厂 函数
+实际是一个工厂函数
 
 ## 在`react`中使用
 
