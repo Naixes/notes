@@ -2645,7 +2645,7 @@ br，针对于图片等的压缩协议
 
 **离线缓存：**
 
-前端ORM存储方案，关系映射表，库localForage，对现有的前端离线存储资源进行了封装
+前端ORM存储方案，关系映射表，库localForage，对现有的前端离线存储资源进行了封装，使用basketjs+localforage做离线缓存库
 
 local storage，key-value，5m，部分机型超过2.5会卡顿（低端机型）
 
@@ -2837,7 +2837,7 @@ gpujs库，查看GPU性能， 优化费时操作
 >
 > 优：所见即所得，一次到位
 >
-> 缺：资源重复加载，index.html重（解决：bigpie quicklink）
+> 缺：资源重复加载，index.html重（解决：bigpipe quicklink）
 >
 > mpa+spa真假路由混用
 >
@@ -2849,13 +2849,15 @@ gpujs库，查看GPU性能， 优化费时操作
 
 <img src="Naixes阶段性学习笔记.assets/截屏2021-05-17 上午9.18.19.png" alt="截屏2021-05-17 上午9.18.19" style="zoom:50%;" />
 
+TTFB，用户收到第一个字节
+
 FMP已废弃，需要手动mark有意义的点，造成一定的侵入性
 
 FP，第一个像素点落点
 
-FCP
+FCP，首次内容绘制
 
-TTI
+TTI，可交互时间
 
 #### 概念
 
@@ -2897,6 +2899,50 @@ CLS 推荐值为低于 0.1，越低说明⻚面跳来跳去的情况就越少，
 <img src="Naixes阶段性学习笔记.assets/截屏2021-05-17 上午9.58.47.png" alt="截屏2021-05-17 上午9.58.47" style="zoom:50%;" />
 
 <img src="Naixes阶段性学习笔记.assets/截屏2021-05-17 上午10.40.00.png" alt="截屏2021-05-17 上午10.40.00" style="zoom:50%;" />
+
+获取性能指标
+
+```js
+// window.performance.getEntriesByType("paint")
+
+// 可以获取FP和FCP
+const obs = new PerformanceObserver(list => {
+  for(const entry of list.getEntries()) {
+    console.log(entry)
+  }
+})
+obs.observer({entryTypes: ['paint']})
+
+// longtask
+const obs = new PerformanceObserver(list => {
+  for(const entry of list.getEntries()) {
+    console.log(entry)
+  }
+})
+obs.observer({entryTypes: ['longtask']})
+// 定位到longtask后要把它挪走
+// 下一帧
+requestAnimationFrame()
+// 空闲帧
+// 1000/60 - 1000/30，1帧16.7 - 33.3毫秒system+程序时间
+requestIdleCallback() // react 16.8 fiber的原理就用到了，利用空闲帧实现了调度算法
+
+// FMP，需要mark收取值，侵入了业务逻辑
+// 无侵入统计：？？？
+<script>performance.mark('meaningful')</script>
+...
+
+<script>performance.clear('meaningful')</script>
+...
+const obs = new PerformanceObserver(list => {
+  for(const entry of list.getEntries()) {
+    console.log(entry)
+  }
+})
+obs.observer({entryTypes: ['meaningful']})
+
+// performance可以获取所有数据，根据navigation timing的流程
+```
 
 统计FP，FCP，浏览器中有很多FRP（响应式函数编程，比如rx.js）的指标证明，可以进行observe
 
