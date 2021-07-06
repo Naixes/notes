@@ -2833,6 +2833,8 @@ gpujs库，查看GPU性能， 优化费时操作
 >
 > index.html - vue.min.js - 相关库 - webpack公用文件 - main.js - fetch - 构建虚拟dom diff - patch页面 - 初始化事件引擎
 >
+> 白屏时间指的是页面准备加载到收到服务器返回的这段时间，这段时间过长就会产生白屏现象，在spa中尤为明显，以vue为例，浏览器加载完index.html后并不能看到页面，以为它只是一个框架没有实际内容，加下来还要加载vue，相关库，webpack公用文件，mainjs，发送请求，构建虚拟dom，diff，将虚拟dom patch到页面，初始化事件引擎等完成之后才能看到页面进行操作
+>
 > mpa
 >
 > 优：所见即所得，一次到位
@@ -2900,6 +2902,60 @@ CLS 推荐值为低于 0.1，越低说明⻚面跳来跳去的情况就越少，
 
 <img src="Naixes阶段性学习笔记.assets/截屏2021-05-17 上午10.40.00.png" alt="截屏2021-05-17 上午10.40.00" style="zoom:50%;" />
 
+使用PerformanceObserver和performance.timing可以获取或计算这些指标
+
+PerformanceObserver，统计异步数据
+
+performance.timing，统计同步数据，通过节点的标签来获取对应的时间，可以计算获得DNS时间白屏时间等
+
+```js
+/**
+ * Navigation Timing API provides performance metrics for HTML documents.
+ * w3c.github.io/navigation-timing/
+ * developers.google.com/web/fundamentals/performance/navigation-and-resource-timing
+ */
+const getNavigationTiming = () => {
+  // There is an open issue to type correctly getEntriesByType
+  // github.com/microsoft/TypeScript/issues/33866
+  // 这里直接的物理赋值performance.timing 已被弃用
+  const n = W.performance.getEntriesByType('navigation')[0] as any;
+  // In Safari version 11.2 Navigation Timing isn't supported yet
+  if (!n) {
+    return {};
+  }
+  const responseStart = n.responseStart;
+  const responseEnd = n.responseEnd;
+  // We cache the navigation time for future times
+  return {
+    // fetchStart marks when the browser starts to fetch a resource
+    // responseEnd is when the last byte of the response arrives
+    fetchTime: responseEnd - n.fetchStart,
+    // Service worker time plus response time
+    workerTime: n.workerStart > 0 ? responseEnd - n.workerStart : 0,
+    // Request plus response time (network only)
+    totalTime: responseEnd - n.requestStart,
+    // Response time only (download)
+    downloadTime: responseEnd - responseStart,
+    // Time to First Byte (TTFB)
+    timeToFirstByte: responseStart - n.requestStart,
+    // HTTP header size
+    headerSize: n.transferSize - n.encodedBodySize || 0,
+    //DNS解析时间
+    dnsLookupTime: n.domainLookupEnd - n.domainLookupStart,
+    //TCP建立时间
+    tcpTime: n.connectEnd - n.connectStart || 0,
+    // 白屏时间
+    whiteTime: n.responseStart - n.navigationStart || 0,
+    // dom渲染完成时间
+    domTime: n.domContentLoadedEventEnd - n.navigationStart || 0,
+    // 页面onload时间
+    loadTime: n.loadEventEnd - n.navigationStart || 0,
+    // 页面解析dom耗时
+    parseDomTime: n.domComplete - n.domInteractive || 0,
+  };
+};
+```
+
 获取性能指标
 
 ```js
@@ -2950,13 +3006,23 @@ PerformanceObserver，统计异步数据
 
 performance.timming，统计同步数据
 
-库web-vitals
+库web-vitals，避开了很多坑
 
 <img src="Naixes阶段性学习笔记.assets/截屏2021-05-17 上午10.41.19.png" alt="截屏2021-05-17 上午10.41.19" style="zoom:50%;" />
 
 白屏：
 
-库qucklink，有缺点需要性能来link大量内容，可以优化。guess，不会对所有遇到的内容link，会猜测将会用到的内容进行link
+白屏时间：一般来说responseStart - navigationStart，但是这只是白屏里的前一半时间，不含代码执行和浏览器引擎渲染过程页面白屏的时间
+
+首屏时间：loadEventEnd - navigationStart**首次全部完整下载和渲染完页面时间**
+
+优化方式：quicklint，骨架屏，HTTP2等
+
+qucklink库：利用了Intersection Observer API（监测视窗滚动）和window.requestIdleCallback()，当滚动到某个视窗以内时判断网络条件，好的话会在空闲帧把a连接进行预加载（cb），所有连接预加载成本有点大，还可以进行优化
+
+guess.js：通过人工智能进行预测最有可能去的连接进行预加载，基于之前的统计数据
+
+统计离线数据的内存使用情况
 
 <img src="Naixes阶段性学习笔记.assets/截屏2021-05-17 上午11.03.02.png" alt="截屏2021-05-17 上午11.03.02" style="zoom:50%;" />
 
@@ -2970,11 +3036,11 @@ vue
 
 <img src="Naixes阶段性学习笔记.assets/截屏2021-05-17 上午11.13.44.png" alt="截屏2021-05-17 上午11.13.44" style="zoom:50%;" />
 
-CSR：不依赖数据index的壳最先出来，webpack插件经常inline css，减少请求时间
+CSR：不依赖数据index的壳最先出来，webpack插件经常inline css，减少请求时间，FP最快
 
-预渲染：不稳定，将html load到无头浏览器中，保存下来，每次上线都需要重新渲染
+解决方案：预渲染，在构建时(build time)简单地生成针对特定路由的静态 HTML 文件。 不稳定，将html load到无头浏览器中，保存下来，每次上线都需要重新渲染
 
-SSR
+SSR：优化index重，bigpipe，将不重要的内容分成task利用流异步输出
 
 ### 错误捕获
 
@@ -3044,7 +3110,7 @@ SSR
     <!-- 5 -->
     <script>
         // 捕获异步错误
-        window.addEventListener('unhandledreject', function(e) {
+        window.addEventListener('unhandledrejection', function(e) {
             e.preventDefault()
             console.log(e.reason);
             return true
@@ -3057,6 +3123,8 @@ SSR
             throw "error3"
         })
         Promise.reject("error2")
+      
+      	// 全局错误uncatchException
 
         // 工具：fundebug
         // 接入
@@ -3065,12 +3133,32 @@ SSR
         // 用户录屏：sessionstack
 
         // 容错：zanePerfor （github）
-
-        // lgwebdream
     </script>
 </body>
 </html>
 ```
+
+fundebug源码：
+
+```js
+// 兼容node错误
+      
+// 全局错误uncatchException
+// unhandledrejection
+// error
+
+// 客户端
+window.onerror
+window.addEventListener("error", ...)
+                        
+// 录屏
+// 记录用户的xpath，发送到服务端，生成gif
+// 或者把用户操作的帧通过html2canvas发送给服务器，然后合成
+```
+
+存储容错数据时不要用ajax，会占用并发，使用navigator.sendBean("xxx.php")，专门用来做统计
+
+参考项目：zanePerfor
 
 #### SDK
 
@@ -3142,6 +3230,8 @@ checkoutEveryNth不准确
 当网页变得复杂整页渲染，内容太多
 
 ssr - render 内容过大
+
+bigpipe，使用文件/流输出页面而不是传统的render页面，或者将不重要的内容分成task利用流在服务端异步输出都属于bagpipe，响应头Transfer-Encoding: chunked，可以不使用koa-bigpipe等库，可以自己写，很简单
 
 分段 chunked 串行输出，比如百度页面
 
@@ -3216,6 +3306,7 @@ router.length('/', async(ctx, next) => {
     // const filename = resolve(join(__dirname, 'index.html'))
     // const stream = fs.createReadStream(filename)
 
+	  // 需要封装一下，否则只返回一个ok
     // function createSsrStreamPromise() {
     //     return new Promise((resolve, reject) => {
     //         stream.on('error', err => {
@@ -3240,6 +3331,7 @@ router.length('/', async(ctx, next) => {
     //         .on('data', chunk => {
     //             ctx.res.write(chunk)
     //         }).pipe(ctx.res)
+  	// 此时必须end
     //         .on('end', () => {
     //             ctx.res.end()
     //         })

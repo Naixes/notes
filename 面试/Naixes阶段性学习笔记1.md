@@ -177,17 +177,17 @@ CSS Houdini 是由一群來自 Mozilla, Apple, Opera, Microsoft, HP, Intel, IBM,
 
 `.item-list { display: layout(waterfall); } // https://www.jasondavies.com/wordcloud/`
 
-<img src="/Users/huangsiying/data/yd/Naixes阶段性学习笔记.assets/截屏2021-05-24 下午3.39.39.png" alt="截屏2021-05-24 下午3.39.39" style="zoom:50%;" />
+<img src="./Naixes阶段性学习笔记.assets/截屏2021-05-24 下午3.39.39.png" alt="截屏2021-05-24 下午3.39.39" style="zoom:50%;" />
 
 **Box tree API** 目的就是希望让开发者能够取得这些 fragments 的信息，至于取得后要如何使用，基本上应该会跟后 面介绍的 Parser API、Layout API 与 Paint API 有关联，当我们能取得详细的 Box Modal 信息时，要客制化 Layout Module 才更为方便。
 
-<img src="/Users/huangsiying/data/yd/Naixes阶段性学习笔记.assets/截屏2021-05-24 下午3.44.29.png" alt="截屏2021-05-24 下午3.44.29" style="zoom:50%;" />
+<img src="./Naixes阶段性学习笔记.assets/截屏2021-05-24 下午3.44.29.png" alt="截屏2021-05-24 下午3.44.29" style="zoom:50%;" />
 
 **CSS Paint API**
 
 `.test { background-image: paint(circle); } `
 
-<img src="/Users/huangsiying/data/yd/Naixes阶段性学习笔记.assets/截屏2021-05-24 下午3.47.31.png" alt="截屏2021-05-24 下午3.47.31" style="zoom:50%;" />
+<img src="./Naixes阶段性学习笔记.assets/截屏2021-05-24 下午3.47.31.png" alt="截屏2021-05-24 下午3.47.31" style="zoom:50%;" />
 
 canvas劣势，dom元素增多，独立成层，GPU渲染变慢
 
