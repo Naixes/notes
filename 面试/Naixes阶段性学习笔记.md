@@ -1175,6 +1175,10 @@ upstream web_crm {
 
 ip_hash:nginx会让相同的客户端ip请求相同的服务器
 
+##### 设置缓存
+
+
+
 ## node
 
 开发模式
@@ -2621,6 +2625,165 @@ GPU进程，绘制
 
 #### 雅⻁军规
 
+https://www.cnblogs.com/xianyulaodi/p/5755079.html
+
+https://www.jianshu.com/p/4cbcd202a591
+
+##### 页面加载方面
+
+- 减少HTTP请求数
+
+合并文件，合并图片，base64图片
+
+- 减少DNS查找次数
+
+DNS预解析，很多浏览器进行了优化即使不设置此属性，也能自动在后台进行预解析 。
+
+```html
+< meta  http-equiv="x-dns-prefetch-control" content="on">
+< link  rel="dns-prefetch" href="//www.zhix.net">
+< link  rel="dns-prefetch" href="//api.share.zhix.net">
+< link  rel="dns-prefetch" href="//bdimg.share.zhix.net">
+// 禁止隐式的 DNS Prefetch
+< meta  http-equiv="x-dns-prefetch-control" content="off">
+```
+
+默认情况下浏览器会对页面中和当前域名（正在浏览网页的域名）不在同一个域的域名进行预获取，并且缓存结果，这就是隐式的 DNS Prefetch。如果想对页面中没有出现的域进行预获取，那么就要使用显示的 DNS Prefetch 了。
+
+- 避免重定向
+
+- 可缓存的ajax
+
+使用etag和expires等浏览器缓存，gzip压缩
+
+- 延迟加载组件
+
+- 预加载组件
+
+**preload**
+
+```html
+<link href=/js/chunk-vendors.5e63c7cf.js rel=preload as=script>
+```
+
+当浏览器解析到`preload`会立即进行资源的请求，需要注意的是使用`preload`进行预加载时需要指定文件的类型
+
+**prefetch**
+
+```html
+<link href=/js/chunk-dca4e6ea.e4986a0a.js rel=prefetch>
+```
+
+当浏览器解析到`prefetch`时，不会立即请求资源，会等待浏览器空闲以后再进行资源的请求
+
+现在前端都是基于`webpack`来实现构建，目前`webpack v4.6.0+` 实现了对预获取和预加载的支持
+
+使用方式如下
+
+```js
+import(/* webpackPrefetch: true */ "LoginModal");
+import(/* webpackPreload: true */ "ChartingLibrary");
+```
+
+当然我们也可以借助`preload-webpack-plugin`插件来实现
+
+[https://www.npmjs.com/package/preload-webpack-plugin](https://link.zhihu.com/?target=https%3A//www.npmjs.com/package/preload-webpack-plugin)
+
+`preload`初始模块
+
+`prefetch`异步模块
+
+```js
+new PreloadWebpackPlugin(
+    {
+        rel: "preload",
+        include: "initial",
+        fileBlacklist: [
+            /\.map$/,
+            /hot-update\.js$/
+        ]
+    }
+),
+new PreloadWebpackPlugin({
+    rel: 'prefetch',
+    include: 'asyncChunks'
+}),
+```
+
+- 减少dom数量
+- 根据域名划分页面内容
+- 少使用iframe
+- 杜绝404
+- 使用内容分发网络
+
+js，html，css放到单独的静态资源服务器
+
+- 使用get完成请求
+
+post两步走，先发文件头再发数据，GET直接发一个TCP包
+
+##### css和js
+
+- 样式表置于顶部
+
+会使页面有秩序得加载
+
+- 避免使用css表达式
+- 使用外部的js和css
+
+会增加请求数量，但是有助于文件的缓存，适用于频繁访问并且变更较少的内容，既不会增加请求也不会增加文件大小
+
+- 压缩js和css
+- 避免使用滤镜
+- 选择link舍弃@important
+
+import会堵住加载
+
+- js脚本放在底部
+- 不引入重复脚本
+- 减少dom访问
+
+使用变量存储获取的dom
+
+- 智能事件处理程序
+
+有时候感觉页面反映不够灵敏，是因为有太多频繁执行的事件处理具柄被添加到了DOM树的不同元素上，这就是推荐使用事件委托的原因。如果一个div里面有10个按钮，应该只给div容器添加一个事件处理具柄，而不是给每个按钮都添加一个。事件能够冒泡，所以可以捕获事件并得知哪个按钮是事件源。
+
+不需要为了处理DOM树而等待onload事件,通常只要目标元素在DOM树中可访问即可,而不必等待所有的图片下载完成。可以考虑用 DOMContentLoaded 来代替onload事件,但为了让它在所有浏览器中都可用,可以用 YUI Event 工具,它有一个onAvailable 方法。
+
+- 文件小于25k
+- 组件打包成复合文本
+
+写在一起js和css，再用某种办法区分，现在不常用了
+
+```js
+1. CSS解析器 会忽略<!--符号，
+2. JS解析器会把<!--当作注释符号，与// 注释相同。
+<!-- /*
+js
+<!-- */
+
+<!--
+css
+```
+
+
+
+##### 图片
+
+- 优化图片
+
+压缩，格式转换为png
+
+- 网站图标，小并且可缓存
+
+##### cookie
+
+- 减小cookie体积，可以使用localStorage代替
+- 把组件放在无cookie域名下
+
+
+
 <img src="Naixes阶段性学习笔记.assets/截屏2021-05-10 上午9.58.46.png" alt="截屏2021-05-10 上午9.58.46" style="zoom:50%;" />
 
 **CDN：**
@@ -3372,6 +3535,8 @@ index
 ```
 
 ### 面向切面编程
+
+面向切面实现的主要目的是针对业务的切面进行提取
 
 ### SOLID
 
