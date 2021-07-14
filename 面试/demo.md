@@ -562,20 +562,133 @@ container用来存储对象，将对象注入container，通过装饰器对构�
 
 vue和react的区别
 
+从架构层面来说，vue有一套自己的语法标准，必须按照这样写vue才会识别然后进行优化，浏览器运行的一般是编译后的代码，所以vue的优化重点就在编译时的优化，打包出来的代码也分为包括编译器的代码和只有运行时的代码，而react没有像这样的语法规范，只是将jsx中的标签替换成了react.createElement，相当于还是在写js，所以没有什么编译时优化，重点在运行时的优化也就是fiber架构
+
+vue模版编译是使用with进行的this的绑定，因为它使用的正则表达式进行编译时，分析不出来js中的this，只能使用with来统一绑定，所以vue所有的属性都需要绑定在vue实例上，否则模版获取不到，模版省略this。在vue3的离线编译抛弃了这种方式，集成了js解析器，在线编译不能集成，还是使用的with。
+
 ## Vue2
 
 ### vue架构
 
+编译流程：
+
+正则匹配模版生成ast，有回溯问题，扩展性差，然后静态节点优化，递归标记每一个节点，将ast生成可执行代码，拼接with方法
+
+运行时流程：
+
+从config.js中可以找到每个版本的入口，比如包含编译器和运行时的版本，扩展了默认的$mount方法，没有传入render时将template或el转换为render函数
+
+初始化阶段：实现初始化函数以及各种api
+
+```js
+// 实现vue初始化函数_init
+initMixin(Vue)
+	Vue.prototype._init
+    // 把组件实例里面用到的常用属性初始化，比如$parent/$root/$children
+    initLifecycle(vm)
+    // 父组件中定义的需要子组件处理的事件
+    initEvents(vm)
+    // $slots $scopedSlots初始化
+    // $createElement函数声明
+    // $attrs和$listeners响应化
+    initRender(vm)
+    callHook(vm, 'beforeCreate')
+    // 注入内容的响应化
+    initInjections(vm) // resolve injections before data/props
+    // 初始化data包括数据响应化/props/methods/computed/watch，
+    initState(vm)
+    initProvide(vm) // resolve provide after data/props
+    callHook(vm, 'created')
+		// 执行mount方法
+		vm.$mount(vm.$options.el)
+// 组件状态相关api如$set,$delete,$watch实现
+stateMixin(Vue)
+// 事件相关api如$on,$emit,$oﬀ,$once实现
+eventsMixin(Vue)
+// 组件生命周期api如_update,$forceUpdate,$destroy实现 
+lifecycleMixin(Vue)
+// 实现组件渲染函数_render, $nextTick
+renderMixin(Vue)
+```
+
+创建实例会执行初始化函数_init()，各种属性的初始化，执行**beforeCreated**生命周期，实例上各种数据的初始化，包括数据的响应化`observe(data, true )`，执行**created**生命周期，最后执行mount方法
+
+默认的mount方法（执行mountComponent方法）：执行**beforeMount**生命周期，`new Watcher()`传入组件更新方法`updateComponent`，执行时初始化赋值时会触发依赖收集，触发updateComponent生成dom节点，执行**mounted**生命周期
+
+updateComponent：判断是否存在上一个节点，没有就render新建vnode，创建dom节点，如果有上一个节点，render生成新的节点，与上一个节点进行dom diff，根据结果进行定向修改
+
+
+
 ### 双向数据绑定
+
+利用了Object.defineProperty实现数据的监听，Object.defineProperty有一定缺陷，监听数组时拦截操作会造成大量不必要的渲染，vue为了解决这个问题重写了数组7个方法，执行原有的数组方法，并且手动进行更新操作，还有就是不能监听新增数据
+
+在vue中我们写的html会被打包成with的形式，运行时生成vnode，在执行mount期间会获取数据，触发observer中的get，进行依赖收集deps，在vue1时一个指令对应一个watcher，vue2中一个mountComponent对应一个watcher，在数据改变的时候遍历所有的依赖dep，通知每一个对应的watcher进行更新，生成新的vnode
+
+### 虚拟dom
+
+为什么使用虚拟dom
+
+本质上是因为原生的dom上面属性太多了，有很多我们用不到的属性，会浪费空间
+
+### dom diff
+
+为什么需要dom diff
+
+vue1时一个指令对应一个watcher时，watcher可以直接定向到dom节点，不需要dom diff，但是如果页面上指令较多，每一个都需要单独的空间进行维护，内存占用会特别大，vue2进行了优化一个组件对应一个watcher，但是组件又不需要每次都整体进行重新渲染，所以引入了dom diff，只渲染改变的部分
+
+此时为了实现数据绑定和dom diff，可以定向更新到组件级别，vue会维护一套映射关系，大型应用的内存占用会很高
+
+而react没有维护这样一个映射关系，每次更新会重新构建fiber（jsx -> element -> fiber），再进行fiber diff，diff较花费时间，可以中断
+
+### 优化
+
+#### 批量更新
+
+在执行更新时默认执行批量更新queueWatcher，防止频繁更新，维护了一个watcher队列，首先判断是否已经存在，不存在时添加进队列，判断是否等待中，不是的情况，异步执行循环执行队列中的watcher更新
+
+#### keep-alive算法
+
+使用了LRU缓存算法，取最新最常使用的缓存
+
+keep-alive保存了vnode虚拟节点，在render阶段判断缓存是否已经存在，存在时先移除再推入，没有直接添加，超出范围时，从后面删除
+
+#### 与vue3模版处理区别
+
+vue2的模版处理使用的时正则匹配，贪婪匹配存在回溯问题，而且分析功能有限不能做更多的优化
+
+vue3使用的是状态机，根据自身语法和状态机模型写了一套compile，可以做更多的编译时优化
+
+## Vue3
+
+### 对vue2的优化
+
+运行时阶段，数据监听逻辑：
+
+把Object.defineProperty替换为**Proxy**，Object.defineProperty会遍历所有的key重写每个key的值，相当于修改了原本的数据，而且不能监听到新增的数据，proxy则是对数据进行行为上的拦截，没有改变原有值，会生成一个新的包装过后的数据，可以拦截到新增的数据，数组的某些操作还是会触发多次拦截，拦截不到嵌套数据，只能拦截到外层
+
+把flow替换为**ts**
+
+新的架构，**拆分模块**，可以分单独的模块进行引用，使用了esmodule特性，使用monorepo进行代码管理，可以拆分子模块，使用lerna管理多个package.json，可以使用composition api，引入需要的模块方法，相互组合完成功能，而不是像以前一样写配置
+
+模版编译优化：根据自身语法和**状态机**模型构建ast，模版分析能力增强，可以做更多的编译时优化
+
+### vue架构
+
+编译时，状态机
+
+### 双向数据绑定
+
+
 
 ### 虚拟dom
 
 ### dom diff
 
-### 运行时优化
+## 手写算法
 
+写一个缓存算法
 
+写一个promise
 
-
-
-## Vue3
+写一个发布订阅模式

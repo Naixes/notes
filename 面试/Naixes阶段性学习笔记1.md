@@ -387,38 +387,49 @@ tridiv.com
 
   - 打包出来的
 
-    - runtime only，无编译器
+    - runtime only，无编译器，不能执行在线编译
     - runtime+compile
 
 - flow（js类型框架，Facebook已经不支持了，和ts不同，ts是语言）
 
 - packages：
 
-  - vue提供的，工程化使用到的东西，比如，模版打包，服务端渲染的一些东西
-
-​	比如，模版打包，服务端渲染的一些东西
+  - vue提供的，工程化使用到的东西，比如模版编译（vue-loader中集成了这个），服务端渲染的一些东西
 
 - scripts：
-  - 打包规范等
-
+  - 打包规范等，config.js
+  - 打出来的包only runtime/runtime + compiler
+  
 - src，核心代码
 
-  - compiler，编译代码
-  - core，核心运行时
+  - **compiler，编译代码**
+  - **core，核心运行时**
   - platforms，不同端的处理，不同平台
   - server，服务端
-  - sfc，单文件组件
-  - shared，
+  - sfc，单文件组件，分别处理html，js和css
+  - shared
 
-vue有一套固定的语法，编译时优化，react在运行时优化（fiber），编译时就是js优化不了
+对比：
 
-Vue打包出来的代码：
+vue，有一套固定的语法规范，编译时优化，将template转化为js，分为离线编译和在线编译
 
 ```js
-// 用with绑定this，this是vue实例，因为模版分析不能准确分析出当前的this，需要单独的js解析器才行，所以需要统一绑定
+new Vue({
+	template: "" // 此时使用的就是在线编译
+})
+```
+
+vue的运行时包括虚拟dom，被处理过的响应式数据
+
+react，只替换标签，相当于在写js，在运行时优化（fiber架构），编译时就是js，优化不了
+
+Vue模版编译出来的代码：
+
+```js
+// 用with绑定this，this是vue实例，因为模版分析不能准确分析出当前的this，需要单独的js解析器才行，所以用with统一绑定，所以所有的属性都需要绑定在vue实例上，否则获取不到，this因为使用with统一绑定的
 
 with(this) {
-	// 创建虚拟dom
+	// 创建虚拟dom并返回
 	return _c(...)
 }
 ```
@@ -427,9 +438,9 @@ with(this) {
 
 #### **vue2编译**
 
-缺点：使用正则匹配模版，回溯问题，性能问题，扩展问题
+缺点：使用正则匹配模版，回溯问题，性能问题，扩展问题，vue3编译，使用状态机
 
-编译时优化：静态节点优化，分析静态节点，跳过dom diff
+编译时优化：静态节点优化，递归分析静态节点，添加标记，跳过dom diff
 
 过程：
 
@@ -437,11 +448,11 @@ baseCompile
 
 ​	parse: html -> ast
 
-​		构建数据类型
+​		执行parseHTML，构建ASTElement
 
-​		执行parseHTML
+​			构建基础数据类型
 
-​			判断处理不同标签，执行回调，开始，结束（维护了一个堆栈，结束时出栈），文本，注释标签
+​			判断处理不同标签，执行回调，开始，结束（维护了一个**堆栈**，结束时出栈），文本，注释标签
 
 ​			正则匹配
 
@@ -459,9 +470,7 @@ baseCompile
 
 ​	返回ast，render和staticRenderFns
 
-vue3编译，状态机
-
-#### **运行时核心**
+#### **运行时核心core**
 
 components，自定义的组件，keep-alive
 
@@ -471,9 +480,56 @@ global-api
 
 **instance**，vue实例，生命周期，初始化，事件等
 
-observer，数据收集与订阅，双向绑定
+**observer**，数据收集与订阅，双向绑定
+
+​	Object.defineProperty
 
 vdom，真实dom也存在js对象，无用属性过多
+
+vue运行时入口：
+
+初始化阶段
+
+```js
+// 实现vue初始化函数_init
+initMixin(Vue)
+	Vue.prototype._init
+    // 把组件实例里面用到的常用属性初始化，比如$parent/$root/$children
+    initLifecycle(vm)
+    // 父组件中定义的需要子组件处理的事件
+    initEvents(vm)
+    // $slots $scopedSlots初始化
+    // $createElement函数声明
+    // $attrs和$listeners响应化
+    initRender(vm)
+    callHook(vm, 'beforeCreate')
+    // 注入内容的响应化
+    initInjections(vm) // resolve injections before data/props
+    // 初始化data包括数据响应化/props/methods/computed/watch，
+    initState(vm)
+      observe(data, true /* asRootData */)/observe(vm._data = {}, true /* asRootData */)
+        new Observer(value) // 监听数据，get/set没有执行，执行with时执行
+      initComputed(vm, opts.computed)
+      initWatch(vm, opts.watch)
+    initProvide(vm) // resolve provide after data/props
+    callHook(vm, 'created')
+		// 执行mount方法
+		vm.$mount(vm.$options.el)
+// 组件状态相关api如$set,$delete,$watch实现
+stateMixin(Vue)
+// 事件相关api如$on,$emit,$oﬀ,$once实现
+eventsMixin(Vue)
+// 组件生命周期api如_update,$forceUpdate,$destroy实现 
+lifecycleMixin(Vue)
+// 实现组件渲染函数_render, $nextTick
+renderMixin(Vue)
+```
+
+创建实例会执行初始化函数_init()，各种属性的初始化，执行beforeCreated生命周期，实例上各种数据的初始化，包括数据的响应化，执行created生命周期，最后执行mount方法
+
+默认的mount方法：执行beforeMount生命周期，`new Watcher()`传入组件更新方法`updateComponent`，执行时初始化赋值时会触发依赖收集，触发updateComponent生成dom节点，执行mounted生命周期
+
+updateComponent：判断是否存在上一个节点，没有就render新建vnode，创建dom节点，如果有上一个节点，render生成新的节点，与上一个节点进行dom diff，根据结果进行定向修改
 
 ### 双向数据绑定
 
@@ -481,31 +537,56 @@ vdom，真实dom也存在js对象，无用属性过多
 Object.defineProperty(obj, 'a', {
 	get: fn,
 	set: fn
-
 })
 ```
 
 重写数据的某一个key，不能监听新增的key，可以监听数组，但是行为不符合预期，因为数组是连续内存，下标和值不是绑定的，比如删除第一项，所有的key都会改变，会重复触发渲染
 
-vue重写数组的七种方法，监控新增数据，手动调用触发渲染
+vue重写数组会改变索引的七种方法，执行原始方法，监控新增数据，手动调用触发渲染
 
-<img src="/Users/huangsiying/data/yd/Naixes阶段性学习笔记.assets/截屏2021-05-26 下午2.33.47.png" alt="截屏2021-05-26 下午2.33.47" style="zoom:50%;" />
+代码编译后会编译成指令，处理成with代码，执行with返回vnode，此时获取数据，记录下这个指令到dep，这个关系就是watcher负责通知
 
-指令（会编译成with代码），使用动态属性，**一个指令对应一个watcher（vue1）不需要diff直接定向修改，一个组件对应一个watcher（vue2）**
+使用的订阅发布模式（观察者模式是订阅发布模式的一个实现）
 
-setter 触发消息到 Watcher watcher帮忙告诉 Directive 更新DOM，DOM中修改了数据 也会通知给 Watcher，watcher 帮忙修改数据。
+<img src="./Naixes阶段性学习笔记.assets/截屏2021-05-26 下午2.33.47.png" alt="截屏2021-05-26 下午2.33.47" style="zoom:50%;" />
+
+指令（会编译成with代码），使用动态属性的地方就是一个指令，**一个指令对应一个watcher（vue1）不需要diff直接定向修改，一个组件对应一个watcher（vue2）**
+
+setter 触发消息到 Watcher，watcher帮忙告诉 Directive 更新DOM，DOM中修改了数据也会通知给 Watcher，watcher 帮忙修改数据。
 
 Dep：收集watcher，通知watcher更新
 
+- target: watcher
+
+- id: number
+
+- subs: watcher[]，所有依赖
+- addSub(sub: Watcher)，`this.subs.push(sub)`
+- removeSub(sub: Watcher)
+- depend()，`Dep.target.addDep(this) // wathcer.addDep(dep)`
+- notify()
+
 Observer：响应式数据
+
+- value: any
+- dep: Dep
+- vmCount: number
 
 Watcher：监听数据，更新数据
 
-#### **Vue**
+- deps: Array<Dep>，依赖的数据
+- newDeps: Array<Dep>
+- depIds: SimpleSet
+- newDepIds: SimpleSet;
+
+- addDep(dep: Dep)，`this.newDepIds.add(id); this.newDeps.push(dep); ...dep.addSub(this)` ？？？
+- get()，`pushTarget(this); value = this.getter.call(vm, vm); popTarget(); this.cleanupDeps()`触发get，收集依赖，new Watcher()初始化时会执行
+
+**Vue**
 
 将所有数据挂载到vue实例上
 
-observer
+**observer(data)**，创建实例时的initState中执行
 
 ​	初始化Dep电话本（**new Dep()**）**一个数据对应一个Dep**
 
@@ -513,31 +594,49 @@ observer
 
 ​	非数组，walk 
 
-​		defineReactive，defineProperty
+​		defineReactive，响应式数据，`Object.defineProperty()`
 
 ​			**new Dep()**
 
-​			get：通知载体（watcher电话），记录通知方法/映射关系（dep电话本），方便通知；获取页面时，即执行with返回vnode时触发；每次指令执行时触发
+​			get：通知载体（watcher电话）,判断`Dep.target`标志第一次获取数据？？记录通知方法/映射关系`dep.depend()` -> watcher｜`watcher.newDeps.push(dep)` & `Dep.subs.push(sub)`（dep电话本），方便通知；获取页面时，即执行with返回vnode时触发；每次指令执行时触发
 
-​			set：通知dep.notify()
+​			set：通知`dep.notify()` -> Dep｜遍历subs更新`subs[i].update()` -> watcher｜判断懒加载 -> `dirty = true` -> 判断同步 -> run: `const value = this.get() // 先获取最新的数据; this.cb.call(this.vm, value, oldValue) //执行回调，cb就是dom更新的render方法，相当于with ` -> 默认不是同步也不是懒更新，批量更新schedule -> `queueWatcher(this)` -> run
 
-compiler
+> 收集：具体收集的是watcher
+>
+> 通知：通知的也是watcher
+
+compiler（非源码，更类似于vue1）
 
 ​	判断节点类型
 
-​		元素节点，解析属性，v-model属性添加input事件，input事件触发时修改数据值
+   	元素节点，解析属性，v-model属性添加input事件，input事件触发时修改数据值
 
 ​	**new Watcher()**，源码是在初始化生命周期时创建的
 
-​		Dep.target = this // watcher，记录信息
+   	Dep.target = this // watcher，记录信息
 
-​		this.update() // 执行render，首次渲染，触发get
+   	this.update() // 执行render，首次渲染，触发get
 
-​			this.get() // this.value = this.vm[this.name]，触发get，收集依赖（使用了控制反转的写法），更新时target为空不会触发依赖收集
+​     	this.get() // this.value = this.vm[this.name]，触发get，收集依赖（使用了控制反转的写法），更新时target为空不会触发依赖收集
 
-​			更新数据this.node[this.type] = this.value
+​     	更新数据this.node[this.type] = this.value
 
-​		Dep.target = null
+   	Dep.target = null
+
+**new Watcher()**，mount阶段执行
+
+​	Dep.target = this // watcher，记录信息
+
+​	执行updateComponent函数
+
+​		vm.\_update(vm._render(), hydrating) // 执行render，首次渲染，触发get
+
+​			_render：生成vnode，触发get，收集依赖（使用了控制反转的写法），更新时target为空不会触发依赖收集
+
+​			\_update(vnode: VNode, hydrating?: boolean)：vm.\__patch__(node, vnode)，diff，生成dom
+
+​	Dep.target = null
 
 update流程：
 
@@ -545,7 +644,7 @@ update流程：
 
 ​	render生成新的vnode
 
-​	创建dom
+​	创建dom节点
 
 ​	有上一个节点
 
@@ -557,17 +656,25 @@ update流程：
 
 #### **vue2**
 
-一个组件对应一个watcher，需要dom diff，需要维护一套映射关系，应用过大时内存占用过高，react没有维护这样的关系
+一个组件对应一个watcher，需要dom diff，需要维护一套映射关系，应用过大时内存占用过高，而react没有维护这样一个映射关系，，每次更新会重新构建fiber（jsx -> element -> fiber），再进行fiber diff，diff较花费时间，可以中断
 
 ### 批量更新
 
+subs遍历更新时，有三种方式，一个是懒加载，一个是同步更新，一个是批量更新，防止频繁更新
+
 update中的queueWatcher，把所有的更新放到下一个异步任务
+
+维护一个watcher队列，先判断watcher是否已经存在，不存在时送入队列，判断是否等待中，否则循环同步或异步执行watcher中的回调更新，类似于防抖节流，再下一次更新之前只会有一个watcher，在更新时执行一次render
 
 ### keep-alive算法
 
 缓存vnode
 
 LRU算法，缓存最新最常用的
+
+### 其他
+
+use：判断是否函数，判断是否已经存在，执行install，然后添加进插件数组
 
 ### vue3
 
@@ -579,17 +686,19 @@ flow -> ts
 
 runtime阶段
 
-vue2：Object.defineProperty --> 遍历所有的key，监听不到新增，重写每个key的值
+vue2：Object.defineProperty --> 会遍历所有的key，重写每个key的值，监听不到新增
 
-vue3：**proxy** --> 拦截，数组的部分方法还是会多次拦截，不能拦截到内部嵌套对象
+vue3：**proxy** --> 拦截，数组的部分方法还是会多次拦截，不能拦截到内部嵌套对象，只能拦截到外层，懒代理
 
-#### 模版处理解析区别
+解决数组
+
+#### 编译阶段优化
 
 编译阶段
 
-vue2正则匹配，贪婪匹配，造成回溯，重复计算，比如si{1}iin匹配siiin，分析功能有限，不能做更多的编译时优化
+vue2正则匹配，贪婪匹配，造成回溯，重复计算，比如si{1, 3}iin匹配siiin，分析功能有限，不能做更多的编译时优化
 
-vue3状态机：ast，根据自身语法和状态机的模型写了complier，强化了模版分析的能力，能做**更多的编译时优化**
+vue3状态机：每次状态变化时进行分割，ast，根据自身语法和状态机的模型写了complier，强化了模版分析的能力，能做**更多的编译时优化**
 
 > var a = 1 + 2
 >
@@ -611,13 +720,27 @@ vue3状态机：ast，根据自身语法和状态机的模型写了complier，�
 >
 > 按照语法结构进行遍历，构建抽象语法树astexplorer.net
 
+vue2dom diff需要递归diff
+
+vue3编译分析时给动态属性的根元素增加dynamicChilren: []记录动态节点，即在**编译阶段收集了动态节点**，称为block tree（由_createBlock生成），但是不稳定比如v-if的情况，要分别单独作为一个block tree，还是需要dom diff，还有v-for的情况也是不稳定的，不能提升成为block tree的几种情况：v-if，v-for，fragment
+
+静态树提升：把静态节点提升到最顶层不需要每次都创建
+
+预字符串，多个静态节点会合并成一个字符串节点，不需要创建多个静态节点
+
+事件缓存
+
+keep-alive没变
+
+批处理没变
+
 #### 文件结构
 
 packages，功能独立
 
 ​	compiler-core，与平台无关的编译器，编译模版等
 
-​	compiler-dom，浏览器而言的编译器
+​	compiler-dom，浏览器而言的编译器，基于compiler-core
 
 ​	complier-sfc，单文件编译
 
@@ -625,7 +748,7 @@ packages，功能独立
 
 ​	**reactivity**，runtime，核心，响应式处理
 
-​	runtime-core，与平台无关的运行时，虚拟dom，vue组件等
+​	runtime-core，与平台无关的运行时，虚拟dom，dom diff，vue组件等
 
 ​	runtime-dom，浏览器的runtime，原生dom api，原生dom事件
 
@@ -639,79 +762,168 @@ packages，功能独立
 
 ​	template-explorer，在线编译，没有with，runtime时还是有with
 
-#### **reactivity**
+#### **双向数据绑定**
 
-reactive，返回一个被监听的数据，proxy
+##### **reactive**
 
-​	判断是否响应式只读，数组，对象
+返回一个被监听的数据，proxy
 
-​	数组重写，收集依赖
+​	判断是否只读处理过
 
-​	嵌套数据，懒代理，使用时才会代理，不会一开始就深度递归
+​	createReactiveObject(  target: Target, isReadonly: boolean, baseHandlers: ProxyHandler<any>, collectionHandlers: ProxyHandler<any>)创建响应式数据，返回proxy
 
-​	get，收集依赖track
+​		判断是否非对象，响应式或只读，是否已经存在响应式数据（维护了一个proxyMap），是否可以代理（只有特定的类型可以代理），直接返回或返回已有的响应式
 
-​	set，派发通知trigger
+​		创建代理，不同类型数据使用不同的处理函数
 
-effect，会先执行一次传递进来的函数，首次渲染render，收集依赖，数据变动就会执行，重新渲染
+​			collectionHandlers
+
+​			baseHandlers，包括get, set, deleteProperty, has, ownKeys
+
+​				**get**，使用时触发，对特殊key的处理，key是symbol直接返回，判断数组重写，判断是否只读，进行track，如果是对象继续reactive，即只有在使用时才会做代理，没有使用时没有代理 -> **懒代理**，使用时才会代理，不会一开始就深度递归。返回值
+
+​					**track**：判断是否开启依赖收集，targetMap全局变量，判断当前的target是否存在depsMap，没有时初始化map，判断当前key是否已经有deps，没有时初始化set，有添加activeEffect到deps
+
+​				**set**，获取到原始值，判断是新增还是修改，反射修改原始值，派发通知trigger，ADD/SET，返回新值
+
+​					**trigger**：获取到原始数据的所有依赖depsMap，根据当前的操作创建一个新的集合，遍历执行集合中的effect，判断schedule，有的话执行schedule，让schedule调度effect的执行
+
+​		添加到proxyMap
+
+##### **effect**
+
+会先执行一次传递进来的函数，返回effect函数，首次渲染render，收集依赖，监听使用到的响应式数据，变动就会执行，重新渲染
 
 ​	判断是否effectFn
 
-​	返回effect函数，并执行一次
+​	createReactiveEffect，传入fn，创建effect函数
 
-​	触发fn()，触发get()，触发track()，构建全局映射
+​		返回effect函数
+
+​		注入属性，raw原始函数，deps依赖，active激活状态，默认激活
+
+​	不是懒更新时，执行effect()：
+
+​		判断active不处于激活状态时，判断没有调度时直接执行fn()并返回，否则判断是否已经在effectStack栈中存在，否：清空依赖，开启依赖收集（添加到trackStack，shouldTrack=true），保存effect到effectStack，设置激活activeEffect，执行fn()，会触发get()，触发track()，构建全局映射
+
+​		pop出栈，activeEffect置为栈顶
+
+​		重置依赖收集（`const last = trackStack.pop();shouldTrack = last === undefined ? true : last`）
+
+​	返回effect函数
 
 ref，监听基本数据
 
-computed
+​	new RefImpl()
 
-#### 编译阶段
+​		设置get和set用来收集依赖和触发更新
 
-vue2dom diff需要递归diff
+**schedule**：可以决定什么时候执行effectFn
 
-vue3编译分析时给动态属性的根元素增加dynamicChilren: []记录动态节点，即在编译阶段收集了动态节点
+##### computed
 
-block tree，_createBlock，不稳定，v-if，要单独作为一个block tree，还是需要dom diff，还有v-for的情况也是不稳定的
+接收函数或者option，函数就是getter，对象就是getter和setter
 
-静态树提升
+​	new ComputedRefImpl()
 
-预字符串，多个静态节点会合并成一个字符串节点
+​		基于effect，传入getter，返回effect（设置了schedule），effect设置懒更新（不会立即执行effectFn），设置schedule：判断不是脏数据时（已经获取过数据），dirty=true，执行trigger更新
 
-事件缓存
+​		get
 
-keep-alive没变
+​			判断dirty为真时执行effect获取值，第一次获取时执行了effectFn，触发get和track，后续依赖项发生改变时触发schedule
 
-批处理没变
+​			dirty=false；
+
+​			收集依赖；返回值
+
+​		set，执行传入的setter
+
+##### **watchEffect**
+
+基于effect和schedule编译阶段
 
 #### 流程
+
+```js
+import { createApp } from 'vue'
+import App from './app'
+
+/**
+    NOTE: 整个app挂载的执行流程
+
+    STEP: 1.整个应用调用createApp方法生成实例，然后调用mount方法，对于整个App实例的创建，就是一个对应数据与方法的对象创建，
+    调用mount的阶段，首先根据入口组件<App> 创建VNode， 然后触发render函数，整个render的阶段，就是Patch所有Vnode的阶段，当中分为初始化挂载与更新组件的逻辑
+
+    STEP: 2.对于内部patch的阶段，会对不同节点类型有不同的处理逻辑，主要是组件与element，组件就继续执行创建、挂载等等
+  */
+
+const app = createApp(App)
+app.mount('#app')
+```
 
 createApp
 
 ​	创建app实例
 
-​		判断渲染器，不同端
+​		createRender，判断渲染器，不同端创建不同的render，比如浏览器/小程序，有不同的配置项renderOption，返回render和createApp
 
-​		创建render
+​			patch，整个patch的过程其实就是对应的VNode深度优先遍历的过程；来构造一颗完整的树
 
-​		createAppAPI
+​			render
+
+​				判断vnode=null，进入卸载流程
+
+​				否则执行patch，创建或者更新组件
+
+​					初次挂载：processComponent - mountComponent
+
+​						createComponentInstance创建组件实例，维护了组件的生命周期，状态，上下文等
+
+​						setupComponent设置组件实例，setupStatefulComponent
+
+​							创建缓存，创建上下文代理，执行setup，执行时会收集依赖，处理setupResult与实例做结合，遇到ref数据直接返回value，finishComponentSetup：没有render时在线编译构建render，挂载render，兼容options写法（合并数据）
+
+​						setupRenderEffect创建响应式的副作用渲染函数，当组件内部数据发生变化，会重新执行componentEffect方法内部逻辑，并且挂载到组件实例的update方法上，后续更新执行
+
+​							首次渲染：执行beforeMounted，生成subTree，使用patch将subTree渲染到container，patch时创建vnode，执行生命周期mounted
+
+​			createApp=createAppAPI(render, ..)，传入render，返回createApp方法
+
+​				createApp接受两个参数，根组件的对象与props，默认为null
+
+​				构建app实例，包含use，mixin，component，directive，mount，unmount，provide等方法
+
+​					mount：判断还没有挂载，创建vnode，触发**render**，render中执行patch
+
+​				返回app
 
 ​	重写mount方法
 
 ​		判断是否传入render和template方法
 
-​		执行mount，传入render
+生命周期
 
-​			判断是否挂载，否，创建根节点，content挂载到根节点
+动态更新/全部diff
 
-​			render
+流程：
 
-​				创建或者更新组件
+1. 处理基本render 
 
-​				代理数据
+2. 创建App 实例 
 
-​				执行setup，返回render
+3. App.mount  创建rootcomponent 
 
-​				兼容options
+4. compoent  ==> 创建compoent instance 
+
+5. patch compoent | Element | Text
+
+6. mount componet 
+
+7. componet 代理 data option props 
+
+8. componet 执行setup ==> 返回render \ proxy(ref) \ options兼容
+
+9. componet Effect ==> 数据 | 执行render | patch
 
 ## vue/react ssr
 
