@@ -12794,13 +12794,13 @@ setImmediate(function () {
  console.log(2); // 6 第二轮poll阶段发现有setImmediate进入第二轮check阶段执行
 });
 process.nextTick(() => {
- console.log(3); // 3 第一轮timer->IO
+ console.log(3); // 3 微任务前
 });
 new Promise((resovle,reject)=>{
  console.log(4); // 1 同步
  resovle(4);
 }).then(function(){
- console.log(5); // 4 第一轮IO阶段
+ console.log(5); // 4 微任务
 });
 console.log(6); // 2 同步
 // 4 6 3 5 1 2
@@ -12813,43 +12813,47 @@ Browser端**执行完一个宏任务就会去检查微任务队列是否有需�
 nodejs端则会将同源的任务放在一起执行，如果涉及到同源宏任务的嵌套，仍会将同源任务放在一起，但是内部的任务会放在下一次事件循环时执行。
 
 ```js
-'use strict';  // 浏览器   node   node阶段
-console.log(1);  // 1   1   同步
-setTimeout(() => {  // 宏任务1   第一阶段设置定时器，启动事件循环
-    console.log(2)  // 6   6   第二轮poll阶段->第三轮timers执行
+'use strict';  
+console.log(1);  // 1
+setTimeout(() => {  // timers
+    console.log(2)  //6
     new Promise((resolve) => { 
-        console.log(6);  // 7   7   第三轮IO阶段执行
+        console.log(6);  // 7
         resolve(7);
-    }).then((num) => {  // 微任务1.1   放入第四轮IO
-        console.log(num);  // 8   10   第四轮IO阶段执行
+    }).then((num) => {  // 微任务
+        console.log(num);  // 8
+    })
+    setTimeout(()=>{  // timers
+        console.log(13);  // 12
     })
 });
-setTimeout(() => {  // 宏任务2   第一阶段设置定时器
-    console.log(3);  // 9   8   第三轮poll阶段->第四轮timers阶段执行
+setTimeout(() => {  // timers
+    console.log(3);  // 9
     new Promise((resolve) => {
-        console.log(9);  //10   9   第四轮IO阶段执行
+        console.log(9);  // 10
         resolve(10);
-    }).then((num) => {  // 微任务1.1.1   放入第五轮IO
-        console.log(num);  // 11   11   第五轮IO阶段执行
+    }).then((num) => {  // 微任务
+        console.log(num);  // 11
     })
-    setTimeout(()=>{  // 宏任务3   第四轮设置定时器
-        console.log(8);  // 12   12   第五轮poll阶段->第六轮timers阶段执行
+    setTimeout(()=>{  // timers
+        console.log(8);  // 13
     })
 })
 new Promise((resolve) => {
-    console.log(4);  // 2   2   同步
+    console.log(4);  // 2
     resolve(5)
-}).then((num) => {  // 微任务1
-    console.log(num);  // 3   3   第一轮IO阶段执行
-    new Promise((resolve)=>{
-        console.log(11);  // 4   4   第一轮IO阶段执行
+}).then((num) => {  // 微任务
+    console.log(num);  // 3
+    new Promise((resolve)=>{ 
+        console.log(11);  // 4
         resolve(12);
-    }).then((num)=>{  // ！！微任务2，要清空所有微任务，多加几层也是一样的
-        console.log(num);  // 5   5   第一轮IO阶段执行
+    }).then((num)=>{  // 微任务
+        console.log(num);  // 5
     })
 })
-// 1 4 5 11 12 2 6 7 3 9 10 8
-// 1 4 5 11 12 2 6 3 9 7 10 8
+
+// 浏览器 1，4，5，11，12，2，6，7，3，9，10，8
+// node 1，4，5，11，12，2，6，7，3，9，10，8
 ```
 
 #### node版本的差异

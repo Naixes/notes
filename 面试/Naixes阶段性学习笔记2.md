@@ -1939,3 +1939,1490 @@ n 皇后问题 研究的是如何将 n 个皇后放置在 n×n 的棋盘上，�
 每一种解法包含一个不同的 n 皇后问题 的棋子放置方案，该方案中 'Q' 和 '.' 分别代表了皇后和空位。
 
 > 回溯
+
+## 前端中的数据结构
+
+堆区存储，引用类型
+
+栈区存储，简单类型或堆区引用
+
+闭包是特殊的，一直有一个堆区的引用
+
+```js
+var a = {n: 1}
+a.x = a = {n: 2}
+console.log(a.x) // undefined，.优先于=，a.x指向于{n: 1}，但是a又被重新赋值，所以a.x就取不到了
+```
+
+js模拟指针移动
+
+### 堆和栈
+
+内存栈：函数执行会把局部变量压到一个栈里面
+
+内存堆：new出来的原型链和obj
+
+栈空间8m，内存向低位增长
+
+堆空间，向高位增长，空间比栈大，效率比栈低
+
+1. 栈区(stack): 由编译器自动分配释放，存放函数的参数值，局部变量的值等，其操作方式类似于数据结构的栈。
+
+2. 堆区(heap): 一般是由程序员分配释放，若程序员不释放的话，程序结束时可能由OS回收，值得注意的是他与数据结构的堆是两回事，分配方式倒是类似于数据结构的链表。
+
+3. 全局区(static): 也叫静态数据内存空间，存储全局变量和静态变量，全局变量和静态变量的存储是放一块的，初始化的全局变量和静态变量放 一块区域，没有初始化的在相邻的另一块区域，程序结束后由系统释放。
+
+4. 文字常量区: 常量字符串就是放在这里，程序结束后由系统释放。 
+
+5. 程序代码区: 存放函数体的二进制代码。
+
+### V8角度的对象和map实现原理
+
+代码参考：demo-collection/html+css+js/03js/memory
+
+一些概念
+
+- 常规属性 (properties) 和排序属性 (element)
+
+- 对象内属性 (in-object properties)
+- 快属性fast和慢属性slow
+- 快数组(FastElements)慢数组(SlowElements)
+- Map和Set的实现原理对比
+
+#### 对象
+
+JavaScript 对象像一个字典是由一组组属性和值组成的，由**map(map 一般也称为 HiddenClass)、propertiesOrHash、elements**三个内置属性组成，所以最简单的方式是使用一个字典来保存属性和值，但是由于字典是非线性结构，所以如果使用字典，读取效率会大大降低。
+
+> new 很多次不会很浪费性能，因为都是一个map/HiddenClass
+
+V8 为了提升存储和查找效率，V8 在对象中添加了两个隐藏属性，**排序属性和常规属性**， element 属性指向了 elements 对象，在 elements 对象中，会按照**顺序**存放排序属性。 properties 属性则指向了 properties 对象，在 properties 对象中，会按照**创建时的顺序**保存常规属性。
+
+##### 常规属性 (properties) 和排序属性 (element)
+
+```js
+// 1.数字属性被最先打印出来了，并且是按照数字大小的顺序打印的
+// 2.设置的字符串属性依然是按照之前的设置顺序打印的
+// 原因:ECMAScript 规范中定义了数字属性应该按照索引值大小升序排列，字符串属性根据创建时的顺序升序排列
+
+function Foo() {
+	this[100] = 'test-100'
+  this[1] = 'test-1'
+  this["B"] = 'bar-B'
+  this[50] = 'test-50'
+  this[9] = 'test-9'
+  this[8] = 'test-8'
+  this[3] = 'test-3'
+  this[5] = 'test-5'
+  this["A"] = 'bar-A'
+  this["C"] = 'bar-C'
+}
+var bar = new Foo() 
+for(key in bar){
+	console.log(`index:${key} value:${bar[key]}`) 
+}
+console.log(bar);
+ 
+```
+
+> ```js
+> const sin = {
+>   	test1: 'naixes', // 对象内属性
+>   	15: 'xxx' // 排序属性，element
+> }
+> ```
+>
+> 在浏览器的memory的快照中可以看到对象在内存中具体是什么样的
+
+在对象中的**数字属性称为排序属性**，在 V8 中被称为 *elements*(elements 对象中，会按照顺序存放排序属性)，in-object 属性知道了其属性值的索引之后，直接根据对象的首地址进行偏移即可， fast 和 in-object 是互补的。
+
+默认情况下，添加的属性优先按 in-object 形式进行处理，当整体 in-object 属性的数量超过一定上限时，属性会被添加到 fast 的 PropertyArray 中。
+
+**字符串属性就被称为常规属性**，在 V8 中被称为 *properties*(按照创建时的顺序保存了常规属性)。bar 对象恰好包含了这两个隐藏属性。
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 上午10.48.46.png" alt="截屏2021-07-15 上午10.48.46" style="zoom:50%;" />
+
+> element 是一个线性结构，数组，连续的内存，properties，应该是一个字典，但是V8进行了优化
+
+如上在 V8 内部，为了有效地提升存储和访问这两种属性的性能，分别**使用了两个线性数据结构来分别保存排序属性和常规属性**。分解成这两种线性数据结构之后，如果执行索引操作，那么 V8 会先从 elements 属性中按照顺序读取所有的元素，然后再在 properties 属性中读取所有的元素，这样就完成一次索引操作。
+
+当我们在浏览器里打印出来以后，并没有发现 *properties* 原因是bar.B这个语句来查找 B 的属性值，那么在 V8 会先查找出 properties 属性所指向的对象 properties，然后再在 properties 对象中查找 B 属性，这种方式在查找过程中增加了一步操作，因此会影响到元素 的查找效率。
+
+所以V8 采取了一个权衡的策略以加快查找属性的效率，这个策略是**将部分常规属性直接存储到对象本身，我们把这称为对象内属性 (in-object properties)**。对象在内存中的展现形式 你可以参看下图:
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 上午11.01.15.png" alt="截屏2021-07-15 上午11.01.15" style="zoom:50%;" />
+
+不过对象**内属性的数量是固定的**，默认是 19 个，如果添加的属性超出了对象分配的空间， 则它们将被保存在常规属性存储中。虽然属性存储多了一层间接层，但可以自由地扩容。 **保存在线性数据结构中的属性称之为“快属性”**，因为线性数据结构中只需要通过索引即可以访问到属性，虽然访问线性结构的速度快，但是如果从线性结构中添加或者删除大量的属性时，则执行效率会非常低，这主要因为会产生大量时间和内存开销。 因此，如果一个对象的属性过多时，V8 就会采取另外一种存储策略，那就是“慢属性”策 略，但**慢属性的对象内部会有独立的非线性数据结构 (词典) 作为属性存储容器**。所有的属性元信息不再是线性存储的，而是直接保存在属性字典中。
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 上午11.05.10.png" alt="截屏2021-07-15 上午11.05.10" style="zoom:50%;" />
+
+> 动态添加的属性放到properties里
+>
+> 在浏览器快照中查看element时，浏览器会在外层多显示一份，实际上内存中是没有的，可以使用V8提供的%DebugPrint查看最原始的样子
+>
+> ```js
+> // 字面量创建的对象
+> const sin = {
+> 	test1: 'naixes', // 对象内属性
+> 	15: 'xxx' // 排序属性，element
+> }
+> console.log('origin', %DebugPrint(sin)) // 要使用 node --allow-natives-syntax xx.js 执行，允许使用原生方法
+> ```
+>
+> <img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 上午11.16.27.png" alt="截屏2021-07-15 上午11.16.27" style="zoom:50%;" />
+>
+> <img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 上午11.21.16.png" alt="截屏2021-07-15 上午11.21.16" style="zoom:50%;" />
+>
+> in-obj和elements都是快属性
+>
+> 深层次的快：FastProperties，整个对象是快对象
+>
+> 当动态加入属性时：
+>
+> ```js
+> // 字面量创建的对象
+> const sin = {
+> 	test1: 'naixes', // 对象内属性
+> 	15: 'xxx' // 排序属性，element
+> }
+> // console.log('origin', %DebugPrint(sin)) // 要使用 node --allow-natives-syntax xx.js 执行，允许使用原生方法
+> sin['test2'] = 'xxxx'
+> ```
+>
+> 查看内存快照：会出现properties，中有test2，in-obj也有test2，因为in-obj还没有达到界限，properties在一定数量级内还是线性的还没有字典
+>
+> V8中显示：
+>
+> <img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 上午11.28.54.png" alt="截屏2021-07-15 上午11.28.54" style="zoom:50%;" />
+>
+> FastProperties没变，整个对象还是快对象
+>
+> inobject properties没有变
+>
+> test2 后面多了propertirs[0]
+>
+> 由FixedArray退化成ProperArray
+>
+> 当动态添加突破极限时（19），FastProperties会变为DictionaryProprties，ProperArray变为NameDictionary字典
+>
+> redux**不可变状态**，不能在原对象上进行操作，会破坏掉FastProperties
+>
+> vue中推广的Object.create(null)，没有原型链，但是刚开始就是慢对象DictionaryProprties
+>
+> **Hidden Classes**
+>
+> 同一个class，new的实例是同一个，所有的对象形成一个栈
+>
+> <img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 上午11.58.23.png" alt="截屏2021-07-15 上午11.58.23" style="zoom:50%;" />
+>
+> back pointer可以往回找，最好不要破坏back pointer
+>
+> ```js
+> function Sin(val) {
+>   this.prop = val;
+> }
+> 
+> //新创建了 堆的引用属性不同 -> 隐藏类
+> const a = new Sin('foo'); //c++ 对象
+> const b = new Sin('bar'); //按址引用发生了 混乱
+> 
+> console.log('🐻🐻🐻js中是否一致', a == b); // false
+> console.log('📚V8中是否是同一指向', %HaveSameMap(a, b)); // true
+> b.prop2 = 'baz'; // 打乱了结构
+> console.log('📚V8修改之后', %HaveSameMap(a, b)); // false
+> ```
+>
+> 不破坏结构对象操作需要注意的地方：
+>
+> delete：
+>
+> ```js
+> //破坏对象的执行时间
+> const startTime = +new Date();
+> for (let i = 0; i < 1000000; i++) {
+>   const a = {
+>     a: '1',
+>     b: '2',
+>     c: '3',
+>   };
+>   a.b = undefined; // 推荐，没有破坏结构，操作也几乎不消耗内存
+>   // delete a.b; // 干掉了c的back pointer，变成慢对象，delete操作也慢
+>   // delete a.c; // 没改变back pointer，按照顺序delete没影响
+> }
+> const endTime = +new Date();
+> console.log(endTime - startTime);
+> ```
+>
+> 创建对象：
+>
+> ```js
+> // 写ts的时候和写JS的时候
+> class Obj {
+>   // 提前声明，减少内存消耗
+>   private a:number = 22;
+>   a = null;
+>   constructor(options) {
+>     if (options && options.a) {
+>       this.a = options.a;
+>     } else {
+>       // 会创建hidden class消耗内存
+>       // 改变类型也会
+>       this.a = null;
+>     }
+>   }
+> }
+> 
+> const objs = [];
+> for (let i = 0; i < 300000; i++) {
+>   const obj = new Obj();
+>   console.log('🐻最初的样子', %DebugPrint(obj));
+>   objs.push(obj);
+> }
+> ```
+>
+> 静态使用对象，动态使用map
+
+inobject 和 fast 都是「偏静态」的优化手段，而 slow 则是完全动态的形式，当对象频繁地 动态添加属性、或者执行了 delete 操作，则预测它很可能未来还会频繁的变动，那么使用 纯动态的形式可能会更好，所以切换成 slow 模式。当你把一个对象给到一个函数的原型链 的时候他会⻢上切换为slow
+
+在 V8 的新版本(≥ 6.0)中，提供了一个新途径，当删除的属性满足如下 6 点条件时对象不 会退化为字典模式:
+
+1. 对象是常规 JavaScript 对象。
+2. 传入的属性名是常量化字符串(不可是变量)或 Symbol。 
+3. 删除的属性是最后添加到对象内的。
+4. 此属性是可以被删除的。
+5. backpointer引用的类型必须是 。
+6. 最后一次 Map Transition 只能由于对象新增属性而触发。
+
+我们可以将如上部分小结如下:
+
+- 对象的属性有三种模式:inobject，elements，properties
+
+- 三种模式的属性访问效率由左往右递减
+
+- 属性默认使用 inobject 型，数字属性属于 elements，动态添加的属于 properties，都属于 fast 型，超过预留配额后，会切换到 slow 型
+
+- 当继续超过 fast 型的配额或者操作不当后，对象整个切换到 slow 型
+
+- 初始 inobject 的配额会因为使用的是「构造函数创建」还是「对象字面量」创建而不同，前者根据编译器收集的信息(大致属性数 + 8，且上限为 252)，后者是固定的 4 
+
+- 使用 Object.create(null) 创建的对象直接是 slow 型
+
+- 对于任意对象 A，在其声明周期内，使用 delete 删除了除最后顺位以外的其余顺位 的属性，或者将 A 设置为另一个构造函数的 prototype 属性，都会将对象 A 整个切 换为 slow 型，神奇的是再次new就可以被优化了
+
+- 目前来看，切换到 slow 型后将不能再回到 fast 型
+
+在实际使用时，我们不必考虑上面的细节，只要确保在有条件的情况下:
+
+- 尽可能使用构造函数(或者字面量)的方式创建对象，换句话说是尽可能的减少属性的 动态创建。实际上，像这样尽可能让 JS 代码体现出更多的静态性，是迎合引擎内部优 化方式以获得更优性能的核心原则，同样的操作包括尽可能的保持变量的类型始终唯 一、以避免 JIT 失效等
+
+- 如果需要大量的动态添加属性，或者需要删除属性，直接使用 Map 对象会更好(虽然引 擎内部也会自动切换，但是直接用 Map 更符合这样的场景，也省去了内部切换的消耗)
+
+以上资料参考自 https://v8.dev/blog/fast-properties
+
+#### 数组
+
+数组 它的这种特定的存储结构(连续存储空间存储同一类型数据)决定了，优点就是可以 随机访问(可以通过下标随机访问数组中的任意位置上的数据)，缺点(对数据的删除和插 入不是很友好)。*JavaScript*的数组过于灵活。
+
+```js
+// --+当栈用--+
+let stack = [1, 2, 3] /% 进栈
+stack.push(4)
+// 出栈
+stcak.pop()
+//--+当队列用--+
+let queue = [1, 2, 3]
+// 进队
+queue.push(4)
+// 出队
+queue.shift()
+
+//综上所述:有以下的结论
+//查找: 根据下标随机访问的时间复杂度为 O(1); *插入或删除: 时间复杂度为 O(n);
+```
+
+##### 数组为什么可以保存不同类型
+
+```js
+//JSArray 是继承自 JSObject 的，所以在 JavaScript 中，数组可以是一个特殊的对象，内部也是以 key-value 形式存储数据，所以 JavaScript 中的数组可以存放不同类型的值。
+// The JSArray describes JavaScript Arrays
+// Such an array can be in one of two modes:
+// - fast, backing storage is a FixedArray and length <- elements.length();
+// Please note: push and pop can be used to grow and shrink the array.
+// - slow, backing storage is a HashTable with numbers as keys. class JSArray: public JSObject {
+public:
+// [length]: The length property. DECL_ACCESSORS(length, Object)
+// ..0
+// Number of element slots to pre-allocate for an empty array.
+static const int kPreallocatedArrayElements = 4; };
+ 
+```
+
+##### 数组是如何存储的
+
+JSArray 继承于 JSObject ，从注释上看，它有两种存储方式:
+
+fast: 存储结构是 FixedArray ，并且数组⻓度 <= elements.length() ， push 或 pop 时可能会伴随着动态扩容或减容
+
+slow: 存储结构是 HashTable (哈希表)，并且数组下标作为 key
+
+fast 模式下数组在源码里面叫 FastElements ，而 slow 模式下的叫做 SlowElements 。
+
+**快数组(FastElements)**
+
+FixedArray 是 V8 实现的一个类似于数组的类，它表示一段连续的内存，可以使用索引直接定位。新创建的空数组默认就是快数组。当数组满(数组的⻓度达到数组在内存中申请的内存容量最大值)的时候，继续 push 时， JSArray 会进行动态的扩容，以存储更多的元素。
+
+**慢数组(SlowElements)**
+
+慢数组以哈希表的形式存储在内存空间里，它不需要开辟连续的存储空间，但需要额外维护一个哈希表，与快数组相比，性能相对较差。
+
+##### 什么时候会从 fast 转变为 slow
+
+当处于以下情况时，快数组会被转变为慢数组:
+
+- 当加入的索引值 index 比当前容量 capacity 差值大于等于 1024 时(index - capacity >= 1024)
+
+- 快数组新增数据后新容量是扩容后的容量 3 倍以上时
+
+例如:向快数组里增加一个大索引同类型值
+
+##### 从 slow 转变为 fast
+
+smi，硬件的串行接口，限制了数据流向
+
+当慢数组的元素可存放在快数组中且⻓度在 smi 之间且节省了50%的空间，则会转变为快数组
+
+总之很困难，置为null也可以
+
+##### 动态扩容与减容
+
+扩容后新容量计公式：即老的容量的 1.5 倍加上 16
+
+初始化为 4 个，当 push 第 5 个的时候，容量将会变成: /%new_capacity = 4 / 2 + 4 + 16 = 22，接着申请一块这么大的内存，把老的数据拷过去，把新元素放在当前 length 位置，然后将数组 的 length + 1，并返回 length。
+
+当数组 pop 后，如果数组容量大于等于 length 的 2 倍，则进行容量调整，使用 RightTrimFixedArray 函数，计算出需要释放的空间大小，做好标记，等待 GC 回收;如果数组 容量小于 length 的 2 倍，则用 holes 对象
+
+扩容和减容影响不是很大，快慢数组影响比较大
+
+##### 总结
+
+JavaScript 中， JSArray 继承自 JSObject ，或者说它就是一个特殊的对象，内 部是以 key-value 形式存储数据，所以 JavaScript 中的数组可以存放不同类型的值。 它有两种存储方式，快数组与慢数组，初始化空数组时，使用快数组，快数组使用连续的内存空间，当数组⻓度达到最大时， JSArray 会进行动态的扩容，以存储更多 的元素，相对慢数组，性能要好得多。当数组中 hole 太多时，会转变成慢数组，即以哈希表的方式( key-value 的形式)存储数据，以节省内存空间。
+
+#### map
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 下午4.45.14.png" alt="截屏2021-07-15 下午4.45.14" style="zoom:50%;" />
+
+「Object」不同于「Map」，它不仅仅是表面所看到的。「Map」只包含你所定义的键值对，但是「Object」对象具有其原型中的一些内置属性
+
+「Map」是一个纯哈希结构，始终保持对⻓度的跟踪，使其能够在*O(1)*复杂度中进行访问
+
+另一方面，对于「Object」而言，想要获得对象的属性⻓度，需要手动对其进行迭代，使 其为*O(n)*复杂度，属性⻓度为*n* 。
+
+「Map」始终保持按插入顺序返回键名。但「Object」却不是。所以当你需要频繁操作数据的时候也可以优先考虑 *Map*
+
+> 不要将「Map」作为普通「Object」的替代品，而应该是普通对象的补充
+
+### 执行堆栈
+
+当Javascript代码执行的时候会将不同的变量存于内存中的不同位置:堆(heap)和栈 (stack)中来加以区分。其中，堆里存放着一些对象。而栈中则存放着一些基础类型变量 以及对象的指针。 但是我们这里说的执行栈和上面这个栈的意义却有些不同。
+
+js 在执行可执行的脚本时，首先会创建一个全局可执行上下文globalContext，每当执行到一个函数调用时都会创建一个可执行上下文(execution context)EC。当然可执行程序可能会存在很多函数调用，那么就会创建很多EC，所以 JavaScript 引擎创建了执行上下文栈 (Execution context stack，ECS)来管理执行上下文。当函数调用完成，JS会退出这个执行环境并把这个执行环境销毁，回到上一个方法的执行环境... 这个过程反复进行，直到执行栈中的代码全部执行完毕，如下是以上的几个关键词:
+
+- 执行栈(Execution Context Stack)
+- 全局对象(GO Global Context)
+- 活动对象(Activation Object)
+- 变量对象(Variable Object)
+- 全局上下文(GC global execution context )
+- 执行上下文(EC execution context)
+- 函数调用栈(Callee Stack)
+- 执行上下文栈(ECS execution context Stack )
+- 垃圾回收(GC Garbage Collection )
+- 词法环境(LexicalEnvironment)
+- 变量环境(VariableEnvironment)
+- 环境记录(Environment record)
+
+**执行栈(Execution Context Stack)**：浏览器解释器执行 js 是单线程的过程，这就意味着同一时间，只能有一个事情在进 行。其他的活动和事件只能排队等候，生成出一个等候队列执行栈(Execution Stack)。
+
+#### 执行栈压栈顺序
+
+一开始执行代码的时候，变确定了一个全局执行上下文 global execution context 作 为默认值。如果在你的全局环境中，调用了其他的函数，程序将会再创建一个新的 EC，然 后将此 EC推入进执行栈中 execution stack
+
+如果函数内再调用其他函数，相同的步骤将会再次发生:创建一个新的EC -> 把EC推入执行 栈。一旦一个EC执行完成，会从执行栈中推出(pop)。ESP指针负责EC出栈指向。
+
+> this永远是ESP的指向，即ECS执行栈栈顶
+
+```js
+ECStack = [
+	globalContext // window就在这里，不会回收
+];
+
+
+function fun3() { 
+  console.log('fun3')
+}
+function fun2() {
+	fun3(); 
+}
+function fun1() {
+  fun2();
+}
+fun1(); 
+//执行fun1 结果如下 
+ECStack = [
+  fun3, // ESP
+  fun2,
+	fun1,
+  globalContext
+]
+```
+
+**变量对象(Variable Object)**：变量对象VO是与执行上下文相关的特殊对象,用来存储上下文的函数声明，函数形参和变量。
+
+```js
+// "变量对象VO存储上下文中声明的以下内容 
+{
+//"1-1 函数声明FD(如果在函数上下文中)，—-不包含函数表达式，这就是为什么匿名函数的this是window，没有参加到VO
+//"1-2 函数形参function arguments
+//"1-3 变量声明–注意b=10不是变量，但是var b = 10;是变量，有变量声明提升 /"alert(a); /" undefined
+//"alert(b); /" “b” 没有声明
+//"b = 10;
+//"var a = 20;
+}
+var a = 10;
+function test(x) { 
+  var b = 20;
+};
+test(30);
+// 全局上下文的变量对象
+VO(global execution context) = { 
+  a: 10,
+  test: <reference to function>
+};
+// test函数上下文的变量对象 
+VO(test functionContext) = {
+  x: 30,
+  b: 20 
+};
+// VO分为全局上下文的变量对象VO，函数上下文的变量对象VO
+VO(global execution context) === Global Context === globalThis;
+```
+
+> scope链就是靠VO维持的
+
+**活动对象(Activation Object)**：在函数上下文中，变量对象被表示为活动对象AO，当函数被调用后，这个特殊的活动对象就被创建了。它包含普通参数与特殊参数对象(具有索引属性的参数映射表)。活动对象在函 数上下文中作为变量对象使用。
+
+```js
+// 1.在函数执行上下文中，VO是不能直接访问的，此时由活动对象扮演VO的⻆色。 
+// 2.Arguments对象它包括如下属性:callee 、length 
+// 3.内部定义的函数
+// 4.以及绑定上对应的变量环境;
+// 5.内部定义的变量 
+VO(functionContext) === AO; 
+function test(a, b) {
+  var c = 10;
+  function d() {}
+  var e = function _e() {}; 
+  (function x() {});
+}
+test(10); // call
+// 当进入带有参数10的test函数上下文时，AO表现为如下: 
+// AO里并不包含函数“x”。这是因为“x” 是一个函数表达式(FunctionExpression, 缩写为 FE) 而不是函数声明，函数表达式不会影响VO
+AO(test) = {
+  a: 10,
+  b: undefined,
+  c: undefined,
+  d: <reference to FunctionDeclaration "d">,
+  e: undefined
+};
+```
+
+> VO执行完成之后创建AO
+>
+> AO分为两步：定义阶段（提升阶段）和执行阶段（赋值阶段）
+>
+> 变量提升发生在AO阶段
+
+**深度活动对象(Activation Object)**
+
+```js
+//Activation Object 分为创建阶段和执行阶段 
+function foo(i) {
+  var a = 'hello';
+  var b = function privateB() { };
+  function c() {
+  }
+}
+foo(22); 
+//当我们执行foo(22)的时候，EC创建阶段会类似生成下面这样的对象: 
+fooExecutionContext = {
+	  // 作用域链
+    scopeChain: { Scope },
+    AO: {
+        arguments: {
+            0: 22,
+						length: 1 
+        },
+        i: 22,
+        c: pointer to function c()
+  			// 函数变量提升
+        a: undefined,
+        b: undefined
+    },
+	  // 外部的
+    VO:{...}
+    Scope: [AO, VO,GO],
+}
+// 在创建阶段，会发生属性名称的定义，但是并没有赋值(变量提升阶段)。一旦创建阶段 (creation stage)结束，变进入了激活 / 执行阶段，那么fooExecutionContext便会完成 赋值，变成这样:
+//【 运行函数内部的代码，对变量赋值，代码一行一行的被解释执行 】 
+fooExecutionContext = {
+  scopeChain: { ..) },
+  AO: {
+    arguments: {
+      0: 22,
+      length: 1 
+    },
+    i: 22,
+    c: pointer to function c()
+    a: 'hello',
+    b: pointer to function privateB()
+  },
+  VO:{...}
+  Scope: [AO, VO, GO], 
+  this: { 运行时确认 } // ESP，ECS执行栈栈顶
+}
+```
+
+**补充活动对象(Activation Object)**
+
+```js
+var x = 10; 
+function foo() {
+  var x = 100
+  var barFn = new Function('alert(x); alert(y); const c = 2'); // 10, "y" is not defined 
+  // var barFn = () => {alert(x); alert(y)}; // 100, "y" is not defined 
+  // var barFn = function() {alert(x); alert(y)}; // 100, "y" is not defined 
+  barFn(); // 10, "y" is not defined 
+}
+foo(); 
+alert(c)
+//1.通过函构造函数Function创建的函数的[[scope]]属性总是唯一的全局对象(全局 LexicalEnvironment)。内存泄漏
+//2.Eval code - eval 函数包含的代码块也有同样的效果
+```
+
+> 闭包会出栈，会去堆区，不回收
+
+整合体运行流程如下
+
+```js
+// VO函数上下文的链接 AO是函数自身的 
+ECStack = [
+        fun3
+        fun2,
+        fun1,
+        globalContext
+];
+```
+
+当一个异步代码(如发送ajax请求数据)执行后会如何呢?
+
+接下来需要了解的另一个概念就是事件队列(Task Queue)。 当js引擎遇到一个异步事件后，其实不会说一直等到异步事件的返回，而是先将异步事件进行挂起。等到异步事件执行完毕后，会被加入到事件队列中。(注意，此时只是异步事件执行完成，其中的回调函数并没有去执行。)当执行队列执行完毕，主线程处于闲置状态时， 会去异步队列那抽取最先被推入队列中的异步事件，放入执行栈中，执行其中的回调同步代 码。如此反复，这样就形成了一个无限的循环。这就是这个过程被称为“事件循环(Event Loop)”的原因。
+
+```js
+function test() { 
+  var result = []
+  for (var i = 0; i < 10; i++) {
+    //(function (i) {
+       result[i] = function() {
+ 				 return i 
+       }
+    //})(i)
+	}
+  return result
+}
+let r = test() 
+r.forEach(fn => {
+	console.log('fn',fn()) 
+})
+//1.函数test执行完出栈，留下AO(test)有个i的指向 
+//2.函数在执行的时候，函数的执行环境才会生成。所以fn执行的时候生成作用域链条指向如下 
+//3.AO(result[i]) --> AO(fn) --> VO(G) test执行完，出栈，i已经去堆区了，i是从全局找的，解决：加个闭包就立⻢创建了执行环境，固定i的值，使用立即执行函数或者let解决
+<ul>
+    <li>1</li>
+    <li>2</li>
+    <li>3</li>
+    <li>4</li>
+    <li>5</li>
+    <li>6</li>
+</ul>
+var list_li = document.getElementsByTagName("li"); 
+for (var i = 0; i < list_li.length; i++) {
+  list_li[i].onclick = function () {
+    console.log(i);
+  }
+}
+```
+
+那么其实一切也就迎刃而解了。闭包的原理是Scope(堆空间中存储closure(foo))，this的原 理是动态绑定，作用域链的原理是Scope: [AO, VO,GO]。eval不能回收的原理是推不进AO，变量提升的原理是AO的准备阶段，异步队列的原理是ECS.
+
+#### ES5+
+
+```js
+// this 值的决定，也被称为 This Binding。(即 this 绑定) 
+// LexicalEnvironment(词法环境)
+// VariableEnvironment(变量环境)
+ExecutionContext = {
+	ThisBinding = <this value>, // 之前是AO执行阶段创建this，由于箭头函数，现在开始就绑定了
+  LexicalEnvironment = { ... }, 
+  VariableEnvironment = { ... },
+}
+```
+
+```js
+// 全局执行上下文 
+GlobalExectionContext = {
+	// 词法环境 
+  LexicalEnvironment: {
+		// 环境记录 
+    EnvironmentRecord: {
+			Type: "Object", // 全局环境
+			// ... 标识符绑定在这里
+			outer: <null>, // 对外部环境的引用
+		} 	
+  }
+}
+// 函数执行上下文 
+FunctionExectionContext = {
+    LexicalEnvironment: {
+        EnvironmentRecord: {
+					Type: "Declarative",// 函数环境
+          // ..) 标识符绑定在这里
+          // 对全局环境或外部函数环境的引用
+          outer: <Global or outer function environment reference>,
+        }
+    }
+}
+```
+
+为了继续去适配早期的JS的var等，新的规范增加了**变量环境**(VariableEnvironment)。变量环境也是一个词法环境，其**环境记录器**包含了由**变量声明语句**
+
+在ES6 中，词法环境组件和变量环境组件的区别在与**前者用于存储函数声明和变量( let 和 const )绑定**，而**后者仅用与存储变量( var )绑定**。
+
+```js
+let a = 20;
+const b = 30;
+var c;
+function multiply(e, f){
+  var g = 20;
+  return e*f*g;
+};
+c = multiply(20, 30); 
+
+// 全局执行上下文
+GlobalExectionContext = {
+	ThisBinding: <Global Object>, 
+  // 词法环境
+  LexicalEnvironment: {
+  	EnvironmentRecord: {
+      Type: "Object",
+      // 标识符绑定，let、const、函数声明 
+  		a: <uninitialized>, // 未初始化，TDZ
+      b: <uninitialized>,
+      multiply:< func >
+    }
+    outer: <null>
+  },
+  // 变量环境 
+  VariableEnvironment: {
+    EnvironmentRecord: {
+      Type: "Object",
+      // 标识符绑定，var 声明
+      c: undefined,
+    }
+    outer: <null>
+  }
+}
+// 函数执行上下文 
+FunctionExectionContext = {
+  ThisBinding: <Global Object>,
+  LexicalEnvironment: {
+    EnvironmentRecord: {
+			Type: "Declarative",
+			// 标识符绑定
+			Arguments: { 0:20, 1:30, length: 2},
+    },
+      VariableEnvironment: {
+        EnvironmentRecord: {
+          Type: "Declarative", // 在这里绑定标识符
+          g: undefined
+       	}
+    	outer: <GlobalLexicalEnvironment>
+    },
+	},
+}
+```
+
+以上 let 和 const 定义的变量并没有关联任何值 **uninitialized(未初始化)** ，但 var 定义的变量被初始化成 undefined 。这也就是造成**TDZ的原因**了。
+
+接下来就是执行阶段，完成对所有变量的分配，最后执行代码。无论是ES3还是ES5，上下文的生命周期包括三个阶段：**创建阶段 -> 执行阶段 -> 回收阶段**。
+
+#### 模版
+
+koa-swig模版原理：
+
+模版，输入到模版引擎，通过正则匹配语法，解析模版，拼接函数 - 返回一个**new Function** - 执行代码，通过传入的template，data，filter生成最终的html - 输出
+
+vue模版：
+
+Vue 的编译模块包含 4 个目录:
+
+- compiler-core 
+- compiler-dom // 浏览器 
+- compiler-sfc // 单文件组件 
+- compiler-ssr // 服务端渲染
+
+Vue 的编译分为三个阶段，分别是:parse、 transform、codegen。
+
+其中 parse 阶段将模板字符串转化为语法抽象树 AST。
+
+transform 阶段则是对 AST 进 行了一些转换处理。
+
+codegen 阶段根据 AST 生成对应的 render 函数字符串。
+
+##### parse
+
+在解析模板字符串时，可分为两种情况:以 < 开头的字符串和不以 < 开头的字符串。
+
+不以 < 开头的字符串有两种情况:它是文本节点或 {{ exp }} 插值表达式。
+
+其实解析 HTML 类似于编译原理中的有限状态机。
+
+"<" 字符前后的文本，"<" 字符前的就当做文本处理，"<" 字符后的通过正则判断，可推算 出有限的几种状态。
+
+而以 < 开头的字符串又分为以下几种情况:
+
+1. 元素开始标签 <div>
+2. 元素结束标签 <"div>
+3. 注释节点 <!-% 123 --(
+4. 文档声明 <!DOCTYPE html>
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-27 下午4.54.12.png" alt="截屏2021-07-27 下午4.54.12" style="zoom:50%;" />
+
+```js
+while (s.length) {
+  if (startsWith(s, '{{')) {
+    // 如果以 '{{' 开头
+    node = parseInterpolation(context, mode) 
+  } else if (s[0] ==$ '<') {
+    // 以 < 标签开头
+    if (s[1] ==$ '!') {
+      if (startsWith(s, '<!-(')) { // 注释
+      	node = parseComment(context)
+      } else if (startsWith(s, '<!DOCTYPE')) {
+        // 文档声明，当成注释处理
+        node = parseBogusComment(context) 
+      }
+    } else if (s[1] ==$ '/') {
+      // 结束标签
+    	parseTag(context, TagType.End, parent) 
+    } else if (/[a-z]/i.test(s[1])) {
+      // 开始标签
+      node = parseElement(context, ancestors) 
+    }
+  } else {
+    // 普通文本节点
+    node = parseText(context, mode) 
+  }
+}
+//parseChildren()，主入口。 
+//parseInterpolation()，解析双花插值表达式。 
+//parseComment()，解析注释。 
+//parseBogusComment()，解析文档声明。 
+//parseTag()，解析标签。 
+//parseElement()，解析元素节点，它会在内部执行 parseTag()。 
+//parseText()，解析普通文本。 
+//parseAttribute()，解析属性。
+```
+
+每解析完一个标签、文本、注释等节点时，Vue 就会生成对应的 AST 节点，并且会把已经解析完的字符串给截断。
+
+Vue 会用一个栈 stack 来保存解析到的元素标签。当它遇到开始标签时，会将这个标签推入栈，遇到结束标签时，将刚才的标签弹出栈。它的作用是保存当前已经解析了，但还没解析完的元素标签。这个栈还有另一个作用，在解析到某个字节点时，通过stack[stack.length - 1] 可以获取它的父元素。
+
+解析完的 <div 字符串截断，然后解析它的属性。Vue 的属性有两种情况: 
+
+1. HTML普通属性
+
+2. Vue指令
+
+##### codegen
+
+> 1 https://vue-next-template-explorer.netlify.app/ 
+>
+> 2 simple html parser
+
+with(this)
+
+```js
+with (this) {
+ 	return _c('div', [
+    message ? _c('h2', [_v(_s(message))]) : _e(),
+    _v(' '),
+    _c('button', { on: { click: showName } }, [_v('showName')]),
+  ]); 
+}
+```
+
+虚拟dom会在内存中常驻
+
+### 递归
+
+webpack 的依赖分析就是递归，koa 原理也是递归和一些函数组合
+
+### 去重和查询
+
+需求：
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 下午8.15.34.png" alt="截屏2021-07-15 下午8.15.34" style="zoom:50%;" />
+
+双循环 - set/map - trie树
+
+复杂度：
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-15 下午8.16.27.png" alt="截屏2021-07-15 下午8.16.27" style="zoom:50%;" />
+
+Set一般是使用红黑树实现的，红黑树是一种平衡 查找二叉树，它的查找时间复杂度为O(logN)。从 O(N)变成O(logN)，而总体时间从O(N2)变成
+
+O(NlogN)。
+
+如果Set是用树的实现，这段代码是时间复杂度为 O(NlogN)，所以总的时间为O(2NlogN)，但是由 于大O是不考虑系数的，O(2NlogN) 还是等于 O(NlogN)，当数据量比较小的时侯，这个系数会 起到很大的作用，而数据量比较大的时候，指数级 增长的O(N2)
+
+Chrome V8的Set是用哈希实现的，它是一个哈希 Set，哈希的查找复杂度为O(1)，因此总的时间复杂度为O(N)，Set/Map都是这样
+
+哈希的存储空间通常为数据大小的两倍，典型的用空间换时间的算法。
+
+> benchmark跑分
+>
+> 100个数据
+>
+> for < set < map
+>
+> \> 1000/10000
+>
+> set = map </<< for
+>
+> V8的set是用hash实现的查找时间复杂度1
+
+### 应用
+
+mt库，增量更新方案
+
+主题色提取
+
+TV客户端焦点管理，投影算法，平面区域划分算法
+
+## dom diff
+
+### vue
+
+两个树的完全的 diff 算法是一个时间复杂度为 O(n^3) 的问题。但是 在前端当中，很少会跨越层级地移动DOM元素。所以 Virtual DOM 只会对同一个层级的元素进行对比。下面的div只会和同一层级的div对比，第二层级的只会跟第二层级对 比。这样算法复杂度就可以达到 O(n)。
+
+#### vue2
+
+头尾双指针
+
+递归，使用while蹦极函数进行了优化
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-28 上午11.38.27.png" alt="截屏2021-07-28 上午11.38.27" style="zoom:50%;" />
+
+分四种情况：
+
+头尾一致
+
+头或尾一致
+
+新增节点
+
+删除节点
+
+> 比如：
+>
+> old：1 2 3 4 5 6 7 8 9 10
+>
+> new：1 9 11 7 3 4 5 6 2 10
+>
+> - 头尾一致，移动指针
+>
+> ​             |                   |
+>
+> old：  1 2 3 4 5 6 7 8 9 10
+>
+> ​             |                   |       
+>
+> new：1 9 11 7 3 4 5 6 2 10
+>
+> 1 2 3 4 5 6 7 8 9 10
+>
+> - 头或尾一致，将2插到9后面，直接操作dom，移动指针
+>
+> ​                |                 |
+>
+> old：  1 2 3 4 5 6 7 8 9 10
+>
+> ​            |                 |       
+>
+> new：1 9 11 7 3 4 5 6 2 10
+>
+> 1  3 4 5 6 7 8 9 2 10
+>
+> - 头或尾一致，将9插到1后面，直接操作dom，移动指针
+>
+> ​                |             |
+>
+> old：  1 2 3 4 5 6 7 8 9 10
+>
+> ​                |             |       
+>
+> new：1 9 11 7 3 4 5 6 2 10
+>
+> 1  9 3 4 5 6 7 8 2 10
+>
+> - 根据id查找是否存在，不存在，新增节点，直接插入，移动指针
+>
+> ​                |             |
+>
+> old：  1 2 3 4 5 6 7 8 9 10
+>
+> ​                   |          |       
+>
+> new：1 9 11 7 3 4 5 6 2 10
+>
+> 1  9 11 3 4 5 6 7 8 2 10
+>
+> 边diff边patch，页面会闪
+>
+> - 根据id查找是否存在，存在，复制一份，将原来的置为undefined，将找到的节点7插入到11后面
+>
+> ​                |                    |
+>
+> old：  1 2 3 4 5 6 undef 8 9 10
+>
+> ​                      |        |       
+>
+> new：1 9 11 7 3 4 5 6 2 10
+>
+> 1  9 11 7 3 4 5 6 8 2 10
+>
+> - 头一致
+>
+> ​                         |           |
+>
+> old：  1 2 3 4 5 6 undef 8 9 10
+>
+> ​                               ||       
+>
+> new：1 9 11 7 3 4 5 6 2 10
+>
+> 1  9 11 7 3 4 5 6 8 2 10
+>
+> - new越界，把old剩下的remove掉
+>
+> ​                              |      |
+>
+> old：  1 2 3 4 5 6 undef 8 9 10
+>
+> ​                              e  s       
+>
+> new：1 9 11 7 3 4 5 6 2 10
+>
+> 1  9 11 7 3 4 5 6 2 10
+
+将每个节点都diff了一遍
+
+```js
+function updateChildren(
+  parentElm,
+  oldCh,
+  newCh,
+  insertedVnodeQueue,
+  removeOnly
+) {
+  var oldStartIdx = 0; //旧节点开始index
+  var newStartIdx = 0; //新节点开始index
+  var oldEndIdx = oldCh.length - 1; //旧节点结束index
+  var oldStartVnode = oldCh[0]; //旧节点开始节点VNode
+  var oldEndVnode = oldCh[oldEndIdx]; //旧节点结束节点
+  var newEndIdx = newCh.length - 1; //新节点结束index
+  var newStartVnode = newCh[0]; //新节点开始节点VNode
+  var newEndVnode = newCh[newEndIdx]; //新节点结束虚拟节点VNode
+
+  //核心dom-diff 算法
+  //新旧节点两个指针，做比较
+  while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+    //1.旧开始节点 === undefined
+    if (isUndef(oldStartVnode)) {
+      oldStartVnode = oldCh[++oldStartIdx];
+      //2.旧结束节点 === undefined
+    } else if (isUndef(oldEndVnode)) {
+      oldEndVnode = oldCh[--oldEndIdx];
+
+      //3.旧开始节点 === 新开始节点
+    } else if (sameVnode(oldStartVnode, newStartVnode)) {
+      patchVnode(
+        oldStartVnode,
+        newStartVnode,
+        insertedVnodeQueue,
+        newCh,
+        newStartIdx
+      );
+      oldStartVnode = oldCh[++oldStartIdx];
+      newStartVnode = newCh[++newStartIdx];
+
+      //4.旧结束节点 === 新结束节点
+    } else if (sameVnode(oldEndVnode, newEndVnode)) {
+      patchVnode(
+        oldEndVnode,
+        newEndVnode,
+        insertedVnodeQueue,
+        newCh,
+        newEndIdx
+      );
+      oldEndVnode = oldCh[--oldEndIdx];
+      newEndVnode = newCh[--newEndIdx];
+
+      //5.旧开始节点 === 新结束节点
+    } else if (sameVnode(oldStartVnode, newEndVnode)) {
+      patchVnode(
+        oldStartVnode,
+        newEndVnode,
+        insertedVnodeQueue,
+        newCh,
+        newEndIdx
+      );
+
+      //操作真实dom:将老开始节点放置在老结束节点的后面,占了老节点的结束节点位置
+      canMove &&
+        nodeOps.insertBefore(
+          parentElm,
+          oldStartVnode.elm,
+          nodeOps.nextSibling(oldEndVnode.elm)
+        );
+      oldStartVnode = oldCh[++oldStartIdx];
+      newEndVnode = newCh[--newEndIdx];
+
+      //6.旧结束节点 === 新开始节点
+    } else if (sameVnode(oldEndVnode, newStartVnode)) {
+      patchVnode(
+        oldEndVnode,
+        newStartVnode,
+        insertedVnodeQueue,
+        newCh,
+        newStartIdx
+      );
+
+      //操作真实dom：将结束节点放置在开始节点前面，因为这里指针有移动，作用就是原本的位置
+      canMove &&
+        nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm);
+      oldEndVnode = oldCh[--oldEndIdx];
+      newStartVnode = newCh[++newStartIdx];
+
+      //7.都不是
+    } else {
+      if (isUndef(oldKeyToIdx)) {
+        //返回老节点的key-index的映射表
+        oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
+      }
+
+      idxInOld = isDef(newStartVnode.key)
+        ? oldKeyToIdx[newStartVnode.key]
+        : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx);
+
+      //index不存在，就是新增的元素
+      if (isUndef(idxInOld)) {
+        //实操dom：新增VNode,并且添加到dom中
+        createElm(
+          newStartVnode,
+          insertedVnodeQueue,
+          parentElm,
+          oldStartVnode.elm,
+          false,
+          newCh,
+          newStartIdx
+        );
+      } else {
+        //不是新增元素，则移动
+        //需要移动的VNode
+        vnodeToMove = oldCh[idxInOld];
+        //比较需要移动的VNode和现在新开始节点是否相同
+        if (sameVnode(vnodeToMove, newStartVnode)) {
+          //打补丁，以及遍历子节点
+          patchVnode(
+            vnodeToMove,
+            newStartVnode,
+            insertedVnodeQueue,
+            newCh,
+            newStartIdx
+          );
+          //将老虚拟dom此处的VNode删除
+          oldCh[idxInOld] = undefined;
+          //实操dom
+          canMove &&
+            nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm);
+        } else {
+          createElm(
+            newStartVnode,
+            insertedVnodeQueue,
+            parentElm,
+            oldStartVnode.elm,
+            false,
+            newCh,
+            newStartIdx
+          );
+        }
+      }
+      newStartVnode = newCh[++newStartIdx];
+    }
+  }
+  /*
+        1.如果开始下标大于结束下标，说明遍历老节点遍历结束
+        2.老节点遍历完毕，新节点的下标+1的值，添加进去
+        3.如果新节点遍历完了，就删除老节点中开始到结束下标的值
+      */
+  if (oldStartIdx > oldEndIdx) {
+    refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm;
+    addVnodes(
+      parentElm,
+      refElm,
+      newCh,
+      newStartIdx,
+      newEndIdx,
+      insertedVnodeQueue
+    );
+  } else if (newStartIdx > newEndIdx) {
+    //老的没有遍历完，新的遍历完了
+    //删除老的的节点，从start开始，end结束，包括end
+    //这里原先移动了节点，用undefined占位，直接删除不影响任何节点
+    removeVnodes(oldCh, oldStartIdx, oldEndIdx);
+  }
+}
+```
+
+#### vue3
+
+完全重写，对比头尾，查找最长递增子序列
+
+使用单指针循环，先遍历头部直到不同的节点，再遍历尾部直到不同的节点，然后判断是否遍历完成，完成则进行挂载和删除，否则进行核心逻辑
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-28 上午11.40.06.png" alt="截屏2021-07-28 上午11.40.06" style="zoom:50%;" />
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-07-28 上午11.43.30.png" alt="截屏2021-07-28 上午11.43.30" style="zoom:50%;" />
+
+> 案例：
+>
+> ```js
+> // realDom
+> 1 2 3 4 5 6 7 8 9 10
+> //old VNode
+> s1                           e1
+> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+> //new VNode
+> s2                            e2
+> [1, 9, 11, 7, 3, 4, 5, 6, 2, 10]
+> ```
+>
+> 先遍历新节点生成key-index映射表keyToNewIndexMap
+>
+> 遍历旧节点，通过旧节点的key查询映射表，没有就删除旧节点，最后生成一个newIndex-oldIndex+1映射表newIndexToOldIndexMap
+>
+> 通过newIndexToOldIndexMap获取最长升序子序列的index集合
+>
+> 同时从后向前遍历newch和newIndexToOldIndexMap和index集合，map在index中没有时，对应的ch节点就需要移动，存在就不需要移动，map中0对应的ch为新增节点
+
+1. 从前往后比较，相同节点 ["a"] 进行 patch，遇到不相同的节点停止比较
+
+2. 从后往前比较，相同节点 ["f"] 进行 patch，遇到不相同的节点停止比较
+
+3. 如果 c1 中的所有节点都已经比较完了，c2 中剩余没有比较的节点都是新数据，执行 mount
+
+4. 如果 c2 中的所有节点都已经比较完了，c1 中剩余没有比较的节点都是需要删除的，执行 unmount 
+
+5. 如果 c1 和 c2 中都有剩余节点，对剩余节点进行比较
+
+    a). 找出需要删除的节点，执行 unmount
+
+    b). 找出新、旧节点的对应关系，利用 “最长递增子序列” 优化节点的移动、新增。这一步是 diff 算法的核心
+
+>old:   a b c d e f g h
+>
+>new: a b d f c e x y g h
+>
+>i=0，e1老树=7，e2新树=9
+>
+>找到头部相同的节点 a b
+>
+>再从尾部开始比较找到相同的 g h
+>
+>old:   c d e f
+>
+>new: d f c e x y
+>
+>新元素没有比较完成的 keyToNewIndexMap {0: {d: 2}; 1: {f: 3}; 2: {c: 4}; 3: {e: 5}; 4: {x: 6}; 5: {y: 7};}
+>
+>老元素没有比较完成的 newIndexToOldIndexMap
+>
+>最大递增子序列 increasingNewIndexSubsequence
+>
+>根据长度填充newIndexToOldIndexMap: 0 0 0 0 0 0
+>
+>根据旧元素进行修正newIndexToOldIndexMap：{0: 4; 1: 6; 2: 3; 3: 5; 4: 0; 5: 0}
+>
+>newIndexToOldIndexMap中为0的说明是新增数据，mount进去
+>
+>根据newIndexToOldIndexMap找到最大递增子序列 [2, 3]即[c, e]
+>
+>根据newIndexToOldIndexMap和最大递增子序列进行节点移动
+
+react没有找最大递增子序列
+
+```js
+const patchKeyedChildren = (
+  c1,
+  c2,
+  container,
+  parentAnchor,
+  parentComponent,
+  parentSuspense,
+  isSVG,
+  optimized
+) => {
+  let i = 0;
+  const l2 = c2.length;
+  let e1 = c1.length - 1; // prev ending index
+  let e2 = l2 - 1; // next ending index
+  // 1. sync from start
+  // (a b) c
+  // (a b) d e
+  while (i <= e1 && i <= e2) {
+    const n1 = c1[i];
+    const n2 = (c2[i] = optimized
+      ? cloneIfMounted(c2[i])
+      : normalizeVNode(c2[i]));
+    if (isSameVNodeType(n1, n2)) {
+      patch(
+        n1,
+        n2,
+        container,
+        parentAnchor,
+        parentComponent,
+        parentSuspense,
+        isSVG,
+        optimized
+      );
+    } else {
+      break;
+    }
+    i++;
+  }
+  // 2. sync from end
+  // a (b c)
+  // d e (b c)
+  while (i <= e1 && i <= e2) {
+    //获取末尾的值
+    const n1 = c1[e1];
+    const n2 = (c2[e2] = optimized
+      ? cloneIfMounted(c2[e2])
+      : normalizeVNode(c2[e2]));
+    if (isSameVNodeType(n1, n2)) {
+      patch(
+        n1,
+        n2,
+        container,
+        parentAnchor,
+        parentComponent,
+        parentSuspense,
+        isSVG,
+        optimized
+      );
+    } else {
+      break;
+    }
+    e1--;
+    e2--;
+  }
+  // 3. common sequence + mount
+  // (a b)
+  // (a b) c
+  // i = 2, e1 = 1, e2 = 2
+  // (a b)
+  // c (a b)
+  // i = 0, e1 = -1, e2 = 0
+  //旧节点遍历完全，patch c2剩下的节点
+  if (i > e1) {
+    if (i <= e2) {
+      const nextPos = e2 + 1;
+      const anchor = nextPos < l2 ? c2[nextPos].el : parentAnchor;
+      while (i <= e2) {
+        patch(
+          null,
+          (c2[i] = optimized ? cloneIfMounted(c2[i]) : normalizeVNode(c2[i])),
+          container,
+          anchor,
+          parentComponent,
+          parentSuspense,
+          isSVG
+        );
+        i++;
+      }
+    }
+  }
+  // 4. common sequence + unmount
+  // (a b) c
+  // (a b)
+  // i = 2, e1 = 2, e2 = 1
+  // a (b c)
+  // (b c)
+  // i = 0, e1 = 0, e2 = -1
+  //新节点遍历完全，卸载老节点上的多余节点
+  else if (i > e2) {
+    while (i <= e1) {
+      unmount(c1[i], parentComponent, parentSuspense, true);
+      i++;
+    }
+  }
+  // 5. unknown sequence
+  // [i ... e1 + 1]: a b [c d e] f g
+  // [i ... e2 + 1]: a b [e d c h] f g
+  // i = 2, e1 = 4, e2 = 5
+  else {
+    const s1 = i; // prev starting index
+    const s2 = i; // next starting index
+    // 5.1 build key:index map for newChildren
+    const keyToNewIndexMap = new Map();
+    for (i = s2; i <= e2; i++) {
+      const nextChild = (c2[i] = optimized
+        ? cloneIfMounted(c2[i])
+        : normalizeVNode(c2[i]));
+      if (nextChild.key != null) {
+        if (
+          process.env.NODE_ENV !== "production" &&
+          keyToNewIndexMap.has(nextChild.key)
+        ) {
+          warn(
+            `Duplicate keys found during update:`,
+            JSON.stringify(nextChild.key),
+            `Make sure keys are unique.`
+          );
+        }
+        keyToNewIndexMap.set(nextChild.key, i);
+      }
+    }
+
+    // 5.2 loop through old children left to be patched and try to patch
+    // matching nodes & remove nodes that are no longer present
+    let j;
+    let patched = 0;
+    const toBePatched = e2 - s2 + 1;
+    let moved = false;
+    let maxNewIndexSoFar = 0; // used to track whether any node has moved
+    // works as Map<newIndex, oldIndex>
+    // Note that oldIndex is offset by +1
+    // and oldIndex = 0 is a special value indicating the new node has
+    // no corresponding old node.
+    // used for determining longest stable subsequence
+    const newIndexToOldIndexMap = new Array(toBePatched);
+    for (i = 0; i < toBePatched; i++) newIndexToOldIndexMap[i] = 0;
+    //先遍历老节点
+    for (i = s1; i <= e1; i++) {
+      //老的子节点
+      const prevChild = c1[i];
+
+      //挂载完成，删除当前老的子节点
+      if (patched >= toBePatched) {
+        unmount(prevChild, parentComponent, parentSuspense, true);
+        continue;
+      }
+
+      //获取newIndex
+      let newIndex;
+      if (prevChild.key != null) {
+        newIndex = keyToNewIndexMap.get(prevChild.key);
+      } else {
+        // key-less node, try to locate a key-less node of the same type
+        //没有key的节点，尝试去定位一个与其相同类型的节点
+        //遍历新节点
+        for (j = s2; j <= e2; j++) {
+          //遍历s2到e2，找出和prevChild类型相同的节点，并将j赋值给newIndex
+          if (
+            newIndexToOldIndexMap[j - s2] === 0 &&
+            isSameVNodeType(prevChild, c2[j])
+          ) {
+            newIndex = j;
+            break;
+          }
+        }
+      }
+
+      //newIndex不存在，则卸载节点
+      if (newIndex === undefined) {
+        unmount(prevChild, parentComponent, parentSuspense, true);
+      } else {
+        //新节点存在
+        newIndexToOldIndexMap[newIndex - s2] = i + 1; //i为s1
+        if (newIndex >= maxNewIndexSoFar) {
+          maxNewIndexSoFar = newIndex;
+        } else {
+          moved = true;
+        }
+        patch(
+          prevChild,
+          c2[newIndex],
+          container,
+          null,
+          parentComponent,
+          parentSuspense,
+          isSVG,
+          optimized
+        );
+        patched++;
+      }
+    }
+
+    // 5.3 move and mount
+    // generate longest stable subsequence only when nodes have moved
+    //新节点数组中最大升序子集，返回的是index集合
+    const increasingNewIndexSequence = moved
+      ? getSequence(newIndexToOldIndexMap)
+      : EMPTY_ARR;
+    j = increasingNewIndexSequence.length - 1;
+
+    //向后循环，以便我们可以使用最后一个补丁节点作为锚
+    for (i = toBePatched - 1; i >= 0; i--) {
+      //新的子节点下标和新的子节点
+      const nextIndex = s2 + i;
+      const nextChild = c2[nextIndex];
+      //nextIndex后面一个节点为锚点
+      const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : parentAnchor;
+      //为0则是新增
+      if (newIndexToOldIndexMap[i] === 0) {
+        // 挂载新节点
+        patch(
+          null,
+          nextChild,
+          container,
+          anchor,
+          parentComponent,
+          parentSuspense,
+          isSVG
+        );
+      } else if (moved) {
+        //在没有稳定升序子集的的情况，或者现在的节点不在稳定升序子集里面，则移动
+        //i是遍历需要移动节点集合的指针，从后往前
+        //j是从后往前遍历increasingNewIndexSequence的指针
+        // j<0则最长升序子集遍历完成 i!== 子序列中的值，说明需要移动
+        if (j < 0 || i !== increasingNewIndexSequence[j]) {
+          move(nextChild, container, anchor, 2 /* REORDER */);
+        } else {
+          j--;
+        }
+      }
+    }
+  }
+};
+```
+

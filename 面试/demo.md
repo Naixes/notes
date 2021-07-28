@@ -42,12 +42,6 @@
 
 
 
-4. a标签禁用默认事件后怎样实现跳转
-
-使用location.href = href
-
-
-
 5. SEO
 
 seo优化就是提高网站在搜索引擎的权重，重点就是提高搜索引擎对网站的理解
@@ -112,11 +106,230 @@ async是html5定义，浏览器支持不同，同时存在时只触发async
 
 ## css
 
+1. 移动端适配方案和对比
+
 ## js
 
-# 浏览器
+1. 原型链继承和class继承
 
-## http
+ES5 prototype 继承
+
+子类的 prototype 为父类对象的一个实例，实质是先创造子类的实例对象`this`，然后再将父类的方法添加到`this`上面（`Parent.apply(this)`）
+
+ES6 class 继承
+
+子类没有自己的 this 对象，因此必须在 constructor 中通过 super 继承父类的 this 对象，而后对此 this 对象进行加工。`super`关键字在构造函数中表示父类的构造函数，用来新建父类的`this`对象。实质是先创造父类的实例对象`this`（所以必须先调用`super`方法），然后再用子类的构造函数修改`this`。
+
+super 可作为函数和对象使用。当作为函数使用时，只可在子类的构造函数中使用，表示父类的构造函数，但是 super 中的 this 指向的是子类的实例，`因此在子类中super()表示的是Parent.prototype.constructor.call(this)`。当作为对象使用时，super 表示父类原型对象，即 Parent.prototype。
+
+区别和不同
+
+- 类内部定义的方法都是不可枚举的
+- 类不存在变量提升（hoist）
+- 类相当于实例的原型，所有在类中定义的方法，都会被实例继承。静态方法直接通过类来调用。
+- ES5 的继承，实质是先创造子类的实例对象 this，然后再将父类的方法添加到 this 上面（Parent.apply(this)）。ES6 的继承机制完全不同，实质是先创造父类的实例对象 this（所以必须先调用 super 方法），然后再用子类的构造函数修改 this。
+
+
+
+2. Reflect.ownKeys和Object.keys
+
+获取对象的属性，以数组的形势返回
+
+前者所有属性包括不可枚举属性和symbol属性，不包括原型
+
+后者可枚举属性，不包括symbol和原型属性
+
+
+
+3. Promise
+
+Promise 对象是 JavaScript 的异步操作解决方案，为异步操作提供统一接口。它起到代理作用（proxy），充当异步操作与回调函数之间的中介，使得异步操作具备同步操作的接口。Promise 可以让异步操作写起来，就像在写同步操作的流程，而不必一层层地嵌套回调函数。
+
+有三个状态：pending，fulfilled，rejected，只能从pending到fulfilled，rejected
+
+通过catch捕获到reject之后，在catch后面还可以继续顺序执行then方法，但是只执行then的第一个回调(resolve回调)
+
+```js
+Promise.reject(2)
+    .catch(r => {
+        // 捕获到错误，执行
+        console.log('catch1');
+    })
+    // 错误已经被捕获，后边的`then`都顺序执行，且只执行`then`的第一个回调（resolve的回调）
+    .then(v => {
+        console.log('then1');
+    }, r => {
+        console.log('catch2');
+    })
+    .catch(r => {
+        // 前边没有未捕获的错误，不执行
+        console.log('catch3');
+    })
+    .then(v => {
+        console.log('then2');
+    }, r => {
+        console.log('catch4');
+});
+// 结果会打印：catch1、then1、then2
+```
+
+
+
+4. 大数计算
+
+因为 JavaScript 的 Number 类型是遵循 IEEE 754 规范表示的，能精确表示的数字是有限的，可以精确到个位的最大整数是 2 的 53 次方，超过这个范围就会精度丢失，造成 JavaScript 无法判断大小
+
+常用的一中方案是将 Number 转为 String，然后将 String 转为 Array，并且注意补齐较短的数组，将他们每一位一一相加得到一个新数组，再将和组成的新数组转为数字就可以了。也可以引用第三方库 bignumber.js，原理也是把所有数字当作字符串
+
+
+
+5. 文件上传
+
+每一个input标签都会创建一个FileUpload对象，使用form的submit可以实现最简单的上传，但是会刷新页面
+
+使用XMLHttpRequest2和FormData对象可以无刷新上传
+
+```js
+let xhr = new XMLHttpRequest();
+let formData = new FormData();
+let fileInput = document.querySelector("#myFile");
+let file = fileInput.files[0];
+formData.append("myFile", file);
+xhr.open("POST", "/upload.php");
+xhr.onload = function () {
+  if (this.status === 200) {
+    // 对请求成功处理
+  }
+};
+// 进度监听
+xhr.upload.onprogress = function (event) {
+  const { loaded, total, lengthComputable } = event;
+  // lengthComputable 代表文件总大小是否可知
+  if (lengthComputable) {
+    let percentComplete = (loaded / total) * 100;
+    // 对进度处理
+  }
+};
+xhr.send(formData);
+xrh = null;
+```
+
+图片预览
+
+一般实现预览的方式是，等待文件上传成功后，后台返回上传文件的url，然后把预览图片的img元素的src指向该url。
+
+但是还有更好的实现方式。就是使用HTML5提供的 FileReader API。
+
+```js
+function handleImageFile(file){
+  let previewArea = document.querySelector("#previewArea");
+  let img = document.createElement('img');
+  let fileInput = document.querySelector('#myFile');
+  let file = fileInput.files[0];
+  img.file = file;
+  previewArea.appendChild(img);
+  let reader = new FileReader();
+  reader.onload = (function(aImg){
+    return function(e){
+      aImg.src = e.target.result;
+    }
+  })(img)
+  reader.readAsDataURL(file);
+}
+```
+
+这里使用FileReader来处理图片的异步加载。在创建新的FileReader对象之后，我们建立了onload函数，然后调用readAsDataURL()开始在后台进行读取操作。当图像文件加载后，转换成一个 data: URL，并传递到onload回调函数中设置给img的src。
+
+另外还可以使用对象URL来实现预览
+
+```js
+let img = document.createElement("img");
+img.src = window.URL.createObjectURL(file);
+img.onload = function(){
+  window.URL.revokeObjectURL(this.src);
+}
+previewArea.appendChild(img);
+```
+
+多文件
+
+```js
+let fileInput = document.querySelector('#myFile');
+let files = fileInput.files;
+let formData = new FormData();
+for(let i = 0;i<files.length;i++){
+  let file = files[i];
+  formData.append('files[]',file,file.name);
+}
+```
+
+二进制上传
+
+有了FileReader 其实还有一种上传的途径，读取文件内容后可以直接二进制格式上传。
+
+```js
+
+let reader = new FileReader();
+reader.onload = function(){
+  xhr.sendAsBinary(this.result);
+}
+// 把input里读取的文件内容，放到fileReader的result字段里
+reader.readAsBinaryString(file);
+// 但是这里有个问题，查看MDN文档，可以看到XMLHttpRequest的sendAsBinary方法已经移除了，所以需要自己实现一个
+
+XMLHttpRequest.prototype.sendAsBinary = function(text){
+  let data = new ArrayBuffer(text.length);
+  let ui8a = new Unit8Array(data,0);
+  for(let i =0;i<text.length;i++){
+    ui8a[i] = (text.charCodeAt(i) & 0xff);
+  }
+  this.send(ui8a);
+}
+// 这段代码将字符串转成8位无符号整型，然后存放到一个8位无符号整型数组里面，再把整个数组发送出去。
+```
+
+拖拽
+
+```js
+let dropArea;
+dropArea = document.querySelector("#dropArea");
+dropArea.addEventListener('dragenter',handleDragenter,false);
+dropArea.addEventListener('dragover',handleDragover,false);
+dropArea.addEventListener('drop',handleDrop,false);
+
+// 阻止dragenter和dragover的默认行为，这样才能使drop事件被触发
+function handleDragenter(e) {
+    e.stopPropagation();
+    e.preventDefault();
+}
+
+function handleDragover(e) {
+    e.stopPropagation();
+    e.preventDefault();
+}
+
+function handleDrop(e) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    let dt = e.dataTransfer;
+    let files = dt.files;
+
+    // handle files ...
+}
+```
+
+
+
+## 浏览器
+
+功能检测：通过判断浏览器是否支持某段代码来决定运行不同的代码
+
+功能推断：也是对代码可用性的检查，检查过后还会使用其他功能，不推荐
+
+UA字符串：可以让对方识别请求用户代理的类型，navigator.userAgent可以获取，但是很难解析，并且具有欺骗性
+
+### http
 
 1. 浏览器工作过程
 
@@ -162,6 +375,8 @@ http工作过程：
 
 2. DNS解析过程
 
+DNS解析会先查找缓存依次是浏览器缓存1000个左右，系统缓存，路由器缓存，ISP（互联网服务提供商）DNS缓存
+
 域名很多为了加快解析，分到了多个服务器，不同等级的域名归不同的服务器管（分治），分根服务器，TLD服务器，名称服务器（负责一级域名以后的），客户端路由器收到DNS解析请求以后会把域名发到DNS服务器（路由器内置，经过路由器中转到DNS服务器），DNS服务器有一个缓存，先查看有没有缓存，没有的话先从根服务器处理顶级域名（全球有13个），查到以给定顶级域名结尾的一级域名归哪个TLD服务器，返回这个服务器ip给DNS服务器，DNS再给TLD服务器发送第二个请求，返回名称服务器ip，DNS再发送第三次请求，名称服务器会找到最终的ip返回。由于通信较多所以没有用TCP
 
 过程中的优化包括，DNS的缓存，还有大数据库的镜像，减少通讯，阿里云等买到域名设置好了ip之后会有一个提示，十分钟之内同步，就是将解析记录主动同步到镜像
@@ -178,11 +393,31 @@ http工作过程：
 
 超文本传输协议，为了统一计算机的通信方式而产生的，规定了客户机和服务机之间请求和响应的方法
 
-请求方法
+请求方法：GET，POST，DELETE，PUT，UPDATE，TRACE，HEAD，CONNECT
+
+请求与响应的组成：
+
+请求，请求行（请求方法，资源标识符，协议版本号）请求头（MIME信息）请求体
+
+响应，响应行（协议版本号，状态码，描述文本）响应头（MIME信息）响应体
 
 常用请求头响应头
 
+accept，cookie，referer，authorization，user-agent
+
+connection，cache-control，expire，last-modified
+
 状态码
+
+1xx：请求已经成功接受
+
+2xx：请求成功
+
+3xx：重定向，301永久，302临时，304缓存生效
+
+4xx：客户端错误，400报文语法错误，401没有权限，403服务端拒绝访问，404未找到资源，413请求实体过大（一般出现在上传文件，修改客户端请求大小和缓存大小）
+
+5xx：服务端错误，500执行时出错，502内部网关错误，一般是nginx
 
 早一点的0.9版本已经有了最基本的语义和规则，1.0基本完整稳定，1.1成熟，增加了**长连接**（TCP），2改变了底层机制，TCP的实现层面 ，很多网站已经迁移到了2，看协议头可以看出1和2，带冒号的伪头，重新设计了协议封装
 
@@ -190,7 +425,7 @@ http工作过程：
 
 - keep-alive，长连接
 
-在一定时间内，同一个域名多次请求数据，只建立一次HTTP连接，其他请求复用连接通道，提高效率，一定时间是可以配置的，1.1还存在效率问题，文件的串行传输和连接数限制，HTTP2的多路复用对此惊醒了优化
+在一定时间内，同一个域名多次请求数据，只建立一次HTTP连接，其他请求复用连接通道，提高效率，一定时间是可以配置的，1.1还存在效率问题，文件的串行传输和浏览器连接数限制，HTTP2的多路复用对此进行了优化
 
 **HTTP2**
 
@@ -202,19 +437,21 @@ http工作过程：
 
 将消息分成了更小的消息和帧，比如之前的请求行请求头请求体之间没有明显的区分，现在分成两帧头帧和数据帧，界限明显用了二进制的分割符，头有专门描述头的长度的字段，来计算偏移量。更加的严密了
 
-伪头字段，没有请求行请求头都封装到头帧里了，但是还得是键值对模式让浏览器进行处理所以使用伪头代替了请求行和请求头，本质是因为数据的封装格式变化了
+伪头字段，没有请求行请求头，都封装到头帧里了，但是还得是键值对模式让浏览器进行处理所以使用伪头代替了请求行和请求头，本质是因为数据的封装格式变化了
 
-- 压缩报头，之前只是压缩报文体，不压缩头
+- **压缩报头**，之前只是压缩报文体，不压缩头
 
-- 多路复用，一个TCP连接可以并行传输多个文件，之前是串行
+- **多路复用**，一个TCP连接可以并行传输多个文件，之前是串行
 
-之前可以并发发起多个请求，每个请求都需要建立连接，服务器压力变大，需要维护每个连接，HTTP2的多路复用对同一个域名下的所有请求都是基于流的，所以只需要一个连接，可以并发传输多个数据，解决了1.1并发连接数的限制，Apache最大连接数是300。1.1要想在一个连接发送多个数据是串行的，会产生队首阻塞，多路复用会把文件切成小块轮流发送，在另一端重新组装，看起来像是并行传输，也会产生阻塞但是只阻塞了当前文件，其他文件不受影响，有一定的优化。阻塞是由于TCP的特性产生的，在TCP层面是无法解决的。
+之前可以并发发起多个请求，每个请求都需要建立连接，服务器压力变大，需要维护每个连接，HTTP2的多路复用对同一个域名下的所有请求都是**基于流和二进制数据帧**的，帧对数据进行顺序标识，所以只需要一个连接，可以并发传输多个数据，解决了1.1并发连接数的限制。
+
+Apache最大连接数是300。1.1要想在一个连接发送多个数据是串行的，会产生队首阻塞，多路复用会把文件切成小块轮流发送，在另一端重新组装，看起来像是并行传输，也会产生阻塞但是只阻塞了当前文件，其他文件不受影响，有一定的优化。阻塞是由于TCP的特性产生的，在TCP层面是无法解决的。
 
 阻塞的主要原因是基于链路，两层链路TCP和TLS，加密以文件为单位，解密需要等完整的文件传输过来，所以会有当前文件的阻塞问题
 
 HTTP3完全解决了阻塞
 
-- 服务器主动推送，减少请求延迟
+- 服务器**主动推送**，减少请求延迟
 
 比websocket轻量，不能完全取代websocket，只是在推送方面取代，websocket是双向的，http是基于请求和响应，相当于一次请求多次响应
 
@@ -222,7 +459,7 @@ HTTP3完全解决了阻塞
 
 **HTTP3**
 
-解决了队首阻塞，发包时没有顺序，有一个编号，以包为单位，所有收到以后组装时发现有丢包要求重发，加解密也是以包为单位，不存在阻塞问题
+解决了队首阻塞，发包时没有顺序，有一个编号，**以包为单位**，所有收到以后组装时发现有丢包要求重发，加解密也是以包为单位，不存在阻塞问题
 
 基于QUIC，QUIC基于UDP，为了解决性能问题，同时也很严密，对数据包进行加密，不是链路加密
 
@@ -250,17 +487,17 @@ nginx，c语言写的
 
 TCP握手
 
-客户端发送支持的协议版本，加密算法和压缩方法
+客户端发送支持的协议版本，加密算法和压缩方法，和一个随机数
 
-服务端确定协议版本，加密算法和压缩方法，返回给客户端
+服务端确定协议版本，加密算法和压缩方法，返回给客户端，和一个随机数
 
 服务端发送证书
 
 服务端通知协商结束
 
-客户端通过服务端公钥加密公钥和密钥种子发送给服务端
+客户端通过服务端公钥加密公钥和密钥种子（大随机数）发送给服务端
 
-双方计算密钥
+双方计算密钥（利用三个随机数）
 
 客户端通知切换加密
 
@@ -278,7 +515,21 @@ TCP挥手
 
 
 
+使用非对称加密交换密钥，使用对称加密进行通信
+
+
+
 3. TCP和UDP
+
+滑动窗口：
+
+TCP的可靠传输是在传输层上完成的，但是发送报文等待确认确认后再发送下一个报文的效率非常低下，滑动窗口是为了解决这个问题
+
+滑动窗口允许发送方连续发送多个报文，根据对方接受窗口大小限制发送方的发送速率，防止拥堵
+
+本质是维护了几个变量，同时在发出或收到报文时对这几个变量进行维护
+
+TCP是双全工，双方都包含了发送窗口和接收窗口
 
 
 
@@ -302,13 +553,13 @@ TCP挥手
 
 不包含数据
 
-客户端发起连接请求，SYN指令，顺序号seq=x
+客户端发起连接请求，SYN置为1，顺序号seq=x，进入SYN_SEND状态等待服务器确认
 
-服务端响应握手包发送SYN指令，顺序号seq=y，应答号ACK=x+1，客户端收到应答号，客户端能确认服务器能收到自己的数据，达到半连接，半连接不能保证服务器能收到客户端的数据
+服务端响应握手包发送SYN报文，位置为1，顺序号seq=y，应答号ACK=x+1，进入SYN_RECV状态，客户端收到应答号，客户端能确认服务器能收到自己的数据，达到半连接，半连接不能保证服务器能收到客户端的数据
 
-客户端发送应答号ACK=y+1，服务器收到应答号，服务端能确认客户端能收到自己的数据，达到全连接
+客户端发送应答号ACK=y+1，进入ESTABLISHED状态，服务器收到应答号，服务端能确认客户端能收到自己的数据，达到全连接
 
-三次交互保证对方可以正确得接收自己的数据
+三次交互保证对方可以正确得接收自己的数据，防止服务器端收到已经过期的连接请求，进行响应，由于客户端没有发送请求收到响应也不会做出反应，服务端就会一直处于等待状态，浪费资源
 
 两次握手（半连接）的问题：如果客户端不断发起连接请求，服务端需要维护的连接数据越来越多，由于服务器还需要遍历数组，维护连接超时，数据过多时服务器会拒绝服务，这是拒绝服务攻击的一种，半连接攻击，缩短超时间可以缓解但是不能解决问题解决：防火墙，堆硬件
 
@@ -358,7 +609,19 @@ Chrome浏览器最多允许对同一个域名Host建立6个TCP连接，不同的
 
 如果图片都是HTTPS的连接，并且在同一域名下，浏览器会先和服务器协商使用`HTTP2`的`Multiplexing`功能进行多路传输，不过未必所有的挂在这个域名下的资源都会使用同一个TCP连接。如果用不了HTTPS或者HTTP2（HTTP2是在HTTPS上实现的），那么浏览器会就在同一个host建立多个TCP连接，每一个TCP连接进行顺序请求资源。
 
-## 渲染
+
+
+5. 多个域名存储网站资源的优点
+
+- 动静分离，方便CDN缓存
+- 突破浏览器最大并发数，6个左右
+- 节约cookie带宽
+- 节约主域名连接数，提高客户端带宽利用率，优化页面响应速度
+- 避免不必要的安全问题，比如cookie隔离
+
+
+
+### 渲染
 
 1. 渲染原理
 
@@ -418,13 +681,257 @@ GPU可以加速的独立层：css3d，vidoe，webGL，transform，css滤镜，�
 
 
 
+### websocket
+
+由于底层依赖TCP的不稳定性，需要设计一整套保活，验活，重连方案
+
+心跳重连，原生的websocket断开连接时不会触发任何事件，前端需要定时发送ping，如果后端没有返回pong，前端就会执行重连
+
+```js
+let socket; //websocket的实例
+let lockReconnect = false; //避免重复连接
+
+//新建websocket的函数 页面初始化 断开连接时重新调用
+const getwebsocket =  ()=> {
+    let wsUrl = 'ws://ip';
+    socket = new WebSocket(wsUrl);
+    // 绑定一些事件，onerror,onclose,onopen，onmessage
+    // 如果希望WebSocket 连接一直保持，可以在close或者error上绑定重连方法
+    // 这样一般正常情况下失去连接时，触发onclose方法，就能重连了。
+    socket.onerror = function(event) {
+        console.log('websocket服务出错了');
+        reconnect(wsUrl);
+    };
+    socket.onclose .= function(event) {
+        console.log('websocket服务关闭了');
+        reconnect(wsUrl);
+    };
+    socket.onopen = function(event) {
+        heartCheck.reset().start(); //传递信息
+    };
+    socket.onmessage = function(event) {
+        //如果获取到消息，心跳检测重置
+        //拿到任何消息都说明当前连接是正常的
+        console.log('websocket服务获得数据了');
+        //接受消息后的UI变化
+        doWithMsg(event.data);
+        heartCheck.reset().start();
+    };
+    //收到消息推送
+    function doWithMsg(msg) {
+        //执行业务代码.....
+    }
+}
+
+// 重新连接
+const  reconnect = (url)=> {
+    if (lockReconnect) return;
+    lockReconnect = true;
+    //没连接上会一直重连，设置延迟避免请求过多
+    setTimeout(function() {
+        getwebsocket();
+        lockReconnect = false;
+    }, 2000);
+}
+
+//心跳检测
+let heartCheck = {
+    timeout: 60000, //60秒
+    timeoutObj: null,
+    serverTimeoutObj: null,
+    reset: ()=> {
+        clearTimeout(this.timeoutObj);
+        clearTimeout(this.serverTimeoutObj);
+        return this;
+    },
+    start: ()=> {
+        let _this = this;
+        this.timeoutObj = setTimeout(()=> {
+            //这里发送一个心跳，后端收到后，返回一个心跳消息，
+            //onmessage拿到返回的心跳就说明连接正常
+            socket.send("心跳测试");
+            //如果超过一定时间还没重置，说明后端主动断开了
+            _this.serverTimeoutObj = setTimeout(function() {
+              //这里再onclose里执行了reconnect，
+              // 所以这里检测到超时之后，执行socket.close()就触发了onclose，进而就执行了reconnect。
+              socket.close();
+            }, _this.timeout)
+        }, this.timeout)
+    }
+}
+```
+
+当连接上时就开始计时，在一定范围内获取到后端信息，重置倒计时，超过60s执行心跳检测
+
+
+
 ## BFF
 
-# 性能优化
+主要应用在多端应用，减少前后端协同成本，用于接口的整合编排、字段裁剪，服务端渲染直出提升首屏性能。
 
-## 生产环境优化
+日志系统
 
-### 页面加载
+容错处理
+
+## 工程化
+
+一切以项目的性能，稳定性，可用性，可维护性，注重开发效率，运行效率的同时，保证维护效率为目标的工作都是工程化
+
+包括模块化，组件化，合理地加载静态资源（性能优化），规范化，自动化
+
+典型的工作流：开发，测试，构建，部署，监控
+
+开发阶段：脚手架，公共库，包管理器，编辑器，代码检查，构建工具，调试套件
+
+测试阶段：测试框架，自动化测试工具，性能测试工具
+
+构建阶段：打包构建
+
+部署阶段：发布平台，迭代管理平台
+
+监控阶段：埋点平台
+
+### 进程和线程
+
+进程，进程执行在cpu和内存中，执行一个程序时操作系统将程序文件读取到内存中，操作系统找到程序的执行入口，将指令交给cpu去执行，单个cpu一次只能执行一个程序，所以不会一直执行统一个程序，操作系统会对cpu执行时间进行调度，看起来像是并行。进程代表cpu所能处理的单个任务，好比工程的车间，线程就像车间的工人，协作完成同一个任务。一个进程可以包含多个线程，进程内内存共享，所有线程都可以使用，但不能同时使用，此时的内存管理方法有互斥锁（mutex，一个锁一个钥匙）和信号量（semaphore，一个锁多把钥匙）
+
+进程：线程的容器，资源分配调度的最小单位，程序是指令数据，数据及其组织形式的描述，进程是程序的实体
+
+线程：系统进行运算调度的最小单位，是进程中的实际运作单元，一条线程指进程中的一个单一顺序的控制流
+
+简单来说：
+
+进程指系统运行的一个应用程序，是资源分配的最小单位
+
+线程是系统分配处理器时间单元的基本单位，或者是进程中独立执行的最小单位
+
+### CSS组织
+
+cssModule：css-loader配置
+
+postcss：集成模块化，css in js，autoprefix，css-next等众多功能，原理通过ast分析css
+
+less/sass/stylus：css预处理器
+
+模块化的实现：
+
+使用命名规范防止类名污染，比如BEM
+
+使用cssModule，打包时类名转换hash值，书写不变，模块化饮用，难以与外部样式混合使用
+
+使用css in js，css放在组件内部，最有名的是styled-components，css内联在js中书写，不能使用预处理器
+
+### 状态树设计
+
+状态树可以理解为redux中的store，个人理解类似于设计数据库
+
+把相互嵌套又关联的数据视为数据库，将数据按范式化存储，使数据更加扁平
+
+数据项只在一个地方定义，便于更新（避免多次更新同样的数据和更新不必要的数据），然后通过id进行相互关联
+
+### 项目架构
+
+#### CI/CD
+
+必要性：减少人工失误，减少成本
+
+#### next/nuxt同构原理
+
+代理a链接通过header判断是站内切换还是刷新，站内切换的情况下，使用node操作dom实现html的局部更新，关于js，无论之前有没有加载过js，切换到这个页面，js都可能会缺失，可以在webpack插件中给指定的js加上标识，通过自定义插件给业务js添加的lazyload-js标识找到需要的js进行bigpipe输出，还可以在这里做缓存，不通过请求直接从localStorage中拿js，在前端执行
+
+#### vue/react SSR
+
+首屏SSR+内部spa路由跳转
+
+两个入口，服务端和客户端分别打包，服务端bundle返回app，store和router，vue提供createSSRApp方法用来生服务端渲染的应用，服务端获取打包好的服务端代码，注入预加载的数据后替换模版的内容
+
+数据预加载，vue提供serverPrefetch方法，只在服务端执行，用这个方法获取数据，在服务器替换模版时注入全局变量，客户端获取并替换store
+
+### 打包
+
+#### vite
+
+- 和webpack对比：
+
+webpack 先打包，服务器返回打包结果，vite 请求某一模块时才**实时编译**，**利用了现代浏览器es module**自动请求依赖模块的特点，也因为启动时不需要打包，所以不需要分析依赖，不需要编译，速度就很快。
+
+热更新方面当改动了一个模块后，仅需让浏览器重新请求该模块即可，不像 webpack 那样需要把该模块的相关依赖模块全部编译一次，**效率更高**。
+
+当需要打包到生产环境时，vite 使用传统的 **rollup 进行打包**。因此，vite 的主要优势在开发阶段。
+
+实际项目中很少用到vite
+
+- 为什么快：
+
+使用 **esbuild** 进行编译，因为 esbuild 是用 **Golang 编写**的，自然比用 JavaScript 编写的构建工具快很多。同时 esbuild 中的**算法**经过精心设计充分利用 CPU 资源。另外，esbuild **没有使用第三方依赖**，和内存高效利用，也是打包快的原因。
+
+- 为什么用的少：
+
+在生产环境仍然需要使用 Rollup 打包。因为**嵌套 import** 会导致发送大量网络请求，即使使用 HTTP/2.0 ，直接使用未打包的 ESM 仍然效率低下。所以为了在生产环境中获得最佳的加载性能，最好将代码 bundle 一遍（结合 Tree Shaking，lazy-loading 和 common chunk splitting 等技术手段）。
+
+另外，开发环境使用浏览器 ESM 解析模块，而生产环境使用 Rollup 打包，这就导致本地和线上环境跑的**代码不一致**，线上环境出了 bug，本地很难排查。
+
+Vite **更像是一个开发工具**，而不是用于生产环境的构建工具。基本上只有浏览器支持完全和基于 QUIC 协议的 HTTP/3 普及之后才可能大规模使用 ESM 。更何况 Webpack 发展至今 loader 和 plugin 生态已经十分丰富，而 bundleless 构建工具的生态还在起步阶段。
+
+#### webpack 
+
+- 为什么需要打包：
+
+http1.1时期受网络延迟和浏览器**并行请求限制**等原因，将资源合并压缩有助于减少 HTTP 请求从而提升页面性能。
+
+es module之前没用**模块系统**，webpack实现了一套模块系统，提供了 HMR 机制等，极大的提升了开发体验。
+
+- 缺点：主要是慢
+
+打包时需要构建模块依赖图，因此需要**递归遍历**所有的模块，大项目会很慢。
+
+修改文件需要**重新打包**
+
+打包后会对源码进行编译和压缩，可读性大大降低，开发环境下，我们借助 **SourceMap** 进行调试，大大降低打包速度。
+
+过大的包会延长**页面首屏加载时间**，对此 Webpack 也有解决方案，即使用 Tree Shaking、Lazy-loading、CommonsChunkPlugin 等。
+
+- 不打包的趋势
+
+首先主要的原因是 HTTP/2.0 实现了**多路复用和首部压缩**，解决了 HTTP/1.1 中队头阻塞的问题，因此通过资源合并压缩减少了 HTTP 请求对页面加载性能不会有显著提升了。
+
+其次，现在各大浏览器逐一支持 ESM，无需自己再实现模块化优化了。可以实现按需加载，不用打包了，启动很快，只需要启动 devServer 即可。
+
+和 Snowpack 类似，Vite 也是利用浏览器原生的 ESM 去解析 imports，然后向 devServer 请求模块，在服务器端使用 esbuild 对浏览器无法处理的文件模块进行即时编译后返回。
+
+##### 插件
+
+postcss：集成模块化，css in js，autoprefix，css-next等众多功能
+
+##### loader
+
+css：css-loader，可以开启模块化
+
+#### babel
+
+原理：
+
+解析Parse：将代码经过词法分析和语法分析解析生成抽象语法树，通过babylon
+
+转换Transform：进行一些列变换操作，通过babel-traverse遍历，在这个阶段转换为es5代码
+
+生成Generate：将AST转换为js，使用到babel-generator
+
+#### 其他
+
+npm run start自动更新插件
+
+`"prestart": "npm update a b c" // 注意版本号控制，推荐使用~`
+
+
+
+## 性能优化
+
+
+
+### 生产环境优化
+
+#### 页面加载
 
 spa/csr，预渲染，mpa/ssr，同构
 
@@ -436,39 +943,30 @@ mpa/ssr，SEO好，首屏性能高，FMP快，数据共享成本高，模版维�
 
 同构，SEO好，首屏性能高，FMP快，用户体验好，数据共享，代码公用，node容易形成性能瓶颈
 
-1. 白屏产生原因
+- 减少请求数量，后台合并接口，合理控制模块的大小，base64
+- 减少请求结果的大小，压缩
+
+- 减少白屏时间
 
 白屏时间指的是页面准备加载到收到服务器返回的这段时间，这段时间过长就会产生白屏现象，在spa中尤为明显，以vue为例，浏览器加载完index.html后并不能看到页面，以为它只是一个框架没有实际内容，加下来还要加载vue，相关库，webpack公用文件，mainjs，发送请求，构建虚拟dom，diff，将虚拟dom patch到页面，初始化事件引擎等完成之后才能看到页面进行操作
 
 优化办法：quicklint，guess，骨架屏，HTTP2等
 
+quicklint：
 
+使用ssr
 
-2. SSR优化
+- SSR优化
 
 bigpipe，使用文件/流输出页面而不是传统的render页面，或者将不重要的内容分成task利用流在服务端异步输出都属于bagpipe，响应头Transfer-Encoding: chunked，可以不使用koa-bigpipe等库，可以自己写，很简单
 
-
-
-3. next/nuxt同构原理
-
-代理a链接通过header判断是站内切换还是刷新，站内切换的情况下，使用node操作dom实现html的局部更新，关于js，无论之前有没有加载过js，切换到这个页面，js都可能会缺失，可以在webpack插件中给指定的js加上标识，通过自定义插件给业务js添加的lazyload-js标识找到需要的js进行bigpipe输出，还可以在这里做缓存，不通过请求直接从localStorage中拿js，在前端执行
-
-
-
-4. vue/react SSR
-
-首屏SSR+内部spa路由跳转
-
-两个入口，服务端和客户端分别打包，服务端bundle返回app，store和router，vue提供createSSRApp方法用来生服务端渲染的应用，服务端获取打包好的服务端代码，注入预加载的数据后替换模版的内容
-
-数据预加载，vue提供serverPrefetch方法，只在服务端执行，用这个方法获取数据，在服务器替换模版时注入全局变量，客户端获取并替换store
-
-
-
-### 传输过程优化
+- 预加载/懒加载
+- 静态页面预渲染
+- CDN
 
 控制模块的拆分和合并，每个页面引用脚本不超过6个，因为网站最多并发请求是6个（受浏览器和http版本影响），要突破限制加CDN，在1.1时是有用的，还有一个好处是CDN可以去cookie，因为每次请求都会带cookie，cookie很长浪费资源，每个CDN不超过6个文件，超过了就新开域名，每个脚本压缩后32kb左右，webpack超过30kb才会提取为单独的文件，不够的话就需要懒加载或者做缓存
+
+- 缓存
 
 合理设置**浏览器缓存**，强缓存一般不会用在业务上，业务上一般会关闭强缓存no-cache使用etag，多用在库上基本不会修改，业务可以使用离线缓存前端就可以管理版本不需要服务端参与，有很多大公司直接将整个网站使用service worker离线缓存，确保用户体验
 
@@ -478,17 +976,33 @@ bigpipe，使用文件/流输出页面而不是传统的render页面，或者将
 
 service worker没有大小限制，可以缓存所有文件
 
+- prerender预渲染
+
+打包工具完成打包后会启动一个server模拟网站运行，用无头浏览器比如puppeteer访问指定路由，得到对应的html结构并输出到指定目录，让用户首次获取html时更快看到内容。prerender-spa-plugin就是一个完成预渲染的插件
+
+主要应用在seo和骨架屏，适用于不经常变化的数据
+
+利于seo和弱网环境白屏，缺点就是打包速度变慢，预渲染的页面永远是上一次打包是生成的
+
+**冷接口缓存**
+
+- 根据网速优化
+
 **检测用户网速**响应不同的图片，`navigator.connection`或者多普勒测速法
 
 多普勒测速法：请求三次0kb图片，一次10k，一次40k，t1为DNS+新建连接+1RTT往返，t2新建连接+1RTT往返，t31RTT往返（三次请求同一个资源时无论是HTTP2还是1.1都会开启多路复用）10k/（t4-t3）就是带宽
 
-升级为**HTTP2**
+- 升级为**HTTP2**
+- 图片使用内存较小的格式或使用base64（css体积增大阻塞渲染）
 
-### 渲染过程优化
+#### 渲染过程优化
 
-js会等待css加载，因为js可以使用CSS类造成重排，使用css in js或者原生的css数组工厂函数代替字符串可以减少css请求
+- **减少重排**
 
-减少重排
+减少dom操作，使用transform代替直接修改dom
+
+- 减少无用dom节点
+- 事件代理
 
 常用性能优化指标：
 
@@ -510,17 +1024,229 @@ CLS，累计位移偏移，页面稳定指标，尤其是移动端，移动距�
 
 首屏时间：loadEventEnd - navigationStart首次全部完整下载和渲染完页面时间
 
+### 开发过程优化
 
+#### 代码层面优化
 
-## webpack优化
+节流：确保在一段时间内只执行一次，滚动
 
-## node性能优化
+防抖：等连续操作后再执行，input
 
+使用requestAnimationFrame优化页面滚动，保证每次重绘只会触发一次事件
 
+```js
+(function () {
+  const throttle = function (type, name, obj) {
+    let obj = obj || window;
+    let running = false;
+    const func = function () {
+      if (running) {
+        return;
+      } 
+      running = true;
+      requestAnimationFrame(function () {
+        obj.dispatchEvent(new CustomEvent(name));
+        running = false;
+      });
+    };
+    obj.addEventListener(type, func);
+  };
 
-# SOLID
+  // 将 scroll 事件重定义为 optimizedScroll 事件
+  throttle("scroll", "optimizedScroll");
+})();
+
+window.addEventListener("optimizedScroll", function () {
+  console.log("Resource conscious scroll callback!");
+});
+```
+
+#### webpack优化
+
+### node性能优化
+
+### 体验优化
+
+#### 骨架屏
+
+在进行了CDN和静态代码缓存等优化方式后，还存在首屏加载时间过长问题时，可以使用骨架屏技术提高用户体验
+
+路由切换loading，自己编写骨架屏，推荐react-content-loader/vue-content-loader
+
+首屏渲染优化，如果是基于vue-cli可以使用page-skeleton-webpack-plugin，否则可以使用vue-server-renderer
+
+page-skeleton-webpack-plugin原理，通过puppeteer在服务端操控无头浏览器打开需要骨架屏的页面，在等待页面加载渲染完成后，在保留布局的前提下通过对页面元素进行增删，对已有元素进行样式覆盖，显示为灰色块，然后将修改后的html和css提取出来就是骨架屏了
+
+具体实现：
+
+1. 利用模版，直接在id为app的div中书写骨架屏，加载完成后会被替换，也可以使用base64图片
+
+2. 抽离到vue文件
+
+```js
+<!-- skeleton.vue -->
+<template>
+  <div class="skeleton page">
+    <span>骨架屏</span>
+  </div>
+</template>
+
+<style scoped></style>
+
+// skeleton.entry.js
+import Vue from "vue";
+import Skeleton from "./skeleton.vue";
+
+export default new Vue({
+  // 根实例简单的渲染应用程序组件
+  render: (h) => h(Skeleton),
+});
+```
+
+配合vue-server-renderer专门进行骨架屏的构建成json文件
+
+```js
+// webpack.skeleton.conf.js
+"use strict";
+const path = require("path");
+const nodeExternals = require("webpack-node-externals");
+const VueSSRServerPlugin = require("vue-server-renderer/server-plugin");
+
+module.exports = {
+  target: "node",
+  devtool: "#source-map",
+  entry: "./src/skeleton/skeleton.entry.js",
+  output: {
+    path: path.resolve(__dirname, "../dist"),
+    publicPath: "/dist/",
+    filename: "[name].js",
+    libraryTarget: "commonjs2",
+  },
+  module: {
+    noParse: /es6-promise\.js$/, // avoid webpack shimming process
+    rules: [
+      {
+        test: /\.vue$/,
+        loader: "vue-loader",
+        options: {
+          compilerOptions: {
+            preserveWhitespace: false,
+          },
+        },
+      },
+      {
+        test: /\.css$/,
+        use: ["vue-style-loader", "css-loader"],
+      },
+    ],
+  },
+  performance: {
+    hints: false,
+  },
+  externals: nodeExternals({
+    // do not externalize CSS files in case we need to import it from a dep
+    whitelist: /\.css$/,
+  }),
+  plugins: [
+    // 这是将服务器的整个输出构建为单个 JSON 文件的插件。
+    // 默认文件名为 `vue-ssr-server-bundle.json`
+    new VueSSRServerPlugin({
+      filename: "skeleton.json",
+    }),
+  ],
+};
+```
+
+将json文件插入到模版
+
+```js
+// skeleton.js
+const fs = require("fs");
+const { resolve } = require("path");
+const { createBundleRenderer } = require("vue-server-renderer");
+
+function createRenderer(bundle, options) {
+  return createBundleRenderer(
+    bundle,
+    Object.assign(options, {
+      // recommended for performance
+      // runInNewContext: false
+    })
+  );
+}
+
+const handleError = (err) => {
+  console.error(`error during render : ${req.url}`);
+  console.error(err.stack);
+};
+
+const bundle = require("./dist/skeleton.json");
+const templatePath = resolve("./index.html");
+const template = fs.readFileSync(templatePath, "utf-8");
+const renderer = createRenderer(bundle, {
+  template,
+});
+
+// console.log(renderer)
+
+/**
+ * 说明：
+ * 默认的index.html中包含<%= BASE_URL %>的插值语法
+ * 我们不在生成骨架屏这一步改变模板中的这个插值
+ * 因为这个插值会在项目构建时完成
+ * 但是如果模板中有这个插值语法，而我们在vue-server-renderder中使用这个模板，而不传值的话，是会报错的
+ * 所以，我们去掉模板中的插值，而使用这个传参的方式，再将这两个插值原模原样返回到模板中
+ *
+ */
+const context = {
+  title: "", // default title
+  meta: `<meta name="theme-color" content="#4285f4">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <link rel="stylesheet" href="<%= BASE_URL %>css/reset.css">`,
+};
+
+renderer.renderToString(context, (err, html) => {
+  if (err) {
+    return handleError(err);
+  }
+  fs.writeFileSync(resolve(__dirname, "./index.html"), html, "utf-8");
+});
+```
+
+加上注释
+
+```vue
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>vue-for-test</title>
+  </head>
+  <body>
+    <div id="app">
+      <!--vue-ssr-outlet-->
+    </div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>
+```
+
+3. 使用插件
+
+page-skeleton-webpack-plugin或者vue-skeleton-webpack-plugin
+
+前者根据项目中不同的路由页面生成相应的骨架屏并通过webpack打包到静态路由页面中
+
+后者将插入骨架屏的方式由手动改为自动，原理在构建时使用预渲染，将骨架屏渲染结果片段插入模版，样式内联到head中
+
+#### 其他
+
+hover
 
 ## SOLID
+
+### SOLID
 
 s，单一功能原则，对象应该仅具有一种功能
 
@@ -532,13 +1258,57 @@ i，接口隔离原则，多个专用接口好过单一的总接口
 
 d，依赖倒置原则，高层模块不应该依赖于低层模块，都应该依赖于抽象
 
-## AOP
+### AOP
 
-AOP是面向切面编程，是一种思想，是OOP的补充，旨在通过分离关注点来增加模块化，通过向现有代码添加额外的行为而不修改当前代码来实现，允许将非核心行为添加到程序中，并且不与核心业务混淆。可以降低耦合度，提高重用性。比如日志功能它横跨了多个业务，此时就可以将它作为一个切面，然后以某种自动化的方式织入到核心业务逻辑来解耦。
+AOP是面向切面编程，是一种思想，**是OOP的补充**，旨在通过分离关注点来增加模块化，**通过向现有代码添加额外的行为而不修改当前代码来实现，允许将非核心行为添加到程序中，并且不与核心业务混淆**。可以降低耦合度，提高重用性。比如日志功能它横跨了多个业务，此时就可以将它作为一个切面，然后以某种自动化的方式织入到核心业务逻辑来解耦。
 
-IOC面向对象编程中的一个设计原则，在对象创建的时候，通过一个调控所有对象的容器将依赖的对象引用传递给他，就是通过一个容器来管理类之间的依赖，减少它们之间的耦合。两种方式，依赖注入，依赖查找
+```js
+function test() {
+    console.log(2);
+    return 0
+}
 
-### IOC框架
+Function.prototype.before = function (fn) {
+    const _self = this
+    return function () {
+        // 先执行传入的函数
+        // 返回false中断执行
+        if(fn.apply(this, arguments) === false) {
+            return false
+        }
+        return _self.apply(_self, arguments)
+    }
+}
+Function.prototype.after = function (fn) {
+    const _self = this
+    return function () {
+        // 获取原本的返回值
+        const result = _self.apply(_self, arguments)
+        if(result === false) {
+            return false
+        }
+        // 后执行传入的函数
+        fn.apply(this, arguments)
+        return result
+    }
+}
+
+// 先挂载self = test
+// 执行before，self，after
+const a = test.after(function() {
+    console.log(3);
+}).before(function() {
+    console.log(1);
+    // return false
+})()
+console.log(a);
+```
+
+### IOC
+
+面向对象编程中的一个设计原则，在对象创建的时候，通过一个调控所有对象的容器将依赖的对象引用传递给他，就是通过一个容器来管理类之间的依赖，减少它们之间的耦合。两种方式，依赖注入，依赖查找
+
+#### IOC框架
 
 awilix和inversify
 
@@ -548,17 +1318,218 @@ inversify，将serveice和controller都注入容器，在路由激活时才会�
 
 对比MVC，将serveice和controlle耦合到一起
 
-### 原理
+#### 原理
 
 利用装饰器和反射实现
 
-container用来存储对象，将对象注入container，通过装饰器对构造器参数进行拦截，在容器中查询并注入参数，对构造函数进行拦截，使用js解析器来分析参数并在容器中寻找，找到后注入构造函数。代码编译时会将参数对应的对象注入到构造函数中，最后使用这个类时，只需要传递约定好的参数名，不用引入真实的类，就可以直接使用容器中的对象，实现了这两个类之间的解耦，
+container用来存储对象，将对象注入container，通过装饰器inject对构造器参数进行拦截，在容器中查询给定对象并注册到构造器参数；装饰器controller对构造函数进行拦截，使用js解析器来分析参数并在容器中寻找，找到后注入构造函数。代码**编译时**会将参数对应的对象注入到构造函数中，最后使用这个类时，只需要传递约定好的参数名，不用引入真实的类，就可以直接使用容器中的对象，实现了这两个类之间的解耦，
+
+```js
+// esprima是一个js解释器
+import { parseScript } from 'esprima';
+import CreateIoc from './ioc';
+import type { Pattern } from 'estree';
+// 元编程
+import 'reflect-metadata';
+
+//常量区域
+interface ITypes {
+  [key: string]: symbol;
+}
+const TYPES: ITypes = {
+  indexService: Symbol.for('indexService'),
+};
+interface IIndexService {
+  log(str: string): void;
+}
+class IndexService implements IIndexService {
+  log(str: string) {
+    console.log(str);
+  }
+}
+const container = new CreateIoc();
+//把所需注入的服务注入到容器中container
+container.bind(TYPES.indexService, () => new IndexService());
+
+function getParams(fn: Function) {
+  const ast = parseScript(fn.toString());
+  // 忽略
+  // @ts-expect-error
+  const node = ast.body[0]['body']['body'][0];
+  let fnParams: Pattern[] = [];
+  if (node.kind === 'constructor') {
+    fnParams = node['value'].params;
+  }
+  const validParams: string[] = [];
+  fnParams.forEach((obj) => {
+    if (obj.type === 'Identifier') {
+      validParams.push(obj.name);
+    }
+  });
+  //   console.log('node: ', validParams);
+  return validParams;
+}
+
+// keyof any表示string，number或者symbol，使用PropertyKey也可以
+function haskey<O extends Object>(obj: O, key: PropertyKey): key is keyof O {
+  return obj.hasOwnProperty(key);
+}
+
+function inject(serviceIdentifier: symbol) {
+  return (target: Function, targetKey: string, index: number) => {
+    if (!targetKey) {
+      // 把想构造的参数事先注册好
+      Reflect.defineMetadata(
+        serviceIdentifier,
+        container.get(serviceIdentifier),
+        target
+      );
+    }
+  };
+}
+
+function controller<T extends { new (...args: any[]): {} }>(constructor: T) {
+  class Controller extends constructor {
+    // 拦截
+    constructor(...args: any[]) {
+      super(args);
+      // 获取所有的参数
+      const _parmas = getParams(constructor);
+      let identity: string;
+      // 寻找并注入
+      for (identity of _parmas) {
+        if (haskey(this, identity)) {
+          //this[identity] = container.get(TYPES[identity]);
+          this[identity] = Reflect.getMetadata(TYPES[identity], constructor); 
+        }
+      }
+    }
+  }
+  return Controller;
+}
+
+@controller
+class IndexController {
+  public indexService: IIndexService;
+  constructor(@inject(TYPES.indexService) indexService?: IndexService) {
+    if (indexService) {
+      this.indexService = indexService;
+    }
+  }
+  info() {
+    this.indexService.log('京程一灯 🏮' + Math.random());
+  }
+}
+const index = new IndexController();
+index.info();
+//①最愚蠢的业务和所需的service 在一起
+// const instance = new IndexService();
+// this.indexService = instance;
+//②稍微好一点 但是业务逻辑的代码还是跟所需的服务混合一起
+// const instance = new IndexService();
+// const index = new IndexController(instance);
+
+class CreateIoc {
+  public container: Map<symbol, { callback: Function }>;
+  constructor() {
+    this.container = new Map();
+  }
+  // 获取
+  get(namespace: symbol) {
+    const item = this.container.get(namespace);
+    if (item) {
+      return item.callback();
+    } else {
+      throw new Error('暂未找到实例');
+    }
+  }
+  // 绑定
+  bind(key: symbol, callback: Function) {
+    this.container.set(key, {
+      callback,
+    });
+  }
+}
+export default CreateIoc;
+```
 
 
 
-# node
 
-# 框架
+
+## node
+
+### 事件循环
+
+**如何理解node高并发**
+
+node是构建在v8引擎上的js运行环境，底层是v8引擎
+
+**架构**
+
+node框架由nodejs标准库，nodejs bindings，和底层库组成
+
+nodejs标准库，js编写，能直接使用的api
+
+node bindings，能直接调用c++的关键，将底层实现的c++库暴露给js环境，可以让js调用c++。node通过一层c++ binding，把js传入v8，v8解析后交给libuv发起async IO，并等待消息循环调度
+
+底层库，v8，提供了在非浏览器的运行环境，libuv，提供了跨平台，线程池，事件池，异步IO等能力，还有C-ares，http-parser，openSSL，zlib等库
+
+与操作系统的交互：在js中调用的方法，都会通过process.binding传递到c++层面
+
+**单线程**
+
+nodejs不为每一个用户创建一个新的线程，只使用一个线程，当有一个用户连接，就触发一个内部事件，通过非阻塞机制io，事件驱动机制，让宏观上是并行的。cpu利用率较高，还有操作系统也不会有线程创建和销毁的开销。
+
+单线程程序，并行极大时cpu计算能力理论上是100%
+
+多线程程序，cpu经常需要等IO结束，cpu被浪费
+
+IO操作越多nodejs宏观上越是并行
+
+**非阻塞IO**
+
+IO操作不会阻塞代码的执行，将后续的代码放到回调中，当IO执行完成后，以事件的形式通知IO操作线程，执行回调。为了处理异步IO线程必须有事件循环，不断检查未处理事件
+
+**事件循环**
+
+每个node进程只有一个主线程，形成执行栈
+
+主线程中维护了一个事件队列，当异步操作到来时，放到队列中，直到主线程执行完成
+
+主线程执行完成后通过事件循环，检查队列，判断是否IO操作，非IO亲自处理，如果是IO操作就从线程池中拿一个线程来处理，指定回调函数，当IO操作完成后将回调放到事件队列尾部，等待事件循环，线程归还给线程池。再次循环到该事件时，就直接处理。
+
+期间主线程不断检查事件队列中是否有未执行事件，直到执行完成，此后每当有新的事件，都会通知主线程按顺序取出交给eventloop处理
+
+eventloop一共7个阶段每个阶段都有一个任务队列，当所有阶段被顺序执行一次eventloop完成一个tick
+
+本质上node将所有的阻塞操作都交给了内部的线程池执行的，本身只负责调度，所以node可以单线程处理高并发的原因就在于libuv的事件循环机制和底层线程池的实现
+
+7个阶段：都属于宏任务，主要阶段timers，poll，check，close
+
+timers：执行setTimeout和setInterval回调，由poll阶段控制
+
+pending callbacks：执行某些系统操作的回调
+
+idle，prepare：内部使用
+
+poll：执行IO回调，检查定时器。队列不为空时遍历执行队列直到为空或到达系统限制，然后继续等待，期间如果监测到timer定时器超时则进入timers阶段，如果存在setImmediate则进入check阶段
+
+check：setImmediate回调
+
+close callbacks：关闭的回调
+
+对于微任务会在每个阶段前清空，promise，process.nextTick，MutationObserver
+
+Node 中的 `process.nextTick`，这个函数其实是独立于 Event Loop 之外的，它有一个自己的队列，当每个阶段完成后，如果存在 nextTick 队列，就会**清空队列中的所有回调函数**，并且优先于其他 microtask 执行
+
+**与浏览器事件循环的区别**
+
+11之前有区别，之后和浏览器统一了
+
+**执行完一个宏任务就会去检查微任务队列是否有需要执行的微任务**，即使微任务内嵌套微任务，也会将嵌套的微任务执行完毕后（这点上nodejs与browser是相同的，对应的就是清空微任务的队列），再去宏任务队列执行下一个宏任务，内部的任务会放在下一次事件循环时执行。
+
+## 框架
 
 vue和react的区别
 
@@ -566,9 +1537,9 @@ vue和react的区别
 
 vue模版编译是使用with进行的this的绑定，因为它使用的正则表达式进行编译时，分析不出来js中的this，只能使用with来统一绑定，所以vue所有的属性都需要绑定在vue实例上，否则模版获取不到，模版省略this。在vue3的离线编译抛弃了这种方式，集成了js解析器，在线编译不能集成，还是使用的with。
 
-## Vue2
+### Vue2
 
-### vue架构
+#### vue架构
 
 编译流程：
 
@@ -617,21 +1588,19 @@ renderMixin(Vue)
 
 updateComponent：判断是否存在上一个节点，没有就render新建vnode，创建dom节点，如果有上一个节点，render生成新的节点，与上一个节点进行dom diff，根据结果进行定向修改
 
-
-
-### 双向数据绑定
+#### 双向数据绑定
 
 利用了Object.defineProperty实现数据的监听，Object.defineProperty有一定缺陷，监听数组时拦截操作会造成大量不必要的渲染，vue为了解决这个问题重写了数组7个方法，执行原有的数组方法，并且手动进行更新操作，还有就是不能监听新增数据
 
 在vue中我们写的html会被打包成with的形式，运行时生成vnode，在执行mount期间会获取数据，触发observer中的get，进行依赖收集deps，在vue1时一个指令对应一个watcher，vue2中一个mountComponent对应一个watcher，在数据改变的时候遍历所有的依赖dep，通知每一个对应的watcher进行更新，生成新的vnode
 
-### 虚拟dom
+#### 虚拟dom
 
 为什么使用虚拟dom
 
 本质上是因为原生的dom上面属性太多了，有很多我们用不到的属性，会浪费空间
 
-### dom diff
+#### dom diff
 
 为什么需要dom diff
 
@@ -641,27 +1610,70 @@ vue1时一个指令对应一个watcher时，watcher可以直接定向到dom节�
 
 而react没有维护这样一个映射关系，每次更新会重新构建fiber（jsx -> element -> fiber），再进行fiber diff，diff较花费时间，可以中断
 
-### 优化
+算法
 
-#### 批量更新
+简单来说diff的过程
+
+- 同级比较，再比较子节点
+- 先判断一方有子节点一方没有子节点的情况，新的没有子节点，将旧的子节点移除
+- 比较都有子节点的情况
+- 递归比较子节点
+
+vue2采用了双端比较法，利用双指针同时从新旧的两端进行比较，借助key找到可以复用的节点，再进行相关操作。
+
+具体比较时分四种情况：
+
+对比头尾一致
+
+对比头或尾一致，直接进行dom移动
+
+都不一样时
+
+​	返回老节点的key-index的映射表
+
+​	根据key判断是否新增节点，新增vnode节点直接插入dom，
+
+​	非新增，再对比是否同一个节点
+
+​		是同一个节点，则进行dom移动
+
+​		不是则新增vnnode直接插入dom，将旧的位置置为undefined，
+
+每次操作完成后指针会进行移动，每次对比相等时都会打补丁，并且继续递归子节点
+
+对比完成后判断越界，老节点先遍历完新增新节点剩下的节点，新节点先遍历完删除老节点剩下的节点
+
+注意：
+
+双指针遍历的是新旧的虚拟节点不是dom
+
+老节点有ele属性，指向真实节点，真实节点的插入和删除都是靠这个属性
+
+尽可能复用了原本的dom
+
+缺点：每一个节点都进行了对比
+
+#### 优化
+
+##### 批量更新
 
 在执行更新时默认执行批量更新queueWatcher，防止频繁更新，维护了一个watcher队列，首先判断是否已经存在，不存在时添加进队列，判断是否等待中，不是的情况，异步执行循环执行队列中的watcher更新
 
-#### keep-alive算法
+##### keep-alive算法
 
 使用了LRU缓存算法，取最新最常使用的缓存
 
 keep-alive保存了vnode虚拟节点，在render阶段判断缓存是否已经存在，存在时先移除再推入，没有直接添加，超出范围时，从后面删除
 
-#### 与vue3模版处理区别
+##### 与vue3模版处理区别
 
 vue2的模版处理使用的时正则匹配，贪婪匹配存在回溯问题，而且分析功能有限不能做更多的优化
 
 vue3使用的是状态机，根据自身语法和状态机模型写了一套compile，可以做更多的编译时优化
 
-## Vue3
+### Vue3
 
-### 对vue2的优化
+#### 对vue2的优化
 
 运行时阶段，数据监听逻辑：
 
@@ -673,22 +1685,188 @@ vue3使用的是状态机，根据自身语法和状态机模型写了一套comp
 
 模版编译优化：根据自身语法和**状态机**模型构建ast，模版分析能力增强，可以做更多的编译时优化
 
-### vue架构
+#### vue架构
 
 编译时，状态机
 
-### 双向数据绑定
+#### 双向数据绑定
 
 
 
-### 虚拟dom
+#### 虚拟dom
 
-### dom diff
+#### dom diff
+
+vue3在创建vnode时就确定类型，diff算法通过最长递归子序列进行了优化，将节点移动操作最小化
+
+对vue2的dom-diff完全重写
+
+使用单指针循环，先遍历头部直到不同的节点，再遍历尾部直到不同的节点，然后判断是否遍历完成，完成则进行挂载和删除，否则进行核心逻辑：
+
+先遍历新节点生成key-index映射表keyToNewIndexMap
+
+根据比较项数量toBePatched，初始化newIndexToOldIndexMap内容都为0
+
+遍历旧节点，通过旧节点的key查询映射表，没有就删除旧节点，最后生成一个newIndex-oldIndex+1映射表newIndexToOldIndexMap
+
+通过newIndexToOldIndexMap获取最长升序子序列的index集合
+
+同时从后向前遍历newch和newIndexToOldIndexMap和index集合，map在index中没有时，对应的ch节点就需要移动，存在就不需要移动，map中0对应的ch为新增节点
+
+
+
+## 原理
 
 ## 手写算法
 
-写一个缓存算法
+写一个LRU缓存算法
+
+```js
+class LRUCache {
+  constructor(capacity) {
+    this.cache = new Map()
+    this.capacity = capacity
+  }
+  get(k) {
+    if(!this.cache.get(k)) {
+      return
+    }
+    const v = this.cache.get(k)
+    this.cache.delete(k)
+    this.cache.set(k, v)
+    return v
+  }
+  push(k, v) {
+    if(this.cache.has(k)) {
+      this.cache.delete(k)
+    }
+    this.cache.set(k, v)
+    if(this.cache.size > this.capacity) {
+      // map.keys()返回迭代器
+      const firstK = this.cache.keys().next().value
+      this.cache.delete(firsetK)
+    }
+  }
+}
+```
+
+> 偶发性批量处理会污染缓存，优化
+>
+> **LRU-K**
+>
+> LRU-K算法有两个队列，一个是缓存队列，一个是数据访问历史队列。当访问一个数据时，首先先在访问历史队列中累加访问次数，当历史访问记录超过K次后，才将数据缓存至缓存队列，从而避免缓存队列被污染。同时访问历史队列中的数据可以按照LRU的规则进行淘汰。
+>
+> 一般来讲，当K的值越大，则缓存的命中率越高，但是也会使得缓存难以被淘汰。综合来说，使用LRU-2的性能最优。
 
 写一个promise
 
+写一个mvvm
+
 写一个发布订阅模式
+
+写一下防抖节流
+
+```js
+// 节流，一段时间内最多执行一次
+function trottle(fn, delay) {
+  let timerId
+  let execDate = getTime()
+  let lastThis
+  let lastArgs
+  let result
+  function execFn() {
+		result = fn.call(lastThis, lastArgs)
+    execDate = getTime()
+    return result
+  }
+  return function(...args) {
+    lastThis = this
+    lastArgs = args
+    //首次立即执行
+    if(timerId === 'undefined') {
+      execFn()
+    }else {
+      const current = getTime()
+      // 清除计时器
+      timerId && clearTimeout(timerId)
+      // 判断是否超过delay
+      if(current - execDate > delay) {
+        // 超过直接执行
+        execFn()
+      }else {
+        // 没超过设置定时器
+        const wait = delay - (current - execDate)
+        timerId = setTomeout(() => {
+          execFn()
+        }, wait)
+      }
+    }
+    return result
+  }
+}
+function getTime() {
+  return + new Date()
+}
+
+// 简化版，区别：第一次没有立刻执行，超过时间也还是会创建定时器
+function throttle(fn, delay) {
+  let flag = true
+  return function(...args) {
+    if(flag) {
+      flag = false
+      setTimeout = (() => {
+        fn.apply(this, args)
+        flag = true
+      }, delay)
+    }
+  }
+}
+
+// 防抖，触发结束一段时间后才执行
+function debounce(fn, delay) {
+  let timerId = ''
+  return function(...args) {
+    timerId && clearTimeout(timer)
+    timerId = setTimeout(() => {
+      fn.apply(this, args)
+    }, delay)
+  }
+}
+```
+
+写一个Ajax
+
+```js
+// 一般写法
+const xhr = new XMLHttpRequest()
+xhr.open('GET', SERVER_URL, true)
+// xhr.responsType = 'json'
+// xhr.setRequestHeader('Accept', 'application/json')
+xhr.onreadystatechange = function () {
+  if(this.readyState === 4 && this.status === 200) {
+    console.log(this.responseText)
+  }
+}
+xhr.onerror = function () {
+  console.error(this.statusText)
+}
+xhr.send(null)
+
+// promise封装
+function getJson(url) {
+  return new Promise((resolve, reject) => {
+    xhr.onreadystatechange = function () {
+      if(this.readyState === 4 && this.status === 200) {
+        resolve(this.responseText)
+      }
+    }
+    xhr.onerror = function () {
+      reject(this.statusText)
+    }
+    xhr.send(null)
+  })
+}
+```
+
+
+

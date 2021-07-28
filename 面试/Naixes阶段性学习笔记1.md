@@ -1114,9 +1114,9 @@ requestHostCallback = function(callback) {
 >
 > performConcurrentWorkOnRoot只会执行taskQueue的任务
 
-![截屏2021-06-02 上午8.54.48](/Users/huangsiying/data/yd/Naixes阶段性学习笔记.assets/截屏2021-06-02 上午8.54.48.png)
+![截屏2021-06-02 上午8.54.48](./Naixes阶段性学习笔记.assets/截屏2021-06-02 上午8.54.48.png)
 
-<img src="/Users/huangsiying/data/yd/Naixes阶段性学习笔记.assets/截屏2021-06-02 上午8.55.34.png" alt="截屏2021-06-02 上午8.54.48" style="zoom:50%;" />
+<img src="./Naixes阶段性学习笔记.assets/截屏2021-06-02 上午8.55.34.png" alt="截屏2021-06-02 上午8.54.48" style="zoom:50%;" />
 
 ### Reconciler
 
@@ -1572,7 +1572,7 @@ ref使用注意事项？
 
 解决阻止事件冒泡的问题
 
-<img src="/Users/huangsiying/data/yd/Naixes阶段性学习笔记.assets/截屏2021-06-04 下午6.11.49.png" alt="截屏2021-06-04 下午6.11.49" style="zoom:50%;" />
+<img src="./Naixes阶段性学习笔记.assets/截屏2021-06-04 下午6.11.49.png" alt="截屏2021-06-04 下午6.11.49" style="zoom:50%;" />
 
 ## vite
 
