@@ -110,6 +110,71 @@ async是html5定义，浏览器支持不同，同时存在时只触发async
 
 ## js
 
+执行流程
+
+分为编译阶段和执行阶段
+
+**编译阶段：**
+
+1. 生成执行上下文和变量对象：在执行上下文栈ECS创建一个全局执行上下文GC其中包含了变量对象VO，在编译阶段js引擎会对声明进行处理，对于通过var声明的变量，js引擎会在环境对象中创建名为变量名的属性，初始化为undefined，对于函数，会将函数的定义部分存到堆中，并在环境对象中创建一个名为方法名的属性指向堆中函数的地址。
+2. 将声明之外的代码编译成可执行代码（字节码），然后进入执行阶段
+
+一段代码经过编译后会生成两部分内容执行上下文和可执行代码。
+
+执行上下文EC就是执行代码时的运行环境，调用一个函数时就会进入这个函数的执行上下文，决定了这个函数执行期间用到的变量。执行上下文中存在一个变量对象，变量提升就保存在这个对象中
+
+**执行阶段：**
+
+顺序执行可执行代码，每调用一个函数就会**创建一个新的EC**，并在ECS中压入这个函数的EC，调用完成之后会销毁，并回到上一个执行上下文，直到栈中的代码全部执行完毕。
+
+如果出现相同的变量或函数时会怎样？
+
+```js
+a(); // 1
+var a = "hello world"; //2 a -> undefined
+console.log(a); // 3
+function a() {
+  // 4
+  console.log("inner a function 1");
+}
+
+var a = "hello, tomorrow"; // 5 a -> function
+
+console.log(a); // 6
+function a() {
+  // 7 a -> function2
+  console.log("inner a function 2");
+}
+a(); // 8
+/* 
+inner a function 2
+hello world
+hello, tomorrow
+
+报错 a is not a function
+*/
+```
+
+其中**ESP**永远指向栈顶也就是this的指向
+
+**变量对象VO**，EC中的特殊变量，用来存储函数声明，函数形参和变量。**作用域链**就是依靠VO维持的
+
+**活动对象AO**，函数**执行时创建**，包含了普通参数和具有所有属性的参数映射表（arguments），VO是不能直接访问的，所以需要AO来管理内部变量，通过VO来与外部进行联系。
+
+**AO分为创建阶段和执行阶段**
+
+函数执行时创建函数执行上下文，包含scopeChain（指向scope），AO，VO，scope: [AO, VO, GO]，在创建阶段会发生属性名称的定义但不会赋值，**变量提升**就是在这个阶段。创建阶段结束就到了运行阶段，运行阶段执行内部代码，**确定this指向**，执行变量赋值等
+
+如果发生**闭包**，执行完成后会被存储到堆区，不会进行回收。
+
+new Function创建函数，scope绑定全局作用域，不会回收，eval也类似，可能造成**内存泄漏**
+
+**ES5+**的执行上下文发生了变化包含**词法环境和变量环境**和ThisBinding，this在一开始就确定了。词法环境中的**环境记录**包含了外部引用和内部变量以及函数声明，而变量环境是用来兼容之前使用var创建的变量。在创建阶段let，const声明的变量没有绑定任何值，这也是造成暂时性死区TDZ的原因
+
+无论是ES多少，上下文的生命周期都是三个阶段：**创建阶段-执行阶段-回收阶段**
+
+
+
 1. 原型链继承和class继承
 
 ES5 prototype 继承
@@ -319,6 +384,283 @@ function handleDrop(e) {
 }
 ```
 
+### 数据结构
+
+1. weakMap和weakSet为什么键只能是对象？
+
+为了保证只能通过键对象的引用来获取值，由于基本数据类型在传递时，传递的是值，而不是引用，没办法区分是否初始化时的键。
+
+不支持迭代以及keys，values，entries方法，因为回收的时间是不确定的，不知道有没有被回收
+
+```js
+const m = new WeakMap();
+m.set({}, 100);
+// 由于 {} 没有在其他地方引用，所以在垃圾回收时，这个值也会被回收。
+
+// 在创建对象时，分配了一块内存，并把这块内存的地址传给 a
+const a = {};
+// 执行 set 操作时，实际上是将 a 指向的内存地址和 100 关联起来
+m.set(a, 100);
+// 如果使用这种方式，则不会被回收。因为 {} 有 a 变量在引用它。
+
+a = null;
+// 将 a 置为空后，m 里的值 100 在垃圾回收时将会被回收。如果是Map类型不会被回收，需要手动清空 m
+
+const a = "abc";
+// 由于基本数据类型在传递时，传递的是值，而不是引用。
+m.set(a, 100);
+// 所以执行 set 操作时，实际上是将新的 'abc' 和 100 关联起来，而不是原来 a 变量指向的那个。
+// 那这样就会有问题，m 里存储的永远是没有被引用的键，随时都会被回收。
+```
+
+使用场景：
+
+**缓存计算结果**，使用完成后将键置为null，键回收时，缓存也会被回收
+
+**关联数据**，当作为键的对象消失时对应的数据也会被回收
+
+
+
+2. Reflect和元编程
+
+**Reflect**不是构造函数，所有属性和方法都是静态的
+
+作用：
+
+- 整合一些语言内部方法，统一命名空间
+- 函数化一些对象操作
+- 修改了Object一些方法的返回结果，用boolean代替抛出异常
+- Proxy可以改写原生api，reflect可以起到备份作用，proxy可以代理的13种拦截，reflect中都有对应方法
+
+**元编程**
+
+借助Proxy和Reflect允许拦截并定义语言操作的自定义行为
+
+应用：
+
+- **数据劫持，验证操作**
+
+- **函数节流**
+
+```js
+const createThrottleProxy = (fn, rate) => {
+  let lastClick = Date.now() - rate;
+  return new Proxy(fn, {
+    apply(target, context, args) {
+      if (Date.now() - lastClick >= rate) {
+        fn.bind(target)(args);
+        lastClick = Date.now();
+      }
+    },
+  });
+};
+const handler = () => console.log("do something");
+const handlerProxy = createThrottleProxy(handler, 1000);
+document.addEventListener("scroll", handlerProxy);
+```
+
+- **图片懒加载**：通过proxy构造Image对象，加载完成时替换默认图片
+
+```js
+const IMG_URL =
+  "http://img-static.yidengxuetang.com/wxapp/github-img/javascript1.png";
+const imageProxy = (loadImage) => {
+  return new Proxy(Image, {
+    construct(target, args) {
+      const instance = Reflect.construct(target, args);
+      instance.src = loadImage;
+      return instance;
+    },
+  });
+};
+const ImageProxy = imageProxy(IMG_URL);
+
+const createImageProxy = (realImg) => {
+  const img = new ImageProxy();
+  const virtualImg = new Image();
+  virtualImg.src = realImg;
+  virtualImg.onload = () => {
+    hasloaded = true;
+    img.src = realImg;
+  };
+  return img;
+};
+
+const img = createImageProxy(
+  "http://img-static.yidengxuetang.com/wxapp/issue-img/wxqr-github.png"
+);
+document.body.appendChild(img);
+```
+
+- **单例模式**
+
+```js
+function makeSingleton(func) {
+  let instance,
+    handler = {
+      construct: function (target, args) {
+        if (!instance) {
+          instance = new func();
+        }
+        return instance;
+      },
+    };
+  return new Proxy(func, handler);
+}
+
+// 以这个constructor为例
+function Test() {
+  this.value = 0;
+}
+
+// 普通创建实例
+const t1 = new Test(),
+  t2 = new Test();
+t1.value = 123;
+console.log(t2.value); // 0 因为 t1、t2 是不同的实例
+
+// 使用proxy
+const TestSingleton = makeSingleton(Test),
+  s1 = new TestSingleton(),
+  s2 = new TestSingleton();
+s1.value = 123;
+console.log(s2.value); // 123 现在 s1、s2 是相同的实例。
+```
+
+- **观察者模式**
+
+```js
+let hero = {
+  name: "赵云",
+  hp: 100,
+  sp: 100,
+  equipment: ["马", "长枪"],
+};
+
+const handler = {
+  set(target, key, value, receiver) {
+    //内部调用对应的 Reflect 方法
+    const result = Reflect.set(target, key, value, receiver);
+    //执行观察者队列
+    observableArray.forEach((item) => item());
+    return result;
+  },
+};
+
+//初始化Proxy对象，设置拦截操作
+const createProxy = (obj) => new Proxy(obj, handler);
+
+//初始化观察者队列
+const observableArray = new Set();
+
+const heroProxy = createProxy(hero);
+
+//将监听函数加入队列
+observableArray.add(() => {
+  console.log(heroProxy.name);
+});
+
+heroProxy.name = "黄忠";
+// --> 黄忠
+```
+
+- 对象多重继承
+
+```js
+const people = {
+  name: "people",
+  run() {
+    console.log("people.run:", this.name);
+  },
+};
+
+const powerMan = {
+  name: "powerMan",
+  run() {
+    console.log("powerMan.run:", this.name);
+  },
+  fight() {
+    console.log("powerMan.fight:", this.name);
+  },
+};
+
+const handler = {
+  get(target, name, receiver) {
+    if (Reflect.has(target, name)) {
+      return Reflect.get(target, name, receiver);
+    } else {
+      for (let P of target[Symbol.for("[[Prototype]]")]) {
+        if (Reflect.has(P, name)) {
+          return Reflect.get(P, name, receiver);
+        }
+      }
+    }
+  },
+};
+
+const hero = new Proxy(
+  {
+    name: "hero",
+    strike() {
+      this.run();
+      this.fight();
+    },
+  },
+  handler
+);
+
+hero[Symbol.for("[[Prototype]]")] = [people, powerMan];
+hero.strike();
+// --> people.run:hero
+// --> powerMan.fight:hero
+```
+
+## ts
+
+### 高级类型
+
+改为选填Partial<User>
+
+改为必填Required<User>
+
+过滤Pick<User, 'age'>
+
+排除Omit<User, 'age'>
+
+排除Exclude<'a' | 'b', 'b' | 'c'>
+
+交集Extract<'a'|'b', 'a'|'y'|'z'>
+
+参数类型的元祖Parameters
+
+Record<K, V>，将V作为整体当成value，key类型为K，生成新的类型，对象嵌套对象
+
+ConstructorParameters，构造函数参数类型的元组
+
+NonNullable<T>，从类型T中剔除null和undefined，然后构造一个类型。
+
+ReturnType<T>，由函数类型T的返回值类型构造一个类型。
+
+infer：表示待推断的类型变量
+
+// 由函数类型T的返回值类型构造一个类型。
+
+其他技巧：
+
+合并 &
+
+[K in keyof Modules]
+
+typeof
+
+### 常用技巧
+
+```js
+interface NewAble<T> {
+  new (...args: any[]): T;
+}
+```
+
 
 
 ## 浏览器
@@ -328,6 +670,14 @@ function handleDrop(e) {
 功能推断：也是对代码可用性的检查，检查过后还会使用其他功能，不推荐
 
 UA字符串：可以让对方识别请求用户代理的类型，navigator.userAgent可以获取，但是很难解析，并且具有欺骗性
+
+### 事件流
+
+DOM事件的处理级别
+
+DOM0行内模型和脚本模型，跨浏览器，绑定速度最快，只能绑定一个函数，只支持冒泡
+
+DOM2addEventListener，参数3true表示捕获false冒泡（默认），都存在先捕获后冒泡，可以绑定多个函数
 
 ### http
 
@@ -805,6 +1155,24 @@ let heartCheck = {
 
 线程是系统分配处理器时间单元的基本单位，或者是进程中独立执行的最小单位
 
+### 组件化
+
+尽可能解耦，用多组件组合或HOC的形式
+
+#### AutoComplete组件设计
+
+考虑通用性，可移植性和扩展性，组件粒度要小，还有安全性
+
+由文本框，搜索按钮和扩展区
+
+文本框事件focus，blur，change，按钮事件search，扩展区通过props.children或slot
+
+安全性，将输入进行转义后提交
+
+性能问题通过防抖来限制
+
+其他功能：清空
+
 ### CSS组织
 
 cssModule：css-loader配置
@@ -906,6 +1274,251 @@ postcss：集成模块化，css in js，autoprefix，css-next等众多功能
 ##### loader
 
 css：css-loader，可以开启模块化
+
+##### 模块加载原理4.x
+
+代码参考demoCollection/learnWebpack
+
+每个文件都是一个模块，打包后统一使用自定义的模块规范管理
+
+```js
+// commonjs规范代码打包
+// index.js
+const test2 = require("./test");
+function test() {}
+
+test();
+test2();
+
+// ./test
+function test2() {}
+
+module.exports = test2;
+
+// 打包后：一个立即执行函数，传入对象，key是文件路径，value是文件内容
+// 简化后：
+// (function (modules) {})({
+//   path1: function1,
+//   path2: fucntion2,
+// });
+
+// 1. 定义缓存模块对象
+// 2. 实现模块加载函数__webpack_require__
+//  	2.1 判断缓存
+//  	2.2 新建一个module放入缓存
+//  	2.3 执行路径对应的模块函数，参数module，module.exports，__webpack_require__
+//  	2.4 模块标识为已加载
+//  	2.5 执行完成后返回exports对象
+// 3. ...
+// 4. 使用__webpack_require__加载入口函数
+/******/ (function (modules) {
+  // webpackBootstrap
+  // The module cache
+  //   模块缓存对象
+  var installedModules = {};
+  // The require function
+  //   webpack 实现的require()函数
+  function __webpack_require__(moduleId) {
+    // Check if module is in cache
+    // 如果模块已经加载过，直接返回缓存
+    if (installedModules[moduleId]) {
+      return installedModules[moduleId].exports;
+    }
+    // Create a new module (and put it into the cache)
+    // 创建一个新模块，并放入缓存
+    var module = (installedModules[moduleId] = {
+      i: moduleId,
+      l: false,
+      exports: {},
+    });
+    // Execute the module function
+    // 执行模块函数
+    modules[moduleId].call(
+      module.exports,
+      module,
+      module.exports,
+      __webpack_require__
+    );
+    // Flag the module as loaded
+    // 将模块标识为已加载
+    module.l = true;
+    // Return the exports of the module
+    return module.exports;
+  }
+  // expose the modules object (__webpack_modules__)
+  // 将所有的模块挂载到 require() 函数上
+  __webpack_require__.m = modules;
+
+  // expose the module cache
+  // 将缓存对象挂载到 require() 函数上
+  __webpack_require__.c = installedModules;
+  // define getter function for harmony exports
+  __webpack_require__.d = function (exports, name, getter) {
+    if (!__webpack_require__.o(exports, name)) {
+      Object.defineProperty(exports, name, {
+        enumerable: true,
+        get: getter,
+      });
+    }
+  };
+  // define __esModule on exports
+  __webpack_require__.r = function (exports) {
+    if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
+      Object.defineProperty(exports, Symbol.toStringTag, {
+        value: "Module",
+      });
+    }
+    Object.defineProperty(exports, "__esModule", { value: true });
+  };
+  // create a fake namespace object
+  // mode & 1: value is a module id, require it
+  // mode & 2: merge all properties of value into the ns
+  // mode & 4: return value when already ns object
+  // mode & 8|1: behave like require
+  __webpack_require__.t = function (value, mode) {
+    if (mode & 1) value = __webpack_require__(value);
+    if (mode & 8) return value;
+    if (mode & 4 && typeof value === "object" && value && value.__esModule)
+      return value;
+    var ns = Object.create(null);
+    __webpack_require__.r(ns);
+    Object.defineProperty(ns, "default", {
+      enumerable: true,
+      value: value,
+    });
+    if (mode & 2 && typeof value != "string")
+      for (var key in value)
+        __webpack_require__.d(
+          ns,
+          key,
+          function (key) {
+            return value[key];
+          }.bind(null, key)
+        );
+    return ns;
+  };
+  // getDefaultExport function for compatibility with non-harmony modules
+  __webpack_require__.n = function (module) {
+    // 判断是否esmodule
+    var getter =
+      module && module.__esModule
+        ? function getDefault() {
+            return module["default"];
+          }
+        : function getModuleExports() {
+            return module;
+          };
+    __webpack_require__.d(getter, "a", getter);
+    return getter;
+  };
+  // Object.prototype.hasOwnProperty.call
+  __webpack_require__.o = function (object, property) {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  };
+  // __webpack_public_path__
+  __webpack_require__.p = "";
+  // Load entry module and return exports
+  // 加载入口模块，并返回模块对象
+  return __webpack_require__((__webpack_require__.s = "./src/index.js"));
+})({
+  "./src/index.js": function (module, exports, __webpack_require__) {
+    eval(
+      // 格式化：对比源代码，require直接改为了__webpack_require__，说明完全适配
+      // const test2 = __webpack_require__("./src/test2.js");
+			// function test() {}
+			// test();
+			// test2();
+			//# sourceURL=webpack:///./src/index.js?
+      'const test2 = __webpack_require__(/*! ./test */ "./src/test.js");\nfunction test() {}\n\ntest();\ntest2();\n\n//# sourceURL=webpack:///./src/index.js?'
+    );
+  },
+
+  "./src/test.js": function (module, exports) {
+    eval(
+      "function test2() {}\n\nmodule.exports = test2;\n\n//# sourceURL=webpack:///./src/test.js?"
+    );
+  },
+});
+
+// es6模范打包
+// index.js
+import test2 from "./test";
+function test() {}
+test();
+test2();
+
+// test.js
+export default function test2() {}
+
+// 打包后，基本与上面一样，只有文件代码不同
+// 多了__webpack_require__.r(__webpack_exports__); // 给__webpack_exports__加一个属性__esModule为true，__esModule用来处理混合使用commonjs和import的情况
+// __webpack_require__.d() // 给__webpack_exports__导出变量用，相当于__webpack_exports__['default'] = test2
+{
+
+  /***/
+  "./src/index.js":(function (module, __webpack_exports__, __webpack_require__) {
+      "use strict";
+      eval(
+      	// 格式化：
+        // __webpack_require__.r(__webpack_exports__);
+        // var _test2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/test2.js");
+        // function test() {}
+        // test();
+        // Object(_test2__WEBPACK_IMPORTED_MODULE_0__["default"])();
+        //# sourceURL=webpack:///./src/index.js?
+        "__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _test__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test */ \"./src/test.js\");\n\nfunction test() {}\ntest();\nObject(_test__WEBPACK_IMPORTED_MODULE_0__[\"default\"])();\n\n//# sourceURL=webpack:///./src/index.js?"
+      );
+
+    }),
+
+  "./src/test.js":(function (module, __webpack_exports__, __webpack_require__) {
+      "use strict";
+      eval(
+      	// 格式化：
+        // __webpack_require__.r(__webpack_exports__);
+				// __webpack_require__.d(__webpack_exports__, "default", function () {
+				//   return test2;
+				// });
+function test2() {}
+//# sourceURL=webpack:///./src/test2.js?
+        "__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return test2; });\nfunction test2() {}\n\n//# sourceURL=webpack:///./src/test.js?"
+      );
+    })
+}
+```
+
+**按需加载**：webpack使用import和require.ensure来引入需要动态引入的代码
+
+直接使用import引入的代码会单独打包
+
+打包出的代码分析：
+
+installedChunks，缓存动态模块，对象，{id: state}
+
+jsonpScriptSrc，根据ID生成URL
+
+\__webpack_require__.e，import被打包成了这个函数
+
+- 查看缓存对应状态是否为0，0表示加载成功，第一次是undefined
+- 不是0或undefined，表示加载中，将这个promise推入promise数组
+- undefined，新建promise，用于加载动态引用的模块
+- 生成script，使用jsonpScriptSrc生成的url
+- 设置2分钟的超时时间，onScriptComplete处理超时错误
+- 添加到页面，开始加载模块
+- 返回promise数组
+
+window["webpackJsonp"]，存储需要动态导入的模块，包含模块id，路径名和内容，push方法重写为webpackJsonpCallback
+
+当js下载完成后就会自动执行文件内容，即下载完0.bundle.js就会执行window['webpackJsonp'].push()即webpackJsonpCallback
+
+- id对应的promise执行resolve，状态置为0
+
+总体流程：
+
+- 重写push
+- 入口模块使用\__webpack_require__.e下载动态资源
+- 下载完成后执行window['webpackJsonp'].push()即webpackJsonpCallback
+- 执行`__webpack_require__.e`后的then调用`__webpack_require__`真正开始加载代码
 
 #### babel
 
@@ -1459,6 +2072,82 @@ export default CreateIoc;
 
 ## node
 
+### GC
+
+https://zhuanlan.zhihu.com/p/55917130?yidian_docid=0LCztEHa&yidian_s=&yidian_amp;appid=pro
+
+Orinoco是V8垃圾回收器项目，使之前的容易造成卡顿延迟（stop-the-word）的垃圾回收器，变得更加并行，并发和增量
+
+所有垃圾回收器的共同任务：
+
+- 标记活动和非活动对象
+
+- 回收或者重用非活动对象内存
+
+- 合并或整理内存
+
+**主垃圾回收器**-全量标记整理
+
+**从整个堆中**收集垃圾，主要有三个阶段：标记，清除，整理
+
+标记：确定可访问对象的过程，通过可访问性确定，从根集开始，包含了执行栈和全局对象，跟踪每一个对象的指针并标记为可访问，是一个递归的过程
+
+清除：标记完成后，将非活动对象占用的内存页添加到free-list中
+
+整理：通过碎片启发式算法整理内存页，将活动对象复制到当前没有被整理的其他内存页中，利用内存中高度分散的内存空间。
+
+堆在V8中分为老生带和新生代，新生代分为两个子带nursery和intermediate，对象第一次分配会在nursery，下一次回收时还在就移动到intermediate，再下一次就会移动到老生带
+
+代际假说表明很多对象在内存的时间很短
+
+垃圾回收的实质就是整理内存，移动内存中的对象
+
+**副垃圾回收器**scavenger，**从新生代中**回收垃圾，新生代内存采用半空间（semi-space）设计，在疏散（移动对象）时，有一半内存是空闲的，清理时，初始的空闲区是to-space，复制对象区为from-space，最坏情况下每个对象都存活就需要都复制
+
+对于清理，我们会维护一个额外的根集（root set），这个根集里会存放一些从旧到新的引用。这些引用是在旧空间（old-space）中指向新生代中对象的指针。使用“写屏障（[write barriers](https://link.zhihu.com/?target=https%3A//www.memorymanagement.org/glossary/w.html%23term-write-barrier)）”来维护从旧到新的引用列表，而不是跟踪整个堆中的每一个对象变更。
+
+疏散步骤将所有的活动对象移动到连续的一块内存中；然后把两块内存空间互换，即把 ‘To-Space’ 变成 ‘From-Space’，反之亦然。一旦垃圾回收完成，新分配的内存空间将从 ‘From-Space’ 下一个空闲内存地址开始。
+
+为了新生代的内存空间不被耗尽，在下一次垃圾回收的时候，我们会把活动对象移动（evacuate）到老生代
+
+清理的最后一步是把移动后的对象的指针地址更新。
+
+**Orinoco** 使用了各种技术降低主线程挂起的时间， 比如：并行（parallel）垃圾回收，增量（incremental）垃圾回收和并发（concurrent）垃圾回收。
+
+**并行垃圾回收**
+
+并行是主线程和协助线程同时执行同样的工作，但是这仍然是一种 ‘stop-the-world’ 的垃圾回收方式。这是这三种技术中最简单的只要确保同时只有一个协助线程在访问对象就好了。
+
+**增量垃圾回收**
+
+增量式垃圾回收是主线程间歇性的去做少量的垃圾回收的方式。做这样的工作是极其困难的，因为 JavaScript 也在做增量式垃圾回收的时候同时执行，这意味着堆的状态已经发生了变化，这有可能会导致之前的增量回收工作完全无效。并没有减少主线程暂停的时间（事实上，通常会略微增加）。但这仍然是解决问题的的好方法，JavaScript 的执行仍然可以在用户输入或者执行动画的时候得到及时的响应。
+
+**并发垃圾回收**
+
+并发是主线程一直执行 JavaScript，而辅助线程在后台完全的执行垃圾回收。这种方式是这三种技术中最难的一种，JavaScript 堆里面的内容随时都有可能发生变化，从而使之前做的工作完全无效。而且主线程和辅助线程极有可能在同一时间去更改同一个对象。这种方式的优势也非常明显，主线程不会被挂起，为了保证同一对象同一时间只有一个辅助线程在修改而带来的一些同步开销。
+
+#### V8当前的回收机制
+
+**Scavenging 垃圾回收器**（并行在主线程和协助线程之间分配疏散任务）
+
+现今，V8 在**新生代垃圾回收中使用并行清理**，每个协助线程会将所有的活动对象都移动到 ‘To-Space’。在每一次尝试将活动对象移动到 ‘To-Space’ 的时候必须通确保原子化的读和写以及比较和交换操作。不同的协助线程都有可能通过不同的路径找到相同的对象，无论哪个协助线程成功移动对象到 ‘To-Space’，都必须更新这个对象的指针，并且去维护移动这个活动对象所留下的转发地址。以便于其他协助线程可以找到该活动对象更新后的指针。为了快速的给幸存下来的活动对象分配内存，清理任务会使用线程局部分配缓冲区。
+
+**主垃圾回收器**（主垃圾回收器会并发的标记和清除对象，并行整理内存和更新活动对象指针）
+
+V8 中的**主垃圾回收器主要使用并发标记**，一旦堆的动态分配接近极限的时候，将启动并发标记任务。每个辅助线程都会去追踪每个标记到的对象的指针以及对这个对象的引用。在 JavaScript 执行的时候，并发标记在后台进行。
+
+当并发**标记完成或者动态分配到达极限**的时候，主线程会执行**最终的快速标记步骤**；在这个阶段**主线程会被暂停**，这段时间也就是主垃圾回收器执行的所有时间（其他是别的线程）。在这个阶段主线程会**再一次的扫描根集**以确保所有的对象都完成了标记；然后辅助线程就会去做**更新指针和整理内存**的工作。在暂停的时候主线程会启动**并发清理**的任务，这些任务都是并发执行的，并不会影响并行内存页的整理工作和 JavaScript 的执行。
+
+**空闲时垃圾回收器**
+
+JavaScript 是无法去直接访问垃圾回收器的。但是 V8 确实提供了一种机制让Embedders（嵌入V8的环境）去触发垃圾回收。垃圾回收器会发布一些 “空闲时任务（Idle Tasks）”，虽然这些任务都是可选的，但最终这些任务会被触发。像 Chrome 这些嵌入了 V8 的环境会有一些空闲时间的概念。比如：在 Chrome 中，以每秒60帧的速度去执行一些动画，浏览器大约有16.6毫秒的时间去渲染动画的每一帧，如果动画提前完成，那么 Chrome 在下一帧之前的空闲时间去触发垃圾回收器发布的空闲时任务。
+
+什么时候进行GC？
+
+空闲时间，每一帧16.7ms，如果提前完成进行GC
+
+
+
 ### 事件循环
 
 **如何理解node高并发**
@@ -1528,6 +2217,26 @@ Node 中的 `process.nextTick`，这个函数其实是独立于 Event Loop 之�
 11之前有区别，之后和浏览器统一了
 
 **执行完一个宏任务就会去检查微任务队列是否有需要执行的微任务**，即使微任务内嵌套微任务，也会将嵌套的微任务执行完毕后（这点上nodejs与browser是相同的，对应的就是清空微任务的队列），再去宏任务队列执行下一个宏任务，内部的任务会放在下一次事件循环时执行。
+
+
+
+### 错误监控和日志
+
+监控：一般分三个维度，性能监控，调用失败，业务监控
+
+性能监控：内存，cpu的占用情况
+
+调用失败：出错次数，QPS（每秒查询率）=PV/t，RT（响应时间）等
+
+业务监控：监控日常业务，总结出的数据用于业务决策
+
+开源方案：fundebug，sentry
+
+日志包含日志源（日志来源，服务名称，主机名等），时间戳，级别和上下文
+
+日志级别：INFO，DEBUG，WARN，ERROR
+
+一般只开启WARN，ERROR，调试时可以使用DEBUG
 
 ## 框架
 
@@ -1719,6 +2428,16 @@ vue3在创建vnode时就确定类型，diff算法通过最长递归子序列进�
 
 ## 手写算法
 
+手写函数式
+
+手写redux
+
+手写vuex
+
+手写koa
+
+手写webpack
+
 写一个LRU缓存算法
 
 ```js
@@ -1868,5 +2587,139 @@ function getJson(url) {
 }
 ```
 
+能否被3整除
 
+```js
+// fsm有限状态机
+function createFSM() {
+  return {
+    // 初始余数为0
+    initial: 0,
+    states: {
+      0: {
+        on: {
+          read(ch) {
+            return {
+              0: 0,
+              3: 0,
+              9: 0,
+              1: 1,
+              4: 1,
+              7: 1,
+              2: 2,
+              5: 2,
+              8: 2,
+            }[ch];
+          },
+        },
+      },
+      1: {
+        on: {
+          read(ch) {
+            return {
+              0: 1,
+              3: 1,
+              9: 1,
+              1: 2,
+              4: 2,
+              7: 2,
+              2: 0,
+              5: 0,
+              8: 0,
+            }[ch];
+          },
+        },
+      },
+      2: {
+        on: {
+          read(ch) {
+            return {
+              0: 2,
+              3: 2,
+              9: 2,
+              1: 0,
+              4: 0,
+              7: 0,
+              2: 1,
+              5: 1,
+              8: 1,
+            }[ch];
+          },
+        },
+      },
+    },
+  };
+}
+
+const fsm = createFSM();
+const str = "281902812894839483047309573843389230298329038293829329";
+let cur = fsm.initial;
+
+for (let i = 0; i < str.length; i++) {
+  if (!["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(str[i])) {
+    throw new Error("非法数字");
+  }
+  cur = fsm.states[cur].on.read(str[i]);
+}
+if (cur === 0) {
+  console.log("可以被3整除");
+} else {
+  console.log("不可以被3整除");
+}
+```
+
+### 代码题
+
+```js
+<script>
+  // 使用未定义的变量
+  sin;
+  console.log(1);
+</script>
+<script>
+  console.log(2);
+</script>
+// sin is not defined
+// 2
+```
+
+## 其他
+
+### 函数式编程
+
+编程范式，面向过程/对象，函数式
+
+函数是一等公民，可以作为变量，参数，返回值
+
+### RPC
+
+remote procedure call远程过程调用
+
+简单来说就是从一台机器上通过参数调用另一台机器上的一个函数或者方法，并得到返回结果
+
+- RPC会隐藏通讯细节
+- 是一个请求响应模型
+- 形式上像调用本地函数一样调用远程函数
+
+本地调用：（计算机内部或浏览器V8做了许多优化）
+
+- 解析函数名
+- 通过作用域寻找函数声明
+- 计算机寻址，找到该函数地址
+- 入栈参数，执行函数
+- 计算并返回结果
+
+远程调用：
+
+- 通讯问题：建立**TCP连接**，比如grpc框架，协议数据类型有unary和stream，底层还是通过二进制流拼凑的数据帧进行传输，包头中表明数据类型。unary，通过一问一答的形式在客户端和服务端通信，stream分为客户端流（客户端发多条服务端回一条），服务端流（客户端发一条服务端回多条）和双工流（都可以主动发）
+- 寻址问题：在传输时调用方需要传递被调用方的**ip，端口和函数id**，这部分信息成为call id映射。一般双方都会维护一个**映射表**。包含了调用函数的入参和出参
+- 序列化和反序列化：基于网络协议传输都是二进制形式，调用方传输信息前需要序列化，被调用方需要反序列化后，找到对应函数，传回结果时也需要序列化，调用方需要反序列化结果
+
+为什么要用？
+
+- http：restful规范为代表，可读性好，支持防火墙，跨语言，工作在第七层，有用信息占比少，效率低，调用远程方法复杂，需要封装各种参数
+- RPC协议牺牲可读性提升效率，易用性
+  - 双方维护一份结构和映射表，调用和传输数据更加透明，严格限制参数类型
+  - 对tcp进行优化，参考HTTP2
+  - 结构层可以做更多的监控，容错和性能优化
 

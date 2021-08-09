@@ -2026,8 +2026,8 @@ console.log(bar);
 
 > ```js
 > const sin = {
->   	test1: 'naixes', // 对象内属性
->   	15: 'xxx' // 排序属性，element
+> 	test1: 'naixes', // 对象内属性
+> 	15: 'xxx' // 排序属性，element
 > }
 > ```
 >
@@ -2118,7 +2118,7 @@ console.log(bar);
 >
 > ```js
 > function Sin(val) {
->   this.prop = val;
+> this.prop = val;
 > }
 > 
 > //新创建了 堆的引用属性不同 -> 隐藏类
@@ -2139,14 +2139,14 @@ console.log(bar);
 > //破坏对象的执行时间
 > const startTime = +new Date();
 > for (let i = 0; i < 1000000; i++) {
->   const a = {
->     a: '1',
->     b: '2',
->     c: '3',
->   };
->   a.b = undefined; // 推荐，没有破坏结构，操作也几乎不消耗内存
->   // delete a.b; // 干掉了c的back pointer，变成慢对象，delete操作也慢
->   // delete a.c; // 没改变back pointer，按照顺序delete没影响
+> const a = {
+>  a: '1',
+>  b: '2',
+>  c: '3',
+> };
+> a.b = undefined; // 推荐，没有破坏结构，操作也几乎不消耗内存
+> // delete a.b; // 干掉了c的back pointer，变成慢对象，delete操作也慢
+> // delete a.c; // 没改变back pointer，按照顺序delete没影响
 > }
 > const endTime = +new Date();
 > console.log(endTime - startTime);
@@ -2157,25 +2157,25 @@ console.log(bar);
 > ```js
 > // 写ts的时候和写JS的时候
 > class Obj {
->   // 提前声明，减少内存消耗
->   private a:number = 22;
->   a = null;
->   constructor(options) {
->     if (options && options.a) {
->       this.a = options.a;
->     } else {
->       // 会创建hidden class消耗内存
->       // 改变类型也会
->       this.a = null;
->     }
->   }
+> // 提前声明，减少内存消耗
+> private a:number = 22;
+> a = null;
+> constructor(options) {
+>  if (options && options.a) {
+>    this.a = options.a;
+>  } else {
+>    // 会创建hidden class消耗内存
+>    // 改变类型也会
+>    this.a = null;
+>  }
+> }
 > }
 > 
 > const objs = [];
 > for (let i = 0; i < 300000; i++) {
->   const obj = new Obj();
->   console.log('🐻最初的样子', %DebugPrint(obj));
->   objs.push(obj);
+> const obj = new Obj();
+> console.log('🐻最初的样子', %DebugPrint(obj));
+> objs.push(obj);
 > }
 > ```
 >
@@ -2339,11 +2339,11 @@ js 在执行可执行的脚本时，首先会创建一个全局可执行上下�
 - 变量环境(VariableEnvironment)
 - 环境记录(Environment record)
 
-**执行栈(Execution Context Stack)**：浏览器解释器执行 js 是单线程的过程，这就意味着同一时间，只能有一个事情在进 行。其他的活动和事件只能排队等候，生成出一个等候队列执行栈(Execution Stack)。
+**执行栈(Execution Context Stack)**：浏览器解释器执行 js 是单线程的过程，这就意味着同一时间，只能有一个事情在进行。其他的活动和事件只能排队等候，生成出一个等候队列执行栈(Execution Stack)。
 
 #### 执行栈压栈顺序
 
-一开始执行代码的时候，变确定了一个全局执行上下文 global execution context 作 为默认值。如果在你的全局环境中，调用了其他的函数，程序将会再创建一个新的 EC，然 后将此 EC推入进执行栈中 execution stack
+一开始执行代码的时候，便确定了一个全局执行上下文 global execution context 作 为默认值。如果在你的全局环境中，调用了其他的函数，程序将会再创建一个新的 EC，然 后将此 EC推入进执行栈中 execution stack
 
 如果函数内再调用其他函数，相同的步骤将会再次发生:创建一个新的EC -> 把EC推入执行 栈。一旦一个EC执行完成，会从执行栈中推出(pop)。ESP指针负责EC出栈指向。
 
@@ -2434,8 +2434,6 @@ AO(test) = {
 };
 ```
 
-> VO执行完成之后创建AO
->
 > AO分为两步：定义阶段（提升阶段）和执行阶段（赋值阶段）
 >
 > 变量提升发生在AO阶段
@@ -2648,12 +2646,12 @@ FunctionExectionContext = {
 			// 标识符绑定
 			Arguments: { 0:20, 1:30, length: 2},
     },
-      VariableEnvironment: {
-        EnvironmentRecord: {
-          Type: "Declarative", // 在这里绑定标识符
+    VariableEnvironment: {
+      EnvironmentRecord: {
+        Type: "Declarative", // 在这里绑定标识符
           g: undefined
-       	}
-    	outer: <GlobalLexicalEnvironment>
+      }
+      outer: <GlobalLexicalEnvironment>
     },
 	},
 }
@@ -3144,9 +3142,9 @@ function updateChildren(
 
 5. 如果 c1 和 c2 中都有剩余节点，对剩余节点进行比较
 
-    a). 找出需要删除的节点，执行 unmount
+   a). 找出需要删除的节点，执行 unmount
 
-    b). 找出新、旧节点的对应关系，利用 “最长递增子序列” 优化节点的移动、新增。这一步是 diff 算法的核心
+   b). 找出新、旧节点的对应关系，利用 “最长递增子序列” 优化节点的移动、新增。这一步是 diff 算法的核心
 
 >old:   a b c d e f g h
 >
@@ -3426,3 +3424,809 @@ const patchKeyedChildren = (
 };
 ```
 
+## webAssembly
+
+Wasm 是一种基于堆栈式虚拟机的二进制指令集，它被 设计成为编程语言的可移植编译目标。借助 Web 平台提 供的相关接口，我们可以在 Web 浏览器中高效地调用从 Wasm 模块中导出的函数
+
+如图所示的 V8 引擎编译管道中你可以看出。相较 于 JavaScript 而言，浏览器引擎在执行 Wasm 字节码时不需要经过诸如“生成 AST”、“生成 Bytecode 字节 码”、“生成 IR” 以及“收集运行时信息”等多个步骤。 JavaScript 引擎的优化编译器后端可以直接将 Wasm 字 节码转换为经过优化的机器码，进而以接近 Native 代 码的效率来执行。
+
+不仅如此，Wasm 字节码在实际的执行过程中，也不会存在类似 JavaScript 代码的“去优化”过程，因此性能表现会更加稳定。
+
+中间媒介表示形式(IR)
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-08-05 下午12.55.45.png" alt="截屏2021-08-05 下午12.55.45" style="zoom:50%;" />
+
+应用
+
+除了使用 JavaScript 编写的“应用程序代码”，以及经 过编译生成的 Wasm 字节码格式的框架代码以外，我们 的项目中还会多出来一部分用作 “Glue Code”(胶水代 码)的 JavaScript 代码。
+
+- 完全重写现有框架，代价大
+
+将整个 Web 框架的全部功能，使用同样的 Wasm 版本进行代替，而应用代码仍然使用 JavaScript 进行编写。 
+
+1. 由于现阶段 Wasm MVP 标准的限制，在这种方案下，无法直接在 Wasm 字节码中操作 HTML ⻚面上的 DOM 元素。我们不得不借助 JavaScript Glue Code 的帮助来实现框架的部分功能。
+
+2. Glue Code 的代码越来越多时，Wasm 与 JavaScript 两个上下文环境之间的函数频繁调用。在某些情况下，这可能会产生严重的性能损耗。  
+
+因此结合现实情况来看，整个方案的可用性并不高。
+
+- 配合框架增强应用的部分功能，最佳实践
+
+我们仅使用 Wasm 来作为 Web 框架的辅助，以优化 Web 应用的某一方面功能。在这种方案中，框架本身的代码 结构不会有任何的变化。
+
+事实上，这是 Wasm 在 Web 上的一种最为典型和常⻅的 应用方式。Wasm 并不尝试取代 JavaScript，而是通过利用其优势来补足或者加以提升 Web 应用在某方面的短板。一 个最为常⻅的例子便是前端的“数据编解码”。“编解码”实际上 是十分单纯的数学计算，那么这便是 Wasm 能够大显身手的 地方。由于这个过程不涉及与 Web API 的频繁交互，
+
+Wasm 所能够带来的性能提升程度更是显而易⻅的。
+
+
+
+- 重写现有框架的核心逻辑，正在尝试
+
+我们尝试仅使用 Wasm 来重写框架的核心部分，比如 React Fiber 架构中的 Reconciler 组件。这类组件通常并不 含有过多需要与 Web API 打交道的地方，相对纯粹的计算 逻辑更易于 Wasm 能力的发挥。同时这种方案也是现阶段大多数 Web 框架正在尝试的，与 Wasm 进行交互的“常规”方式。
+ 这部分逻辑不会涉及与 DOM 或者 Web API 的频繁交互，但其本身却又是“计算密集(compute-intensive)”的 (包含有大量的纯数学计算逻辑)。Wasm 十分擅⻓处理这 样的计算密集型逻辑。
+
+- 使用其他语言构建 Web 前端框架，未来
+
+即使你不懂 Rust，但如果你熟悉 React，仍然可以发现基于 Yew 构建的 Web 前端应用，它的代码组织结构与 React 十分类 似，整个应用也同样被划分为不同的“生命周期”。比如在上面的代 码中，“create” 方法对应应用的创建时刻;update 方法对应应用 的状态更新时刻，以及最后用于渲染应用 UI 的 view 方法等等。 不仅如此，在 Yew 中也同样拥有组件的概念，使用方式与 React 类似。
+
+相对来说，抛开语言本身带来的成本不谈，单从性能来看，在 目前 Wasm 的 MVP 标准下，Yew 这类框架的潜力还没有实际的显露出来。Yew 希望能够借助 Wasm 的能力，将视图(VDOM) 差异的计算过程以更高性能的方式进行实现。但鉴于目前 MVP 标 准下的一些限制，实际上在最后的编译产物中，Glue Code 执行 时所带来的成本则会与 Wasm 带来的性能提升相互抵消。不仅如 此，考虑到目前 JavaScript 在构建 Web 应用时的丰富生态和资 源，单从性能⻆度进行考量而使用 Yew 等框架也不是一个实际可 行的方案。因此，未来这类“跨语言” Web 前端框架的生态会变得如何，也只能够让我们拭目以待了。 
+
+**eBay**扫码
+
+微内核**Unikraft**
+
+“字节码联盟”成立于 2019 年末，是一个由个人和公司 组成的团体。最初的一批创始成员为 Mozilla、Fastly、 Intel 以及 Red Hat。联盟旨在通过协作的方式，来共同 实现 Wasm 及 WASI 相关标准，并通过提出新标准的方 式来共同打造 Wasm 在浏览器之外的未来。
+
+纳米进程(Nano-Process)+ 虚拟机运行时（安全）
+
+当一个含有恶意代码的 Wasm 模块被“链接”到整个应用的依赖树中 时，应用各依赖模块所能够使用的资源及系统接口权限，便全部来自于 最上层的调用者。也就是说需要在应用运行的入口模块中被指定，然后 再由该模块向下层依赖模块进行分发。当恶意模块的内部代码需要使用 某种未经授权的额外资源或能力时，整个模块依赖树的 “Import Section” 签名便会发生错误，这个错误会在运行时向上层用户抛出对应异常，提 示某个模块的某些特定资源或者权限没有被导入。在这种情况下，特殊 的权限调用便会引起人们的注意。即便恶意代码获得了特定操作系统接 口的执行权限，但恶意代码想要从其他应用依赖模块的实例中，获取对 应内存段中的敏感信息，也并非易事。
+
+我们为了能够基于 “Nanoprocess” 模式来构建安全可靠的 Wasm 应 用，一定少不了在 out-of-web 领域提供 Wasm 字节码解析和执行能力的 基础设施。并且在一定程度上，我们还需要它们为我们提供的 WASI 系 统接口的访问能力。而“字节码联盟”便负责培养和发展这样一批，能够提 供这些能力的优秀基础设施及相关组件。它们主要包括:Wasm 运行时 (虚拟机)、Wasm 运行时组件(实现)以及 Wasm 语言相关的工具。
+
+补充
+
+AssemblyScript，将 ts 转换为 webAssembly，ts的node项目使用gulp插件
+
+什么时候用 Clang(LLVM) 编译 Wasm?而什么时候又该用 Emscripten 编译 Wasm?
+
+需要在 Web 浏览器中运行的 Wasm 应用，一定要使用 Emscripten 来 进行编译;而需要在 out-of-web 环境中使用的 Wasm(WASI) 应用， 可以使用 Clang 来编译。当然，Clang 与 Emscripten 两者在可编译和 生成 Wasm 字节码这个能力上，有着一定的重叠。毕竟 Emscripten 就是借助了 LLVM 的后端来生成 Wasm 格式的。但不同的是， Emscripten 会在编译过程中，为所编译代码在 Web 平台上的功能适 配性进行一定的调整。比如 OpenGL 到 WebGL 的适配、文件操作到 虚拟文件操作的适配等等。而使用 Clang 编译 Wasm 应用，不会进行 上述这些针对 Web 平台的适配。因此仅在编译 WASI 应用时选择使 用 Clang 来进行交叉编译。大多数时候，你的最佳选择仍然是 Emscripten。
+
+## vite原理
+
+vite快，不打包，直接使用esmodule
+
+swc-loader，机器码执行 esbuild
+
+0配置 vite server
+
+拦截路由，js ts vue根据文件后缀名，动态添加中间件
+
+实质上vite就是一个koaServer
+
+1. 新建httpserver
+2. 中间件
+3. 加载项目，处理ts，vue等使用中间件执行
+4. 遇到node_modules拷贝到目录
+5. hot-reload，注入websocket
+6. 在html写入一个本地文件，配合更新
+
+## webpack原理
+
+命令中的webpack从bin里来的，软链到webpack/bin/webpack
+
+判断是否安装cli，提示安装，runCli()，执行cli.js
+
+引入V8-compile-cache，加速js冷启动，没人访问时就回收
+
+判断webpack是否存在，runCLI
+
+cli.run()，初始化工作
+
+​	createCompiler()，compiler = this.webpack(...)
+
+​		compiler = createCompiler(webpackOptions)
+
+​			统一化options参数
+
+​			const complier = new Compiler()
+
+​			初始化所有的插件，注入插件钩子函数，plugin.apply(compiler)
+
+​			初始化options
+
+​			初始化内部插件
+
+​		如果有回调，放到run中，compiler.run()
+
+​		调度compiler.run()开始执行构建
+
+​	watch，变化后重新run
+
+​	开启缓存体系
+
+使用tabable管理
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-08-05 下午9.18.11.png" alt="截屏2021-08-05 下午9.18.11" style="zoom:50%;" />
+
+compilation，代表一次构建
+
+compiler，代表整个webpack
+
+chunk，先分析entry自己，放入depend ency，通过parser确定依赖关系
+
+parser，生成ast，确定依赖关系，数组
+
+dependency，
+
+module，根据配置文件调度loader，完成后放入depend ency
+
+template，相对独立的模块
+
+chunk - parser - module - dependency 形成一个递归
+
+<img src="Naixes阶段性学习笔记2.assets/截屏2021-08-05 下午9.19.58.png" alt="截屏2021-08-05 下午9.19.58" style="zoom:50%;" />
+
+## 设计模式
+
+设计模式:在**面向对象**软件设计过程中针对 特定问题的简洁而优雅的解决方案。
+
+### 单例模式
+
+保证一个类只有一个实例，并提供一个访问 它的全局访问点，如window对象。当我们单击登录按钮的时候页面出现一个登陆浮窗，这个悬浮窗是唯一的，无论单击多少次登陆按钮，这个浮 窗都只会被创建一次，这个登陆的浮窗就适合用单例模式创建。
+
+> 插件copilot
+>
+> code.fun根据ps或sketch生成html
+
+```js
+class Singleton {
+  private static instance: Singleton;
+  private constructor() {}
+  static getInstance(): Singleton {
+    if (!Singleton.instance) {
+      Singleton.instance = new Singleton();
+    }
+    return Singleton.instance;
+  }
+}
+
+Singleton.getInstance();
+```
+
+### 工厂模式
+
+工厂模式是我们最常用的实例化对象模式了，是用工 厂方法代替new操作的一种模式。著名的Jive论坛，就大量使用了工厂模式，工厂模式在Java程序系统可以说是随处可见。因为工厂模式就相当于创建实例对象的new，我们经常要根据类Class生成实例对象，如A a=new A() 工厂模式也是用来创建实例对象的，所以以后new时就要多个心眼，是否可以考虑使用工厂模 式，虽然这样做，可能多做一些工作，但会给你系统带来更大的可扩展性和尽量少的修改量。
+
+```js
+// ts中可以作为类型的
+// interface A{}
+// type xx = {}
+// class B{}
+// abstract class C{}
+
+// 内置类型
+// const x:HTMLDivElement = null as any;
+// const y:PropertyKey = null as any;
+abstract class INoodles {
+  public abstract desc(): void;
+}
+
+class LzNoodles extends INoodles {
+  public desc(): void {
+    console.log('兰州拉面');
+  }
+}
+
+class PaoNoodles extends INoodles {
+  public desc(): void {
+    console.log('方便面');
+  }
+}
+
+class GankouNoodles extends INoodles {
+  public desc(): void {
+    console.log('干扣面');
+  }
+}
+
+class SimpleNoodlesFactory {
+  public static TYPE_LZ: number = 1; //兰州拉面
+  public static TYPE_PM: number = 2; //泡面
+  public static TYPE_GK: number = 3; //干扣面
+  public static createNoodles(type: number): INoodles {
+    switch (type) {
+      case SimpleNoodlesFactory.TYPE_LZ:
+        return new LzNoodles();
+      case SimpleNoodlesFactory.TYPE_PM:
+        return new PaoNoodles();
+      case SimpleNoodlesFactory.TYPE_GK:
+        return new GankouNoodles();
+      default:
+        return new LzNoodles();
+    }
+  }
+}
+const noodles: INoodles = SimpleNoodlesFactory.createNoodles(
+  SimpleNoodlesFactory.TYPE_LZ
+);
+noodles.desc();
+```
+
+### 代理模式
+
+为一个对象提供一个代用品或占位符，以便控制对它的访问。很多明星都有自己经纪人，比如开演唱会经纪人会代替明星细节和谈好报酬之后再跟明星签合同。即核心是当客户不方便直接访问一个对象或者不满足需要的时候，提供一个替身对象控制这个对象的访问，替身对象对请 最初一些处理之后再把请求转交给本体对象。
+
+比如根据不同的网速加载不同图片
+
+代理不能超越本体的功能，使用接口进行限制
+
+```js
+interface IUserDao {
+  save(): void;
+}
+
+class UserDao implements IUserDao {
+  public save(): void {
+    console.log('----已经保存数据!----');
+  }
+}
+
+class UserDaoProxy implements IUserDao {
+  private target: IUserDao;
+  constructor(target: IUserDao) {
+    this.target = target;
+  }
+  save(): void {
+    console.log('开始事物');
+    //目标本体对象 本体不方便的时候
+    //使用了TS控制了设计模式的约束
+    this.target.save();
+    console.log('结束事物');
+  }
+}
+
+const target: UserDao = new UserDao();
+const proxy: UserDaoProxy = new UserDaoProxy(target);
+proxy.save();
+
+```
+
+### 策略模式
+
+在程序设计中，经常会遇到实现某一个功能有多种方案可以选择。比如一个压缩文件程序， 既可以选择zip算法也可以选择gzip算法。这些算法灵活多样，而且可以互相替换。这种解决方案就是策略模式(定义一系列算法，把它们一个个封装起来，并且可以相互替换)。
+
+在JavaScript中，策略模式往往被函数锁替代。这种就是”隐式“的策略模式。
+
+当算法和调用分离时使用，否则没有必要，比如在线excel
+
+```js
+var S = function (salary) { return salary * 4;};
+var A = function (salary) {return salary * 3; };
+var B = function (salary) { return salary * 2;};
+var calculateBounds = function (func, salary) {
+	return func(salary); 
+};
+calculateBounds(S, 10000);
+
+// ts案例
+// 具体的算法和策略类 相互独立
+interface PriceStrategy {
+  countPrice(originalPrice: number): number;
+}
+
+class PcStrategy implements PriceStrategy {
+  public countPrice(originalPrice: number): number {
+    return originalPrice * 0.5;
+  }
+}
+class KcStrategy implements PriceStrategy {
+  public countPrice(originalPrice: number): number {
+    return originalPrice * 1;
+  }
+}
+class HcStrategy implements PriceStrategy {
+  public countPrice(originalPrice: number): number {
+    return originalPrice * 2;
+  }
+}
+
+class PriceContext {
+  private riceStrategy: PriceStrategy;
+  constructor(riceStrategy: PriceStrategy) {
+    this.riceStrategy = riceStrategy;
+  }
+  public countPrice(originalPrice: number): number {
+    return this.riceStrategy.countPrice(originalPrice);
+  }
+}
+//具体行为策略
+const pcStrategy: PriceStrategy = new PcStrategy();
+const kcStrategy: PriceStrategy = new KcStrategy();
+const hcStrategy: PriceStrategy = new HcStrategy();
+
+//用户选择不同的策略
+const pcContext: PriceContext = new PriceContext(pcStrategy);
+const kcContext: PriceContext = new PriceContext(kcStrategy);
+const hcContext: PriceContext = new PriceContext(hcStrategy);
+
+console.log('拼车价格 = ' + pcContext.countPrice(10));
+console.log('快车价格 = ' + kcContext.countPrice(10));
+console.log('豪车价格 = ' + hcContext.countPrice(10));
+// 看起来有点多余，可以直接调用，当算法和调用分离时使用
+```
+
+### 命令模式
+
+命令模式中的命令指的是一个执行某些特定事情的指令，有时候需要向某些特定事情的指 令。常见的应用场景有时候需要向某些对象发送 请求，但是并不知道请求的接受者是谁，也不知道被请求的操作是什么。假如我们去快餐店，我们可以点餐，取消，但是我们并不用关心厨师是谁怎么做。
+
+可以撤销
+
+```js
+// 1.接收者角色类 👩🏻‍🍳
+class Receiver {
+  /**
+   * 真正执行命令相应的操作
+   */
+  public action(): void {
+    console.log('执行操作');
+  }
+}
+
+// 2.抽象命令角色类 💁🏻
+interface Command {
+  execute(): void;
+}
+//服务员
+class ConcreteCommand implements Command {
+  private receiver: Receiver = null;
+  constructor(receiver: Receiver) {
+    this.receiver = receiver;
+  }
+  public execute(): void {
+    throw new Error('Method not implemented.');
+  }
+}
+
+//你去饭店点菜 👨🏻
+class Invoker {
+  private command: Command = null;
+  constructor(command: Command) {
+    this.command = command;
+  }
+  public action(): void {
+    this.command.execute();
+  }
+}
+
+const receiver: Receiver = new Receiver();
+const command: Command = new ConcreteCommand(receiver);
+const invoker: Invoker = new Invoker(command);
+invoker.action();
+
+```
+
+### 发布订阅模式
+
+发布-订阅模式又叫观察者模式，它定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖它的对象都将得到通知。 现实生活中，如我们去售楼中心服务人员A接待了我们，然后再有客户找到A，这个时候暂时没房了，等到有房的时候不可能服务人员A挨个打 电话通知而是订阅A的公共提醒服务。
+
+```js
+//观察者接口 （买房子的人）
+interface Observer {
+  //当主题状态改变时,更新通知
+  update(version: number): void;
+}
+// 小哥的公众号 大家都关注小哥的公众号
+interface Subject {
+  //添加观察者
+  addObserver(key: string, obj: Observer): void;
+  //移除观察者
+  deleteObserver(key: string): void;
+  //当主题方法改变时,这个方法被调用,通知所有的观察者
+  notifyObserver(): void;
+}
+// 某某杂志(卖房子的小哥)
+class MagazineSubject implements Subject {
+  //存放订阅者
+  // private List<Observer> observers = new ArrayList<Observer>();
+  private observers: Map<string, Observer> = new Map<string, Observer>();
+  //期刊版本
+  private version: number = 0;
+
+  public addObserver(key: string, obj: Observer): void {
+    // observers.add(obj);
+    this.observers.set(key, obj);
+  }
+
+  public deleteObserver(key: string): void {
+    if (this.observers.has(key)) {
+      this.observers.delete(key);
+    } else {
+      throw new Error(`Observer的对象上不存在${key}`);
+    }
+  }
+
+  public notifyObserver(): void {
+    for (const item of this.observers) {
+      // console.log("🍌", item);
+      const o: Observer = item[1];
+      o.update(this.version);
+    }
+  }
+
+  //该杂志发行了新版本
+  public publish() {
+    //新版本
+    this.version++;
+    //信息更新完毕，通知所有观察者
+    this.notifyObserver();
+  }
+}
+// 买房子的具体人 订阅杂志的人
+class CustomerObserver implements Observer {
+  //订阅者名字
+  private name: string;
+  private version: number;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  public update(version: number): void {
+    this.version = version;
+    console.log('该杂志出新版本了');
+    this.buy();
+  }
+
+  public buy(): void {
+    console.log(`${this.name} + "购买了第" + ${this.version} + "期的杂志!"`);
+  }
+}
+
+//创建主题(被观察者)
+const magazine: MagazineSubject = new MagazineSubject();
+//创建三个不同的观察者
+const a: CustomerObserver = new CustomerObserver('A');
+const b: CustomerObserver = new CustomerObserver('B');
+const c: CustomerObserver = new CustomerObserver('C');
+//将观察者注册到主题中
+magazine.addObserver('a', a);
+magazine.addObserver('b', b);
+magazine.addObserver('c', c);
+
+//更新主题的数据，当数据更新后，会自动通知所有已注册的观察者
+magazine.publish();
+
+```
+
+### 职责链模式
+
+使多个对象都有机会处理请求，从而避免请 求的发送者和接受者之间的耦合关系，将这些关系连成一条链，并沿着这条链传递该请求，直到 一个对象处理它为止。现实生活中如我们座公交车人太多，我们把公交卡交给售票员，让前面的人不停的往前递直到售票员刷卡结束。
+
+应用：**整理model中的逻辑**`router.get('/', blogModel.newsList, blogModel.newsComments, ...) // model中使用next()进行传递 `
+
+```js
+// js
+
+
+// ts
+// 抽象类可以实现部分接口
+abstract class Handler {
+  public sucesser: Handler;
+  //定义一个抽象的处理请求的方法
+  public abstract handlerRequest(user: string, days: number): void;
+
+  //获取当前角色的下一个处理者角色
+  public getNextHandler(): Handler {
+    return this.sucesser;
+  }
+  //设置当前角色的下一个处理者角色
+  public setNextHandler(sucesser: Handler): void {
+    this.sucesser = sucesser;
+  }
+}
+//班主任处理请假请求
+class HeadTeacher extends Handler {
+  public handlerRequest(user: string, days: number): string {
+    if (days < 5) {
+      console.log('班主任同意' + user + '同学的请假请求');
+    } else {
+      console.log('班主任无法处理' + user + '同学的请假请求');
+    }
+    // 如果下一个执行者不为空，由下一个执行者执行
+    if (this.getNextHandler() != null) {
+      const nextHandler = this.getNextHandler();
+      nextHandler.handlerRequest(user, days);
+      return;
+      // return this.getNextHandler().handlerRequest(user, days);
+    }
+    return null;
+  }
+}
+//院系主任处理请假请求
+class Department extends Handler {
+  public handlerRequest(user: string, days: number): string {
+    if (days < 30) {
+      console.log('院系主任同意' + user + '同学的请假请求');
+    } else {
+      console.log('院系主任无法处理' + user + '同学的请假请求');
+    }
+    if (this.getNextHandler() != null) {
+      const nextHandler = this.getNextHandler();
+      nextHandler.handlerRequest(user, days);
+      return;
+    }
+    return null;
+  }
+}
+//校级主任处理请假请求
+class Leader extends Handler {
+  public handlerRequest(user: string, days: number): string {
+    if (days >= 30) {
+      console.log('校级主任同意' + user + '同学的请假请求');
+    } else if (this.getNextHandler() != null) {
+      const nextHandler = this.getNextHandler();
+      nextHandler.handlerRequest(user, days);
+      return;
+      //return getNextHandler().handlerRequest(user, days);
+    }
+    return null;
+  }
+}
+class SimpleFactory {
+  public static TYPE_HeadTeacher: number = 1; //兰州拉面
+  public static TYPE_Department: number = 2; //泡面
+  public static TYPE_Leader: number = 3; //干扣面
+
+  public static createHandler(type: number): Handler {
+    switch (type) {
+      case SimpleFactory.TYPE_HeadTeacher:
+        return new HeadTeacher();
+      case SimpleFactory.TYPE_Department:
+        return new Department();
+      case SimpleFactory.TYPE_Leader:
+      default:
+        return new Leader();
+    }
+  }
+}
+// 获取三个不同的处理者对象
+const h1: Handler = SimpleFactory.createHandler(SimpleFactory.TYPE_HeadTeacher);
+const h2: Handler = SimpleFactory.createHandler(SimpleFactory.TYPE_Department);
+const h3: Handler = SimpleFactory.createHandler(SimpleFactory.TYPE_Leader);
+// 设置角色的处理层次
+h1.setNextHandler(h2);
+h2.setNextHandler(h3);
+
+h1.handlerRequest('李四', 35);
+// console.log("*************************");
+// h2.handlerRequest("王五", 15);
+// console.log("*************************");
+// h2.handlerRequest("朱七", 30);
+
+```
+
+### 装饰者模式
+
+在传统面向对象过程中，经常使用继承。但完成复杂的复用时，有可能创建大量的子类。 比如4种自行车，每种自行车又得加3种型号。这就需要4*3=12个子类，但是如果把这些型号参 数动态组合到自行车上就只需要3个子类。
+
+这种给对象动态地增加职责的方式称为装饰模式，他不会改变对象本身。跟继承相比更加灵活，这是一种即付即用的模式。如:天冷加衣
+
+类似高阶函数，ts中的@就是高阶函数
+
+```js
+//抽象构件角色（对应动物类）
+interface Component {
+  fn(): void;
+}
+// 具体构件角色（对应狗）
+class ConcreteComponent implements Component {
+  public fn(): void {
+    console.log('基本功能：呼吸+觅食+睡觉');
+  }
+}
+//装饰角色
+class Decorator implements Component {
+  //持有一个Component类型的对象引用
+  private component: Component;
+  constructor(component: Component) {
+    this.component = component;
+  }
+  public fn(): void {
+    //客户端的调用委派给具体的子类
+    this.component.fn();
+  }
+}
+
+class ConcreteDecorator extends Decorator {
+  constructor(component: Component) {
+    super(component);
+  }
+
+  public fn(): void {
+    super.fn();
+    console.log('附加功能：');
+    this.eat();
+    this.bellow();
+  }
+
+  private eat(): void {
+    console.log('吃肉');
+  }
+
+  private bellow(): void {
+    console.log('吼叫');
+  }
+}
+
+//测试
+const component: Component = new ConcreteComponent();
+console.log('------装饰前：-------');
+component.fn();
+const newComponent: Component = new ConcreteDecorator(component);
+console.log('------装饰后：-------');
+newComponent.fn();
+
+```
+
+### 享元模式
+
+享元模式(flyweight)是一种性能优化的模式， 它的核心是运用技术来有效支持大量细粒度的对象，如果系统中因为创建大量类似的对象而导致 内存占用过高，它就很有用了。使用好的关键的 区别是内部状态和外部状态，可以被共享的通常划分为内部状态。
+
+前端开发中比如一个上传对象，同时长传100 个文件，这个时候就可以利用享元模式。
+
+解决内存问题，高频率创建对象时
+
+```js
+interface Shape {
+  draw(): void;
+}
+
+class Circle implements Shape {
+  private color: string;
+  private x: number;
+  private y: number;
+  private radius: number;
+
+  constructor(color: string) {
+    this.color = color;
+  }
+
+  public setX(x: number): void {
+    this.x = x;
+  }
+
+  public setY(y: number): void {
+    this.y = y;
+  }
+
+  public setRadius(radius: number): void {
+    this.radius = radius;
+  }
+
+  public draw(): void {
+    console.log(
+      'Circle: Draw() [Color : ' +
+        this.color +
+        ', x : ' +
+        this.x +
+        ', y :' +
+        this.y +
+        ', radius :' +
+        this.radius
+    );
+  }
+}
+
+//创建一个工厂，生成基于给定信息的实体类的对象。
+class ShapeFactory {
+  private static circleMap = new Map<string, Shape>();
+
+  public static getCircle(color: string): Shape {
+    let circle: Circle = <Circle>this.circleMap.get(color);
+
+    if (circle == null) {
+      circle = new Circle(color);
+      this.circleMap.set(color, circle);
+      console.log('创建实例--》🐻🐻🐻🐻 : ' + color);
+    }
+    return circle;
+  }
+}
+
+//使用该工厂，通过传递颜色信息来获取实体类的对象。
+
+class FlyweightPatternDemo {
+  private static colors: string[] = ['Red', 'Green', 'Blue', 'White', 'Black'];
+  constructor() {
+    for (let i = 0; i < 20; ++i) {
+      const circle: Circle = <Circle>(
+        ShapeFactory.getCircle(FlyweightPatternDemo.getRandomColor())
+      );
+      circle.setX(FlyweightPatternDemo.getRandomX());
+      circle.setY(FlyweightPatternDemo.getRandomY());
+      circle.setRadius(100);
+      circle.draw();
+    }
+  }
+  private static getRandomColor(): string {
+    // console.log(
+    //   '🐼🐼🐼🐼🐼',
+    //   <number>Math.ceil(Math.random() * (this.colors.length - 1))
+    // );
+    return this.colors[
+      <number>Math.ceil(Math.random() * (this.colors.length - 1))
+    ];
+  }
+  private static getRandomX(): number {
+    return <number>(Math.random() * 100);
+  }
+  private static getRandomY(): number {
+    return <number>(Math.random() * 100);
+  }
+}
+
+new FlyweightPatternDemo();
+
+//100个○ 颜色 位置 半径
+
+//30个红色 位置 半径不一样
+
+//创建1个红色的即可 复用这个红色的○
+```
+
+### ioc
+
+```js
+interface IContainer<T extends new () => any> {
+  callback: () => InstanceType<T>;
+  singleton: boolean;
+  instance?: InstanceType<T>;
+}
+interface NewAble<T> {
+  new (...args: any[]): T;
+}
+type TBind<T> = [key: string, Fn: NewAble<T>];
+class CreateIoc {
+  private container = new Map<string, IContainer<any>>();
+  public bind<T>(...params: TBind<T>) {
+    this.helpBind(params, false);
+  }
+  public singleton<T>(...params: TBind<T>) {
+    this.helpBind(params, true);
+  }
+  private helpBind<T>(params: TBind<T>, singleton: boolean) {
+    const [key, Fn] = params;
+    //  new Fn == InstanceType 实例
+    const callback = () => new Fn();
+    const _instance: IContainer<typeof Fn> = { callback, singleton };
+    this.container.set(key, _instance);
+  }
+  public restore(key: string) {
+    this.container.delete(key);
+  }
+  public use<T>(namspace: string) {
+    const item = this.container.get(namspace);
+    if (item !== undefined) {
+      if (item.singleton && !item.instance) {
+        item.instance = item.callback();
+      }
+      return item.singleton ? <T>item.instance : <T>item?.callback();
+    } else {
+      throw new Error('没有找到item');
+    }
+  }
+}
+interface IUserService {
+  test(str: string): void;
+}
+class UserService implements IUserService {
+  constructor() {}
+  public test(str: string): void {
+    console.log('[ str ]', str);
+  }
+}
+const ioc = new CreateIoc();
+ioc.bind<IUserService>('userService', UserService);
+const user = ioc.use<IUserService>('userService');
+user.test('naixes');
+```
