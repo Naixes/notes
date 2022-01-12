@@ -1,4 +1,4 @@
-
+····
 
 ## html
 
@@ -26,7 +26,7 @@
 
 不使用无意义标签，使用伪元素代替，比如阴影，清除浮动
 
-按需加载
+按需加载，减少不必要渲染
 
 结构合理，语义化标签
 
@@ -34,7 +34,7 @@
 
 缓存dom对象，比如在循环遍历之前先获取到主节点
 
-合并操作：使用文档片段，`document.createDocumentFragment()`操作文档片段不会影响真实dom，做完所有操作后一次性更新到dom；进行复杂的dom操作时，先删除或者复制元素，操作完成后再更新
+合并操作：使用文档片段，`document.createDocumentFragment()`操作文档片段不会影响真实dom，做完所有操作后一次性更新到dom；进行复杂的dom操作时（删减或添加子节点），先删除或者复制元素，操作完成后再更新
 
 使用innerHtml代替频繁的appendChild
 
@@ -86,7 +86,7 @@ a，内部链接加title，外部链接加el="nofollow"，只能抓取href，不
 
 提供页面的元信息，属性：charset，content，http-equiv，name
 
-http-equiv，http头部某些作用，可以改变服务器和用户代理行为
+http-equiv，http头部某些作用，可以改变服务器和用户代理行为，模拟http头字段
 
 content与http-equiv，name配合
 
@@ -98,15 +98,179 @@ name定义元数据不和charset，http-equiv共存
 
 7. async和defer
 
-都是为了脚本执行时不影响页面构造，会延迟到页面解析后执行，相当于告诉浏览器立即下载延迟执行，对内联脚本不起作用，脚本中不能调用document.write
+都是为了加载文件时不阻塞页面渲染，对内联脚本不起作用，脚本中不能调用document.write
 
-defer规范要求按照出现顺序执行并且先于DOMContentLoaded执行，实际上并不一定，所以最好只包含一个延迟脚本，async不保证执行先后顺序
+defer立即下载，延迟到页面解析完成之后执行，规范要求按照出现顺序执行并且先于DOMContentLoaded执行，实际上都并不一定，所以最好只包含一个延迟脚本，async不保证执行先后顺序，模块脚本默认defer
 
-async是html5定义，浏览器支持不同，同时存在时只触发async
+async允许脚本异步执行，在下载完成后立即执行，window的load之前执行，是html5定义，浏览器支持不同，同时存在时只触发async
 
 ## css
 
 1. 移动端适配方案和对比
+
+**媒体查询**，简单方便，响应式，代码量大，有资源浪费
+
+**flex**
+
+**rem+viewport**，根据rem将页面放大dpr倍，viewport设为1/dpr，在 scale 为 1 的情况下，`device-width（设备逻辑像素大小） = 设备的物理分辨率/devicePixelRatio（物理像素分辨率与CSS像素分辨率之比）`
+
+**rem**，根据屏幕宽度设置`html`标签的`font-size`，在布局时使用 **rem** 单位布局，达到自适应的目的。需要内嵌js，浏览器渲染整数，可能不准确
+
+```js
+!(function (d) {
+  var c = d.document;
+  var a = c.documentElement;
+  var b = d.devicePixelRatio;
+  var f;
+  function e() {
+    var h = a.getBoundingClientRect().width,
+      g;
+    if (b === 1) {
+      h = 720;
+    }
+    if (h > 720) h = 720; //设置基准值的极限值
+    g = h / 7.2;
+    a.style.fontSize = g + "px";
+  }
+  if (b > 2) {
+    b = 3;
+  } else {
+    if (b > 1) {
+      b = 2;
+    } else {
+      b = 1;
+    }
+  }
+  a.setAttribute("data-dpr", b);
+  d.addEventListener(
+    "resize",
+    function () {
+      clearTimeout(f);
+      f = setTimeout(e, 200);
+    },
+    false
+  );
+  e();
+})(window);
+```
+
+**vh，vw**
+
+**百分比**，有可能拉伸变形，字体不能动态变化
+
+
+
+2. 伪元素和伪类
+
+伪类用来选择dom树之外的信息，添加一些特殊效果，`:active :hover​ :link :visited`等，与class类似
+
+伪元素dom树没有定义的虚拟元素，是基于元素的抽象
+
+都不会出现在源文件或者dom树中，伪元素需要添加元素
+
+
+
+3. link和@import区别
+
+link使用在html头部，引入外部css文件，也可以引入别的文件，在页面载入时同时加载
+
+@import在css中引入外部css文件，在页面载入之后加载，页面会有闪烁，有兼容问题
+
+
+
+4. flex
+
+flex属性是 `flex-grow、flex-shrink、flex-basis` 的简写，默认值为`0，1，auto。`
+
+- flex-grow 定义项目的放大比例，默认为0，即如果存在剩余空间，也不放大
+- flex-shrink 定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小
+- flex-basis 给上面两个属性分配多余空间之前, 计算项目是否有多余空间, 默认值为 auto, 即项目本身的大小
+
+flex = 1，1 1 0%
+
+
+
+5. 盒模型
+
+IE：width=content+padding+border
+
+标准：width=content
+
+相对定位，相对自己；绝对定位，脱离文档流，相对定位的父元素；浮动，脱离文档流
+
+
+
+6. 动画实现
+
+transition
+
+animation，更加强大
+
+
+
+7. 浮动
+
+脱离文档流，移动到指定的相对于父元素的位置
+
+清除浮动本质是避免浮动元素对其他元素产生影响
+
+额外标签 `<div style="clear:both"></div>`
+
+BFC，父元素添加overflow:hidden
+
+伪元素
+
+```js
+ .clearfix:after {  
+     content: "";
+     display: block;
+     height: 0;
+     clear: both;
+     visibility: hidden;
+}
+```
+
+8. 使用transform和margin，top，left改变位置的区别
+
+transform生成独立的层不会造成整个页面重绘回流，GPU直接渲染，但会占用多余的内存
+
+
+
+9. px和em
+
+em相对父元素的字体大小，使用起来复杂，会有很多小数，不精确
+
+px绝对长度单位
+
+
+
+10. inherit，initial，unset区别
+
+继承，默认值，不设置默认继承不可继承就默认
+
+
+
+11. 超出省略
+
+```css
+.single-ellipsis{
+  width: 500px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.multiline-ellipsis {
+  display: -webkit-box;
+  word-break: break-all;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; //需要显示的行数
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+```
+
+
 
 ## js
 
@@ -660,8 +824,6 @@ interface NewAble<T> {
   new (...args: any[]): T;
 }
 ```
-
-
 
 ## 浏览器
 

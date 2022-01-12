@@ -913,7 +913,7 @@ class组件的this指向问题
 - useMutationEffect更新兄弟组件之前，react执行dom改变的同一阶段触发
 - useLayoutEffect，dom改变后同步触发，从dom读取布局同步重新渲染
 
-# 豆瓣电影案例
+# 案例
 
 ## Node.js设置跨域
 

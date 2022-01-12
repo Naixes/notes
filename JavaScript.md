@@ -10328,7 +10328,7 @@ var b = sin(1);
 下面的代码是memorize的一个简单的实现，尽管它不太健壮。
 
 ```js
-var memoize = function(f) {
+var memorize = function(f) {
   var cache = {};
 
   return function() {
@@ -10992,6 +10992,8 @@ class Category {
 
 ### 函子
 
+参考：https://sylvenas.github.io/blog/2020/01/30/%E8%96%9B%E5%AE%9A%E8%B0%94%E7%9A%84Maybe.html 系列
+
 函数不仅可以用于同一个范畴之中值的转换，还可以用于将一个范畴转成另一个范畴。这就涉及到了函子（Functor）。
 
 函子是函数式编程里面**最重要的数据类型，也是基本的运算单位和功能单位**。
@@ -11002,7 +11004,7 @@ $(...) 返回的对象并不是一个原生的 DOM 对象，而是对于原生�
 
 Functor(函子)遵守一些特定规则的容器类型。
 
-Functor 是一个对于函数调用的抽象，我们赋予容器自己去调用函数的能力。把东西装进一个容器，只留出一个接口map 给容器外的函数，map 一个函数时，我们让容器自己来运行这个函数，这样容器就可以自由地选择何时何地如何操作这个函数，以 致于拥有惰性求值、错误处理、异步调用等等非常牛掰的特性。
+Functor 是一个对于函数调用的抽象，我们赋予容器自己去调用函数的能力。把东西装进一个容器，只留出一个接口map 给容器外的函数，map 一个函数时，我们让容器自己来运行这个函数，这样容器就可以自由地选择何时何地如何操作这个函数，以致于拥有惰性求值、错误处理、异步调用等等非常牛掰的特性。
 
 #### 代码实现
 
@@ -11051,6 +11053,20 @@ class Functor {
     return new Functor(f(this.val));
   }
 }
+
+// 2
+const Box = x => ({
+  // 避免使用 new
+	map: f => Box(f(x)), 
+  inspect: () => `Box(${x})`
+})
+const nextChartFromNumberString = str => 
+  Box(str)
+    .map(s => s.trim())
+    .map(r => parseInt(r))
+    .map(i => i + 1)
+    .map(i => String.fromCharCode(i))
+const result = nextChartFromNumberString(' 64')
 ```
 
 **一般约定，函子的标志就是容器具有map方法。该方法将容器里面的每一个值，映射到另一个容器。**
@@ -11089,8 +11105,6 @@ Functor.of(2).map(function (two) {
 #### Pointed函子
 
 函子只是一个实现了map契约的接口。Ponited函子是一个函子的子集。 
-
-生成新的函子的时候，用了new命令。这实在太不像函数式编程了，因为new命令是面向对象编程的标志。 函数式编程一般约定，函子有一个of方法，用来生成新的容器。
 
 ```js
 // 数组成为一个pointed函子

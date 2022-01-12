@@ -65,7 +65,7 @@ node中libuv实现了eventloop，libuv封装了系统中windows的LCP和linux异
 
 为了实现多线程，Chrome思路是简单且尽可能的少用锁，相比平时的消息循环(如:Windows的消息 循环，Linux中的epoll模型)，它唯一增加的功能就是可以运行自定义的任务:Task。如果在一个线程 里面需要访问另一个线程的数据，则把接下来要运行的函数和参数包装成一个Task，并将其传递给另外 一个线程，由另外一个线程来执行这个Task。
 
-Chrome将其线程分为了三类:普通线程，UI线程和IO线程。他们之间的区别是:
+Chrome将其线程分为了三类：普通线程，UI线程和IO线程。他们之间的区别是:
 
 普通线程:只能执行Task，没有其他的功能。
 
@@ -73,11 +73,13 @@ UI线程:所有的窗口都需要跑在UI线程上，它除了能执行Task以�
 
 IO线程:和本地文件读写，或者网络收发相关的操作都运行在这个线程上，它除了能执行Task以外，还 能执行和IO操作相关的事件回调。
 
-由于这三类线程中Task的执行部分基本是一样的，而其他的功能却完成不同，为了实现这不同的三类线 程，Chrome将消息循环分成了两个部分:MessageLoop和MessagePump。chrome-thread-and- messageloop(如下图)
+由于这三类线程中Task的执行部分基本是一样的，而其他的功能却完成不同，为了实现这不同的三类线 程，Chrome将消息循环分成了两个部分:**MessageLoop**和**MessagePump**。chrome-thread-and- messageloop(如下图)
 
 MessagePump被提取出来负责执行Task的时机和处理线程本身的消息，如:UI线程的Windows消息， IO线程的IO事件。
 
 MessageLoop则仅仅是做Task的管理，它实现了MessagePump的Delegate的接口，这样MessagePump 就可以告诉MessageLoop何时应该处理Task了。
+
+MessagePump通知，MessageLoop循环，完成对外的代理对接
 
 另外实现上虽然Chrome为这三种线程实现了三套MessageLoop，但是它们之间的区别，也仅限于暴露 出现的MessagePump的接口不同而已。
 
@@ -426,7 +428,11 @@ for(var i=0;i<10000;i++){
 
 浏览器端的内存泄漏会造成网页卡顿
 
+### 压力测试
+
 node压力测试寻找内存泄漏WRK，jmeter
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 上午9.05.30.png" alt="截屏2021-08-10 上午9.05.30" style="zoom:50%;" />
 
 node自带process.memoryUsage，判断泄漏以heapUsed为准
 
@@ -440,18 +446,426 @@ external：v8内部引擎的c++对象占用的内存
 
 memwatch+heapdump
 
+easy-monitor，node监控平台
+
 ### 原因
 
 使用js全局变量当作缓存必然会发生内存泄漏，可以使用redis
 
-队列消费不及时，消费生产者模型中，生产大于消费会产生堆积，容易产生内存泄漏，比如收集日志，产生速度大于文件写入速度
+队列消费不及时，消费生产者模型中，生产大于消费会产生堆积，容易产生内存泄漏，比如收集日志，产生速度大于文件写入速度（事件循环也是一个典型的生产消费模型）
 
 闭包，最小化闭包
 
-浏览器中：
+**浏览器中**
 
 全局变量大
 
-原型链，vue2的原型链上挂载过多的东西，with的虚拟dom也在内存中，vuex的对象使用Object.create创建，慢对象
+原型链，vue2的插件在原型链上挂载过多的东西，new Vue是一个全局变量，with的虚拟dom也在内存中，vuex的对象使用Object.create创建，慢对象
 
-游离Dom
+游离Dom，dom内存泄漏
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dom内存泄漏</title>
+  </head>
+  <body>
+    <!--只有同时满足 DOM 树和 JavaScript 代码都不引用某个 DOM 节点，该节点才会被作为垃圾进行回收。 
+        如果某个节点已从 DOM 树移除，但 JavaScript 仍然引用它，我们称此节点为“detached ”。
+        因为 DOM 元素依然会呆在内存中。
+        “detached ”节点是 DOM 内存泄漏的常见原因。-->
+    <script>
+      //万万记得避免全局变量 "use strict"
+      //同时也要避免在函数内部不使用var的声明
+      let detachedTree;
+      function create() {
+        var ul = document.createElement('ul');
+        for (var i = 0; i < 100; i++) {
+          var li = document.createElement('li');
+          ul.appendChild(li);
+        }
+        detachedTree = ul;
+      }
+      create();
+      detachedTree = null;
+    </script>
+  </body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>游离的DOM元素2</title>
+  </head>
+  <body>
+    <script>
+      function createElement() {
+        const div = document.createElement('div');
+        div.id = 'yideng';
+        return div;
+      }
+      // this will keep referencing the DOM element even after deleteElement() is called
+      // 放在函数里执行完后可以回收
+      // function appendElement() {
+      const detachedDiv = createElement();
+      document.body.appendChild(detachedDiv);
+      // }
+      // appendElement();
+      // 在页面上删除没有用，js中还存在
+      function deleteElement() {
+        document.body.removeChild(document.getElementById('detached'));
+      }
+      deleteElement(); // Heap snapshot will show detached div#detached
+    </script>
+  </body>
+</html>
+
+```
+
+> 控制台：performance
+>
+> hs Heap
+>
+> memory中有detached HTMLElement
+>
+> vue的虚拟dom不能回收，因为用了with，react双缓存也一样
+
+事件绑定，使用事件具柄（不要使用匿名函数），记得移除
+
+清除定时器
+
+delete和修改对象
+
+统计代码运行时间，避免逻辑过于复杂没有GC的机会
+
+学会查看控制台的memory快照
+
+compiled code和string太大说明js文件太大了
+
+node内存泄漏监控：
+
+使用memeye监控，简陋，node启动demo，再使用wrk进行压力测试
+
+```js
+const http = require('http');
+const memeye = require('memeye');
+memeye();
+// 泄漏，使用redis代替变量缓存
+let leakArray = [];
+const server = http.createServer((req, res) => {
+  if (req.url == '/') {
+    // const wm = new WeakMap();
+    leakArray.push(Math.random());
+    // wm.set(leakArray, leakArray);
+    // console.log(wm.get(leakArray));
+    console.log(leakArray);
+		// 使用null也不能明显解决，因为不会马上进行回收，也不一定会回收（还有其他强引用的情况下）
+    // leakArray = null;
+    res.end('hello world');
+  }
+});
+server.listen(4000);
+```
+
+demo1
+
+```js
+//node --expose-gc
+const format = (bytes) => {
+  return (bytes / 1024 / 1024).toFixed(2) + 'MB';
+};
+//手动GC
+global.gc();
+// 返回 Nodejs 的内存占用情况，单位是 bytes
+const mem = process.memoryUsage();
+console.log(format(mem.heapUsed));
+
+// let map = new Map();
+// let key = new Array(5 * 1024 * 1024);
+// map.set(key, 1);
+// //注意要先删除依赖关系，再置空，否则删除后，gc也毫无用处
+// map.delete(key);
+// key = null;
+
+// global.gc();
+// const mem2 = process.memoryUsage();
+// null没用
+// console.log('对象占用之后🐻', format(mem2.heapUsed));
+
+const wm = new WeakMap();
+let key = new Array(5 * 1024 * 1024);
+wm.set(key, 1);
+// console.log(%DebugPrint(wm));
+//不用做无谓的挣扎
+key = null;
+global.gc();
+const mem3 = process.memoryUsage();
+console.log('使用Weakmap以后🐻', format(mem3.heapUsed));
+
+```
+
+demo2，buffer的性能优于string，bigpipe的应用
+
+```js
+const http = require('http');
+const memeye = require('memeye');
+memeye();
+let s = '';
+for (let i = 0; i < 1024 * 10; i++) {
+  s += 'a';
+}
+
+const str = s;
+const bufStr = Buffer.from(s);
+const server = http.createServer((req, res) => {
+  if (req.url == '/buffer') {
+    res.end(bufStr);
+  } else if (req.url == '/string') {
+    res.end(str);
+  }
+});
+server.listen(3000);
+
+```
+
+buffer需要处理大量的二进制数据，用一点就去向系统申请就会造成频繁的内存调用申请，所以buffer的内存不由V8分配，而是在c++层面完成，这部分内存称为堆外内存
+
+nodejs采用了slob机制进行预先申请，事后分配
+
+nodejs以8kb为界限区分小对象和大对象
+
+## serverless
+
+FAAS
+
+函数即服务，每一个函数都是一个服务，函数可以由任何语言编写，除此 之外不需要关心任何运维细节，比如:计算资源、弹性扩容，而且可以按 量计费，且支持事件驱动。业界大云厂商都支持 FAAS，各自都有一套工 作台、或者可视化工作流来管理这些函数。
+
+BAAS
+
+后端及服务，就是集成了许多中间件技术，可以无视环境调用服 务，比如数据即服务(数据库服务)，缓存服务等。虽然下面还 有很多 XASS，但组成 Serverless 概念的只有 FAAS + BAAS。
+
+PAAS
+
+平台即服务，用户只要上传源代码就可以自动持续集成并享受高 可用服务，如果速度足够快，可以认为是类似 Serverless。但随 着以 Docker 为代表的容器技术兴起，以容器为粒度的 PASS 部 署逐渐成为主流，是最常用的应用部署方式。比如中间件、数据 库、操作系统等。
+
+DAAS
+
+数据即服务，将数据采集、治理、聚合、服务打包起来提供出 去。DASS 服务可以应用 Serverless 的架构。
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 上午9.58.34.png" alt="截屏2021-08-10 上午9.58.34" style="zoom:50%;" />
+
+国内为数不多的实践ServerLess的云平 台，但是现阶段开发体验相对较差。
+
+亚马逊云，开发体验更好。有更完整的 Demo和实际的代码
+
+让前后端链接在一起真正的云化，利用 Service Worker部署到边缘服务器上
+
+https://www.aliyun.com
+
+https://serverless.com
+
+https://www.cloudflare.com/zh-cn/
+
+原理
+
+docker+k8s
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 上午10.00.26.png" alt="截屏2021-08-10 上午10.00.26" style="zoom:50%;" />
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 上午10.03.47.png" alt="截屏2021-08-10 上午10.03.47" style="zoom:50%;" />
+
+FaaS 推荐无状态的函数。就是函数不可改变 Immutable。就是说一个函数只要参数固定，返回的结果也必须是固定的。
+
+状态交给数据库
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 上午10.04.49.png" alt="截屏2021-08-10 上午10.04.49" style="zoom:50%;" />
+
+FaaS 就像高铁的⻋头 Bass就是⻋厢
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 上午10.05.20.png" alt="截屏2021-08-10 上午10.05.20" style="zoom:50%;" />
+
+DDD
+
+领域驱动模型
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 上午10.05.37.png" alt="截屏2021-08-10 上午10.05.37" style="zoom:50%;" />
+
+......
+
+## Electron
+
+1 Electron = Chromium + Node.js+Native API,我们每天使 用的VsCode就是使用它开发的。
+
+2 我们学习他的收益:自己造工具、拓展技术的广度
+
+3 它没有跨域问题、最新浏览器的Feature、没有PolyFill
+
+4 node.js add-on、node-ffi可以调用原生模块
+
+5 系统OS能力WinRT、AppleScript、Shell
+
+6 同类对比:Native( C++/C#/Objective-C)、QT(基于C++)
+
+Wps就是基于QT的、NW、Flutter、PWA、WPF等。
+
+能力：
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 下午4.08.09.png" alt="截屏2021-08-10 下午4.08.09" style="zoom:50%;" />
+
+对比：
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 下午4.08.27.png" alt="截屏2021-08-10 下午4.08.27" style="zoom:50%;" />
+
+原理：
+
+Node.js与Chromiums整合
+
+难点:Node.js事件循环基于libuv，但Chromium基于 Message pump
+
+1. Chromium集成到Node.js 用libuv实现Message pump(nw) 
+
+2. Node.js集成到Chromium 
+
+3. libuv引入了backend_fd（事件通知机制，监控node eventloop，送回chrome）的概念右侧如图，libuv轮询事件的 文件描述符，我们通过Elector起了一个新的安全线程去轮询 这个backend_fd，可以知道libuv的一个新事件，通过 postTask转发到Chromium MesssageLoop中。
+
+4. 资料:
+
+https://www.electronjs.org/blog/electron-internals-node-integration 
+
+https://www.youtube.com/watch?v=OPhb5GoV8Xk 
+
+https://github.com/electron/electron/blob/master/shell/common/node_bindings.cc
+
+PrepareMessageLoop->独立线程(uv_thread_create)-> EmbedThreadRunner(轮询)->有消息WakeupMainThread唤起主线程 ->PostTask 转发到Chromium事件循环
+
+准备事件循环，如果node有返回，拉起独立线程，开始轮询，有消息时唤醒主线程，把当前PostTask 转发到Chromium事件循环
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 下午4.37.01.png" alt="截屏2021-08-10 下午4.37.01" style="zoom:50%;" />
+
+Chromium架构
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 下午5.03.52.png" alt="截屏2021-08-10 下午5.03.52" style="zoom:50%;" />
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 下午5.06.57.png" alt="截屏2021-08-10 下午5.06.57" style="zoom:50%;" />
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 下午5.07.13.png" alt="截屏2021-08-10 下午5.07.13" style="zoom:50%;" />
+
+Package.json中启动的就是主进程，展示Web页面的进程称为渲染进程(有多个可以)
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 下午5.08.01.png" alt="截屏2021-08-10 下午5.08.01" style="zoom:50%;" />
+
+Electron提供了IPC通信模块，主进程的ipcMain和渲染进程的ipcRender都是EventEmitter对象
+
+......
+
+## PWA
+
+Progressive Web Apps 是 Google 提出的用前沿的 Web 技术为网页 提供 App 般使用体验的一系列方案。但是作为一个 web 应用，它可以 断网使用、推送消息、发送通知、从桌面启动，当然还包括 Web 应 用的优势:免安装、快速开发、依赖浏览器跨平台(支持包括Edge在内的 各种主流PC/手机浏览器)。
+
+响应式: 用户界面可以兼容多种设备，比如: 桌面，移动端，平板。
+
+应用化: 交互体验接近native应用。
+
+网络低依赖: 无网络或者低速网络下依然可以 使用。
+
+延续性: 借助推送功能，能够维持用户粘性。
+
+可安装: 可以被安装到主屏，这样用户随时可 以从主屏启动应用。
+
+可被发现: 被视为一个独立应用，而且可以被 搜索.
+
+可更新: 当用户重新联网时，可以更新内容.
+
+安全: 可以使用HTTPS来防止内容伪造和中间 人攻击。
+
+渐进性: 所有用户都可以使用，浏览器无关。 
+
+兼容url: 可以通过url传播。
+
+不兼容苹果
+
+利用“App Shell”方法设计和构建应用、应用能够离线工 作、存储供稍后离线使用的数据、代理的https服务器、 Chrome 52 或更高版本
+
+<img src="Naixes阶段性学习笔记3.assets/截屏2021-08-10 下午5.55.38.png" alt="截屏2021-08-10 下午5.55.38" style="zoom:50%;" />
+
+**Service worker** 它是一个在浏览器后台运行的脚本，与网页不相干，专注于那些不需要网页或用户互动就能完成的功能。它主要用于操作离线缓存。
+
+**前端缓存介质**，利用orm操作缓存的库? **offline.js**实现数据的互通
+
+**App Shell**，顾名思义，就是“壳”的意思， 也可以理解为“骨架屏”，说白了就是在内容 尚未加载完全的时候，优先展示页面的结构、 占位图、主题和背景颜色等，它们都是一些被 强缓存的 html，css和javascript。
+
+**测试环境&开发环境** http-server -c-1 # 注意设置 关闭缓存 ngrok http 8080
+
+### service work
+
+存储机制
+
+通过拦截网络请求，使得网站运行得更快，或者在离线情况下，依然可以执行。也作为其他后台功能的基础，比如消息推送和背景同步。
+
+属于JavaScript Worker，不能直接接触DOM，通过 postMessage接口与页面通信。
+
+不用的时候会终止执行，需要的时候又重新执行，即它是事 件驱动的。
+
+只在**HTTPs协议下可用**，这是 因为它能拦截网络请求，所以必须保证请求是安全的。
+
+有一个精心定义的升级策略，内部大量使用Promise。
+
+#### 生命周期
+
+**INSTALLING 正在安装阶段** 此阶段处于Service Worker被注册的 时候。在这个阶段，Service Worker 的install() 方法将会被执行，声明的资 源即将被加入缓存。
+
+**INSTALLED 安装完成阶段** 当 Service Worker 完成其初始化安装 之后就会进入到这个阶段。在这个阶 段，它是一个“有效但尚未激活的 worker ”，等待着客户端对其进行激活 使用。我们可以在这个阶段告知用户， PWA 已经可以进行升级了。
+
+**ACTIVATING 正在激活阶段**当客户端已无其它激活状态的 Service Worker、或者脚本中的skipWaiting() 方 法被调用、或者用户关闭了该 Service Worker 作用域下的所有页面时，就会触 发 ACTIVATING 阶段。在这个阶段中，Service Worker脚本中的activate() 事件 会被执行，此时可以清除掉过期的资源，并将进入下一个“激活完成阶段”。
+
+**ACTIVETED 激活完成阶段**此时 Service Worker 已经被激活并生效，可以开 始控制网站的资源请求了。此时 Service Worker 内的fetch 和message 事件已经可以被监听。
+
+**REDUNDANT 废弃阶段** 当安装失败，激活失败或者当前 Service Worker 被其他 Service Worker 替换时，就会进入这个阶 段，此时 Service Worker 将失去对页面的控制。
+
+第一次安装，第二次激活，原子操作
+
+
+
+PWA 的核心可谓是 Service Worker，任何一个PWA都有 且只有一个service-worker.js 文件，用于为Service Worker添加资源列表，进行注册、激活等生命周期操作。 但是在webpack构建的项目中，生成一个service- worker.js 可能会面临很多的问题。 							 					 				
+
+文件的版本戳
+
+webpack生成的资源多会生成一串hash，Service Worker的 资源列表里面需要同步更新这些带hash的资源;
+
+sw.js文件的版本号
+
+每次更新代码，都需要通过更新service-worker.js 文件版本号 来通知客户端对所缓存的资源进行更新，(但使用明确的版本 号会更加合适)。
+
+#### offline-plugin PK Worker-precache-webpack-plugin
+
+配置 
+
+更多的可选配置项，满足更加细致的配置要 求;
+
+社区
+
+更新频率相对更高，star数更多;
+
+文档
+
+更为详细的文档和例子。
+
+自动
+
+自动处理生命周期，用户无需纠结生命周期 的坑;
+
+#### Workbox
+
+workbox这个库和构建工具的集合使用了servicework 的 fetch event 和cache API，可以很容易地在用户的设备上本地存储您的网站文件。
+
+让您的网站离线访问。
+
+提高重复访问的负载性能，即使您不想完全离线，也可以使用 workbox 在本地存储和提供常用文件，而不是从网络中存储和提供。
+
+迅速集成进**workbox-webpack-plugin**
+
