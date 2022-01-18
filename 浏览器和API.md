@@ -443,7 +443,7 @@ Cache-control: max-age=30
 
 常见指令的作用：
 
-![img](https://user-gold-cdn.xitu.io/2018/12/5/1677ef2cd7bf1bba?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+<img src="浏览器和API.assets/截屏2022-01-13 上午10.43.08.png" alt="截屏2022-01-13 上午10.43.08" style="zoom:50%;" />
 
 > no-cache：不使用强缓存
 >
